@@ -1,0 +1,21 @@
+app: forest
+# urlPrefix: /api
+listen: ":8080"
+# redis: redis://:pwd@127.0.0.1:6379/?db=1
+redis: redis://127.0.0.1:6379
+influxdb: http://user:pwd@127.0.0.1:8086/?db=forest
+track: jt
+session:
+  # 以下值，可不配置则使用默认值
+  # cookie:
+  #   name: jt
+  #   maxAge: 8760h
+  #   path: /
+  expires: 24h
+  keys:
+    - cuttlefish
+    - tree.xie
+locationByIP: http://ip.taobao.com/service/getIpInfo.php
+db:
+  uri: postgres://tree:mypwd@127.0.0.1:5432/forest?connect_timeout=5&sslmode=disable
+  poolSize: 100
