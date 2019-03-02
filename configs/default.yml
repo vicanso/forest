@@ -22,5 +22,3 @@ session:
   #   path: /
   # name: "forest"
   expires: 24h
-  keys:
-    - cuttlefish

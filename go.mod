@@ -3,6 +3,7 @@ module github.com/vicanso/forest
 go 1.12
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/gobuffalo/packr/v2 v2.0.3
 	github.com/hashicorp/golang-lru v0.5.1
@@ -18,6 +19,7 @@ require (
 	github.com/vicanso/cod-fresh v0.0.1
 	github.com/vicanso/cod-recover v0.0.1
 	github.com/vicanso/cod-responder v0.0.1
+	github.com/vicanso/cod-session v0.0.3
 	github.com/vicanso/cod-stats v0.0.1
 	github.com/vicanso/dusk v0.0.5
 	github.com/vicanso/hes v0.1.3

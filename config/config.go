@@ -135,7 +135,6 @@ func GetSessionConfig() *SessionConfig {
 	return &SessionConfig{
 		TTL:        GetDurationDefault("session.expires", 24*time.Hour),
 		Key:        GetStringDefault("session.name", "forest"),
-		SignKeys:   GetStringSlice("session.keys"),
 		CookiePath: GetStringDefault("session.cookie.path", "/"),
 	}
 }

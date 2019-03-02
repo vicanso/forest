@@ -4,11 +4,17 @@ import (
 	"net/http"
 	"strconv"
 	"sync/atomic"
+	"time"
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/global"
+	"github.com/vicanso/forest/log"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
+
+	concurrentLimiter "github.com/vicanso/cod-concurrent-limiter"
 )
 
 var (
@@ -20,7 +26,8 @@ var (
 )
 
 const (
-	defaultRequestLimit = 2048
+	defaultRequestLimit      = 2048
+	concurrentLimitKeyPrefix = "mid-concurrent-limit"
 )
 
 // NewLimiter create a limit middleware
@@ -39,4 +46,35 @@ func NewLimiter() cod.Handler {
 		}
 		return c.Next()
 	}
+}
+
+// createConcurrentLimitLock 创建并发限制的lock函数
+func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) concurrentLimiter.Lock {
+	return func(key string, c *cod.Context) (success bool, done func(), err error) {
+		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
+		done = nil
+		if withDone {
+			success, redisDone, err := service.LockWithDone(k, ttl)
+			done = func() {
+				err := redisDone()
+				if err != nil {
+					log.Default().Error("redis done fail",
+						zap.String("key", k),
+						zap.Error(err),
+					)
+				}
+			}
+			return success, done, err
+		}
+		success, err = service.Lock(k, ttl)
+		return
+	}
+}
+
+// NewConcurrentLimit create a concurrent limit
+func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) cod.Handler {
+	return concurrentLimiter.New(concurrentLimiter.Config{
+		Lock: createConcurrentLimitLock(prefix, ttl, false),
+		Keys: keys,
+	})
 }

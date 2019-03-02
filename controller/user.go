@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/hes"
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/cs"
@@ -27,42 +27,59 @@ type (
 	}
 )
 
+var (
+	errLoginTokenNil = hes.New("login token is nil")
+)
+
 func init() {
 	g := router.NewGroup("/users")
 	ctrl := userCtrl{}
 
-	// user login
+	g.GET(
+		"/v1/me",
+		userSession,
+		ctrl.me,
+	)
+
+	// 用户登录
+	g.GET(
+		"/v1/me/login",
+		userSession,
+		isAnonymous,
+		ctrl.getLoginToken,
+	)
 	// 限制3秒只能登录一次（无论成功还是失败）
 	loginLimit := createConcurrentLimit([]string{
 		"account",
 	}, 3*time.Second, cs.ActionLogin)
-
-	g.GET("/v1/me", ctrl.me)
-	g.POST("/v1/me/login", loginLimit, ctrl.login)
+	g.POST(
+		"/v1/me/login",
+		loginLimit,
+		userSession,
+		isAnonymous,
+		ctrl.login,
+	)
 }
 
 // get user info from session
 func (ctrl userCtrl) pickUserInfo(c *cod.Context) (userInfo *UserInfoResp) {
+	us := getUserSession(c)
 	userInfo = &UserInfoResp{
-		Account: "tree.xie",
+		Anonymous: true,
+		Date:      now(),
+		IP:        c.RealIP(),
+		TrackID:   getTrackID(c),
 	}
-	// us := getUserSession(c)
-	// userInfo = &UserInfoResp{
-	// 	Anonymous: true,
-	// 	Date:      now(),
-	// 	IP:        c.RealIP(),
-	// 	TrackID:   getTrackID(c),
-	// }
-	// if us == nil {
-	// 	return
-	// }
-	// account := us.GetAccount()
-	// if account != "" {
-	// 	userInfo.Account = account
-	// 	userInfo.Anonymous = false
-	// 	userInfo.UpdatedAt = us.GetUpdatedAt()
-	// 	userInfo.LoginAt = us.GetLoginAt()
-	// }
+	if us == nil {
+		return
+	}
+	account := us.GetAccount()
+	if account != "" {
+		userInfo.Account = account
+		userInfo.Anonymous = false
+		userInfo.UpdatedAt = us.GetUpdatedAt()
+		userInfo.LoginAt = us.GetLoginAt()
+	}
 	return
 }
 
@@ -70,8 +87,8 @@ func (ctrl userCtrl) pickUserInfo(c *cod.Context) (userInfo *UserInfoResp) {
 func (ctrl userCtrl) me(c *cod.Context) (err error) {
 	key := config.GetTrackKey()
 	// 如果没有track cookie，则生成
-	if cookie, _ := c.Cookie(key); cookie == nil {
-		c.AddCookie(&http.Cookie{
+	if cookie, _ := c.SignedCookie(key); cookie == nil {
+		c.AddSignedCookie(&http.Cookie{
 			Name:     key,
 			Value:    util.GenUlid(),
 			Path:     "/",
@@ -86,11 +103,36 @@ func (ctrl userCtrl) me(c *cod.Context) (err error) {
 
 // login user login
 func (ctrl userCtrl) login(c *cod.Context) (err error) {
-	fmt.Println(c.RequestBody)
-	c.Body = &struct {
-		Name string `json:"name"`
-	}{
-		"tree.xie",
+	us := getUserSession(c)
+	token := us.GetLoginToken()
+	if token == "" {
+		err = errLoginTokenNil
 	}
+	// TODO 从数据库读取客户密码与token sha1再校验
+	us.SetAccount("tree.xie")
+	c.Body = ctrl.pickUserInfo(c)
+	return
+}
+
+// getLoginToken get login token
+func (ctrl userCtrl) getLoginToken(c *cod.Context) (err error) {
+	us := getUserSession(c)
+	token := util.RandomString(8)
+	err = us.SetLoginToken(token)
+	if err != nil {
+		return
+	}
+	c.Body = &struct {
+		Token string `json:"token"`
+	}{
+		token,
+	}
+	return
+}
+
+// logout logout
+func (ctrl userCtrl) logout(c *cod.Context) (err error) {
+	us := getUserSession(c)
+	err = us.Destroy()
 	return
 }

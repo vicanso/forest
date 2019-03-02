@@ -8,7 +8,7 @@ import (
 	_ "github.com/vicanso/forest/controller"
 	"github.com/vicanso/forest/global"
 	"github.com/vicanso/forest/log"
-	m "github.com/vicanso/forest/middleware"
+	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/hes"
@@ -44,7 +44,7 @@ func main() {
 
 	d.Use(recover.New())
 
-	d.Use(m.NewEntry())
+	d.Use(middleware.NewEntry())
 
 	// 接口响应统计，在项目中可写入数据库方便统计
 	d.Use(stats.New(stats.Config{
@@ -63,7 +63,7 @@ func main() {
 
 	d.Use(errorHandler.NewDefault())
 
-	d.Use(m.NewLimiter())
+	d.Use(middleware.NewLimiter())
 
 	d.Use(bodyparser.NewDefault())
 
