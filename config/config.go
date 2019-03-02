@@ -5,13 +5,22 @@ import (
 	"os"
 	"time"
 
-	packr "github.com/gobuffalo/packr/v2"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/spf13/viper"
 )
 
 var (
 	box = packr.New("config", "../configs")
 	env = os.Getenv("GO_ENV")
+)
+
+type (
+	SessionConfig struct {
+		TTL        time.Duration
+		Key        string
+		SignKeys   []string
+		CookiePath string
+	}
 )
 
 const (
@@ -114,4 +123,19 @@ func GetDurationDefault(key string, defaultValue time.Duration) time.Duration {
 // GetStringSlice viper get string slice
 func GetStringSlice(key string) []string {
 	return viper.GetStringSlice(key)
+}
+
+// GetTrackKey get the track cookie key
+func GetTrackKey() string {
+	return GetString("track")
+}
+
+// GetSessionConfig get session config
+func GetSessionConfig() *SessionConfig {
+	return &SessionConfig{
+		TTL:        GetDurationDefault("session.expires", 24*time.Hour),
+		Key:        GetStringDefault("session.name", "forest"),
+		SignKeys:   GetStringSlice("session.keys"),
+		CookiePath: GetStringDefault("session.cookie.path", "/"),
+	}
 }

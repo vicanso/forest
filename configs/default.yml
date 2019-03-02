@@ -1,3 +1,26 @@
 app: forest
-apiPrefix: /api
+requestLimit: 1024
+# apiPrefix: /api
 listen: ":7001"
+# ip location url
+ipLocation: https://ip.aslant.site/ip-locations/json/%s
+
+# cookie track key
+track: jt
+# key for sign cookie
+keys:
+  - cuttlefish
+  - secret
+
+# redis服务器
+redis: redis://127.0.0.1:6379
+
+# session的相关配置
+session:
+  # 以下值，可不配置则使用默认值
+  # cookie:
+  #   path: /
+  # name: "forest"
+  expires: 24h
+  keys:
+    - cuttlefish
