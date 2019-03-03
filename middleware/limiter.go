@@ -21,13 +21,20 @@ var (
 	errTooManyRequest = &hes.Error{
 		StatusCode: http.StatusTooManyRequests,
 		Message:    "too many request",
-		Category:   "request-limit",
+		Category:   errLimitCategory,
+	}
+	errTooFrequently = &hes.Error{
+		StatusCode: http.StatusBadRequest,
+		Message:    "request to frequently",
+		Category:   errLimitCategory,
 	}
 )
 
 const (
 	defaultRequestLimit      = 2048
 	concurrentLimitKeyPrefix = "mid-concurrent-limit"
+	ipLimitKeyPrefix         = "mid-ip-limit"
+	errLimitCategory         = "request-limit"
 )
 
 // NewLimiter create a limit middleware
@@ -77,4 +84,20 @@ func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) cod.Han
 		Lock: createConcurrentLimitLock(prefix, ttl, false),
 		Keys: keys,
 	})
+}
+
+// NewIPLimit create a limit middleware by ip address
+func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) cod.Handler {
+	return func(c *cod.Context) (err error) {
+		key := ipLimitKeyPrefix + "-" + prefix + "-" + c.RealIP()
+		count, err := service.IncWithTTL(key, ttl)
+		if err != nil {
+			return
+		}
+		if count > maxCount {
+			err = errTooFrequently
+			return
+		}
+		return c.Next()
+	}
 }

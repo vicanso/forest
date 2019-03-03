@@ -18,6 +18,7 @@ var (
 	createConcurrentLimit = middleware.NewConcurrentLimit
 	isLogin               = middleware.IsLogin
 	isAnonymous           = middleware.IsAnonymous
+	newIPLimit            = middleware.NewIPLimit
 
 	getUserSession = service.NewUserSession
 

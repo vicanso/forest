@@ -55,6 +55,8 @@ func init() {
 	g.POST(
 		"/v1/me/login",
 		loginLimit,
+		// 限制相同IP在60秒之内只能调用10次
+		newIPLimit(10, 60*time.Second, cs.ActionLogin),
 		userSession,
 		isAnonymous,
 		ctrl.login,
@@ -107,6 +109,7 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 	token := us.GetLoginToken()
 	if token == "" {
 		err = errLoginTokenNil
+		return
 	}
 	// TODO 从数据库读取客户密码与token sha1再校验
 	us.SetAccount("tree.xie")

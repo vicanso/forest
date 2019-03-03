@@ -108,3 +108,20 @@ func LockWithDone(key string, ttl time.Duration) (bool, Done, error) {
 	}
 	return true, done, nil
 }
+
+// IncWithTTL inc value with ttl
+func IncWithTTL(key string, ttl time.Duration) (count int64, err error) {
+	if redisClient == nil {
+		return 0, errRedisNotInit
+	}
+	pipe := redisClient.TxPipeline()
+	// 保证只有首次会设置ttl
+	pipe.SetNX(key, 0, ttl)
+	incr := pipe.Incr(key)
+	_, err = pipe.Exec()
+	if err != nil {
+		return
+	}
+	count = incr.Val()
+	return
+}
