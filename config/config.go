@@ -15,10 +15,10 @@ var (
 )
 
 type (
+	// SessionConfig session's config
 	SessionConfig struct {
 		TTL        time.Duration
 		Key        string
-		SignKeys   []string
 		CookiePath string
 	}
 )
@@ -30,11 +30,18 @@ const (
 	Test = "test"
 	// Production production env
 	Production = "production"
+
+	defaultListen     = ":7001"
+	defaultTrackKey   = "jt"
+	defaultSessionTTL = 24 * time.Hour
+	defaultSessionKey = "forest"
+	defaultCookiePath = "/"
 )
 
 func init() {
 	configType := "yml"
-	data, err := box.Find("default.yml")
+	configExt := "." + configType
+	data, err := box.Find("default" + configExt)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +60,7 @@ func init() {
 	}
 
 	// 根据当前运行环境配置读取
-	envConfigFile := GetENV() + "." + configType
+	envConfigFile := GetENV() + configExt
 	data, err = box.Find(envConfigFile)
 	if err != nil {
 		panic(err)
@@ -67,7 +74,7 @@ func init() {
 
 // GetListen get server listen address
 func GetListen() string {
-	return GetString("listen")
+	return GetStringDefault("listen", defaultListen)
 }
 
 // GetENV get go env
@@ -85,7 +92,7 @@ func GetInt(key string) int {
 
 // GetIntDefault get int with default value
 func GetIntDefault(key string, defaultValue int) int {
-	v := viper.GetInt(key)
+	v := GetInt(key)
 	if v != 0 {
 		return v
 	}
@@ -99,7 +106,7 @@ func GetString(key string) string {
 
 // GetStringDefault get string with default value
 func GetStringDefault(key, defaultValue string) string {
-	v := viper.GetString(key)
+	v := GetString(key)
 	if v != "" {
 		return v
 	}
@@ -113,8 +120,8 @@ func GetDuration(key string) time.Duration {
 
 // GetDurationDefault get duration with default value
 func GetDurationDefault(key string, defaultValue time.Duration) time.Duration {
-	v := viper.GetDuration(key)
-	if v.Nanoseconds() != 0 {
+	v := GetDuration(key)
+	if v != 0 {
 		return v
 	}
 	return defaultValue
@@ -127,14 +134,14 @@ func GetStringSlice(key string) []string {
 
 // GetTrackKey get the track cookie key
 func GetTrackKey() string {
-	return GetString("track")
+	return GetStringDefault("track", defaultTrackKey)
 }
 
 // GetSessionConfig get session config
 func GetSessionConfig() *SessionConfig {
 	return &SessionConfig{
-		TTL:        GetDurationDefault("session.expires", 24*time.Hour),
-		Key:        GetStringDefault("session.name", "forest"),
-		CookiePath: GetStringDefault("session.cookie.path", "/"),
+		TTL:        GetDurationDefault("session.expires", defaultSessionTTL),
+		Key:        GetStringDefault("session.name", defaultSessionKey),
+		CookiePath: GetStringDefault("session.cookie.path", defaultCookiePath),
 	}
 }
