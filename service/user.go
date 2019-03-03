@@ -73,10 +73,10 @@ func (u *userSession) Refresh() error {
 	return u.se.Refresh()
 }
 
-// // RefreshSessionCookie refres session's cookie
-// func (u *userSession) RefreshSessionCookie() {
-// 	// u.se.RegenerateCookie()
-// }
+// ClearSessionID clear session id
+func (u *userSession) ClearSessionID() {
+	u.se.ID = ""
+}
 
 // NewUserSession create a user session
 func NewUserSession(c *cod.Context) *userSession {

@@ -11,10 +11,13 @@ import (
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	_ "github.com/vicanso/forest/schedule"
+	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 
 	"go.uber.org/zap"
 
+	humanize "github.com/dustin/go-humanize"
 	bodyparser "github.com/vicanso/cod-body-parser"
 	compress "github.com/vicanso/cod-compress"
 	errorHandler "github.com/vicanso/cod-error-handler"
@@ -48,15 +51,23 @@ func main() {
 
 	// 接口响应统计，在项目中可写入数据库方便统计
 	d.Use(stats.New(stats.Config{
-		OnStats: func(statsInfo *stats.Info, _ *cod.Context) {
+		OnStats: func(statsInfo *stats.Info, c *cod.Context) {
+			account := ""
+			us := service.NewUserSession(c)
+			if us != nil {
+				account = us.GetAccount()
+			}
 			// 增加从session中获取当前账号
 			logger.Info("access log",
 				zap.String("cid", statsInfo.CID),
+				zap.String("track", util.GetTrackID(c)),
 				zap.String("ip", statsInfo.IP),
+				zap.String("account", account),
 				zap.String("method", statsInfo.Method),
 				zap.String("uri", statsInfo.URI),
 				zap.Int("status", statsInfo.Status),
 				zap.String("consuming", statsInfo.Consuming.String()),
+				zap.String("size", humanize.Bytes(uint64(statsInfo.Size))),
 			)
 		},
 	}))

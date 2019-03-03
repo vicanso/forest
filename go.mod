@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
+	github.com/dustin/go-humanize v1.0.0
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/gobuffalo/packr/v2 v2.0.3
 	github.com/hashicorp/golang-lru v0.5.1

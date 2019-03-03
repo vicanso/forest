@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 
 	"github.com/vicanso/cod"
@@ -24,6 +25,12 @@ type (
 		IP        string `json:"ip,omitempty"`
 		TrackID   string `json:"trackId,omitempty"`
 		LoginAt   string `json:"loginAt,omitempty"`
+	}
+
+	// UserLoginParams user login params
+	UserLoginParams struct {
+		Account  string `valid:"ascii,runelength(4|10)"`
+		Password string `valid:"runelength(6|64)"`
 	}
 )
 
@@ -54,12 +61,19 @@ func init() {
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
+		userSession,
+		isAnonymous,
 		loginLimit,
 		// 限制相同IP在60秒之内只能调用10次
 		newIPLimit(10, 60*time.Second, cs.ActionLogin),
-		userSession,
-		isAnonymous,
 		ctrl.login,
+	)
+
+	// 退出登录
+	g.DELETE(
+		"/v1/me/logout",
+		userSession,
+		ctrl.logout,
 	)
 }
 
@@ -111,8 +125,14 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 		err = errLoginTokenNil
 		return
 	}
+	params := &UserLoginParams{}
+	err = validate.Do(params, c.RequestBody)
+	if err != nil {
+		return
+	}
 	// TODO 从数据库读取客户密码与token sha1再校验
-	us.SetAccount("tree.xie")
+	us.SetAccount(params.Account)
+	us.SetLoginAt(now())
 	c.Body = ctrl.pickUserInfo(c)
 	return
 }
@@ -120,6 +140,7 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 // getLoginToken get login token
 func (ctrl userCtrl) getLoginToken(c *cod.Context) (err error) {
 	us := getUserSession(c)
+	us.ClearSessionID()
 	token := util.RandomString(8)
 	err = us.SetLoginToken(token)
 	if err != nil {
@@ -136,6 +157,9 @@ func (ctrl userCtrl) getLoginToken(c *cod.Context) (err error) {
 // logout logout
 func (ctrl userCtrl) logout(c *cod.Context) (err error) {
 	us := getUserSession(c)
-	err = us.Destroy()
+	if us != nil {
+		err = us.Destroy()
+	}
+	c.NoContent()
 	return
 }
