@@ -2,6 +2,10 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
@@ -107,8 +111,35 @@ func main() {
 
 	// 设置应用状态为运行中
 	global.StartApplication()
-	err := d.ListenAndServe(listen)
-	if err != nil {
-		panic(err)
+	if util.IsDevelopment() {
+		err := d.ListenAndServe(listen)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	errCh := make(chan error)
+	go func() {
+		err := d.ListenAndServe(listen)
+		if err != nil {
+			errCh <- err
+		}
+	}()
+
+	closeCh := make(chan os.Signal)
+	signal.Notify(closeCh, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case err := <-errCh:
+		logger.Error("server is closed by error",
+			zap.Error(err),
+		)
+	case sign := <-closeCh:
+		logger.Info("server will be closed by signal")
+		d.GracefulClose(10 * time.Second)
+		logger.Info("server is closed by signal",
+			zap.String("sign", sign.String()),
+		)
 	}
 }
