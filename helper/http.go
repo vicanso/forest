@@ -52,9 +52,17 @@ func httpConvertResponse(d *dusk.Dusk) {
 		Category:   json.Get(d.Body, "category").ToString(),
 		Message:    json.Get(d.Body, "message").ToString(),
 	}
-	he.Category = errCategoryHTTPRequest + "-" + he.Category
+	if he.Category != "" {
+		he.Category = errCategoryHTTPRequest + "-" + he.Category
+	} else {
+		he.Category = errCategoryHTTPRequest
+	}
 	if he.Message == "" {
 		he.Message = "unknown error"
+	}
+	if d.ConvertError != nil {
+		d.Error = d.ConvertError(he, d)
+		return
 	}
 	d.Error = he
 }
@@ -131,8 +139,11 @@ func httpErrorConvert(err error, d *dusk.Dusk) error {
 		he.Category = errCategoryHTTPRequest
 	}
 	// 仅在测试中输出请求 url至 hes中（避免将重要信息输出）
-	if he.Extra == nil && !util.IsProduction() {
-		extra := make(map[string]interface{})
+	if !util.IsProduction() {
+		extra := he.Extra
+		if extra == nil {
+			extra = make(map[string]interface{})
+		}
 		url := req.URL
 		extra["uri"] = url.RequestURI()
 		extra["host"] = url.Host

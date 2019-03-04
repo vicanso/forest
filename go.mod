@@ -7,6 +7,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/gobuffalo/packr/v2 v2.0.3
+	github.com/h2non/gock v1.0.12
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/json-iterator/go v1.1.5
 	github.com/oklog/ulid v1.3.1
@@ -22,7 +23,7 @@ require (
 	github.com/vicanso/cod-responder v0.0.1
 	github.com/vicanso/cod-session v0.0.3
 	github.com/vicanso/cod-stats v0.0.1
-	github.com/vicanso/dusk v0.0.5
+	github.com/vicanso/dusk v0.0.7
 	github.com/vicanso/hes v0.1.3
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
