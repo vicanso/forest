@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	l, err := lru.New(defaultCacheSize)
+	l, err := NewLRU(defaultCacheSize)
 	if err != nil {
 		panic(err)
 	}
