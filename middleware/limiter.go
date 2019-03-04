@@ -57,7 +57,7 @@ func NewLimiter() cod.Handler {
 
 // createConcurrentLimitLock 创建并发限制的lock函数
 func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) concurrentLimiter.Lock {
-	return func(key string, c *cod.Context) (success bool, done func(), err error) {
+	return func(key string, _ *cod.Context) (success bool, done func(), err error) {
 		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
 		done = nil
 		if withDone {
