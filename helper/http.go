@@ -7,14 +7,12 @@ import (
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/dusk"
-	"github.com/vicanso/hes"
-
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 
 	jsoniter "github.com/json-iterator/go"
-
-	"go.uber.org/zap"
 )
 
 var (
@@ -41,8 +39,8 @@ const (
 )
 
 // httpConvertResponse convert http response
-func httpConvertResponse(d *dusk.Dusk) {
-	statusCode := d.Response.StatusCode
+func httpConvertResponse(resp *http.Response, d *dusk.Dusk) (newResp *http.Response, newErr error) {
+	statusCode := resp.StatusCode
 	if statusCode < 400 {
 		return
 	}
@@ -60,23 +58,19 @@ func httpConvertResponse(d *dusk.Dusk) {
 	if he.Message == "" {
 		he.Message = "unknown error"
 	}
-	if d.ConvertError != nil {
-		d.Error = d.ConvertError(he, d)
-		return
-	}
-	d.Error = he
+	return nil, he
 }
 
 // httpDoneEvent http请求完成的触发，用于统计、日志等输出
-func httpDoneEvent(d *dusk.Dusk) {
+func httpDoneEvent(d *dusk.Dusk) error {
 	req := d.Request
 	resp := d.Response
-	err := d.Error
+	err := d.Err
 	uri := req.URL.RequestURI()
-	stats := d.GetTimelineStats()
+	ht := d.GetHTTPTrace()
 	use := ""
-	if stats != nil {
-		use = stats.Total.String()
+	if ht != nil {
+		use = ht.Stats().Total.String()
 	}
 	statusCode := 0
 	if err != nil {
@@ -106,7 +100,7 @@ func httpDoneEvent(d *dusk.Dusk) {
 			zap.String("use", use),
 			zap.Error(err),
 		)
-		return
+		return nil
 	}
 	logger.Info("http request done",
 		zap.String("method", req.Method),
@@ -116,6 +110,7 @@ func httpDoneEvent(d *dusk.Dusk) {
 		zap.Int("status", statusCode),
 		zap.String("use", use),
 	)
+	return nil
 }
 
 // httpErrorConvert convert http error
@@ -153,28 +148,62 @@ func httpErrorConvert(err error, d *dusk.Dusk) error {
 	return he
 }
 
-// NewRequest new request
-func NewRequest() *dusk.Dusk {
-	d := dusk.New()
-	d.Client = DefaultHTTPClient
-	d.EnableTimelineTrace = true
-	d.ConvertError = httpErrorConvert
-	d.On(dusk.EventResponse, httpConvertResponse)
-	d.On(dusk.EventDone, httpDoneEvent)
-	return d
-}
-
-// NewRequestWithContext 使用context 初始化 request
-func NewRequestWithContext(c *cod.Context) *dusk.Dusk {
-	d := NewRequest()
-	d.SetValue(contextID, c.ID)
-	d.On(dusk.EventRequest, func(d *dusk.Dusk) {
+func initDusk(d *dusk.Dusk, c *cod.Context) {
+	if c != nil && c.ID != "" {
+		d.SetValue(contextID, c.ID)
 		// 设置x-forwarded-for
 		v := c.GetRequestHeader(xForwardedForHeader)
 		if v == "" {
 			v = c.RealIP()
 		}
-		d.Request.Header.Set(xForwardedForHeader, v)
-	})
+		d.Set(xForwardedForHeader, v)
+	}
+	d.SetClient(DefaultHTTPClient)
+	d.EnableTrace()
+	d.OnResponseSuccess(httpConvertResponse)
+	d.OnError(httpErrorConvert)
+	d.OnDone(httpDoneEvent)
+}
+
+// NewRequestWithContext new request with context
+func NewRequestWithContext(method, url string, c *cod.Context) (d *dusk.Dusk) {
+	switch method {
+	case http.MethodGet:
+		d = dusk.Get(url)
+	case http.MethodPost:
+		d = dusk.Post(url)
+	case http.MethodPatch:
+		d = dusk.Patch(url)
+	case http.MethodDelete:
+		d = dusk.Delete(url)
+	}
+	if d != nil {
+		initDusk(d, c)
+	}
 	return d
+}
+
+// GetWithContext get request with context
+func GetWithContext(url string, c *cod.Context) *dusk.Dusk {
+	return NewRequestWithContext(http.MethodGet, url, c)
+}
+
+// PostWithContext post request with context
+func PostWithContext(url string, c *cod.Context) *dusk.Dusk {
+	return NewRequestWithContext(http.MethodPost, url, c)
+}
+
+// PutWithContext put request with context
+func PutWithContext(url string, c *cod.Context) *dusk.Dusk {
+	return NewRequestWithContext(http.MethodPut, url, c)
+}
+
+// PatchWithContext patch request with context
+func PatchWithContext(url string, c *cod.Context) *dusk.Dusk {
+	return NewRequestWithContext(http.MethodPatch, url, c)
+}
+
+// DeleteWithContext delete request with context
+func DeleteWithContext(url string, c *cod.Context) *dusk.Dusk {
+	return NewRequestWithContext(http.MethodDelete, url, c)
 }

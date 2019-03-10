@@ -28,12 +28,12 @@ func TestHTTPRequest(t *testing.T) {
 		c := cod.NewContext(nil, req)
 		cid := "abcd"
 		c.ID = cid
-		d := NewRequestWithContext(c)
+		d := GetWithContext("http://aslant.site/", c)
 		if d.GetValue(contextID).(string) != cid {
 			t.Fatalf("get value fail")
 		}
-		d.Client = http.DefaultClient
-		resp, body, err := d.Get("http://aslant.site/", nil)
+		d.SetClient(http.DefaultClient)
+		resp, body, err := d.Do()
 		if err != nil {
 			t.Fatalf("get request fail, %v", err)
 		}
@@ -51,9 +51,9 @@ func TestHTTPRequest(t *testing.T) {
 			JSON(map[string]string{
 				"message": "get data fail",
 			})
-		d := NewRequest()
-		d.Client = http.DefaultClient
-		resp, body, err := d.Get("http://aslant.site/", nil)
+		d := GetWithContext("http://aslant.site/", nil)
+		d.SetClient(http.DefaultClient)
+		_, _, err := d.Do()
 		he, ok := err.(*hes.Error)
 		if !ok {
 			t.Fatalf("error should convert to hes error")
@@ -64,16 +64,17 @@ func TestHTTPRequest(t *testing.T) {
 			he.Extra["host"] != "aslant.site" {
 			t.Fatalf("covert error fail")
 		}
-		if resp.StatusCode != 500 ||
-			strings.TrimSpace(string(body)) != `{"message":"get data fail"}` {
+
+		resp := d.Response
+		if resp.StatusCode != 500 {
 			t.Fatalf("get request fail")
 		}
 	})
 
 	t.Run("timeout", func(t *testing.T) {
-		d := NewRequest()
-		d.Timeout = time.Millisecond
-		_, _, err := d.Get("https://aslant.site/", nil)
+		d := GetWithContext("https://aslant.site/", nil)
+		d.Timeout(time.Millisecond)
+		_, _, err := d.Do()
 		he, ok := err.(*hes.Error)
 		if !ok || he.StatusCode != http.StatusRequestTimeout {
 			t.Fatalf("should return timeout error")

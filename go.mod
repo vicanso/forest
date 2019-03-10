@@ -9,6 +9,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.0.3
 	github.com/h2non/gock v1.0.12
 	github.com/hashicorp/golang-lru v0.5.1
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.5
 	github.com/oklog/ulid v1.3.1
 	github.com/spf13/viper v1.3.1
@@ -20,10 +21,11 @@ require (
 	github.com/vicanso/cod-etag v0.0.1
 	github.com/vicanso/cod-fresh v0.0.1
 	github.com/vicanso/cod-recover v0.0.1
-	github.com/vicanso/cod-responder v0.0.1
+	github.com/vicanso/cod-responder v0.0.2
 	github.com/vicanso/cod-session v0.0.3
+	github.com/vicanso/cod-static-serve v0.0.1
 	github.com/vicanso/cod-stats v0.0.1
-	github.com/vicanso/dusk v0.0.7
+	github.com/vicanso/dusk v0.1.1
 	github.com/vicanso/hes v0.1.3
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect

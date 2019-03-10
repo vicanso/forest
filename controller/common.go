@@ -1,15 +1,12 @@
 package controller
 
 import (
-	"bytes"
-	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/vicanso/cod"
-	"github.com/vicanso/forest/config"
-	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/router"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 
@@ -68,14 +65,11 @@ func (ctrl commonCtrl) objectID2time(c *cod.Context) (err error) {
 
 // getLocationByIP get location by ip address
 func (ctrl commonCtrl) getLocationByIP(c *cod.Context) (err error) {
-	url := config.GetString("ipLocation")
-	url = fmt.Sprintf(url, c.Param("ip"))
-	_, body, err := helper.NewRequestWithContext(c).Get(url, nil)
+	info, err := service.GetLocationByIP(c.Param("ip"), c)
 
 	if err != nil {
 		return
 	}
-	c.SetContentTypeByExt(".json")
-	c.BodyBuffer = bytes.NewBuffer(body)
+	c.Body = info
 	return
 }

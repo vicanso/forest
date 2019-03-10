@@ -17,8 +17,8 @@ const (
 )
 
 type (
-	// userSession user session struct
-	userSession struct {
+	// UserSession user session struct
+	UserSession struct {
 		se *session.Session
 	}
 	// User user
@@ -26,7 +26,7 @@ type (
 )
 
 // GetAccount get the account
-func (u *userSession) GetAccount() string {
+func (u *UserSession) GetAccount() string {
 	if u.se == nil {
 		return ""
 	}
@@ -34,57 +34,57 @@ func (u *userSession) GetAccount() string {
 }
 
 // SetAccount set the account
-func (u *userSession) SetAccount(account string) error {
+func (u *UserSession) SetAccount(account string) error {
 	return u.se.Set(UserAccount, account)
 }
 
 // GetUpdatedAt get updated at
-func (u *userSession) GetUpdatedAt() string {
+func (u *UserSession) GetUpdatedAt() string {
 	return u.se.GetUpdatedAt()
 }
 
 // SetLoginAt set the login at
-func (u *userSession) SetLoginAt(date string) error {
+func (u *UserSession) SetLoginAt(date string) error {
 	return u.se.Set(UserLoginAt, date)
 }
 
 // GetLoginAt get login at
-func (u *userSession) GetLoginAt() string {
+func (u *UserSession) GetLoginAt() string {
 	return u.se.GetString(UserLoginAt)
 }
 
 // SetLoginToken get user login token
-func (u *userSession) SetLoginToken(token string) error {
+func (u *UserSession) SetLoginToken(token string) error {
 	return u.se.Set(UserLoginToken, token)
 }
 
 // GetLoginToken get user login token
-func (u *userSession) GetLoginToken() string {
+func (u *UserSession) GetLoginToken() string {
 	return u.se.GetString(UserLoginToken)
 }
 
 // Destroy destroy user session
-func (u *userSession) Destroy() error {
+func (u *UserSession) Destroy() error {
 	return u.se.Destroy()
 }
 
 // Refresh refresh user session
-func (u *userSession) Refresh() error {
+func (u *UserSession) Refresh() error {
 	return u.se.Refresh()
 }
 
 // ClearSessionID clear session id
-func (u *userSession) ClearSessionID() {
+func (u *UserSession) ClearSessionID() {
 	u.se.ID = ""
 }
 
 // NewUserSession create a user session
-func NewUserSession(c *cod.Context) *userSession {
+func NewUserSession(c *cod.Context) *UserSession {
 	v := c.Get(session.Key)
 	if v == nil {
 		return nil
 	}
-	return &userSession{
+	return &UserSession{
 		se: v.(*session.Session),
 	}
 }

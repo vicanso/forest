@@ -39,19 +39,17 @@ var (
 )
 
 func init() {
-	g := router.NewGroup("/users")
+	g := router.NewGroup("/users", userSession)
 	ctrl := userCtrl{}
 
 	g.GET(
 		"/v1/me",
-		userSession,
 		ctrl.me,
 	)
 
 	// 用户登录
 	g.GET(
 		"/v1/me/login",
-		userSession,
 		isAnonymous,
 		ctrl.getLoginToken,
 	)
@@ -61,7 +59,6 @@ func init() {
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
-		userSession,
 		isAnonymous,
 		loginLimit,
 		// 限制相同IP在60秒之内只能调用10次
@@ -72,7 +69,6 @@ func init() {
 	// 退出登录
 	g.DELETE(
 		"/v1/me/logout",
-		userSession,
 		ctrl.logout,
 	)
 }
