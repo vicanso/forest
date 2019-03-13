@@ -44,6 +44,69 @@ func TestHTTPRequest(t *testing.T) {
 		}
 	})
 
+	t.Run("post", func(t *testing.T) {
+		gock.New("http://aslant.site").
+			Post("/user/login").
+			Reply(200).
+			JSON(map[string]string{
+				"name": "tree.xie",
+			})
+		d := PostWithContext("http://aslant.site/user/login", nil).
+			Send(map[string]string{
+				"a": "1",
+			})
+		d.SetClient(http.DefaultClient)
+		resp, _, err := d.Do()
+		if err != nil || resp.StatusCode != 200 {
+			t.Fatalf("post request fail, %v", err)
+		}
+	})
+
+	t.Run("put", func(t *testing.T) {
+		gock.New("http://aslant.site").
+			Put("/user").
+			Reply(200).
+			JSON(map[string]string{
+				"name": "tree.xie",
+			})
+		d := PutWithContext("http://aslant.site/user", nil)
+		d.SetClient(http.DefaultClient)
+		resp, _, err := d.Do()
+		if err != nil || resp.StatusCode != 200 {
+			t.Fatalf("put request fail, %v", err)
+		}
+	})
+
+	t.Run("patch", func(t *testing.T) {
+		gock.New("http://aslant.site").
+			Patch("/user").
+			Reply(200).
+			JSON(map[string]string{
+				"name": "tree.xie",
+			})
+		d := PatchWithContext("http://aslant.site/user", nil)
+		d.SetClient(http.DefaultClient)
+		resp, _, err := d.Do()
+		if err != nil || resp.StatusCode != 200 {
+			t.Fatalf("patch request fail, %v", err)
+		}
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		gock.New("http://aslant.site").
+			Delete("/user").
+			Reply(200).
+			JSON(map[string]string{
+				"name": "tree.xie",
+			})
+		d := DeleteWithContext("http://aslant.site/user", nil)
+		d.SetClient(http.DefaultClient)
+		resp, _, err := d.Do()
+		if err != nil || resp.StatusCode != 200 {
+			t.Fatalf("delete request fail, %v", err)
+		}
+	})
+
 	t.Run("error", func(t *testing.T) {
 		gock.New("http://aslant.site").
 			Get("/").

@@ -170,6 +170,8 @@ func NewRequestWithContext(method, url string, c *cod.Context) (d *dusk.Dusk) {
 	switch method {
 	case http.MethodGet:
 		d = dusk.Get(url)
+	case http.MethodPut:
+		d = dusk.Put(url)
 	case http.MethodPost:
 		d = dusk.Post(url)
 	case http.MethodPatch:
