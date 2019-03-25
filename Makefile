@@ -14,6 +14,9 @@ test-cover: export GO_ENV=test
 test-cover:
 	go test -race -coverprofile=test.out ./... && go tool cover --html=test.out
 
+list-mod:
+	go list -m -u all
+
 build:
 	packr2
 	go build -tags netgo -o forest 

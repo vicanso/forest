@@ -13,9 +13,9 @@ require (
 	github.com/json-iterator/go v1.1.5
 	github.com/oklog/ulid v1.3.1
 	github.com/spf13/viper v1.3.1
-	github.com/vicanso/cod v0.0.2
+	github.com/vicanso/cod v0.0.4
 	github.com/vicanso/cod-body-parser v0.0.1
-	github.com/vicanso/cod-compress v0.0.1
+	github.com/vicanso/cod-compress v0.0.2
 	github.com/vicanso/cod-concurrent-limiter v0.0.1
 	github.com/vicanso/cod-error-handler v0.0.1
 	github.com/vicanso/cod-etag v0.0.1
@@ -25,7 +25,7 @@ require (
 	github.com/vicanso/cod-session v0.0.3
 	github.com/vicanso/cod-static-serve v0.0.1
 	github.com/vicanso/cod-stats v0.0.1
-	github.com/vicanso/dusk v0.1.1
+	github.com/vicanso/dusk v0.1.2
 	github.com/vicanso/hes v0.1.3
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
