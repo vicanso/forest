@@ -2,7 +2,7 @@ FROM node:12-alpine as webbuilder
 
 RUN apk update \
   && apk add git \
-  && git clone --depth=1 https://github.com/vicanso/forest.git /diving \
+  && git clone --depth=1 https://github.com/vicanso/forest.git /forest \
   && cd /forest/web \
   && npm i \
   && npm run build \
