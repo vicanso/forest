@@ -61,7 +61,7 @@ func TestIncWithTTL(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(count, int64(2))
 
-	time.Sleep(ttl)
+	time.Sleep(2 * ttl)
 	count, err = IncWithTTL(key, ttl)
 	assert.Nil(err)
 	assert.Equal(count, int64(1), "after expired should be reseted")
