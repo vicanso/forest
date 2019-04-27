@@ -15,10 +15,9 @@ ENV GO111MODULE on
 COPY --from=webbuilder /forest /forest
 
 RUN apk update \
-  && apk add docker git gcc make musl-dev \
+  && apk add docker git gcc make \
   && go get -u github.com/gobuffalo/packr/v2/packr2 \
   && cd /forest \
-  && make test \
   && make build
 
 FROM alpine 

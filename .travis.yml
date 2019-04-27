@@ -4,6 +4,14 @@ sudo: required
 go:
   - "1.12"
 
+services:
+  - docker
+
+before_install:
+  - docker pull redis:alpine
+  - docker run -p 6379:6379 -d redis:alpine
+
 script:
+  - env GO111MODULE=on make test
   - docker build -t forest .
   - docker images
