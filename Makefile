@@ -19,7 +19,7 @@ list-mod:
 
 build:
 	packr2
-	go build -tags netgo -o forest 
+	go build -o forest 
 
 clean:
 	packr2 clean
