@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/vicanso/cod"
+	"github.com/vicanso/dusk"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/validate"
@@ -21,7 +22,8 @@ type (
 // GetLocationByIP get location by ip address
 func GetLocationByIP(ip string, c *cod.Context) (l *Location, err error) {
 	url := config.GetString("ipLocation")
-	d := helper.GetWithContext(url, c)
+	d := dusk.Get(url)
+	helper.AttachContext(d, c)
 	d.Param("ip", ip)
 	_, body, err := d.Do()
 	if err != nil {

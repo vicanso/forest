@@ -39,6 +39,13 @@ const (
 )
 
 func init() {
+	dusk.AddRequestListener(func(_ *http.Request, d *dusk.Dusk) (newReq *http.Request, newErr error) {
+		if d.GetClient() == nil {
+			d.SetClient(DefaultHTTPClient)
+		}
+		d.EnableTrace()
+		return
+	}, dusk.EventTypeBefore)
 	dusk.AddResponseListener(httpConvertResponse, dusk.EventTypeAfter)
 	dusk.AddDoneListener(httpDoneEvent)
 	dusk.AddErrorListener(httpErrorConvert)
@@ -148,7 +155,8 @@ func httpErrorConvert(err error, d *dusk.Dusk) error {
 	return he
 }
 
-func initDusk(d *dusk.Dusk, c *cod.Context) {
+// AttachContext attach dusk with context
+func AttachContext(d *dusk.Dusk, c *cod.Context) {
 	if c != nil && c.ID != "" {
 		d.SetValue(contextID, c.ID)
 		// 设置x-forwarded-for
@@ -158,51 +166,5 @@ func initDusk(d *dusk.Dusk, c *cod.Context) {
 		}
 		d.Set(xForwardedForHeader, v)
 	}
-	d.SetClient(DefaultHTTPClient)
-	d.EnableTrace()
 }
 
-// NewRequestWithContext new request with context
-func NewRequestWithContext(method, url string, c *cod.Context) (d *dusk.Dusk) {
-	switch method {
-	case http.MethodGet:
-		d = dusk.Get(url)
-	case http.MethodPut:
-		d = dusk.Put(url)
-	case http.MethodPost:
-		d = dusk.Post(url)
-	case http.MethodPatch:
-		d = dusk.Patch(url)
-	case http.MethodDelete:
-		d = dusk.Delete(url)
-	}
-	if d != nil {
-		initDusk(d, c)
-	}
-	return d
-}
-
-// GetWithContext get request with context
-func GetWithContext(url string, c *cod.Context) *dusk.Dusk {
-	return NewRequestWithContext(http.MethodGet, url, c)
-}
-
-// PostWithContext post request with context
-func PostWithContext(url string, c *cod.Context) *dusk.Dusk {
-	return NewRequestWithContext(http.MethodPost, url, c)
-}
-
-// PutWithContext put request with context
-func PutWithContext(url string, c *cod.Context) *dusk.Dusk {
-	return NewRequestWithContext(http.MethodPut, url, c)
-}
-
-// PatchWithContext patch request with context
-func PatchWithContext(url string, c *cod.Context) *dusk.Dusk {
-	return NewRequestWithContext(http.MethodPatch, url, c)
-}
-
-// DeleteWithContext delete request with context
-func DeleteWithContext(url string, c *cod.Context) *dusk.Dusk {
-	return NewRequestWithContext(http.MethodDelete, url, c)
-}
