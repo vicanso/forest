@@ -1,0 +1,9 @@
+language: go
+sudo: required
+
+go:
+  - "1.12"
+
+script:
+  - docker build -t forest .
+  - docker images

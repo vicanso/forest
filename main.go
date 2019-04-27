@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,39 @@ import (
 	stats "github.com/vicanso/cod-stats"
 )
 
+var (
+	runMode string
+)
+
+func check() {
+	listen := config.GetListen()
+	url := ""
+	if listen[0] == ':' {
+		url = "http://127.0.0.1" + listen + "/ping"
+	} else {
+		url = "http://" + listen + "/ping"
+	}
+	client := http.Client{
+		Timeout: 3 * time.Second,
+	}
+	resp, err := client.Get(url)
+	if err != nil || resp == nil || resp.StatusCode != http.StatusOK {
+		os.Exit(1)
+		return
+	}
+	os.Exit(0)
+}
+
 func main() {
+	flag.StringVar(&runMode, "mode", "", "running mode")
+	flag.Parse()
+
+	if runMode == "check" {
+		check()
+		return
+	}
+
+
 	logger := log.Default()
 	listen := config.GetListen()
 
