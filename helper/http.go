@@ -38,6 +38,12 @@ const (
 	xForwardedForHeader = "X-Forwarded-For"
 )
 
+func init() {
+	dusk.AddResponseListener(httpConvertResponse, dusk.EventTypeAfter)
+	dusk.AddDoneListener(httpDoneEvent)
+	dusk.AddErrorListener(httpErrorConvert)
+}
+
 // httpConvertResponse convert http response
 func httpConvertResponse(resp *http.Response, d *dusk.Dusk) (newResp *http.Response, newErr error) {
 	statusCode := resp.StatusCode
@@ -90,26 +96,20 @@ func httpDoneEvent(d *dusk.Dusk) error {
 
 	// TODO 是否将POST参数也记录（有可能会有敏感信息）
 	// TODO 是否将响应数据输出（有可能敏感信息以及数据量较大），或者写入缓存数据库，保存较短时间方便排查
+	fields := make([]zap.Field, 0, 6)
+	fields = append(fields, zap.String("host", req.Host))
+	fields = append(fields, zap.String("method", req.Method))
+	fields = append(fields, zap.String("path", d.GetPath()))
+	fields = append(fields, zap.String("uri", uri))
+	fields = append(fields, zap.String("cid", cid))
+	fields = append(fields, zap.Int("status", statusCode))
+	fields = append(fields, zap.String("use", use))
 	if resp == nil || err != nil {
-		logger.Error("http request fail",
-			zap.String("method", req.Method),
-			zap.String("host", req.Host),
-			zap.String("uri", uri),
-			zap.String("cid", cid),
-			zap.Int("status", statusCode),
-			zap.String("use", use),
-			zap.Error(err),
-		)
+		fields = append(fields, zap.Error(err))
+		logger.Error("http request fail", fields...)
 		return nil
 	}
-	logger.Info("http request done",
-		zap.String("method", req.Method),
-		zap.String("host", req.Host),
-		zap.String("uri", uri),
-		zap.String("cid", cid),
-		zap.Int("status", statusCode),
-		zap.String("use", use),
-	)
+	logger.Info("http request done", fields...)
 	return nil
 }
 
@@ -160,9 +160,6 @@ func initDusk(d *dusk.Dusk, c *cod.Context) {
 	}
 	d.SetClient(DefaultHTTPClient)
 	d.EnableTrace()
-	d.OnResponseSuccess(httpConvertResponse)
-	d.OnError(httpErrorConvert)
-	d.OnDone(httpDoneEvent)
 }
 
 // NewRequestWithContext new request with context

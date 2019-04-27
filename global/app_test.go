@@ -1,17 +1,19 @@
 package global
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestChangeApplicationStatus(t *testing.T) {
+	assert := assert.New(t)
 	if IsApplicationRunning() {
 		defer StartApplication()
 	}
 	StartApplication()
-	if !IsApplicationRunning() {
-		t.Fatalf("application should be running")
-	}
+	assert.True(IsApplicationRunning())
+
 	PauseApplication()
-	if IsApplicationRunning() {
-		t.Fatalf("application should be paused")
-	}
+	assert.False(IsApplicationRunning())
 }

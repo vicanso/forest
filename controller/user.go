@@ -53,12 +53,15 @@ func init() {
 		isAnonymous,
 		ctrl.getLoginToken,
 	)
+
 	// 限制3秒只能登录一次（无论成功还是失败）
 	loginLimit := createConcurrentLimit([]string{
 		"account",
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
+		createUserTracker(cs.ActionLogin),
+		noQuery,
 		isAnonymous,
 		loginLimit,
 		// 限制相同IP在60秒之内只能调用10次

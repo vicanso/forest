@@ -73,10 +73,10 @@ func AddRouteCount(method, path string) {
 
 // ResetRouteCount reset the route count
 func ResetRouteCount() {
+	routeCounterLock.Lock()
 	for _, v := range routeCounter.Counts {
 		atomic.StoreUint32(v, 0)
 	}
-	routeCounterLock.Lock()
 	defer routeCounterLock.Unlock()
 	routeCounter.CreatedAt = util.NowString()
 }

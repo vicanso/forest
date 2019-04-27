@@ -3,42 +3,37 @@ package global
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/forest/util"
 )
 
 func TestConnectingCount(t *testing.T) {
 	var count uint32 = 100
 	SaveConnectingCount(count)
-	if GetConnectingCount() != count {
-		t.Fatalf("set/get connecting count fail")
-	}
+	assert.Equal(t, GetConnectingCount(), count)
 }
 
 func TestSyncMap(t *testing.T) {
+	assert := assert.New(t)
 	key := util.RandomString(8)
 	value := 1
 	Store(key, value)
 	v, ok := Load(key)
-	if !ok || v.(int) != value {
-		t.Fatalf("load value fail")
-	}
+	assert.True(ok)
+	assert.Equal(v.(int), value)
 	_, loaded := LoadOrStore(key, 2)
-	if !loaded {
-		t.Fatalf("load or store fail")
-	}
+	assert.True(loaded)
 }
 
 func TestLruCache(t *testing.T) {
+	assert := assert.New(t)
 	key := util.RandomString(8)
 	value := 1
 	Add(key, value)
 	v, found := Get(key)
-	if !found || v.(int) != value {
-		t.Fatalf("lru cache add/get fail")
-	}
+	assert.True(found)
+	assert.Equal(v.(int), value)
 	Remove(key)
 	_, found = Get(key)
-	if found {
-		t.Fatalf("lru cache remove fail")
-	}
+	assert.False(found)
 }

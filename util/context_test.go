@@ -7,16 +7,16 @@ import (
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTrackID(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users/me", nil)
+	cookieValue := "abcd"
 	req.AddCookie(&http.Cookie{
 		Name:  config.GetTrackKey(),
-		Value: "abcd",
+		Value: cookieValue,
 	})
 	c := cod.NewContext(nil, req)
-	if GetTrackID(c) != "abcd" {
-		t.Fatalf("get track id fail")
-	}
+	assert.Equal(t, GetTrackID(c), cookieValue)
 }

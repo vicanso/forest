@@ -4,10 +4,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/cod"
 )
 
 func TestNewEntry(t *testing.T) {
+	assert := assert.New(t)
 	fn := NewEntry()
 	req := httptest.NewRequest("GET", "/users/me", nil)
 	res := httptest.NewRecorder()
@@ -16,10 +18,6 @@ func TestNewEntry(t *testing.T) {
 		return nil
 	}
 	err := fn(c)
-	if err != nil {
-		t.Fatalf("new entry middleware fail, %v", err)
-	}
-	if c.GetHeader(xResponseID) != c.ID {
-		t.Fatalf("set response id fail")
-	}
+	assert.Nil(err)
+	assert.Equal(c.GetHeader(xResponseID), c.ID)
 }

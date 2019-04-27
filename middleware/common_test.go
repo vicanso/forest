@@ -5,27 +5,26 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/cod"
 )
 
 func TestNoQuery(t *testing.T) {
+	assert := assert.New(t)
 	req := httptest.NewRequest("GET", "/users/me?a=1", nil)
 	c := cod.NewContext(nil, req)
 	c.Next = func() error {
 		return nil
 	}
-	if NoQuery(c) != errQueryNotAllow {
-		t.Fatalf("no query middleware is fail")
-	}
+	assert.Equal(NoQuery(c), errQueryNotAllow)
 
 	req = httptest.NewRequest("GET", "/users/me", nil)
 	c.Request = req
-	if NoQuery(c) != nil {
-		t.Fatalf("no query should pass")
-	}
+	assert.Nil(NoQuery(c))
 }
 
 func TestWaitFor(t *testing.T) {
+	assert := assert.New(t)
 	start := time.Now()
 	d := 10 * time.Millisecond
 	fn := WaitFor(d)
@@ -34,11 +33,7 @@ func TestWaitFor(t *testing.T) {
 		return nil
 	}
 	err := fn(c)
-	if err != nil {
-		t.Fatalf("wait for middleware fail, %v", err)
-	}
+	assert.Nil(err)
 	use := time.Since(start)
-	if use < d {
-		t.Fatalf("wait for middleware fail")
-	}
+	assert.True(use >= d)
 }

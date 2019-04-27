@@ -1,61 +1,46 @@
 package config
 
 import (
-	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetListen(t *testing.T) {
-	if GetListen() != defaultListen {
-		t.Fatalf("get listen fail")
-	}
+	assert.Equal(t, GetListen(), defaultListen)
 }
 
 func TestGetENV(t *testing.T) {
-	if GetENV() != "test" {
-		t.Fatalf("get env fail")
-	}
+	assert.Equal(t, GetENV(), "test")
 }
 
 func TestGet(t *testing.T) {
 	randomKey := "xx_xx_xx"
-	if GetIntDefault("requestLimit", 0) != 1024 {
-		t.Fatalf("get int fail")
-	}
+	assert := assert.New(t)
+	assert.Equal(GetIntDefault("requestLimit", 0), 1024)
 
-	if GetIntDefault(randomKey, 1) != 1 {
-		t.Fatalf("get int default fail")
-	}
+	assert.Equal(GetIntDefault(randomKey, 1), 1)
 
-	if GetString("app") != "forest" {
-		t.Fatalf("get string fail")
-	}
+	assert.Equal(GetString("app"), "forest")
+	assert.Equal(GetStringDefault(randomKey, "1"), "1")
 
-	if GetStringDefault(randomKey, "1") != "1" {
-		t.Fatalf("get string default fail")
-	}
+	assert.Equal(GetDurationDefault(randomKey, time.Second), time.Second)
 
-	if GetDurationDefault(randomKey, time.Second) != time.Second {
-		t.Fatalf("get time duration default fail")
-	}
-
-	if strings.Join(GetStringSlice("keys"), ",") != "cuttlefish,secret" {
-		t.Fatalf("get string slice fail")
-	}
+	assert.Equal(GetStringSlice("keys"), []string{
+		"cuttlefish",
+		"secret",
+	})
 }
 
 func TestGetTrackKey(t *testing.T) {
-	if GetTrackKey() != defaultTrackKey {
-		t.Fatalf("get track key fail")
-	}
+	assert.Equal(t, GetTrackKey(), defaultTrackKey)
 }
 
 func TestGetSessionConfig(t *testing.T) {
+	assert := assert.New(t)
 	scf := GetSessionConfig()
-	if scf.TTL != defaultSessionTTL ||
-		scf.Key != defaultSessionKey ||
-		scf.CookiePath != defaultCookiePath {
-		t.Fatalf("get session config fail")
-	}
+	assert.Equal(scf.TTL, defaultSessionTTL)
+	assert.Equal(scf.Key, defaultSessionKey)
+	assert.Equal(scf.CookiePath, defaultCookiePath)
 }

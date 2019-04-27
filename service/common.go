@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
@@ -23,9 +21,9 @@ type (
 // GetLocationByIP get location by ip address
 func GetLocationByIP(ip string, c *cod.Context) (l *Location, err error) {
 	url := config.GetString("ipLocation")
-	url = fmt.Sprintf(url, ip)
-	_, body, err := helper.GetWithContext(url, c).
-		Do()
+	d := helper.GetWithContext(url, c)
+	d.Param("ip", ip)
+	_, body, err := d.Do()
 	if err != nil {
 		return
 	}

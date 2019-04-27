@@ -1,11 +1,14 @@
 package util
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestEnv(t *testing.T) {
-	if IsDevelopment() ||
-		IsProduction() ||
-		!IsTest() {
-		t.Fatalf("check env fail")
-	}
+	assert := assert.New(t)
+	assert.False(IsDevelopment())
+	assert.False(IsProduction())
+	assert.True(IsTest())
 }

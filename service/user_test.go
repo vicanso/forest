@@ -8,10 +8,12 @@ import (
 
 	"github.com/vicanso/forest/util"
 
+	"github.com/stretchr/testify/assert"
 	session "github.com/vicanso/cod-session"
 )
 
 func TestUserSession(t *testing.T) {
+	assert := assert.New(t)
 	c := cod.NewContext(nil, nil)
 	se := &session.Session{
 		Store: session.NewRedisStore(GetRedisClient(), nil),
@@ -21,35 +23,25 @@ func TestUserSession(t *testing.T) {
 	us := NewUserSession(c)
 	account := "tree.xie"
 	err := us.SetAccount(account)
-	if err != nil ||
-		us.GetAccount() != account {
-		t.Fatalf("get/set account fail, %v", err)
-	}
-	if us.GetUpdatedAt() == "" {
-		t.Fatalf("get updated at fail")
-	}
+	assert.Nil(err)
+	assert.Equal(us.GetAccount(), account)
+
+	assert.NotEmpty(us.GetUpdatedAt())
 
 	loginAt := util.NowString()
 	us.SetLoginAt(loginAt)
-	if us.GetLoginAt() != loginAt {
-		t.Fatalf("get/set login at fail")
-	}
+	assert.Equal(us.GetLoginAt(), loginAt)
 
 	token := util.RandomString(8)
 	us.SetLoginToken(token)
-	if us.GetLoginToken() != token {
-		t.Fatalf("get/set login token fail")
-	}
+	assert.Equal(us.GetLoginToken(), token)
+
 	us.se.ID = "abcd"
 	us.ClearSessionID()
-	if us.se.ID != "" {
-		t.Fatalf("clear session id fail")
-	}
+	assert.Empty(us.se.ID)
 
 	updatedAt := us.GetUpdatedAt()
 	time.Sleep(time.Second)
 	us.Refresh()
-	if us.GetUpdatedAt() == updatedAt {
-		t.Fatalf("session refresh fail")
-	}
+	assert.NotEqual(us.GetUpdatedAt(), updatedAt)
 }

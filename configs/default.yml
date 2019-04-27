@@ -3,7 +3,7 @@ requestLimit: 1024
 # apiPrefix: /api
 listen: ":7001"
 # ip location url
-ipLocation: https://ip.aslant.site/ip-locations/json/%s
+ipLocation: https://ip.aslant.site/ip-locations/json/:ip
 
 # cookie track key
 track: jt

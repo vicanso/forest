@@ -2,24 +2,20 @@ package util
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRandomString(t *testing.T) {
-	if len(RandomString(8)) != 8 {
-		t.Fatalf("get random string fail")
-	}
+	assert.Equal(t, len(RandomString(8)), 8)
 }
 
 func TestGenUlid(t *testing.T) {
-	if len(GenUlid()) != 26 {
-		t.Fatalf("gen ulid fail")
-	}
+	assert.Equal(t, len(GenUlid()), 26)
 }
 
 func TestSha256(t *testing.T) {
-	if Sha256("abcd") != "iNQmb9TmM40TuEX88olXnSCciXgjuSF9o+Fhk28DFYk=" {
-		t.Fatalf("sha 256 fail")
-	}
+	assert.Equal(t, Sha256("abcd"), "iNQmb9TmM40TuEX88olXnSCciXgjuSF9o+Fhk28DFYk=")
 }
 
 func TestContainsString(t *testing.T) {
@@ -27,8 +23,6 @@ func TestContainsString(t *testing.T) {
 		"a",
 		"b",
 	}
-	if !ContainsString(arr, "b") ||
-		ContainsString(arr, "c") {
-		t.Fatalf("contain string fail")
-	}
+	assert.True(t, ContainsString(arr, "b"))
+	assert.False(t, ContainsString(arr, "c"))
 }

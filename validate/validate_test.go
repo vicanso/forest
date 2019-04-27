@@ -2,10 +2,13 @@ package validate
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidate(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
+		assert := assert.New(t)
 		s := &struct {
 			Method string `json:"method" valid:"xMethods"`
 			Type   int    `json:"type" valid:"xIntIn(1|3|5)"`
@@ -16,16 +19,12 @@ func TestValidate(t *testing.T) {
 			"type": 3,
 			"size": 10
 		}`))
-		if err == nil {
-			t.Fatalf("validate should be fail")
-		}
+		assert.NotNil(err)
 		err = Do(s, map[string]interface{}{
 			"method": "GET",
 			"type":   3,
 			"size":   1,
 		})
-		if err != nil {
-			t.Fatalf("validate fail, %v", err)
-		}
+		assert.Nil(err)
 	})
 }

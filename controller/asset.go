@@ -38,7 +38,7 @@ func init() {
 	g := router.NewGroup("")
 	ctrl := assetCtrl{}
 	g.GET("/", noQuery, ctrl.index)
-	g.GET("/favicon.ico", ctrl.favIcon)
+	g.GET("/favicon.ico", noQuery, ctrl.favIcon)
 
 	sf := &staticFile{
 		box: box,
@@ -59,6 +59,7 @@ func sendFile(c *cod.Context, file string) (err error) {
 	if err != nil {
 		return
 	}
+	// 根据文件后续设置类型
 	c.SetContentTypeByExt(file)
 	c.BodyBuffer = bytes.NewBuffer(buf)
 	return
@@ -70,6 +71,6 @@ func (ctrl assetCtrl) index(c *cod.Context) (err error) {
 }
 
 func (ctrl assetCtrl) favIcon(c *cod.Context) (err error) {
-	c.CacheMaxAge("10m")
+	c.SetHeader(cod.HeaderAcceptEncoding, "public, max-age=3600, s-maxage=600")
 	return sendFile(c, "favicon.ico")
 }

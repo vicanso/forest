@@ -3,33 +3,24 @@ package util
 import (
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNow(t *testing.T) {
+	assert := assert.New(t)
 	utcTimeStringLen := 20
 	now := time.Now()
-	if Now().Unix()-now.Unix() > 1 {
-		t.Fatalf("get time now fail")
-	}
+	assert.True(Now().Unix()-now.Unix() <= 1)
 
-	if len(NowString()) < utcTimeStringLen {
-		t.Fatalf("get time now string fail")
-	}
+	assert.True(len(NowString()) >= utcTimeStringLen)
 
-	if UTCNow().Unix()-now.Unix() > 1 {
-		t.Fatalf("get utc now fail")
-	}
+	assert.True(UTCNow().Unix()-now.Unix() <= 1)
 
-	if len(UTCNowString()) != utcTimeStringLen {
-		t.Fatalf("get utc now string fail")
-	}
+	assert.Equal(len(UTCNowString()), utcTimeStringLen)
 
 	_, err := ParseTime(NowString())
-	if err != nil {
-		t.Fatalf("parse time fail, %v", err)
-	}
+	assert.Nil(err)
 
-	if len(FormatTime(now)) < utcTimeStringLen {
-		t.Fatalf("format time fail")
-	}
+	assert.True(len(FormatTime(now)) >= utcTimeStringLen)
 }

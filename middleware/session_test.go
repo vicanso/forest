@@ -4,11 +4,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/service"
 )
 
 func TestNewSession(t *testing.T) {
+	assert := assert.New(t)
 	fn := NewSession()
 	req := httptest.NewRequest("GET", "/users/me", nil)
 	resp := httptest.NewRecorder()
@@ -17,19 +19,13 @@ func TestNewSession(t *testing.T) {
 		return nil
 	}
 	err := fn(c)
-	if err != nil {
-		t.Fatalf("get session fail, %v", err)
-	}
+	assert.Nil(err)
 
-	if IsAnonymous(c) != nil ||
-		IsLogin(c) != errShouldLogin {
-		t.Fatalf("the session status should be anonymous")
-	}
+	assert.Nil(IsAnonymous(c))
+	assert.Equal(IsLogin(c), errShouldLogin)
 	us := service.NewUserSession(c)
 	us.SetAccount("tree.xie")
 
-	if IsAnonymous(c) != errLoginAlready ||
-		IsLogin(c) != nil {
-		t.Fatalf("the session status should be login")
-	}
+	assert.Equal(IsAnonymous(c), errLoginAlready)
+	assert.Nil(IsLogin(c))
 }

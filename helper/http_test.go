@@ -7,12 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/h2non/gock"
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/cod"
 	"github.com/vicanso/hes"
+	gock "gopkg.in/h2non/gock.v1"
 )
 
 func TestHTTPRequest(t *testing.T) {
+	assert := assert.New(t)
 	defer gock.Off()
 
 	t.Run("normal", func(t *testing.T) {
@@ -29,19 +31,15 @@ func TestHTTPRequest(t *testing.T) {
 		cid := "abcd"
 		c.ID = cid
 		d := GetWithContext("http://aslant.site/", c)
-		if d.GetValue(contextID).(string) != cid {
-			t.Fatalf("get value fail")
-		}
+		assert.Equal(d.GetValue(contextID).(string), cid)
+
 		d.SetClient(http.DefaultClient)
 		resp, body, err := d.Do()
-		if err != nil {
-			t.Fatalf("get request fail, %v", err)
-		}
-		if d.Request.Header.Get(xForwardedForHeader) != ipAddr ||
-			resp.StatusCode != 200 ||
-			strings.TrimSpace(string(body)) != `{"name":"tree.xie"}` {
-			t.Fatalf("get request fail")
-		}
+		assert.Nil(err)
+
+		assert.Equal(d.Request.Header.Get(xForwardedForHeader), ipAddr)
+		assert.Equal(resp.StatusCode, 200)
+		assert.Equal(strings.TrimSpace(string(body)), `{"name":"tree.xie"}`)
 	})
 
 	t.Run("post", func(t *testing.T) {
@@ -57,9 +55,8 @@ func TestHTTPRequest(t *testing.T) {
 			})
 		d.SetClient(http.DefaultClient)
 		resp, _, err := d.Do()
-		if err != nil || resp.StatusCode != 200 {
-			t.Fatalf("post request fail, %v", err)
-		}
+		assert.Nil(err)
+		assert.Equal(resp.StatusCode, 200)
 	})
 
 	t.Run("put", func(t *testing.T) {
@@ -72,9 +69,8 @@ func TestHTTPRequest(t *testing.T) {
 		d := PutWithContext("http://aslant.site/user", nil)
 		d.SetClient(http.DefaultClient)
 		resp, _, err := d.Do()
-		if err != nil || resp.StatusCode != 200 {
-			t.Fatalf("put request fail, %v", err)
-		}
+		assert.Nil(err)
+		assert.Equal(resp.StatusCode, 200)
 	})
 
 	t.Run("patch", func(t *testing.T) {
@@ -87,9 +83,8 @@ func TestHTTPRequest(t *testing.T) {
 		d := PatchWithContext("http://aslant.site/user", nil)
 		d.SetClient(http.DefaultClient)
 		resp, _, err := d.Do()
-		if err != nil || resp.StatusCode != 200 {
-			t.Fatalf("patch request fail, %v", err)
-		}
+		assert.Nil(err)
+		assert.Equal(resp.StatusCode, 200)
 	})
 
 	t.Run("delete", func(t *testing.T) {
@@ -102,9 +97,8 @@ func TestHTTPRequest(t *testing.T) {
 		d := DeleteWithContext("http://aslant.site/user", nil)
 		d.SetClient(http.DefaultClient)
 		resp, _, err := d.Do()
-		if err != nil || resp.StatusCode != 200 {
-			t.Fatalf("delete request fail, %v", err)
-		}
+		assert.Nil(err)
+		assert.Equal(resp.StatusCode, 200)
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -118,20 +112,12 @@ func TestHTTPRequest(t *testing.T) {
 		d.SetClient(http.DefaultClient)
 		_, _, err := d.Do()
 		he, ok := err.(*hes.Error)
-		if !ok {
-			t.Fatalf("error should convert to hes error")
-		}
-		if he.Category != errCategoryHTTPRequest ||
-			he.Extra["uri"] != "/" ||
-			he.Extra["method"] != "GET" ||
-			he.Extra["host"] != "aslant.site" {
-			t.Fatalf("covert error fail")
-		}
-
-		resp := d.Response
-		if resp.StatusCode != 500 {
-			t.Fatalf("get request fail")
-		}
+		assert.True(ok)
+		assert.Equal(he.Category, errCategoryHTTPRequest)
+		assert.Equal(he.Extra["uri"], "/")
+		assert.Equal(he.Extra["method"], "GET")
+		assert.Equal(he.Extra["host"], "aslant.site")
+		assert.Equal(d.Response.StatusCode, 500)
 	})
 
 	t.Run("timeout", func(t *testing.T) {
@@ -139,8 +125,7 @@ func TestHTTPRequest(t *testing.T) {
 		d.Timeout(time.Millisecond)
 		_, _, err := d.Do()
 		he, ok := err.(*hes.Error)
-		if !ok || he.StatusCode != http.StatusRequestTimeout {
-			t.Fatalf("should return timeout error")
-		}
+		assert.True(ok)
+		assert.Equal(he.StatusCode, http.StatusRequestTimeout)
 	})
 }
