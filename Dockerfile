@@ -10,8 +10,6 @@ RUN apk update \
 
 FROM golang:1.12-alpine as builder
 
-ENV GO111MODULE on
-
 COPY --from=webbuilder /forest /forest
 
 RUN apk update \

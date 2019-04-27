@@ -24,7 +24,7 @@ func TestLock(t *testing.T) {
 	assert.Nil(err)
 	assert.False(success, "the second time should lock fail")
 
-	time.Sleep(ttl)
+	time.Sleep(2 * ttl)
 	success, err = Lock(key, ttl)
 	assert.Nil(err)
 	assert.True(success, "after expired should lock success")
