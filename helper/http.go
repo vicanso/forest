@@ -71,6 +71,7 @@ func httpConvertResponse(resp *http.Response, d *dusk.Dusk) (newResp *http.Respo
 	if he.Message == "" {
 		he.Message = "unknown error"
 	}
+
 	return nil, he
 }
 
@@ -80,6 +81,10 @@ func httpDoneEvent(d *dusk.Dusk) error {
 	resp := d.Response
 	err := d.Err
 	uri := req.URL.RequestURI()
+	unescapeURI, _ := url.QueryUnescape(uri)
+	if unescapeURI != "" {
+		uri = unescapeURI
+	}
 	ht := d.GetHTTPTrace()
 	use := ""
 	if ht != nil {
@@ -157,8 +162,10 @@ func httpErrorConvert(err error, d *dusk.Dusk) error {
 
 // AttachContext attach dusk with context
 func AttachContext(d *dusk.Dusk, c *cod.Context) {
-	if c != nil && c.ID != "" {
-		d.SetValue(contextID, c.ID)
+	if c != nil {
+		if c.ID != "" {
+			d.SetValue(contextID, c.ID)
+		}
 		// 设置x-forwarded-for
 		v := c.GetRequestHeader(xForwardedForHeader)
 		if v == "" {
@@ -167,4 +174,3 @@ func AttachContext(d *dusk.Dusk, c *cod.Context) {
 		d.Set(xForwardedForHeader, v)
 	}
 }
-

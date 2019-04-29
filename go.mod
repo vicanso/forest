@@ -25,7 +25,7 @@ require (
 	github.com/vicanso/cod-static-serve v0.0.2
 	github.com/vicanso/cod-stats v0.0.2
 	github.com/vicanso/cod-tracker v0.0.2
-	github.com/vicanso/dusk v0.2.0
+	github.com/vicanso/dusk v0.2.1
 	github.com/vicanso/hes v0.1.4
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
