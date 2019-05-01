@@ -16,8 +16,8 @@ import (
 
 type (
 	userCtrl struct{}
-	// UserInfoResp user info response
-	UserInfoResp struct {
+	// userInfoResp user info response
+	userInfoResp struct {
 		Anonymous bool   `json:"anonymous,omitempty"`
 		Account   string `json:"account,omitempty"`
 		Date      string `json:"date,omitempty"`
@@ -27,8 +27,8 @@ type (
 		LoginAt   string `json:"loginAt,omitempty"`
 	}
 
-	// UserLoginParams user login params
-	UserLoginParams struct {
+	// userLoginParams user login params
+	userLoginParams struct {
 		Account  string `json:"account" valid:"ascii,runelength(4|10)"`
 		Password string `json:"password" valid:"runelength(6|64)"`
 	}
@@ -77,9 +77,9 @@ func init() {
 }
 
 // get user info from session
-func (ctrl userCtrl) pickUserInfo(c *cod.Context) (userInfo *UserInfoResp) {
+func (ctrl userCtrl) pickUserInfo(c *cod.Context) (userInfo *userInfoResp) {
 	us := getUserSession(c)
-	userInfo = &UserInfoResp{
+	userInfo = &userInfoResp{
 		Anonymous: true,
 		Date:      now(),
 		IP:        c.RealIP(),
@@ -112,6 +112,7 @@ func (ctrl userCtrl) me(c *cod.Context) (err error) {
 			MaxAge: 365 * 24 * 3600,
 		})
 	}
+
 	c.Body = ctrl.pickUserInfo(c)
 	return
 }
@@ -124,7 +125,7 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 		err = errLoginTokenNil
 		return
 	}
-	params := &UserLoginParams{}
+	params := &userLoginParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
 		return
