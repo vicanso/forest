@@ -29,8 +29,8 @@ type (
 
 	// userLoginParams user login params
 	userLoginParams struct {
-		Account  string `json:"account" valid:"ascii,runelength(4|10)"`
-		Password string `json:"password" valid:"runelength(6|64)"`
+		Account  string `json:"account" valid:"xAccount"`
+		Password string `json:"password" valid:"xPassword"`
 	}
 )
 

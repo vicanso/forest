@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"net/http"
 	"regexp"
 	"strings"
 
@@ -15,6 +14,8 @@ var (
 	paramTagMap      = govalidator.ParamTagMap
 	customTypeTagMap = govalidator.CustomTypeTagMap
 	json             = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	errCategory = "validate"
 )
 
 func init() {
@@ -46,35 +47,62 @@ func init() {
 		}
 		return govalidator.IsIn(value, methods...)
 	})
+
+	Add("xAccount", func(i interface{}, _ interface{}) bool {
+		return checkASCIILength(i, 2, 20)
+	})
+
+	Add("xPassword", func(i interface{}, _ interface{}) bool {
+		return checkASCIILength(i, 6, 64)
+	})
+}
+
+func checkASCIILength(i interface{}, min, max int) bool {
+	value, ok := i.(string)
+	if !ok {
+		return false
+	}
+	size := len(value)
+	// ascii 而且 长度>=min <=20
+	if !govalidator.IsASCII(value) || size < min || size > max {
+		return false
+	}
+	return true
+}
+
+func wrapError(e error) error {
+	err := hes.Wrap(e)
+	err.Category = errCategory
+	return err
 }
 
 // Do do validate
 func Do(s interface{}, data interface{}) (err error) {
-	statusCode := http.StatusBadRequest
+	// statusCode := http.StatusBadRequest
 	if data != nil {
 		switch data.(type) {
 		case []byte:
 			e := json.Unmarshal(data.([]byte), s)
 			if e != nil {
-				err = hes.NewWithErrorStatusCode(e, statusCode)
+				err = wrapError(e)
 				return
 			}
 		default:
 			buf, e := json.Marshal(data)
 			if e != nil {
-				err = hes.NewWithErrorStatusCode(e, statusCode)
+				err = wrapError(e)
 				return
 			}
 			e = json.Unmarshal(buf, s)
 			if e != nil {
-				err = hes.NewWithErrorStatusCode(e, statusCode)
+				err = wrapError(e)
 				return
 			}
 		}
 	}
-	_, err = govalidator.ValidateStruct(s)
-	if err != nil {
-		err = hes.NewWithErrorStatusCode(err, statusCode)
+	_, e := govalidator.ValidateStruct(s)
+	if e != nil {
+		err = wrapError(e)
 	}
 	return
 }
