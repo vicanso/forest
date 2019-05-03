@@ -65,13 +65,21 @@ func main() {
 		return
 	}
 
-
 	logger := log.Default()
 	listen := config.GetListen()
 
 	d := cod.New()
 
 	d.Keys = config.GetStringSlice("keys")
+
+	// 对于404的请求，不会执行中间件，因此特别输出日志，方便排查
+	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
+		logger.Info("404",
+			zap.String("uri", req.RequestURI),
+		)
+		resp.WriteHeader(http.StatusNotFound)
+		resp.Write([]byte("Not found"))
+	}
 
 	// 如果出错则会触发此回调（在 ErrorHandler 中会将出错转换为相应的http响应，此类情况不会触发）
 	d.OnError(func(c *cod.Context, err error) {
