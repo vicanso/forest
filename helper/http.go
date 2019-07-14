@@ -1,176 +1,119 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package helper
 
 import (
-	"net/http"
-	"net/url"
+	"errors"
 	"time"
 
-	"github.com/vicanso/cod"
-	"github.com/vicanso/dusk"
-	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+
+	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/go-axios"
 	"go.uber.org/zap"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
-var (
-	json   = jsoniter.ConfigCompatibleWithStandardLibrary
-	logger = log.Default()
-	// DefaultHTTPClient default http client
-	DefaultHTTPClient = &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			MaxIdleConns:           100,
-			IdleConnTimeout:        90 * time.Second,
-			TLSHandshakeTimeout:    5 * time.Second,
-			ExpectContinueTimeout:  1 * time.Second,
-			MaxResponseHeaderBytes: 5 * 1024,
-		},
-	}
-)
+// newHTTPStats http stats
+func newHTTPStats(serviceName string) axios.ResponseInterceptor {
+	return func(resp *axios.Response) (err error) {
+		conf := resp.Config
 
-const (
-	errCategoryHTTPRequest = "http-request"
-	contextID              = "cid"
+		ht := conf.HTTPTrace
 
-	xForwardedForHeader = "X-Forwarded-For"
-)
-
-func init() {
-	dusk.AddRequestListener(func(_ *http.Request, d *dusk.Dusk) (newReq *http.Request, newErr error) {
-		if d.GetClient() == nil {
-			d.SetClient(DefaultHTTPClient)
+		reused := false
+		addr := ""
+		use := ""
+		if ht != nil {
+			reused = ht.Reused
+			addr = ht.Addr
+			use = ht.Stats().Total.String()
 		}
-		d.EnableTrace()
-		return
-	}, dusk.EventTypeBefore)
-	dusk.AddResponseListener(httpConvertResponse, dusk.EventTypeAfter)
-	dusk.AddDoneListener(httpDoneEvent)
-	dusk.AddErrorListener(httpErrorConvert)
-}
-
-// httpConvertResponse convert http response
-func httpConvertResponse(resp *http.Response, d *dusk.Dusk) (newResp *http.Response, newErr error) {
-	statusCode := resp.StatusCode
-	if statusCode < 400 {
+		// TODO 统计可以写入influxdb
+		logger.Info("http stats",
+			zap.String("service", serviceName),
+			zap.String("cid", conf.GetString(cs.CID)),
+			zap.String("method", conf.Method),
+			zap.String("route", conf.Route),
+			zap.String("url", conf.URL),
+			zap.Int("status", resp.Status),
+			zap.String("addr", addr),
+			zap.Bool("reused", reused),
+			zap.String("use", use),
+		)
 		return
 	}
-	// 对于状态码大于400的，转化为 hes.Error
-	he := &hes.Error{
-		StatusCode: statusCode,
-		Category:   json.Get(d.Body, "category").ToString(),
-		Message:    json.Get(d.Body, "message").ToString(),
-	}
-	if he.Category != "" {
-		he.Category = errCategoryHTTPRequest + "-" + he.Category
-	} else {
-		he.Category = errCategoryHTTPRequest
-	}
-	if he.Message == "" {
-		he.Message = "unknown error"
-	}
-
-	return nil, he
 }
 
-// httpDoneEvent http请求完成的触发，用于统计、日志等输出
-func httpDoneEvent(d *dusk.Dusk) error {
-	req := d.Request
-	resp := d.Response
-	err := d.Err
-	uri := req.URL.RequestURI()
-	unescapeURI, _ := url.QueryUnescape(uri)
-	if unescapeURI != "" {
-		uri = unescapeURI
-	}
-	ht := d.GetHTTPTrace()
-	use := ""
-	if ht != nil {
-		use = ht.Stats().Total.String()
-	}
-	statusCode := 0
-	if err != nil {
-		he, ok := err.(*hes.Error)
-		if ok {
-			statusCode = he.StatusCode
-		}
-	}
-	if resp != nil {
-		statusCode = resp.StatusCode
-	}
-	cid := ""
-	cidValue := d.GetValue(contextID)
-	if cidValue != nil {
-		cid = cidValue.(string)
-	}
-
-	// TODO 是否将POST参数也记录（有可能会有敏感信息）
-	// TODO 是否将响应数据输出（有可能敏感信息以及数据量较大），或者写入缓存数据库，保存较短时间方便排查
-	fields := make([]zap.Field, 0, 6)
-	fields = append(fields, zap.String("host", req.Host))
-	fields = append(fields, zap.String("method", req.Method))
-	fields = append(fields, zap.String("path", d.GetPath()))
-	fields = append(fields, zap.String("uri", uri))
-	fields = append(fields, zap.String("cid", cid))
-	fields = append(fields, zap.Int("status", statusCode))
-	fields = append(fields, zap.String("use", use))
-	if resp == nil || err != nil {
-		fields = append(fields, zap.Error(err))
-		logger.Error("http request fail", fields...)
-		return nil
-	}
-	logger.Info("http request done", fields...)
-	return nil
-}
-
-// httpErrorConvert convert http error
-func httpErrorConvert(err error, d *dusk.Dusk) error {
-	he, ok := err.(*hes.Error)
-	resp := d.Response
-	req := d.Request
-	if !ok {
-		he = hes.NewWithError(err)
-		statusCode := http.StatusInternalServerError
-		if resp != nil {
-			statusCode = resp.StatusCode
-		}
-		if ue, ok := err.(*url.Error); ok {
-			// 请求超时中断
-			if ue.Timeout() {
-				statusCode = http.StatusRequestTimeout
+// newConvertResponseToError convert http response(4xx, 5xx) to error
+func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
+	return func(resp *axios.Response) (err error) {
+		if resp.Status >= 400 {
+			message := standardJSON.Get(resp.Data, "message").ToString()
+			if message == "" {
+				message = "Unknown Error"
 			}
+			err = errors.New(message)
 		}
-		he.StatusCode = statusCode
-		he.Category = errCategoryHTTPRequest
+		return
 	}
-	// 仅在测试中输出请求 url至 hes中（避免将重要信息输出）
-	if !util.IsProduction() {
-		extra := he.Extra
-		if extra == nil {
-			extra = make(map[string]interface{})
-		}
-		url := req.URL
-		extra["uri"] = url.RequestURI()
-		extra["host"] = url.Host
-		extra["method"] = req.Method
-		he.Extra = extra
-	}
-	return he
 }
 
-// AttachContext attach dusk with context
-func AttachContext(d *dusk.Dusk, c *cod.Context) {
-	if c != nil {
-		if c.ID != "" {
-			d.SetValue(contextID, c.ID)
+// newOnError new an error listener
+func newOnError(serviceName string) axios.OnError {
+	return func(err error, conf *axios.Config) (newErr error) {
+		e, ok := err.(*axios.Error)
+		id := conf.GetString(cs.CID)
+		if ok {
+			he := &hes.Error{
+				StatusCode: e.Code,
+				Message:    e.Message,
+				ID:         id,
+			}
+			// 请求超时
+			if e.Timeout() {
+				he.Message = "Timeout"
+			}
+			if !isProduction() {
+				he.Extra = map[string]interface{}{
+					"route":   conf.Route,
+					"service": serviceName,
+				}
+			}
+			newErr = he
 		}
-		// 设置x-forwarded-for
-		v := c.GetRequestHeader(xForwardedForHeader)
-		if v == "" {
-			v = c.RealIP()
-		}
-		d.Set(xForwardedForHeader, v)
+		logger.Info("http error",
+			zap.String("service", serviceName),
+			zap.String("cid", id),
+			zap.String("method", conf.Method),
+			zap.String("url", conf.URL),
+			zap.String("error", err.Error()),
+		)
+		return
 	}
+}
+
+// NewInstance new an instance
+func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
+	return axios.NewInstance(&axios.InstanceConfig{
+		EnableTrace: true,
+		Timeout:     timeout,
+		OnError:     newOnError(serviceName),
+		BaseURL:     baseURL,
+		ResponseInterceptors: []axios.ResponseInterceptor{
+			newHTTPStats(serviceName),
+			newConvertResponseToError(serviceName),
+		},
+	})
 }

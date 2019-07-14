@@ -12,23 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package helper
 
 import (
-	"github.com/vicanso/cod"
+	"github.com/go-redis/redis"
+	"go.uber.org/zap"
 
 	"github.com/vicanso/forest/config"
 )
 
-// GetTrackID get track id
-func GetTrackID(c *cod.Context) string {
-	trackCookie := config.GetTrackKey()
-	if trackCookie == "" {
-		return ""
+var (
+	redisClient *redis.Client
+)
+
+func init() {
+	options, err := config.GetRedisConfig()
+	if err != nil {
+		panic(err)
 	}
-	cookie, _ := c.Cookie(trackCookie)
-	if cookie == nil {
-		return ""
-	}
-	return cookie.Value
+	logger.Info("connect to redis",
+		zap.String("addr", options.Addr),
+		zap.Int("db", options.DB),
+	)
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     options.Addr,
+		Password: options.Password,
+		DB:       options.DB,
+	})
+}
+
+// RedisGetClient get redis client
+func RedisGetClient() *redis.Client {
+	return redisClient
 }

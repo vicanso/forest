@@ -2,23 +2,33 @@ app: forest
 requestLimit: 1024
 # apiPrefix: /api
 listen: ":7001"
-# ip location url
-ipLocation: https://ip.aslant.site/ip-locations/json/:ip
 
 # cookie track key
 track: jt
+
+
+# redis 配置(pass从env中获取pass这个配置为密码，如果未配置则为空)
+redis: redis://127.0.0.1:6379
+
+# postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
+postgres:
+  host: 127.0.0.1
+  port: 5432
+  user: vicanso 
+  dbname: forest
+  password: PASS
+  sslmode: disable
+
+# session的相关配置
+session:
+  path: /
+  key: forest
+  ttl: 24h
+
 # key for sign cookie
 keys:
   - cuttlefish
   - secret
 
-# redis服务器
-redis: redis://127.0.0.1:6379
-
-# session的相关配置
-session:
-  # 以下值，可不配置则使用默认值
-  # cookie:
-  #   path: /
-  # name: "forest"
-  expires: 24h
+location:
+  baseURL: https://ip.aslant.site/

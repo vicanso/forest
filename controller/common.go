@@ -1,16 +1,26 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
-	"strconv"
-	"time"
+	"bytes"
+
+	"github.com/vicanso/forest/service"
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/router"
-	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/util"
-	"github.com/vicanso/hes"
-
-	"github.com/oklog/ulid"
 )
 
 type (
@@ -19,57 +29,30 @@ type (
 
 func init() {
 	ctrl := commonCtrl{}
-	g := router.NewGroup("/common")
-	g.GET("/ulid2time/:id", noQuery, ctrl.ulid2time)
-	g.GET("/objid2time/:id", noQuery, ctrl.objectID2time)
-	// 请求限制最少1秒才响应，避免接口被刷
-	g.GET("/ip-location/:ip", noQuery, waitFor(time.Second), ctrl.getLocationByIP)
+	g := router.NewGroup("")
+
+	g.GET("/ping", ctrl.ping)
+
+	g.GET("/ip-location", ctrl.location)
+
+	g.GET("/routers", ctrl.routers)
 }
 
-// ulid2time convert ulid to time
-func (ctrl commonCtrl) ulid2time(c *cod.Context) (err error) {
-	id, e := ulid.ParseStrict(c.Param("id"))
-	if e != nil {
-		err = hes.NewWithError(e)
-		return
-	}
-	t := ulid.Time(id.Time())
-	c.Body = &struct {
-		Time string `json:"time"`
-	}{
-		util.FormatTime(t),
-	}
-	return
+func (ctrl commonCtrl) ping(c *cod.Context) error {
+	c.BodyBuffer = bytes.NewBufferString("pong")
+	return nil
 }
 
-// objectID2time convert object id to time
-func (ctrl commonCtrl) objectID2time(c *cod.Context) (err error) {
-	id := c.Param("id")
-	// object id 长度为24
-	if len(id) != 24 {
-		err = hes.New("object id is invalid")
-	}
-	seconds, e := strconv.ParseInt(id[0:8], 16, 64)
-	if e != nil {
-		err = hes.NewWithError(e)
-		return
-	}
-	t := time.Unix(seconds, 0)
-	c.Body = &struct {
-		Time string `json:"time"`
-	}{
-		util.FormatTime(t),
-	}
-	return
-}
-
-// getLocationByIP get location by ip address
-func (ctrl commonCtrl) getLocationByIP(c *cod.Context) (err error) {
-	info, err := service.GetLocationByIP(c.Param("ip"), c)
-
+func (ctrl commonCtrl) location(c *cod.Context) (err error) {
+	info, err := service.GetLocationByIP(c.RealIP(), c.ID)
 	if err != nil {
 		return
 	}
 	c.Body = info
+	return
+}
+
+func (ctrl commonCtrl) routers(c *cod.Context) (err error) {
+	c.Body = c.Cod().Routers
 	return
 }

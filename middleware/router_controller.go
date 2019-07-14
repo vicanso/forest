@@ -1,0 +1,47 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package middleware
+
+import (
+	"bytes"
+
+	"github.com/vicanso/cod"
+	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
+)
+
+// NewRouterController create a router controller
+func NewRouterController() cod.Handler {
+	return func(c *cod.Context) (err error) {
+		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
+		now := util.Now().Unix()
+		if routerConfig == nil ||
+			// 如果配置了开始时间，但尚未开始
+			(routerConfig.BeginDate != nil && routerConfig.BeginDate.Unix() > now) ||
+			// 如果配置了结束时间，但已结束
+			(routerConfig.EndDate != nil && routerConfig.EndDate.Unix() < now) {
+			return c.Next()
+		}
+
+		c.StatusCode = routerConfig.Status
+		contentType := routerConfig.CotentType
+		if contentType == "" {
+			contentType = cod.MIMEApplicationJSON
+		}
+		c.SetHeader(cod.HeaderContentType, contentType)
+		c.BodyBuffer = bytes.NewBufferString(routerConfig.Response)
+		return nil
+	}
+}

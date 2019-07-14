@@ -1,8 +1,22 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package validate
 
 import (
+	"encoding/json"
 	"regexp"
-	"strings"
 
 	"github.com/asaskevich/govalidator"
 	jsoniter "github.com/json-iterator/go"
@@ -10,99 +24,64 @@ import (
 )
 
 var (
+	standardJSON     = jsoniter.ConfigCompatibleWithStandardLibrary
 	paramTagRegexMap = govalidator.ParamTagRegexMap
 	paramTagMap      = govalidator.ParamTagMap
 	customTypeTagMap = govalidator.CustomTypeTagMap
-	json             = jsoniter.ConfigCompatibleWithStandardLibrary
-
-	errCategory = "validate"
+	errCategory      = "validate"
 )
 
 func init() {
 	govalidator.SetFieldsRequiredByDefault(true)
-	AddRegex("xIntRange", "^xIntRange\\((\\d+)\\|(\\d+)\\)$", func(value string, params ...string) bool {
-		return govalidator.InRangeInt(value, params[0], params[1])
-	})
 
-	AddRegex("xIntIn", `^xIntIn\((.*)\)$`, func(value string, params ...string) bool {
-		if len(params) == 1 {
-			rawParams := params[0]
-			parsedParams := strings.Split(rawParams, "|")
-			return govalidator.IsIn(value, parsedParams...)
-		}
-		return false
-	})
-
-	methods := []string{
-		"GET",
-		"POST",
-		"PUT",
-		"DELETE",
-		"HEAD",
-	}
-	Add("xMethods", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
-		return govalidator.IsIn(value, methods...)
-	})
-
+	// 账号
 	Add("xAccount", func(i interface{}, _ interface{}) bool {
-		return checkASCIILength(i, 2, 20)
+		return checkASCIIStringLength(i, 4, 10)
 	})
 
-	Add("xPassword", func(i interface{}, _ interface{}) bool {
-		return checkASCIILength(i, 6, 64)
+	// 应用配置名称
+	Add("xConfigName", func(i interface{}, _ interface{}) bool {
+		return checkASCIIStringLength(i, 2, 50)
+	})
+	Add("xConfigCategory", func(i interface{}, _ interface{}) bool {
+		return checkASCIIStringLength(i, 2, 20)
+	})
+	Add("xConfigData", func(i interface{}, _ interface{}) bool {
+		return checkStringLength(i, 1, 500)
 	})
 }
 
-func checkASCIILength(i interface{}, min, max int) bool {
-	value, ok := i.(string)
-	if !ok {
-		return false
-	}
-	size := len(value)
-	// ascii 而且 长度>=min <=20
-	if !govalidator.IsASCII(value) || size < min || size > max {
-		return false
-	}
-	return true
-}
-
-func wrapError(e error) error {
-	err := hes.Wrap(e)
-	err.Category = errCategory
-	return err
-}
-
-// Do do validate
-func Do(s interface{}, data interface{}) (err error) {
+func doValidate(s interface{}, data interface{}) (err error) {
 	// statusCode := http.StatusBadRequest
 	if data != nil {
 		switch data.(type) {
 		case []byte:
-			e := json.Unmarshal(data.([]byte), s)
-			if e != nil {
-				err = wrapError(e)
+			err = json.Unmarshal(data.([]byte), s)
+			if err != nil {
 				return
 			}
 		default:
-			buf, e := json.Marshal(data)
-			if e != nil {
-				err = wrapError(e)
-				return
+			buf, err := json.Marshal(data)
+			if err != nil {
+				return err
 			}
-			e = json.Unmarshal(buf, s)
-			if e != nil {
-				err = wrapError(e)
-				return
+			err = json.Unmarshal(buf, s)
+			if err != nil {
+				return err
 			}
 		}
 	}
-	_, e := govalidator.ValidateStruct(s)
-	if e != nil {
-		err = wrapError(e)
+	_, err = govalidator.ValidateStruct(s)
+	return
+}
+
+// Do do validate
+func Do(s interface{}, data interface{}) (err error) {
+	err = doValidate(s, data)
+	if err != nil {
+		he := hes.Wrap(err)
+		he.Category = errCategory
+		err = he
 	}
 	return
 }
@@ -123,4 +102,30 @@ func Add(name string, fn govalidator.CustomTypeValidator) {
 		panic(name + " is duplicated")
 	}
 	customTypeTagMap.Set(name, fn)
+}
+
+func checkASCIIStringLength(i interface{}, min, max int) bool {
+	value, ok := i.(string)
+	if !ok {
+		return false
+	}
+	if !govalidator.IsASCII(value) {
+		return false
+	}
+	size := len(value)
+	if size < min || size > max {
+		return false
+	}
+	return true
+}
+func checkStringLength(i interface{}, min, max int) bool {
+	value, ok := i.(string)
+	if !ok {
+		return false
+	}
+	size := len(value)
+	if size < min || size > max {
+		return false
+	}
+	return true
 }

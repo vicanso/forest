@@ -12,48 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package log
+package helper
 
 import (
-	"fmt"
+	"regexp"
 
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/log"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 var (
-	defaultLogger *zap.Logger
+	pgClient *gorm.DB
 )
-
-type (
-	pgLogger struct {
-	}
-)
-
-func (l *pgLogger) Print(v ...interface{}) {
-	Default().Info("pg log",
-		zap.String("message", fmt.Sprint(v...)),
-	)
-}
 
 func init() {
-	c := zap.NewProductionConfig()
-	c.DisableCaller = true
-	c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	// 只针对panic 以上的日志增加stack trace
-	l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
+	str := config.GetPostgresConnectString()
+	reg := regexp.MustCompile(`password=\S*`)
+	maskStr := reg.ReplaceAllString(str, "password=***")
+	logger.Info("connect to pg",
+		zap.String("args", maskStr),
+	)
+	db, err := gorm.Open("postgres", str)
 	if err != nil {
 		panic(err)
 	}
-	defaultLogger = l
+	db.SetLogger(log.PGLogger())
+	pgClient = db
 }
 
-// Default get default logger
-func Default() *zap.Logger {
-	return defaultLogger
+// PGCreate pg create
+func PGCreate(data interface{}) (err error) {
+	err = pgClient.Create(data).Error
+	return
 }
 
-// PGLogger pg logger
-func PGLogger() *pgLogger {
-	return new(pgLogger)
+// PGGetClient pg client
+func PGGetClient() *gorm.DB {
+	return pgClient
 }

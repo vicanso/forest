@@ -1,16 +1,29 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controller
 
 import (
-	"regexp"
-
 	"github.com/vicanso/cod"
-	tracker "github.com/vicanso/cod-tracker"
-	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+
 	"go.uber.org/zap"
+
+	tracker "github.com/vicanso/cod-tracker"
 )
 
 var (
@@ -18,52 +31,27 @@ var (
 	now        = util.NowString
 	getTrackID = util.GetTrackID
 
-	noQuery               = middleware.NoQuery
-	waitFor               = middleware.WaitFor
-	createConcurrentLimit = middleware.NewConcurrentLimit
-	isLogin               = middleware.IsLogin
-	isAnonymous           = middleware.IsAnonymous
-	newIPLimit            = middleware.NewIPLimit
-
-	getUserSession = service.NewUserSession
-
-	userSession cod.Handler
+	getUserSession  = service.NewUserSession
+	loadUserSession cod.Handler
 )
 
 func init() {
-	userSession = middleware.NewSession()
+	loadUserSession = middleware.NewSession()
 }
 
-var maskReg = regexp.MustCompile(`password`)
-
-func createUserTracker(category string) cod.Handler {
+func newTracker(action string) cod.Handler {
 	return tracker.New(tracker.Config{
-		Mask: maskReg,
-		OnTrack: func(info *tracker.Info, c *cod.Context) {
-			us := getUserSession(c)
-			fields := make([]zap.Field, 0, 5)
-			fields = append(fields, zap.String("cid", c.ID))
-			if us != nil && us.GetAccount() != "" {
-				fields = append(fields, zap.String("account", us.GetAccount()))
-			}
-			fields = append(fields, zap.String("category", category))
-			fields = append(fields, zap.Int("result", info.Result))
-
-			if info.Form != nil {
-				fields = append(fields, zap.Any("form", info.Form))
-			}
-
-			if info.Params != nil {
-				fields = append(fields, zap.Any("params", info.Params))
-			}
-
-			if info.Query != nil {
-				fields = append(fields, zap.Any("query", info.Query))
-			}
-			if info.Err != nil {
-				fields = append(fields, zap.Any("err", info.Err))
-			}
-			logger.Info(cs.UserTrackerTag, fields...)
+		// TODO 添加当前登录用户
+		OnTrack: func(info *tracker.Info, _ *cod.Context) {
+			logger.Info("tracker",
+				zap.String("action", action),
+				zap.String("cid", info.CID),
+				zap.Int("result", info.Result),
+				zap.Any("query", info.Query),
+				zap.Any("params", info.Params),
+				zap.Any("form", info.Form),
+				zap.Error(info.Err),
+			)
 		},
 	})
 }

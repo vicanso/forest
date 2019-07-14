@@ -12,23 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package cs
 
-import (
-	"github.com/vicanso/cod"
-
-	"github.com/vicanso/forest/config"
+const (
+	// CID context id
+	CID = "cid"
 )
-
-// GetTrackID get track id
-func GetTrackID(c *cod.Context) string {
-	trackCookie := config.GetTrackKey()
-	if trackCookie == "" {
-		return ""
-	}
-	cookie, _ := c.Cookie(trackCookie)
-	if cookie == nil {
-		return ""
-	}
-	return cookie.Value
-}

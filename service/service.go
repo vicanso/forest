@@ -11,36 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package middleware
+package service
 
 import (
-	"github.com/vicanso/cod"
-	session "github.com/vicanso/cod-session"
-	"github.com/vicanso/forest/config"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 )
 
-// NewSession new session middleware
-func NewSession() cod.Handler {
-	client := helper.RedisGetClient()
-	if client == nil {
-		panic("session store need redis client")
-	}
-	store := session.NewRedisStore(client, nil)
-	store.Prefix = "ss-"
-	scf := config.GetSessionConfig()
-	return session.NewByCookie(session.CookieConfig{
-		Store:   store,
-		Signed:  true,
-		Expired: scf.TTL,
-		GenID: func() string {
-			return util.GenUlid()
-		},
-		Name:     scf.Key,
-		Path:     scf.CookiePath,
-		MaxAge:   int(scf.TTL.Seconds()),
-		HttpOnly: true,
-	})
-}
+var (
+	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	redisGetClient = helper.RedisGetClient
+
+	pgCreate    = helper.PGCreate
+	pgGetClient = helper.PGGetClient
+
+	nowString = util.NowString
+	logger    = log.Default()
+)

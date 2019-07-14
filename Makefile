@@ -4,7 +4,7 @@ export GO111MODULE = on
 
 # for dev
 dev:
-	fresh
+	PASS=123456 fresh
 
 test: export GO_ENV=test
 test:
@@ -23,6 +23,3 @@ build:
 
 clean:
 	packr2 clean
-
-release:
-	go mod tidy

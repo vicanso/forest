@@ -1,22 +1,31 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package schedule
 
 import (
 	"time"
 
 	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/util"
 
 	"go.uber.org/zap"
 )
 
 func init() {
-	if util.IsDevelopment() {
-		return
-	}
-	go initRouteCountTicker()
 	go initRedisCheckTicker()
+	go initConfigurationRefreshTicker()
 	// go initInfluxdbCheckTicker()
 	// go initRouterConfigRefreshTicker()
 }
@@ -43,25 +52,20 @@ func runTicker(ticker *time.Ticker, message string, do func() error, restart fun
 	}
 }
 
-func initRouteCountTicker() {
-	// 每5分钟重置route count
-	ticker := time.NewTicker(5 * time.Minute)
-	runTicker(ticker, "reset route count", func() error {
-		router.ResetRouteCount()
-		return nil
-	}, initRouteCountTicker)
-}
-
 func initRedisCheckTicker() {
-	client := service.GetRedisClient()
-	// 未使用redis，则不需要检测
-	if client == nil {
-		return
-	}
 	// 每一分钟检测一次
 	ticker := time.NewTicker(60 * time.Second)
 	runTicker(ticker, "redis check", func() error {
-		_, err := client.Ping().Result()
+		err := service.RedisPing()
 		return err
 	}, initRedisCheckTicker)
+}
+
+func initConfigurationRefreshTicker() {
+	// 每一分钟更新一次
+	ticker := time.NewTicker(60 * time.Second)
+	runTicker(ticker, "configuration refresh", func() error {
+		err := service.ConfigurationRefresh()
+		return err
+	}, initConfigurationRefreshTicker)
 }

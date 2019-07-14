@@ -1,8 +1,26 @@
+// Copyright 2019 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package config
 
 import (
 	"bytes"
+	"errors"
+	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
@@ -15,6 +33,12 @@ var (
 )
 
 type (
+	// RedisOptions redis options
+	RedisOptions struct {
+		Addr     string
+		Password string
+		DB       int
+	}
 	// SessionConfig session's config
 	SessionConfig struct {
 		TTL        time.Duration
@@ -72,11 +96,6 @@ func init() {
 	}
 }
 
-// GetListen get server listen address
-func GetListen() string {
-	return GetStringDefault("listen", defaultListen)
-}
-
 // GetENV get go env
 func GetENV() string {
 	if env == "" {
@@ -132,16 +151,66 @@ func GetStringSlice(key string) []string {
 	return viper.GetStringSlice(key)
 }
 
+// GetListen get server listen address
+func GetListen() string {
+	return GetStringDefault("listen", defaultListen)
+}
+
 // GetTrackKey get the track cookie key
 func GetTrackKey() string {
 	return GetStringDefault("track", defaultTrackKey)
 }
 
-// GetSessionConfig get session config
-func GetSessionConfig() *SessionConfig {
-	return &SessionConfig{
-		TTL:        GetDurationDefault("session.expires", defaultSessionTTL),
-		Key:        GetStringDefault("session.name", defaultSessionKey),
-		CookiePath: GetStringDefault("session.cookie.path", defaultCookiePath),
+// GetRedisConfig get redis config
+func GetRedisConfig() (options RedisOptions, err error) {
+	value := GetString("redis")
+	if value == "" {
+		err = errors.New("redis connect uri can't be nil")
+		return
 	}
+	info, err := url.Parse(value)
+	if err != nil {
+		return
+	}
+	options.Addr = info.Host
+	pass, ok := info.User.Password()
+	// 密码从env中读取
+	if ok {
+		pass = os.Getenv(pass)
+	}
+	options.Password = pass
+
+	db := info.Query().Get("db")
+	if db != "" {
+		options.DB, _ = strconv.Atoi(db)
+	}
+	return
+}
+
+// GetPostgresConnectString get postgres connect string
+func GetPostgresConnectString() string {
+	data := viper.GetStringMapString("postgres")
+	pass := data["password"]
+	if pass != "" {
+		data["password"] = os.Getenv(pass)
+	}
+	arr := []string{}
+	for k, v := range data {
+		arr = append(arr, k+"="+v)
+	}
+	return strings.Join(arr, " ")
+}
+
+// GetSessionConfig get sesion config
+func GetSessionConfig() SessionConfig {
+	return SessionConfig{
+		TTL:        viper.GetDuration("session.ttl"),
+		Key:        viper.GetString("session.key"),
+		CookiePath: viper.GetString("session.path"),
+	}
+}
+
+// GetSignedKeys get signed keys
+func GetSignedKeys() []string {
+	return viper.GetStringSlice("keys")
 }
