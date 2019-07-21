@@ -15,6 +15,7 @@
 package service
 
 import (
+	"strings"
 	"time"
 
 	"github.com/vicanso/cod"
@@ -23,8 +24,9 @@ import (
 )
 
 const (
-	mockTimeKey          = "mockTime"
-	routerConfigCategory = "router-config"
+	mockTimeKey              = "mockTime"
+	sessionSignedKeyCateogry = "signedKey"
+	routerConfigCategory     = "router-config"
 )
 
 var (
@@ -39,11 +41,24 @@ type (
 		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
-		Name     string `json:"name,omitempty" gorm:"not null;unique"`
+		// 配置名称，唯一
+		Name string `json:"name,omitempty" gorm:"not null;unique"`
+		// 配置分类
 		Category string `json:"category,omitempty"`
-		Owner    string `json:"owner,omitempty" gorm:"not null;"`
-		Enabled  bool   `json:"enabled,omitempty"`
-		Data     string `json:"data,omitempty"`
+		// 配置由谁创建
+		Owner string `json:"owner,omitempty" gorm:"not null;"`
+		// 是否启用
+		Enabled bool   `json:"enabled,omitempty"`
+		Data    string `json:"data,omitempty"`
+		// 启用开始时间
+		BeginDate time.Time `json:"beginDate,omitempty"`
+		// 启用结束时间
+		EndDate time.Time `json:"endDate,omitempty"`
+	}
+	// ConfigurationQueryParmas configuration query params
+	ConfigurationQueryParmas struct {
+		Name     string
+		Category string
 	}
 )
 
@@ -72,14 +87,33 @@ func ConfigurationRefresh() (err error) {
 		return
 	}
 	var mockTimeConfig *Configuration
+	now := util.Now().Unix()
 	routerConfigs := make([]*Configuration, 0)
+	var signedKeysConfig *Configuration
 	for _, item := range configs {
+		// 如果开始时间大于当前时间，未开始启用
+		if item.BeginDate.UTC().Unix() > now {
+			continue
+		}
+		// 如果结束时间少于当前时间，已结束
+		if item.EndDate.UTC().Unix() < now {
+			continue
+		}
 		if item.Name == mockTimeKey {
 			mockTimeConfig = item
 			continue
 		}
+
+		// 路由配置
 		if item.Category == routerConfigCategory {
 			routerConfigs = append(routerConfigs, item)
+			continue
+		}
+
+		// signed key配置
+		if item.Category == sessionSignedKeyCateogry {
+			signedKeysConfig = item
+			continue
 		}
 	}
 
@@ -90,6 +124,14 @@ func ConfigurationRefresh() (err error) {
 		util.SetMockTime(mockTimeConfig.Data)
 	}
 
+	// 如果数据库中未配置，则使用默认配置
+	if signedKeysConfig == nil {
+		signedKeys.SetKeys(config.GetSignedKeys())
+	} else {
+		keys := strings.Split(signedKeysConfig.Data, ",")
+		signedKeys.SetKeys(keys)
+	}
+
 	// 更新router configs
 	updateRouterConfigs(routerConfigs)
 	return
@@ -98,4 +140,37 @@ func ConfigurationRefresh() (err error) {
 // GetSignedKeys get signed keys
 func GetSignedKeys() cod.SignedKeysGenerator {
 	return signedKeys
+}
+
+// ConfigurationList list configurations
+func ConfigurationList(params ConfigurationQueryParmas) (result []*Configuration, err error) {
+	result = make([]*Configuration, 0)
+	db := pgGetClient()
+	if params.Name != "" {
+		names := strings.Split(params.Name, ",")
+		if len(names) > 1 {
+			db = db.Where("name in (?)", names)
+		} else {
+			db = db.Where("name = (?)", names[0])
+		}
+	}
+
+	if params.Category != "" {
+		categories := strings.Split(params.Category, ",")
+		if len(categories) > 1 {
+			db = db.Where("category in (?)", categories)
+		} else {
+			db = db.Where("category = ?", categories[0])
+		}
+	}
+	err = db.Find(&result).Error
+	return
+}
+
+// ConfigurationDeleteByID delete configuration
+func ConfigurationDeleteByID(id uint) (err error) {
+	err = pgGetClient().Unscoped().Delete(&Configuration{
+		ID: id,
+	}).Error
+	return
 }

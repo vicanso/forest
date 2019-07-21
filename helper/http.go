@@ -16,7 +16,10 @@ package helper
 
 import (
 	"errors"
+	"net/http"
 	"time"
+
+	"github.com/vicanso/cod"
 
 	"github.com/vicanso/hes"
 
@@ -62,7 +65,7 @@ func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 		if resp.Status >= 400 {
 			message := standardJSON.Get(resp.Data, "message").ToString()
 			if message == "" {
-				message = "Unknown Error"
+				message = string(resp.Data)
 			}
 			err = errors.New(message)
 		}
@@ -76,11 +79,18 @@ func newOnError(serviceName string) axios.OnError {
 		e, ok := err.(*axios.Error)
 		id := conf.GetString(cs.CID)
 		if ok {
+			code := e.Code
+
 			he := &hes.Error{
-				StatusCode: e.Code,
+				StatusCode: code,
 				Message:    e.Message,
 				ID:         id,
 			}
+			if code < http.StatusBadRequest {
+				he.Exception = true
+				he.StatusCode = http.StatusInternalServerError
+			}
+
 			// 请求超时
 			if e.Timeout() {
 				he.Message = "Timeout"
@@ -116,4 +126,9 @@ func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Inst
 			newConvertResponseToError(serviceName),
 		},
 	})
+}
+
+// AttachWithContext attach with context
+func AttachWithContext(conf *axios.Config, c *cod.Context) {
+	conf.Set(cs.CID, c.ID)
 }

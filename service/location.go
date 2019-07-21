@@ -17,10 +17,11 @@ package service
 import (
 	"time"
 
+	"github.com/vicanso/cod"
+
 	"github.com/vicanso/go-axios"
 
 	"github.com/vicanso/forest/config"
-	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 )
 
@@ -54,14 +55,14 @@ func init() {
 }
 
 // GetLocationByIP get location by ip
-func GetLocationByIP(ip string, cid string) (lo Location, err error) {
+func GetLocationByIP(ip string, c *cod.Context) (lo Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
 			"ip": ip,
 		},
 	}
-	conf.Set(cs.CID, cid)
+	helper.AttachWithContext(conf, c)
 	resp, err := locationIns.Request(conf)
 	if err != nil {
 		return

@@ -44,7 +44,7 @@ func (ctrl commonCtrl) ping(c *cod.Context) error {
 }
 
 func (ctrl commonCtrl) location(c *cod.Context) (err error) {
-	info, err := service.GetLocationByIP(c.RealIP(), c.ID)
+	info, err := service.GetLocationByIP(c.RealIP(), c)
 	if err != nil {
 		return
 	}
@@ -53,6 +53,8 @@ func (ctrl commonCtrl) location(c *cod.Context) (err error) {
 }
 
 func (ctrl commonCtrl) routers(c *cod.Context) (err error) {
-	c.Body = c.Cod().Routers
+	c.Body = map[string]interface{}{
+		"routers": c.Cod().Routers,
+	}
 	return
 }

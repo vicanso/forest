@@ -14,8 +14,54 @@
 
 package service
 
+import "time"
+
+var (
+	redisNoop = func() error {
+		return nil
+	}
+)
+
+type (
+	// RedisDone redis done function
+	RedisDone func() error
+)
+
 // RedisPing redis ping
 func RedisPing() (err error) {
 	_, err = redisGetClient().Ping().Result()
+	return
+}
+
+// RedisLock lock the key for ttl seconds
+func RedisLock(key string, ttl time.Duration) (bool, error) {
+	return redisGetClient().SetNX(key, true, ttl).Result()
+}
+
+// RedisLockWithDone lock the key for ttl, and with done function
+func RedisLockWithDone(key string, ttl time.Duration) (bool, RedisDone, error) {
+	success, err := RedisLock(key, ttl)
+	// 如果lock失败，则返回no op 的done function
+	if err != nil || !success {
+		return false, redisNoop, err
+	}
+	done := func() error {
+		_, err := redisGetClient().Del(key).Result()
+		return err
+	}
+	return true, done, nil
+}
+
+// RedisIncWithTTL inc value with ttl
+func RedisIncWithTTL(key string, ttl time.Duration) (count int64, err error) {
+	pipe := redisGetClient().TxPipeline()
+	// 保证只有首次会设置ttl
+	pipe.SetNX(key, 0, ttl)
+	incr := pipe.Incr(key)
+	_, err = pipe.Exec()
+	if err != nil {
+		return
+	}
+	count = incr.Val()
 	return
 }

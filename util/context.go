@@ -32,3 +32,13 @@ func GetTrackID(c *cod.Context) string {
 	}
 	return cookie.Value
 }
+
+// GetSessionID get session id
+func GetSessionID(c *cod.Context) string {
+	scf := config.GetSessionConfig()
+	cookie, _ := c.Cookie(scf.Key)
+	if cookie == nil {
+		return ""
+	}
+	return cookie.Value
+}

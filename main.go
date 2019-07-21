@@ -38,6 +38,7 @@ import (
 	"github.com/vicanso/forest/router"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 )
 
 // 相关依赖服务的校验，主要是数据库等
@@ -85,7 +86,7 @@ func main() {
 
 	// 接口相关统计信息
 	d.Use(stats.New(stats.Config{
-		OnStats: func(info *stats.Info, _ *cod.Context) {
+		OnStats: func(info *stats.Info, c *cod.Context) {
 			// ping 的日志忽略
 			if info.URI == "/ping" {
 				return
@@ -93,6 +94,7 @@ func main() {
 			logger.Info("access log",
 				zap.String("id", info.CID),
 				zap.String("ip", info.IP),
+				zap.String("sid", util.GetSessionID(c)),
 				zap.String("method", info.Method),
 				zap.String("uri", info.URI),
 				zap.Int("status", info.Status),

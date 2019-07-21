@@ -17,4 +17,6 @@ package cs
 const (
 	// CID context id
 	CID = "cid"
+	// UserSession user session
+	UserSession = "userSession"
 )

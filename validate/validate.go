@@ -33,22 +33,6 @@ var (
 
 func init() {
 	govalidator.SetFieldsRequiredByDefault(true)
-
-	// 账号
-	Add("xAccount", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 4, 10)
-	})
-
-	// 应用配置名称
-	Add("xConfigName", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 2, 50)
-	})
-	Add("xConfigCategory", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 2, 20)
-	})
-	Add("xConfigData", func(i interface{}, _ interface{}) bool {
-		return checkStringLength(i, 1, 500)
-	})
 }
 
 func doValidate(s interface{}, data interface{}) (err error) {

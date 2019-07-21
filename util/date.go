@@ -75,3 +75,9 @@ func ParseTime(str string) (time.Time, error) {
 func FormatTime(t time.Time) string {
 	return t.Format(time.RFC3339)
 }
+
+// ChinaNow get the now time of china
+func ChinaNow() time.Time {
+	loc, _ := time.LoadLocation("Asia/Chongqing")
+	return Now().In(loc)
+}

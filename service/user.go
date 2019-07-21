@@ -15,8 +15,15 @@
 package service
 
 import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 	"github.com/vicanso/cod"
 	session "github.com/vicanso/cod-session"
+	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 )
 
 const (
@@ -30,14 +37,95 @@ const (
 	UserLoginToken = "loginToken"
 )
 
+const (
+	// UserRoleSu super user
+	UserRoleSu = "su"
+	// UserRoleAdmin admin user
+	UserRoleAdmin = "admin"
+)
+
+var (
+	errAccountOrPasswordInvalid = hes.New("account or password is invalid")
+)
+
 type (
 	// UserSession user session struct
 	UserSession struct {
 		se *session.Session
 	}
 	// User user
-	User struct{}
+	User struct {
+		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+		CreatedAt time.Time  `json:"createdAt,omitempty"`
+		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+
+		Account  string         `json:"account,omitempty" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
+		Password string         `json:"password,omitempty" gorm:"type:varchar(128);not null;"`
+		Roles    pq.StringArray `json:"roles,omitempty" gorm:"type:text[]"`
+	}
+
+	// UserLoginRecord user login
+	UserLoginRecord struct {
+		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+		CreatedAt time.Time  `json:"createdAt,omitempty"`
+		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+
+		Account   string `json:"account,omitempty" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
+		UserAgent string `json:"userAgent,omitempty"`
+		IP        string `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
+		TrackID   string `json:"trackId,omitempty" gorm:"type:varchar(64);not null"`
+		SessionID string `json:"sessionId,omitempty" gorm:"type:varchar(64);not null"`
+	}
 )
+
+func init() {
+	pgGetClient().AutoMigrate(&User{}).
+		AutoMigrate(&UserLoginRecord{})
+}
+
+// UserAdd add user
+func UserAdd(u *User) (err error) {
+	err = pgCreate(u)
+	// 首次创建账号，设置su权限
+	if u.ID == 1 {
+		pgGetClient().Model(u).Update(map[string]interface{}{
+			"roles": []string{
+				UserRoleSu,
+			},
+		})
+	}
+	return
+}
+
+// UserLogin user login
+func UserLogin(account, password, token string) (u *User, err error) {
+	u = &User{}
+	err = pgGetClient().Where("account = ?", account).First(u).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			err = errAccountOrPasswordInvalid
+		}
+		return
+	}
+	pwd := util.Sha256(u.Password + token)
+	// 用于自动化测试使用
+	if util.IsDevelopment() && password == "fEqNCco3Yq9h5ZUglD3CZJT4lBs=" {
+		pwd = password
+	}
+	if pwd != password {
+		err = errAccountOrPasswordInvalid
+		return
+	}
+	return
+}
+
+// UserLoginRecordAdd add user login record
+func UserLoginRecordAdd(r *UserLoginRecord) (err error) {
+	err = pgCreate(r)
+	return
+}
 
 // GetAccount get the account
 func (u *UserSession) GetAccount() string {
@@ -77,6 +165,27 @@ func (u *UserSession) GetLoginToken() string {
 	return u.se.GetString(UserLoginToken)
 }
 
+// SetRoles set user roles
+func (u *UserSession) SetRoles(roles []string) error {
+	return u.se.Set(UserRoles, roles)
+}
+
+// GetRoles get user roles
+func (u *UserSession) GetRoles() []string {
+	result, ok := u.se.Get(UserRoles).([]interface{})
+	if !ok {
+		return nil
+	}
+	roles := []string{}
+	for _, item := range result {
+		role, _ := item.(string)
+		if role != "" {
+			roles = append(roles, role)
+		}
+	}
+	return roles
+}
+
 // Destroy destroy user session
 func (u *UserSession) Destroy() error {
 	return u.se.Destroy()
@@ -98,7 +207,17 @@ func NewUserSession(c *cod.Context) *UserSession {
 	if v == nil {
 		return nil
 	}
-	return &UserSession{
+	data := c.Get(cs.UserSession)
+	if data != nil {
+		us, ok := data.(*UserSession)
+		if ok {
+			return us
+		}
+	}
+	us := &UserSession{
 		se: v.(*session.Session),
 	}
+	c.Set(cs.UserSession, us)
+
+	return us
 }

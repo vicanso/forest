@@ -19,19 +19,13 @@ import (
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/util"
 )
 
 // NewRouterController create a router controller
 func NewRouterController() cod.Handler {
 	return func(c *cod.Context) (err error) {
 		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
-		now := util.Now().Unix()
-		if routerConfig == nil ||
-			// 如果配置了开始时间，但尚未开始
-			(routerConfig.BeginDate != nil && routerConfig.BeginDate.Unix() > now) ||
-			// 如果配置了结束时间，但已结束
-			(routerConfig.EndDate != nil && routerConfig.EndDate.Unix() < now) {
+		if routerConfig == nil {
 			return c.Next()
 		}
 

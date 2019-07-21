@@ -16,7 +16,6 @@ package service
 
 import (
 	"sync"
-	"time"
 
 	"go.uber.org/zap"
 )
@@ -24,13 +23,11 @@ import (
 type (
 	// RouterConfig route config
 	RouterConfig struct {
-		Route      string     `json:"route,omitempty"`
-		Method     string     `json:"method,omitempty"`
-		Status     int        `json:"status,omitempty"`
-		CotentType string     `json:"cotentType,omitempty"`
-		Response   string     `json:"response,omitempty"`
-		BeginDate  *time.Time `json:"beginDate,omitempty"`
-		EndDate    *time.Time `json:"endDate,omitempty"`
+		Route      string `json:"route,omitempty"`
+		Method     string `json:"method,omitempty"`
+		Status     int    `json:"status,omitempty"`
+		CotentType string `json:"cotentType,omitempty"`
+		Response   string `json:"response,omitempty"`
 	}
 )
 

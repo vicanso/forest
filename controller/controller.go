@@ -15,11 +15,14 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 
 	"go.uber.org/zap"
 
@@ -27,25 +30,44 @@ import (
 )
 
 var (
+	errShouldLogin  = hes.New("should login first")
+	errLoginAlready = hes.New("login already, please logout first")
+	errForbidden    = &hes.Error{
+		StatusCode: http.StatusForbidden,
+		Message:    "acccess forbidden",
+	}
+)
+
+var (
 	logger     = log.Default()
 	now        = util.NowString
 	getTrackID = util.GetTrackID
 
-	getUserSession  = service.NewUserSession
-	loadUserSession cod.Handler
-)
+	// 创建新的并发控制中间件
+	newConcurrentLimit = middleware.NewConcurrentLimit
+	// 创建IP限制中间件
+	newIPLimit = middleware.NewIPLimit
 
-func init() {
+	getUserSession = service.NewUserSession
+	// 加载用户session
 	loadUserSession = middleware.NewSession()
-}
+	// 判断用户是否登录
+	shouldLogined = cod.Compose(loadUserSession, checkLogin)
+	// 判断用户是否未登录
+	shouldAnonymous = cod.Compose(loadUserSession, checkAnonymous)
+	// 判断用户是否admin权限
+	shouldBeAdmin = cod.Compose(loadUserSession, checkAdmin)
+)
 
 func newTracker(action string) cod.Handler {
 	return tracker.New(tracker.Config{
 		// TODO 添加当前登录用户
-		OnTrack: func(info *tracker.Info, _ *cod.Context) {
+		OnTrack: func(info *tracker.Info, c *cod.Context) {
 			logger.Info("tracker",
 				zap.String("action", action),
 				zap.String("cid", info.CID),
+				zap.String("ip", c.RealIP()),
+				zap.String("sid", util.GetSessionID(c)),
 				zap.Int("result", info.Result),
 				zap.Any("query", info.Query),
 				zap.Any("params", info.Params),
@@ -54,4 +76,43 @@ func newTracker(action string) cod.Handler {
 			)
 		},
 	})
+}
+
+func isLogin(c *cod.Context) bool {
+	us := service.NewUserSession(c)
+	if us == nil || us.GetAccount() == "" {
+		return false
+	}
+	return true
+}
+
+func checkLogin(c *cod.Context) (err error) {
+	if !isLogin(c) {
+		err = errShouldLogin
+		return
+	}
+	return c.Next()
+}
+
+func checkAnonymous(c *cod.Context) (err error) {
+	if isLogin(c) {
+		err = errLoginAlready
+		return
+	}
+	return c.Next()
+}
+
+func checkAdmin(c *cod.Context) (err error) {
+	if !isLogin(c) {
+		err = errShouldLogin
+		return
+	}
+	us := service.NewUserSession(c)
+	roles := us.GetRoles()
+	if util.ContainsString(roles, service.UserRoleSu) ||
+		util.ContainsString(roles, service.UserRoleAdmin) {
+		return c.Next()
+	}
+	err = errForbidden
+	return
 }
