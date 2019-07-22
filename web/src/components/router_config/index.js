@@ -29,6 +29,13 @@ class RouterConfig extends React.Component {
   state = {
     routers: null,
     mode: "",
+
+    method: "",
+    route: "",
+    status: null,
+    contentType: "",
+    response: "",
+
     currentData: null,
     currentKeys: null
   };
@@ -54,12 +61,20 @@ class RouterConfig extends React.Component {
   reset() {
     this.setState({
       mode: "",
-      currentKeys: null,
       currentData: null
     });
   }
   renderConfigEditor() {
-    const { mode, currentData, routers } = this.state;
+    const {
+      mode,
+      currentData,
+      routers,
+      method,
+      route,
+      status,
+      contentType,
+      response
+    } = this.state;
     if (mode !== editMode) {
       return;
     }
@@ -91,24 +106,61 @@ class RouterConfig extends React.Component {
       <div>
         <Col span={colSpan}>
           <Form.Item label="路由选择">
-            <Select placeholder="请选择要配置的路由">{opts}</Select>
+            <Select
+              placeholder="请选择要配置的路由"
+              defaultValue={`${method} ${route}`}
+              onSelect={value => {
+                const arr = value.split(" ");
+                this.setState({
+                  method: arr[0],
+                  route: arr[1]
+                });
+              }}
+            >
+              {opts}
+            </Select>
           </Form.Item>
         </Col>
         <Col span={colSpan}>
           <Form.Item label="状态码">
-            <Input type="number" placeholder="请输入响应状态码" />
+            <Input
+              defaultValue={status}
+              type="number"
+              placeholder="请输入响应状态码"
+              onChange={e => {
+                this.setState({
+                  status: e.target.valueAsNumber
+                });
+              }}
+            />
           </Form.Item>
         </Col>
         <Col span={colSpan}>
           <Form.Item label="响应类型">
-            <Select placeholder="请选择响应数据类型">{contentTypes}</Select>
+            <Select
+              placeholder="请选择响应数据类型"
+              defaultValue={contentType}
+              onChange={value => {
+                this.setState({
+                  contentType: value
+                });
+              }}
+            >
+              {contentTypes}
+            </Select>
           </Form.Item>
         </Col>
-        <Col>
+        <Col span={24}>
           <Form.Item label="响应数据">
             <TextArea
               autosize={{
-                minRows: 4,
+                minRows: 4
+              }}
+              defaultValue={response}
+              onChange={e => {
+                this.setState({
+                  response: e.target.value.trim()
+                });
               }}
             />
           </Form.Item>
@@ -117,20 +169,24 @@ class RouterConfig extends React.Component {
     );
     return (
       <Card size="small" title="添加/更新路由配置">
-        <Paragraph>用于生成session的cookie认证</Paragraph>
+        <Paragraph>用于设置路由启用、禁用等配置</Paragraph>
         <ConfigEditor
           originalData={originalData}
           content={content}
           getConfigData={() => {
-            const { currentKeys } = this.state;
-            if (!currentKeys) {
-              return "";
-            }
-            return currentKeys.join(",");
+            const { method, route, status, response, contentType } = this.state;
+            const data = {
+              method,
+              route,
+              status,
+              contentType,
+              response
+            };
+            return JSON.stringify(data);
           }}
           onSuccess={this.reset.bind(this)}
         />
-        <Button className="back" type="primary" onClick={this.reset.bind(this)}>
+        <Button className="back" onClick={this.reset.bind(this)}>
           返回
         </Button>
       </Card>
@@ -150,15 +206,20 @@ class RouterConfig extends React.Component {
           if (!data) {
             return "";
           }
-          return JSON.stringify(data);
+          return <pre>{JSON.stringify(JSON.parse(data), null, 2)}</pre>;
         }}
         onUpdate={data => {
-          console.dir(data);
-          // this.setState({
-          //   currentKeys: data.data.split(","),
-          //   mode: editMode,
-          //   currentData: data
-          // });
+          const routerData = JSON.parse(data.data);
+          this.setState({
+            method: routerData.method,
+            route: routerData.route,
+            status: routerData.status,
+            contentType: routerData.contentType,
+            response: routerData.response,
+
+            mode: editMode,
+            currentData: data
+          });
         }}
       />
     );
@@ -177,6 +238,12 @@ class RouterConfig extends React.Component {
           <Button
             onClick={() => {
               this.setState({
+                method: "",
+                route: "",
+                status: null,
+                contentType: "",
+                response: "",
+
                 mode: editMode
               });
             }}

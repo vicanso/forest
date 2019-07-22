@@ -16,8 +16,10 @@ package controller
 
 import (
 	"bytes"
+	"strconv"
 
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/router"
@@ -36,6 +38,8 @@ func init() {
 	g.GET("/ip-location", ctrl.location)
 
 	g.GET("/routers", ctrl.routers)
+
+	g.GET("/random-keys", ctrl.randomKeys)
 }
 
 func (ctrl commonCtrl) ping(c *cod.Context) error {
@@ -55,6 +59,25 @@ func (ctrl commonCtrl) location(c *cod.Context) (err error) {
 func (ctrl commonCtrl) routers(c *cod.Context) (err error) {
 	c.Body = map[string]interface{}{
 		"routers": c.Cod().Routers,
+	}
+	return
+}
+
+func (ctrl commonCtrl) randomKeys(c *cod.Context) (err error) {
+	n, _ := strconv.Atoi(c.QueryParam("n"))
+	size, _ := strconv.Atoi(c.QueryParam("size"))
+	if size < 1 {
+		size = 1
+	}
+	if n < 1 {
+		n = 1
+	}
+	result := make([]string, size)
+	for index := 0; index < size; index++ {
+		result[index] = util.RandomString(n)
+	}
+	c.Body = map[string][]string{
+		"keys": result,
 	}
 	return
 }

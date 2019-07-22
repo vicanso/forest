@@ -4,6 +4,7 @@ import { Menu, Icon } from "antd";
 import { Link } from "react-router-dom";
 
 import {
+  ALL_CONFIG_PATH,
   BASIC_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH
@@ -26,6 +27,9 @@ class AppMenu extends React.Component {
               </span>
             }
           >
+            <Menu.Item key="all-config">
+              <Link to={ALL_CONFIG_PATH}>所有配置</Link>
+            </Menu.Item>
             <Menu.Item key="basic-config">
               <Link to={BASIC_CONFIG_PATH}>基本配置</Link>
             </Menu.Item>

@@ -1,10 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { message, Table, Icon, Divider } from "antd";
+import { message, Table, Icon, Divider, Spin } from "antd";
 import axios from "axios";
 import moment from "moment";
 
-import { CONFIGURATIONS_LIST, CONFIGURATIONS_DELETE } from "../../urls";
+import {
+  CONFIGURATIONS_LIST,
+  CONFIGURATIONS_DELETE,
+  CONFIGURATIONS_LIST_AVAILABLE
+} from "../../urls";
 import { TIME_FORMAT } from "../../vars";
 import "./config_table.sass";
 
@@ -19,7 +23,12 @@ class ConfigTable extends React.Component {
       loading: true
     });
     try {
-      const { data } = await axios.get(CONFIGURATIONS_LIST, {
+      let url = CONFIGURATIONS_LIST;
+      if (params.available) {
+        url = CONFIGURATIONS_LIST_AVAILABLE;
+        delete params.available;
+      }
+      const { data } = await axios.get(url, {
         params: params
       });
       const { configs } = data;
@@ -56,7 +65,7 @@ class ConfigTable extends React.Component {
     }
   }
   render() {
-    const { configs } = this.state;
+    const { configs, loading } = this.state;
     const { onUpdate, formatData } = this.props;
     const columns = [
       {
@@ -73,6 +82,7 @@ class ConfigTable extends React.Component {
         title: "是否启用",
         dataIndex: "enabled",
         key: "enabled",
+        width: "100px",
         render: value => {
           if (value) {
             return <Icon type="check-circle" theme="twoTone" />;
@@ -116,19 +126,22 @@ class ConfigTable extends React.Component {
       {
         title: "操作",
         key: "op",
+        width: "120px",
         render: (text, record) => {
           return (
             <span>
-              <a
-                href="/update"
-                onClick={e => {
-                  e.preventDefault();
-                  onUpdate(record);
-                }}
-              >
-                更新
-              </a>
-              <Divider type="vertical" />
+              {onUpdate && (
+                <a
+                  href="/update"
+                  onClick={e => {
+                    e.preventDefault();
+                    onUpdate(record);
+                  }}
+                >
+                  更新
+                </a>
+              )}
+              {onUpdate && <Divider type="vertical" />}
               <a
                 href="/delete"
                 onClick={e => {
@@ -145,7 +158,12 @@ class ConfigTable extends React.Component {
     ];
     return (
       <div className="ConfigTable">
-        <Table dataSource={configs} columns={columns} />
+        {loading && (
+          <div className="loadingWrapper">
+            <Spin tip="加载中..." />
+          </div>
+        )}
+        {!loading && <Table dataSource={configs} columns={columns} />}
       </div>
     );
   }
@@ -153,7 +171,7 @@ class ConfigTable extends React.Component {
 
 ConfigTable.propTypes = {
   params: PropTypes.object,
-  onUpdate: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func,
   formatData: PropTypes.func
 };
 

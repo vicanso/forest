@@ -79,18 +79,16 @@ func ConfigurationUpdate(conf *Configuration, attrs ...interface{}) (err error) 
 	return
 }
 
-// ConfigurationRefresh refresh configurations
-func ConfigurationRefresh() (err error) {
-	configs := make([]*Configuration, 0)
-	err = pgGetClient().Where("enabled = ?", true).Find(&configs).Error
+// ConfigurationAvailable get available configs
+func ConfigurationAvailable() (configs []*Configuration, err error) {
+	now := util.Now().Unix()
+	result := make([]*Configuration, 0)
+	configs = make([]*Configuration, 0)
+	err = pgGetClient().Where("enabled = ?", true).Find(&result).Error
 	if err != nil {
 		return
 	}
-	var mockTimeConfig *Configuration
-	now := util.Now().Unix()
-	routerConfigs := make([]*Configuration, 0)
-	var signedKeysConfig *Configuration
-	for _, item := range configs {
+	for _, item := range result {
 		// 如果开始时间大于当前时间，未开始启用
 		if item.BeginDate.UTC().Unix() > now {
 			continue
@@ -99,6 +97,22 @@ func ConfigurationRefresh() (err error) {
 		if item.EndDate.UTC().Unix() < now {
 			continue
 		}
+		configs = append(configs, item)
+	}
+	return
+}
+
+// ConfigurationRefresh refresh configurations
+func ConfigurationRefresh() (err error) {
+	configs, err := ConfigurationAvailable()
+	if err != nil {
+		return
+	}
+	var mockTimeConfig *Configuration
+
+	routerConfigs := make([]*Configuration, 0)
+	var signedKeysConfig *Configuration
+	for _, item := range configs {
 		if item.Name == mockTimeKey {
 			mockTimeConfig = item
 			continue

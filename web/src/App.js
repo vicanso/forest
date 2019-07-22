@@ -5,6 +5,7 @@ import { message, Spin } from "antd";
 
 import "./app.sass";
 import {
+  ALL_CONFIG_PATH,
   BASIC_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
@@ -19,6 +20,7 @@ import SignedKeysConfig from "./components/signed_keys_config";
 import Login from "./components/login";
 import Register from "./components/register";
 import RouterConfig from "./components/router_config";
+import ConfigList from "./components/config_list";
 
 class App extends React.Component {
   state = {
@@ -40,6 +42,10 @@ class App extends React.Component {
         loading: false
       });
     }
+    // 更新session与cookie有效期
+    setTimeout(() => {
+      axios.patch(USERS_ME)
+    }, 5 * 1000);
   }
   setUserInfo(data)  {
     let isAdmin = false;
@@ -81,6 +87,14 @@ class App extends React.Component {
                 />}
               />
               <Route path={REGISTER_PATH} component={Register} />
+              <Route
+                path={ALL_CONFIG_PATH}
+                render={(props) => <ConfigList
+                  {...props}
+                  account={account}
+                  isAdmin={isAdmin}
+                />}
+              />
               <Route
                 path={BASIC_CONFIG_PATH}
                 render={(props) => <BasicConfig

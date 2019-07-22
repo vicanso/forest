@@ -58,6 +58,11 @@ func init() {
 		shouldBeAdmin,
 		ctrl.list,
 	)
+	g.GET(
+		"/v1/available",
+		shouldBeAdmin,
+		ctrl.listAvailable,
+	)
 
 	g.POST(
 		"/v1",
@@ -90,6 +95,18 @@ func (ctrl configurationCtrl) list(c *cod.Context) (err error) {
 		Name:     params.Name,
 		Category: params.Category,
 	})
+	if err != nil {
+		return
+	}
+	c.Body = map[string]interface{}{
+		"configs": result,
+	}
+	return
+}
+
+// listAvailable list available config
+func (ctrl configurationCtrl) listAvailable(c *cod.Context) (err error) {
+	result, err := service.ConfigurationAvailable()
 	if err != nil {
 		return
 	}

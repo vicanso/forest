@@ -86,7 +86,7 @@ class ConfigEditor extends React.Component {
         message.info("添加配置已成功");
       }
       if (onSuccess) {
-        onSuccess();
+        setTimeout(onSuccess, 100);
       }
     } catch (err) {
       message.error(err.message);

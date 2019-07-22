@@ -6,13 +6,16 @@ import {
   Select,
   Form,
   Col,
+  message,
   notification
 } from "antd";
 import PropTypes from "prop-types";
+import axios from "axios";
 
 import ConfigEditor from "../config_editor";
 import ConfigTable from "../config_table";
 import "./signed_keys_config.sass";
+import { RANDOM_KEYS } from "../../urls";
 
 const { Paragraph } = Typography;
 const signedKeyCategory = "signedKey";
@@ -21,6 +24,7 @@ const editMode = "edit";
 class SignedKeysConfig extends React.Component {
   state = {
     mode: "",
+    randomKey: "",
     currentData: null,
     currentKeys: null
   };
@@ -40,29 +44,60 @@ class SignedKeysConfig extends React.Component {
       currentData: null
     });
   }
+  async updateRandomString() {
+    try {
+      const { data } = await axios.get(RANDOM_KEYS, {
+        params: {
+          n: 10
+        }
+      });
+      this.setState({
+        randomKey: data.keys[0]
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
   renderConfigEditor() {
-    const { mode, currentData, currentKeys } = this.state;
+    const { mode, currentData, currentKeys, randomKey } = this.state;
     if (mode !== editMode) {
       return;
     }
     const originalData = currentData || {
       category: signedKeyCategory
     };
+    const colSpan = 8;
     const content = (
-      <Col span={8}>
-        <Form.Item label="Key列表">
-          <Select
-            defaultValue={currentKeys || []}
-            mode="tags"
-            placeholder="请输入需要配置的key"
-            onChange={value => {
-              this.setState({
-                currentKeys: value
-              });
-            }}
-          ></Select>
-        </Form.Item>
-      </Col>
+      <div>
+        <Col span={colSpan}>
+          <Form.Item label="Key列表">
+            <Select
+              defaultValue={currentKeys || []}
+              mode="tags"
+              placeholder="请输入需要配置的key"
+              onChange={value => {
+                this.setState({
+                  currentKeys: value
+                });
+              }}
+            ></Select>
+          </Form.Item>
+        </Col>
+        <Col span={colSpan}>
+          <Form.Item label="随机串">
+            <Button type="primary" onClick={this.updateRandomString.bind(this)}>
+              立即生成
+            </Button>
+            <span
+              style={{
+                marginLeft: "15px"
+              }}
+            >
+              {randomKey}
+            </span>
+          </Form.Item>
+        </Col>
+      </div>
     );
     return (
       <Card size="small" title="添加/更新签名配置">
@@ -79,7 +114,7 @@ class SignedKeysConfig extends React.Component {
           }}
           onSuccess={this.reset.bind(this)}
         />
-        <Button className="back" type="primary" onClick={this.reset.bind(this)}>
+        <Button className="back" onClick={this.reset.bind(this)}>
           返回
         </Button>
       </Card>

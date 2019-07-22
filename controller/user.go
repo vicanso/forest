@@ -74,6 +74,11 @@ func init() {
 		shouldAnonymous,
 		ctrl.register,
 	)
+	// 刷新user session的ttl
+	g.PATCH(
+		"/v1/me",
+		ctrl.refresh,
+	)
 
 	// 获取登录token
 	g.GET(
@@ -220,6 +225,42 @@ func (ctrl userCtrl) logout(c *cod.Context) (err error) {
 	if us != nil {
 		err = us.Destroy()
 	}
+	c.NoContent()
+	return
+}
+
+// refresh user refresh
+func (ctrl userCtrl) refresh(c *cod.Context) (err error) {
+	us := getUserSession(c)
+	if us == nil {
+		c.NoContent()
+		return
+	}
+
+	scf := config.GetSessionConfig()
+	cookie, _ := c.SignedCookie(scf.Key)
+	// 如果认证的cookie已过期，则不做刷新
+	if cookie == nil {
+		c.NoContent()
+		return
+	}
+
+	err = us.Refresh()
+	if err != nil {
+		return
+	}
+	// 更新session
+	err = c.AddSignedCookie(&http.Cookie{
+		Name:     scf.Key,
+		Value:    cookie.Value,
+		Path:     scf.CookiePath,
+		MaxAge:   int(scf.TTL.Seconds()),
+		HttpOnly: true,
+	})
+	if err != nil {
+		return
+	}
+
 	c.NoContent()
 	return
 }
