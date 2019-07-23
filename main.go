@@ -47,7 +47,8 @@ func dependServiceCheck() (err error) {
 	if err != nil {
 		return
 	}
-	err = service.ConfigurationRefresh()
+	configSrv := new(service.ConfigurationSrv)
+	err = configSrv.Refresh()
 	if err != nil {
 		return
 	}

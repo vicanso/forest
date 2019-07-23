@@ -91,7 +91,7 @@ func (ctrl configurationCtrl) list(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
-	result, err := service.ConfigurationList(service.ConfigurationQueryParmas{
+	result, err := configSrv.List(service.ConfigurationQueryParmas{
 		Name:     params.Name,
 		Category: params.Category,
 	})
@@ -106,7 +106,7 @@ func (ctrl configurationCtrl) list(c *cod.Context) (err error) {
 
 // listAvailable list available config
 func (ctrl configurationCtrl) listAvailable(c *cod.Context) (err error) {
-	result, err := service.ConfigurationAvailable()
+	result, err := configSrv.Available()
 	if err != nil {
 		return
 	}
@@ -133,7 +133,7 @@ func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
 		BeginDate: params.BeginDate,
 		EndDate:   params.EndDate,
 	}
-	err = service.ConfigurationAdd(conf)
+	err = configSrv.Add(conf)
 	if err != nil {
 		return
 	}
@@ -152,7 +152,7 @@ func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
-	err = service.ConfigurationUpdate(&service.Configuration{
+	err = configSrv.Update(&service.Configuration{
 		ID: uint(id),
 	}, map[string]interface{}{
 		"enabled":   params.Enabled,
@@ -175,7 +175,7 @@ func (ctrl configurationCtrl) delete(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
-	err = service.ConfigurationDeleteByID(uint(id))
+	err = configSrv.DeleteByID(uint(id))
 	if err != nil {
 		return
 	}

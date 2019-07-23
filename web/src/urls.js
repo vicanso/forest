@@ -1,5 +1,6 @@
 const prefix = "";
 
+export const USERS = `${prefix}/users/v1`;
 export const USERS_ME = `${prefix}/users/v1/me`;
 export const USERS_LOGIN = `${prefix}/users/v1/me/login`;
 export const USERS_LOGOUT = `${prefix}/users/v1/me/logout`;

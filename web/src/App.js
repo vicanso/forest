@@ -10,7 +10,8 @@ import {
   SIGNED_KEYS_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
   REGISTER_PATH,
-  LOGIN_PATH
+  LOGIN_PATH,
+  USERS_PATH,
 } from "./paths";
 import { USERS_ME } from "./urls";
 import AppMenu from "./components/app_menu";
@@ -21,6 +22,7 @@ import Login from "./components/login";
 import Register from "./components/register";
 import RouterConfig from "./components/router_config";
 import ConfigList from "./components/config_list";
+import UserList from "./components/user_list";
 
 class App extends React.Component {
   state = {
@@ -117,6 +119,15 @@ class App extends React.Component {
                   {...props}
                   account={account}
                   isAdmin={isAdmin}
+                />}
+              />
+              <Route
+                exact
+                path={USERS_PATH}
+                render={(props) => <UserList
+                  {...props}
+                  account={account}
+                  isAdmin={isAdmin}     
                 />}
               />
             </div>

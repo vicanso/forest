@@ -42,6 +42,8 @@ const (
 	UserRoleSu = "su"
 	// UserRoleAdmin admin user
 	UserRoleAdmin = "admin"
+
+	defaultUserLimit = 10
 )
 
 var (
@@ -61,7 +63,7 @@ type (
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		Account  string         `json:"account,omitempty" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
-		Password string         `json:"password,omitempty" gorm:"type:varchar(128);not null;"`
+		Password string         `json:"-" gorm:"type:varchar(128);not null;"`
 		Roles    pq.StringArray `json:"roles,omitempty" gorm:"type:text[]"`
 	}
 
@@ -78,6 +80,15 @@ type (
 		TrackID   string `json:"trackId,omitempty" gorm:"type:varchar(64);not null"`
 		SessionID string `json:"sessionId,omitempty" gorm:"type:varchar(64);not null"`
 	}
+	// UserQueryParams user query params
+	UserQueryParams struct {
+		Keyword string
+		Role    string
+		Limit   int
+	}
+	// UserSrv user service
+	UserSrv struct {
+	}
 )
 
 func init() {
@@ -85,8 +96,8 @@ func init() {
 		AutoMigrate(&UserLoginRecord{})
 }
 
-// UserAdd add user
-func UserAdd(u *User) (err error) {
+// Add add user
+func (srv *UserSrv) Add(u *User) (err error) {
 	err = pgCreate(u)
 	// 首次创建账号，设置su权限
 	if u.ID == 1 {
@@ -99,8 +110,8 @@ func UserAdd(u *User) (err error) {
 	return
 }
 
-// UserLogin user login
-func UserLogin(account, password, token string) (u *User, err error) {
+// Login user login
+func (srv *UserSrv) Login(account, password, token string) (u *User, err error) {
 	u = &User{}
 	err = pgGetClient().Where("account = ?", account).First(u).Error
 	if err != nil {
@@ -121,9 +132,28 @@ func UserLogin(account, password, token string) (u *User, err error) {
 	return
 }
 
-// UserLoginRecordAdd add user login record
-func UserLoginRecordAdd(r *UserLoginRecord) (err error) {
+// AddLoginRecord add user login record
+func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 	err = pgCreate(r)
+	return
+}
+
+// List list users
+func (srv *UserSrv) List(params UserQueryParams) (result []*User, err error) {
+	result = make([]*User, 0)
+	db := pgGetClient()
+	if params.Limit <= 0 {
+		db = db.Limit(defaultUserLimit)
+	} else {
+		db = db.Limit(params.Limit)
+	}
+	// if params.Role != "" {
+	// 	db = db.Where("roles @> ?", params.Role)
+	// }
+	if params.Keyword != "" {
+		db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
+	}
+	err = db.Find(&result).Error
 	return
 }
 

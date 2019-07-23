@@ -5,3 +5,4 @@ export const ROUTER_CONFIG_PATH = "/configs/router";
 
 export const LOGIN_PATH = "/users/login";
 export const REGISTER_PATH = "/users/register";
+export const USERS_PATH = "/users";

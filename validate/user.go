@@ -14,6 +14,10 @@
 
 package validate
 
+import (
+	"github.com/asaskevich/govalidator"
+)
+
 func init() {
 	// 账号
 	Add("xUserAccount", func(i interface{}, _ interface{}) bool {
@@ -21,5 +25,15 @@ func init() {
 	})
 	Add("xUserPassword", func(i interface{}, _ interface{}) bool {
 		return checkASCIIStringLength(i, 44, 44)
+	})
+	Add("xUserAccountKeyword", func(i interface{}, _ interface{}) bool {
+		return checkASCIIStringLength(i, 1, 10)
+	})
+	Add("xUserRole", func(i interface{}, _ interface{}) bool {
+		value, ok := i.(string)
+		if !ok {
+			return false
+		}
+		return govalidator.IsIn(value, "su", "admin")
 	})
 }

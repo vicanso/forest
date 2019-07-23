@@ -63,9 +63,10 @@ func initRedisCheckTicker() {
 
 func initConfigurationRefreshTicker() {
 	// 每一分钟更新一次
+	configSrv := new(service.ConfigurationSrv)
 	ticker := time.NewTicker(60 * time.Second)
 	runTicker(ticker, "configuration refresh", func() error {
-		err := service.ConfigurationRefresh()
+		err := configSrv.Refresh()
 		return err
 	}, initConfigurationRefreshTicker)
 }

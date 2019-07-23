@@ -52,6 +52,11 @@ type (
 		Account  string `json:"account,omitempty" valid:"xUserAccount"`
 		Password string `json:"password,omitempty" valid:"xUserPassword"`
 	}
+
+	listUserParams struct {
+		Keyword string `json:"keyword,omitempty" valid:"xUserAccountKeyword,optional"`
+		Role    string `json:"role,omitempty" valid:"xUserRole,optional"`
+	}
 )
 
 var (
@@ -61,6 +66,12 @@ var (
 func init() {
 	g := router.NewGroup("/users", loadUserSession)
 	ctrl := userCtrl{}
+	// 获取用户列表
+	g.GET(
+		"/v1",
+		shouldBeAdmin,
+		ctrl.list,
+	)
 
 	// 获取用户信息
 	g.GET("/v1/me", ctrl.me)
@@ -179,7 +190,7 @@ func (ctrl userCtrl) register(c *cod.Context) (err error) {
 		Account:  params.Account,
 		Password: params.Password,
 	}
-	err = service.UserAdd(u)
+	err = userSrv.Add(u)
 	if err != nil {
 		return
 	}
@@ -201,11 +212,11 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 		err = errLoginTokenNil
 		return
 	}
-	u, err := service.UserLogin(params.Account, params.Password, token)
+	u, err := userSrv.Login(params.Account, params.Password, token)
 	if err != nil {
 		return
 	}
-	service.UserLoginRecordAdd(&service.UserLoginRecord{
+	userSrv.AddLoginRecord(&service.UserLoginRecord{
 		Account:   params.Account,
 		UserAgent: c.GetRequestHeader("User-Agent"),
 		IP:        c.RealIP(),
@@ -262,5 +273,26 @@ func (ctrl userCtrl) refresh(c *cod.Context) (err error) {
 	}
 
 	c.NoContent()
+	return
+}
+
+// list user list
+func (ctrl userCtrl) list(c *cod.Context) (err error) {
+	params := &listUserParams{}
+	err = validate.Do(params, c.Query())
+	if err != nil {
+		return
+	}
+	users, err := userSrv.List(service.UserQueryParams{
+		Keyword: params.Keyword,
+	})
+	if err != nil {
+		return
+	}
+	c.Body = &struct {
+		Users []*service.User `json:"users,omitempty"`
+	}{
+		users,
+	}
 	return
 }

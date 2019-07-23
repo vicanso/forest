@@ -27,6 +27,8 @@ const (
 	mockTimeKey              = "mockTime"
 	sessionSignedKeyCateogry = "signedKey"
 	routerConfigCategory     = "router-config"
+
+	defaultConfigurationLimit = 100
 )
 
 var (
@@ -59,6 +61,10 @@ type (
 	ConfigurationQueryParmas struct {
 		Name     string
 		Category string
+		Limit    int
+	}
+	// ConfigurationSrv configuration service
+	ConfigurationSrv struct {
 	}
 )
 
@@ -67,20 +73,20 @@ func init() {
 	signedKeys.SetKeys(config.GetSignedKeys())
 }
 
-// ConfigurationAdd add configuration
-func ConfigurationAdd(conf *Configuration) (err error) {
+// Add add configuration
+func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 	err = pgCreate(conf)
 	return
 }
 
-// ConfigurationUpdate update configuration
-func ConfigurationUpdate(conf *Configuration, attrs ...interface{}) (err error) {
+// Update update configuration
+func (srv *ConfigurationSrv) Update(conf *Configuration, attrs ...interface{}) (err error) {
 	pgGetClient().Model(conf).Update(attrs)
 	return
 }
 
-// ConfigurationAvailable get available configs
-func ConfigurationAvailable() (configs []*Configuration, err error) {
+// Available get available configs
+func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
 	now := util.Now().Unix()
 	result := make([]*Configuration, 0)
 	configs = make([]*Configuration, 0)
@@ -102,9 +108,9 @@ func ConfigurationAvailable() (configs []*Configuration, err error) {
 	return
 }
 
-// ConfigurationRefresh refresh configurations
-func ConfigurationRefresh() (err error) {
-	configs, err := ConfigurationAvailable()
+// Refresh refresh configurations
+func (srv *ConfigurationSrv) Refresh() (err error) {
+	configs, err := srv.Available()
 	if err != nil {
 		return
 	}
@@ -156,10 +162,17 @@ func GetSignedKeys() cod.SignedKeysGenerator {
 	return signedKeys
 }
 
-// ConfigurationList list configurations
-func ConfigurationList(params ConfigurationQueryParmas) (result []*Configuration, err error) {
+// List list configurations
+func (srv *ConfigurationSrv) List(params ConfigurationQueryParmas) (result []*Configuration, err error) {
 	result = make([]*Configuration, 0)
 	db := pgGetClient()
+
+	if params.Limit <= 0 {
+		db = db.Limit(defaultConfigurationLimit)
+	} else {
+		db = db.Limit(params.Limit)
+	}
+
 	if params.Name != "" {
 		names := strings.Split(params.Name, ",")
 		if len(names) > 1 {
@@ -181,8 +194,8 @@ func ConfigurationList(params ConfigurationQueryParmas) (result []*Configuration
 	return
 }
 
-// ConfigurationDeleteByID delete configuration
-func ConfigurationDeleteByID(id uint) (err error) {
+// DeleteByID delete configuration
+func (srv *ConfigurationSrv) DeleteByID(id uint) (err error) {
 	err = pgGetClient().Unscoped().Delete(&Configuration{
 		ID: id,
 	}).Error

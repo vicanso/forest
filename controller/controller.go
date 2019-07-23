@@ -43,6 +43,12 @@ var (
 	now        = util.NowString
 	getTrackID = util.GetTrackID
 
+	// 服务列表
+	// 配置服务
+	configSrv = new(service.ConfigurationSrv)
+	// 用户服务
+	userSrv = new(service.UserSrv)
+
 	// 创建新的并发控制中间件
 	newConcurrentLimit = middleware.NewConcurrentLimit
 	// 创建IP限制中间件
@@ -56,7 +62,10 @@ var (
 	// 判断用户是否未登录
 	shouldAnonymous = cod.Compose(loadUserSession, checkAnonymous)
 	// 判断用户是否admin权限
-	shouldBeAdmin = cod.Compose(loadUserSession, checkAdmin)
+	shouldBeAdmin = cod.Compose(loadUserSession, newCheckRoles([]string{
+		service.UserRoleSu,
+		service.UserRoleAdmin,
+	}))
 )
 
 func newTracker(action string) cod.Handler {
@@ -102,17 +111,25 @@ func checkAnonymous(c *cod.Context) (err error) {
 	return c.Next()
 }
 
-func checkAdmin(c *cod.Context) (err error) {
-	if !isLogin(c) {
-		err = errShouldLogin
+func newCheckRoles(validRoles []string) cod.Handler {
+	return func(c *cod.Context) (err error) {
+		if !isLogin(c) {
+			err = errShouldLogin
+			return
+		}
+		us := service.NewUserSession(c)
+		roles := us.GetRoles()
+		valid := false
+		for _, role := range validRoles {
+			if util.ContainsString(roles, role) {
+				valid = true
+				break
+			}
+		}
+		if valid {
+			return c.Next()
+		}
+		err = errForbidden
 		return
 	}
-	us := service.NewUserSession(c)
-	roles := us.GetRoles()
-	if util.ContainsString(roles, service.UserRoleSu) ||
-		util.ContainsString(roles, service.UserRoleAdmin) {
-		return c.Next()
-	}
-	err = errForbidden
-	return
 }
