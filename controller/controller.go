@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/vicanso/cod"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
@@ -63,8 +64,8 @@ var (
 	shouldAnonymous = cod.Compose(loadUserSession, checkAnonymous)
 	// 判断用户是否admin权限
 	shouldBeAdmin = cod.Compose(loadUserSession, newCheckRoles([]string{
-		service.UserRoleSu,
-		service.UserRoleAdmin,
+		cs.UserRoleSu,
+		cs.UserRoleAdmin,
 	}))
 )
 

@@ -81,7 +81,7 @@ func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 
 // Update update configuration
 func (srv *ConfigurationSrv) Update(conf *Configuration, attrs ...interface{}) (err error) {
-	pgGetClient().Model(conf).Update(attrs)
+	err = pgGetClient().Model(conf).Update(attrs).Error
 	return
 }
 

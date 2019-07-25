@@ -16,24 +16,28 @@ import axios from "axios";
 
 import "./user_list.sass";
 import { TIME_FORMAT } from "../../vars";
-import { USERS } from "../../urls";
+import { USERS, USERS_UPDATE } from "../../urls";
 
 const { Search } = Input;
 const { Option } = Select;
 const editMode = "edit";
 
-const roles = ["su", "admin"];
+const allRole = "all";
+const roles = [allRole, "su", "admin"];
 
 class UserList extends React.Component {
   state = {
     mode: "",
     keyword: "",
+    role: "",
     current: null,
     loading: false,
-    users: null
+    users: null,
+
+    newRoles: null
   };
   async search() {
-    const { loading, keyword } = this.state;
+    const { loading, keyword, role } = this.state;
     if (loading) {
       return;
     }
@@ -41,13 +45,23 @@ class UserList extends React.Component {
       loading: true
     });
     try {
+      let filterRole = role;
+      if (filterRole === allRole) {
+        filterRole = "";
+      }
       const { data } = await axios.get(USERS, {
         params: {
-          keyword
+          limit: 20,
+          keyword,
+          role: filterRole
         }
       });
+      const { users } = data;
+      users.forEach(item => {
+        item.key = `${item.id}`;
+      });
       this.setState({
-        users: data.users
+        users
       });
     } catch (err) {
       message.error(err.message);
@@ -57,8 +71,28 @@ class UserList extends React.Component {
       });
     }
   }
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
+    const { current, newRoles } = this.state;
+    try {
+      const url = USERS_UPDATE.replace(":id", current.id);
+      await axios.patch(url, {
+        roles: newRoles
+      });
+      const users = this.state.users.slice(0);
+      users.forEach(item => {
+        if (item.id === current.id) {
+          item.roles = newRoles;
+        }
+      });
+      message.info("更新用户信息成功");
+      this.setState({
+        mode: "",
+        users
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
   }
   renderTable() {
     const { users } = this.state;
@@ -71,7 +105,13 @@ class UserList extends React.Component {
       {
         title: "角色",
         dataIndex: "roles",
-        key: "roles"
+        key: "roles",
+        render: roles => {
+          if (roles) {
+            return roles.join(",");
+          }
+          return;
+        }
       },
       {
         title: "创建于",
@@ -95,6 +135,7 @@ class UserList extends React.Component {
               onClick={e => {
                 e.preventDefault();
                 this.setState({
+                  newRoles: record.roles,
                   current: record,
                   mode: editMode
                 });
@@ -125,17 +166,21 @@ class UserList extends React.Component {
         <Card title="用户搜索" size="small">
           <Spin spinning={loading}>
             <div className="filter">
-              <Select className="roles" placeholder="请选择用户角色">
+              <Select
+                defaultValue={allRole}
+                className="roles"
+                placeholder="请选择用户角色"
+                onChange={value => {
+                  this.setState({
+                    role: value
+                  });
+                }}
+              >
                 {this.renderRoles()}
               </Select>
               <Search
                 className="keyword"
                 placeholder="请输入关键字"
-                onKeyDown={e => {
-                  if (e.keyCode === 0x0d) {
-                    this.search();
-                  }
-                }}
                 onSearch={keyword => {
                   this.setState({
                     keyword
@@ -168,7 +213,16 @@ class UserList extends React.Component {
             </Col>
             <Col span={colSpan}>
               <Form.Item label="用户角色">
-                <Select mode="multiple" placeholder="请选择要添加的角色">
+                <Select
+                  defaultValue={current.roles}
+                  mode="multiple"
+                  placeholder="请选择要添加的角色"
+                  onChange={value => {
+                    this.setState({
+                      newRoles: value
+                    });
+                  }}
+                >
                   {this.renderRoles()}
                 </Select>
               </Form.Item>

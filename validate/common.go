@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cs
+package validate
 
-const (
-	// CID context id
-	CID = "cid"
-	// UserSession user session
-	UserSession = "userSession"
-
-	// UserRoleSu super user
-	UserRoleSu = "su"
-	// UserRoleAdmin admin user
-	UserRoleAdmin = "admin"
+import (
+	"github.com/asaskevich/govalidator"
 )
+
+func init() {
+	Add("xLimit", func(i interface{}, _ interface{}) bool {
+		value, ok := i.(string)
+		if !ok {
+			return false
+		}
+		return govalidator.InRangeInt(value, "1", "20")
+	})
+}

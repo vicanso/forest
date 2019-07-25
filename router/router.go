@@ -15,7 +15,10 @@
 package router
 
 import (
+	"regexp"
+
 	"github.com/vicanso/cod"
+	"github.com/vicanso/hes"
 )
 
 var (
@@ -31,7 +34,26 @@ func NewGroup(path string, handlerList ...cod.Handler) *cod.Group {
 	return g
 }
 
-// GetGroups get groups
-func GetGroups() []*cod.Group {
-	return groupList
+// Init init router
+func Init(d *cod.Cod) {
+	for _, g := range groupList {
+		d.AddGroup(g)
+	}
+
+	configIDReg := regexp.MustCompile(`^[1-9][0-9]{0,3}$`)
+	d.AddValidator("configID", func(value string) error {
+		if !configIDReg.MatchString(value) {
+			return hes.New("config id should be numbers")
+		}
+		return nil
+	})
+
+	// 如果用户量增大，需要调整此限制
+	userIDReg := regexp.MustCompile(`^[1-9][0-9]{0,6}$`)
+	d.AddValidator("userID", func(value string) error {
+		if !userIDReg.MatchString(value) {
+			return hes.New("user id should be numbers")
+		}
+		return nil
+	})
 }

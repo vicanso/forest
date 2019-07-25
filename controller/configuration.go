@@ -71,13 +71,13 @@ func init() {
 		ctrl.add,
 	)
 	g.PATCH(
-		"/v1/:id",
+		"/v1/:configID",
 		newTracker(cs.ActionConfigurationUpdate),
 		shouldBeAdmin,
 		ctrl.update,
 	)
 	g.DELETE(
-		"/v1/:id",
+		"/v1/:configID",
 		newTracker(cs.ActionConfigurationDelete),
 		shouldBeAdmin,
 		ctrl.delete,
@@ -143,7 +143,7 @@ func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
 
 // update configuration
 func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("configID"))
 	if err != nil {
 		return
 	}
@@ -171,7 +171,7 @@ func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
 
 // delete configuration
 func (ctrl configurationCtrl) delete(c *cod.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("configID"))
 	if err != nil {
 		return
 	}

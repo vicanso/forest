@@ -124,10 +124,8 @@ func main() {
 	// 读取读取body的数的，转换为json bytes
 	d.Use(bodyparser.NewDefault())
 
-	groups := router.GetGroups()
-	for _, g := range groups {
-		d.AddGroup(g)
-	}
+	// 初始化路由
+	router.Init(d)
 
 	err := dependServiceCheck()
 	if err != nil {

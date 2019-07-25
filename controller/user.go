@@ -16,6 +16,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/vicanso/forest/validate"
@@ -54,8 +55,13 @@ type (
 	}
 
 	listUserParams struct {
+		Limit   string `json:"limit,omitempty" valid:"xLimit"`
 		Keyword string `json:"keyword,omitempty" valid:"xUserAccountKeyword,optional"`
 		Role    string `json:"role,omitempty" valid:"xUserRole,optional"`
+	}
+
+	updateUserParams struct {
+		Roles []string `json:"roles,omitempty" valid:"xUserRoles,optional"`
 	}
 )
 
@@ -71,6 +77,14 @@ func init() {
 		"/v1",
 		shouldBeAdmin,
 		ctrl.list,
+	)
+
+	// 更新用户信息
+	g.PATCH(
+		// 因为与/me有冲突，因此路径增加update
+		"/v1/update/:userID",
+		shouldBeAdmin,
+		ctrl.update,
 	)
 
 	// 获取用户信息
@@ -283,8 +297,11 @@ func (ctrl userCtrl) list(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
+	limit, _ := strconv.Atoi(params.Limit)
 	users, err := userSrv.List(service.UserQueryParams{
+		Role:    params.Role,
 		Keyword: params.Keyword,
+		Limit:   limit,
 	})
 	if err != nil {
 		return
@@ -294,5 +311,36 @@ func (ctrl userCtrl) list(c *cod.Context) (err error) {
 	}{
 		users,
 	}
+	return
+}
+
+// update user update
+func (ctrl userCtrl) update(c *cod.Context) (err error) {
+	id, err := strconv.Atoi(c.Param("userID"))
+	if err != nil {
+		return
+	}
+	params := &updateUserParams{}
+	err = validate.Do(params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	// 只能su用户才可以添加su权限
+	if util.ContainsString(params.Roles, cs.UserRoleSu) {
+		roles := getUserSession(c).GetRoles()
+		if !util.ContainsString(roles, cs.UserRoleSu) {
+			err = hes.New("add su role is forbidden")
+			return
+		}
+	}
+	err = userSrv.Update(&service.User{
+		ID: uint(id),
+	}, map[string]interface{}{
+		"roles": params.Roles,
+	})
+	if err != nil {
+		return
+	}
+	c.NoContent()
 	return
 }

@@ -16,6 +16,8 @@ package validate
 
 import (
 	"github.com/asaskevich/govalidator"
+
+	"github.com/vicanso/forest/cs"
 )
 
 func init() {
@@ -34,6 +36,18 @@ func init() {
 		if !ok {
 			return false
 		}
-		return govalidator.IsIn(value, "su", "admin")
+		return govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin)
+	})
+	Add("xUserRoles", func(i interface{}, _ interface{}) bool {
+		values, ok := i.([]string)
+		if !ok {
+			return false
+		}
+		for _, value := range values {
+			if !govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin) {
+				return false
+			}
+		}
+		return true
 	})
 }

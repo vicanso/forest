@@ -24,6 +24,28 @@ import RouterConfig from "./components/router_config";
 import ConfigList from "./components/config_list";
 import UserList from "./components/user_list";
 
+function NeedLoginRoute({ component: Component,  account, isAdmin, ...rest }) {
+  return (
+    <Route
+      {...rest}
+      render={props => {
+        const {
+          history,
+        } = props;
+        if (!account) {
+          history.push(LOGIN_PATH);
+          return
+        }
+        return <Component
+          {...props}
+          account={account}
+          isAdmin={isAdmin}
+        />
+      }}
+    />
+  );
+}
+
 class App extends React.Component {
   state = {
     loading: false,
@@ -89,47 +111,11 @@ class App extends React.Component {
                 />}
               />
               <Route path={REGISTER_PATH} component={Register} />
-              <Route
-                path={ALL_CONFIG_PATH}
-                render={(props) => <ConfigList
-                  {...props}
-                  account={account}
-                  isAdmin={isAdmin}
-                />}
-              />
-              <Route
-                path={BASIC_CONFIG_PATH}
-                render={(props) => <BasicConfig
-                  {...props}
-                  account={account}
-                  isAdmin={isAdmin}
-                />}
-              />
-              <Route
-                path={SIGNED_KEYS_CONFIG_PATH}
-                render={(props) => <SignedKeysConfig
-                  {...props}
-                  account={account}
-                  isAdmin={isAdmin}
-                />}
-              />
-              <Route
-                path={ROUTER_CONFIG_PATH}
-                render={(props) => <RouterConfig
-                  {...props}
-                  account={account}
-                  isAdmin={isAdmin}
-                />}
-              />
-              <Route
-                exact
-                path={USERS_PATH}
-                render={(props) => <UserList
-                  {...props}
-                  account={account}
-                  isAdmin={isAdmin}     
-                />}
-              />
+              <NeedLoginRoute path={ALL_CONFIG_PATH} component={ConfigList} account={account} isAdmin={isAdmin} />
+              <NeedLoginRoute path={BASIC_CONFIG_PATH} component={BasicConfig} account={account} isAdmin={isAdmin} />
+              <NeedLoginRoute path={SIGNED_KEYS_CONFIG_PATH} component={SignedKeysConfig} account={account} isAdmin={isAdmin} />
+              <NeedLoginRoute path={ROUTER_CONFIG_PATH} component={RouterConfig} account={account} isAdmin={isAdmin} />
+              <NeedLoginRoute exact path={USERS_PATH} component={UserList} account={account} isAdmin={isAdmin} />
             </div>
           } 
         </HashRouter>

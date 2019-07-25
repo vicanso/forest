@@ -5,7 +5,6 @@ import { Form, Input, Icon, Card, Button, message } from "antd";
 import { USERS_LOGIN, USERS_ME } from "../../urls";
 import { sha256 } from "../../helpers/crypto";
 import "./login_register.sass";
-import * as router from "../../router";
 
 class LoginRegister extends React.Component {
   loginMode = "login";
@@ -18,6 +17,7 @@ class LoginRegister extends React.Component {
     mode: ""
   };
   async handleSubmit(e) {
+    const { history } = this.props;
     const { setUserInfo } = this.props;
     e.preventDefault();
     const { account, password, mode, token } = this.state;
@@ -52,8 +52,9 @@ class LoginRegister extends React.Component {
           roles: data.roles
         });
       }
-      router.back();
-      // TODO 触发reload
+      if (history) {
+        history.goBack();
+      }
     } catch (err) {
       message.error(err.message);
     } finally {

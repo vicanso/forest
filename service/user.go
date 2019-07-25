@@ -38,11 +38,6 @@ const (
 )
 
 const (
-	// UserRoleSu super user
-	UserRoleSu = "su"
-	// UserRoleAdmin admin user
-	UserRoleAdmin = "admin"
-
 	defaultUserLimit = 10
 )
 
@@ -103,7 +98,7 @@ func (srv *UserSrv) Add(u *User) (err error) {
 	if u.ID == 1 {
 		pgGetClient().Model(u).Update(map[string]interface{}{
 			"roles": []string{
-				UserRoleSu,
+				cs.UserRoleSu,
 			},
 		})
 	}
@@ -132,6 +127,12 @@ func (srv *UserSrv) Login(account, password, token string) (u *User, err error) 
 	return
 }
 
+// Update update user
+func (srv *UserSrv) Update(user *User, attrs ...interface{}) (err error) {
+	err = pgGetClient().Model(user).Update(attrs).Error
+	return
+}
+
 // AddLoginRecord add user login record
 func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 	err = pgCreate(r)
@@ -147,9 +148,9 @@ func (srv *UserSrv) List(params UserQueryParams) (result []*User, err error) {
 	} else {
 		db = db.Limit(params.Limit)
 	}
-	// if params.Role != "" {
-	// 	db = db.Where("roles @> ?", params.Role)
-	// }
+	if params.Role != "" {
+		db = db.Where("? = ANY(roles)", params.Role)
+	}
 	if params.Keyword != "" {
 		db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
 	}
