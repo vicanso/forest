@@ -130,5 +130,8 @@ func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Inst
 
 // AttachWithContext attach with context
 func AttachWithContext(conf *axios.Config, c *cod.Context) {
+	if c == nil || conf == nil {
+		return
+	}
 	conf.Set(cs.CID, c.ID)
 }

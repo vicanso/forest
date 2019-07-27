@@ -21,9 +21,11 @@ require (
 	github.com/vicanso/cod-fresh v0.0.3
 	github.com/vicanso/cod-recover v0.0.5
 	github.com/vicanso/cod-responder v0.0.6
+	github.com/vicanso/cod-router-concurrent-limiter v0.0.2
 	github.com/vicanso/cod-session v0.0.6
 	github.com/vicanso/cod-stats v0.0.3
 	github.com/vicanso/cod-tracker v0.0.3
+	github.com/vicanso/count-warner v0.0.1
 	github.com/vicanso/go-axios v0.0.3
 	github.com/vicanso/hes v0.2.1
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

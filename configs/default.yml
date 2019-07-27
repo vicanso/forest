@@ -32,3 +32,8 @@ keys:
 
 location:
   baseURL: https://ip.aslant.site/
+
+# router limit
+routerLimit:
+  # 限制路由访问并发数
+  GET /users/v1/me/login: 50

@@ -5,6 +5,7 @@ import { Link, withRouter } from "react-router-dom";
 
 import {
   USERS_PATH,
+  USERS_LOGIN_RECORDS_PATH,
   ALL_CONFIG_PATH,
   BASIC_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
@@ -59,6 +60,11 @@ const userMenu = {
       key: "users",
       url: USERS_PATH,
       title: "用户列表"
+    },
+    {
+      key: "users-login-records",
+      url: USERS_LOGIN_RECORDS_PATH,
+      title: "用户登录查询"
     }
   ]
 };

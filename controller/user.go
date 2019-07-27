@@ -25,6 +25,7 @@ import (
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
@@ -62,6 +63,13 @@ type (
 
 	updateUserParams struct {
 		Roles []string `json:"roles,omitempty" valid:"xUserRoles,optional"`
+	}
+	listUserLoginRecordParams struct {
+		Begin   time.Time `json:"begin,omitempty" valid:"-"`
+		End     time.Time `json:"end,omitempty" valid:"-"`
+		Account string    `json:"account,omitempty" valid:"xUserAccount,optional"`
+		Limit   string    `json:"limit,omitempty" valid:"xLimit"`
+		Offset  string    `json:"offset,omitempty" valid:"xOffset"`
 	}
 )
 
@@ -119,6 +127,7 @@ func init() {
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
+		middleware.WaitFor(time.Second),
 		newTracker(cs.ActionLogin),
 		shouldAnonymous,
 		loginLimit,
@@ -132,6 +141,13 @@ func init() {
 		newTracker(cs.ActionLogout),
 		shouldLogined,
 		ctrl.logout,
+	)
+
+	// 获取客户登录记录
+	g.GET(
+		"/v1/login-records",
+		shouldBeAdmin,
+		ctrl.listLoginRecord,
 	)
 }
 
@@ -230,13 +246,15 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
-	userSrv.AddLoginRecord(&service.UserLoginRecord{
-		Account:   params.Account,
-		UserAgent: c.GetRequestHeader("User-Agent"),
-		IP:        c.RealIP(),
-		TrackID:   util.GetTrackID(c),
-		SessionID: util.GetSessionID(c),
-	})
+	loginRecord := &service.UserLoginRecord{
+		Account:       params.Account,
+		UserAgent:     c.GetRequestHeader("User-Agent"),
+		IP:            c.RealIP(),
+		TrackID:       util.GetTrackID(c),
+		SessionID:     util.GetSessionID(c),
+		XForwardedFor: c.GetRequestHeader("X-Forwarded-For"),
+	}
+	userSrv.AddLoginRecord(loginRecord)
 	omitUserInfo(u)
 	us.SetAccount(u.Account)
 	us.SetRoles(u.Roles)
@@ -342,5 +360,43 @@ func (ctrl userCtrl) update(c *cod.Context) (err error) {
 		return
 	}
 	c.NoContent()
+	return
+}
+
+// listLoginRecord list login record
+func (ctrl userCtrl) listLoginRecord(c *cod.Context) (err error) {
+	params := &listUserLoginRecordParams{}
+	err = validate.Do(params, c.Query())
+	if err != nil {
+		return
+	}
+	offset, _ := strconv.Atoi(params.Offset)
+	limit, _ := strconv.Atoi(params.Limit)
+	query := service.UserLoginRecordQueryParams{
+		Account: params.Account,
+		Limit:   limit,
+		Offset:  offset,
+	}
+	if !params.Begin.IsZero() {
+		query.Begin = util.FormatTime(params.Begin)
+	}
+	if !params.End.IsZero() {
+		query.End = util.FormatTime(params.End)
+	}
+	result, err := userSrv.ListLoginRecord(query)
+	if err != nil {
+		return
+	}
+	count := -1
+	if offset == 0 {
+		count, err = userSrv.CountLoginRecord(query)
+	}
+	c.Body = struct {
+		Logins []*service.UserLoginRecord `json:"logins,omitempty"`
+		Count  int                        `json:"count,omitempty"`
+	}{
+		result,
+		count,
+	}
 	return
 }

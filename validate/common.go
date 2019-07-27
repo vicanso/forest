@@ -26,4 +26,11 @@ func init() {
 		}
 		return govalidator.InRangeInt(value, "1", "20")
 	})
+	Add("xOffset", func(i interface{}, _ interface{}) bool {
+		value, ok := i.(string)
+		if !ok {
+			return false
+		}
+		return govalidator.InRangeInt(value, "0", "1000")
+	})
 }

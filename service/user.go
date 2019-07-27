@@ -24,6 +24,8 @@ import (
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -38,7 +40,8 @@ const (
 )
 
 const (
-	defaultUserLimit = 10
+	defaultUserLimit            = 10
+	defaultUserLoginRecordLimit = 10
 )
 
 var (
@@ -69,17 +72,30 @@ type (
 		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
-		Account   string `json:"account,omitempty" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
-		UserAgent string `json:"userAgent,omitempty"`
-		IP        string `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
-		TrackID   string `json:"trackId,omitempty" gorm:"type:varchar(64);not null"`
-		SessionID string `json:"sessionId,omitempty" gorm:"type:varchar(64);not null"`
+		Account       string `json:"account,omitempty" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
+		UserAgent     string `json:"userAgent,omitempty"`
+		IP            string `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
+		TrackID       string `json:"trackId,omitempty" gorm:"type:varchar(64);not null"`
+		SessionID     string `json:"sessionId,omitempty" gorm:"type:varchar(64);not null"`
+		XForwardedFor string `json:"xForwardedFor,omitempty" gorm:"type:varchar(128)"`
+		Country       string `json:"country,omitempty" gorm:"type:varchar(64)"`
+		Province      string `json:"province,omitempty" gorm:"type:varchar(64)"`
+		City          string `json:"city,omitempty" gorm:"type:varchar(64)"`
+		ISP           string `json:"isp,omitempty" gorm:"type:varchar(64)"`
 	}
 	// UserQueryParams user query params
 	UserQueryParams struct {
 		Keyword string
 		Role    string
 		Limit   int
+	}
+	// UserLoginRecordQueryParams user login record query params
+	UserLoginRecordQueryParams struct {
+		Begin   string
+		End     string
+		Account string
+		Limit   int
+		Offset  int
 	}
 	// UserSrv user service
 	UserSrv struct {
@@ -117,7 +133,7 @@ func (srv *UserSrv) Login(account, password, token string) (u *User, err error) 
 	}
 	pwd := util.Sha256(u.Password + token)
 	// 用于自动化测试使用
-	if util.IsDevelopment() && password == "fEqNCco3Yq9h5ZUglD3CZJT4lBs=" {
+	if util.IsDevelopment() && password == "fEqNCco3Yq9h5ZUglD3CZJT4lBsfEqNCco31Yq9h5ZUB" {
 		pwd = password
 	}
 	if pwd != password {
@@ -136,6 +152,28 @@ func (srv *UserSrv) Update(user *User, attrs ...interface{}) (err error) {
 // AddLoginRecord add user login record
 func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 	err = pgCreate(r)
+	if r.ID != 0 {
+		id := r.ID
+		ip := r.IP
+		go func() {
+			lo, err := GetLocationByIP(ip, nil)
+			if err != nil {
+				logger.Error("get location by ip fail",
+					zap.String("ip", ip),
+					zap.Error(err),
+				)
+				return
+			}
+			pgGetClient().Model(&UserLoginRecord{
+				ID: id,
+			}).Update(map[string]string{
+				"country":  lo.Country,
+				"province": lo.Province,
+				"city":     lo.City,
+				"isp":      lo.ISP,
+			})
+		}()
+	}
 	return
 }
 
@@ -155,6 +193,44 @@ func (srv *UserSrv) List(params UserQueryParams) (result []*User, err error) {
 		db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
 	}
 	err = db.Find(&result).Error
+	return
+}
+
+func newUserLoginRecordQuery(params UserLoginRecordQueryParams) *gorm.DB {
+	db := pgGetClient()
+	if params.Account != "" {
+		db = db.Where("account = ?", params.Account)
+	}
+	if params.Limit <= 0 {
+		db = db.Limit(defaultUserLoginRecordLimit)
+	} else {
+		db = db.Limit(params.Limit)
+	}
+	if params.Begin != "" {
+		db = db.Where("created_at > ?", params.Begin)
+	}
+	if params.End != "" {
+		db = db.Where("created_at < ?", params.End)
+	}
+	return db
+}
+
+// ListLoginRecord list login record
+func (srv *UserSrv) ListLoginRecord(params UserLoginRecordQueryParams) (result []*UserLoginRecord, err error) {
+	result = make([]*UserLoginRecord, 0)
+	db := newUserLoginRecordQuery(params)
+	if params.Offset > 0 {
+		db = db.Offset(params.Offset)
+	}
+	err = db.Find(&result).Error
+	return
+}
+
+// CountLoginRecord count login record
+func (srv *UserSrv) CountLoginRecord(params UserLoginRecordQueryParams) (count int, err error) {
+	count = 0
+	db := newUserLoginRecordQuery(params)
+	err = db.Model(&UserLoginRecord{}).Count(&count).Error
 	return
 }
 

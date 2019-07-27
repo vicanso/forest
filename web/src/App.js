@@ -12,6 +12,7 @@ import {
   REGISTER_PATH,
   LOGIN_PATH,
   USERS_PATH,
+  USERS_LOGIN_RECORDS_PATH,
 } from "./paths";
 import { USERS_ME } from "./urls";
 import AppMenu from "./components/app_menu";
@@ -23,6 +24,7 @@ import Register from "./components/register";
 import RouterConfig from "./components/router_config";
 import ConfigList from "./components/config_list";
 import UserList from "./components/user_list";
+import UserLoginRecordList from "./components/user_login_record_list";
 
 function NeedLoginRoute({ component: Component,  account, isAdmin, ...rest }) {
   return (
@@ -116,6 +118,7 @@ class App extends React.Component {
               <NeedLoginRoute path={SIGNED_KEYS_CONFIG_PATH} component={SignedKeysConfig} account={account} isAdmin={isAdmin} />
               <NeedLoginRoute path={ROUTER_CONFIG_PATH} component={RouterConfig} account={account} isAdmin={isAdmin} />
               <NeedLoginRoute exact path={USERS_PATH} component={UserList} account={account} isAdmin={isAdmin} />
+              <NeedLoginRoute path={USERS_LOGIN_RECORDS_PATH} component={UserLoginRecordList} account={account} isAdmin={isAdmin} />
             </div>
           } 
         </HashRouter>

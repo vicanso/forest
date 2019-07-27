@@ -16,17 +16,19 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/vicanso/cod"
 	bodyparser "github.com/vicanso/cod-body-parser"
-	compress "github.com/vicanso/cod-compress"
 	errorHandler "github.com/vicanso/cod-error-handler"
 	etag "github.com/vicanso/cod-etag"
 	fresh "github.com/vicanso/cod-fresh"
 	recover "github.com/vicanso/cod-recover"
 	responder "github.com/vicanso/cod-responder"
+	routerLimiter "github.com/vicanso/cod-router-concurrent-limiter"
 	stats "github.com/vicanso/cod-stats"
+	warner "github.com/vicanso/count-warner"
 
 	"go.uber.org/zap"
 
@@ -61,23 +63,44 @@ func main() {
 	d.SignedKeys = service.GetSignedKeys()
 
 	// 未处理的error才会触发
+	// 如果1分钟出现超过5次未处理异常
+	warnerException := warner.NewWarner(60*time.Second, 5)
+	warnerException.ResetOnWarn = true
+	warnerException.On(func(_ string, _ int64) {
+		logger.Warn("too many exception")
+	})
 	d.OnError(func(c *cod.Context, err error) {
 		// 可以针对实际场景输出更多的日志信息
 		logger.DPanic("exception",
+			zap.String("ip", c.RealIP()),
 			zap.String("uri", c.Request.RequestURI),
 			zap.Error(err),
 		)
+		// TODO 邮件通知
+		warnerException.Inc("exception", 1)
 	})
-	// TODO 对于404的请求，不会执行中间件，一般都是因为攻击之类才会导致大量出现404，
+	// 对于404的请求，不会执行中间件，一般都是因为攻击之类才会导致大量出现404，
 	// 因此可在此处汇总出错IP，针对较频繁出错IP，增加告警信息
+	// 如果1分钟同一个IP出现60次404
+	warner404 := warner.NewWarner(60*time.Second, 60)
+	warner404.ResetOnWarn = true
+	warner404.On(func(ip string, createdAt int64) {
+		// TODO 邮件通知
+		logger.Warn("too manry 404 request",
+			zap.String("ip", ip),
+		)
+	})
+
 	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
+		ip := cod.GetRealIP(req)
 		logger.Info("404",
-			zap.String("ip", cod.GetRealIP(req)),
+			zap.String("ip", ip),
 			zap.String("uri", req.RequestURI),
 		)
 		resp.Header().Set(cod.HeaderContentType, cod.MIMEApplicationJSON)
 		resp.WriteHeader(http.StatusNotFound)
 		resp.Write([]byte(`{"statusCode": 404,"message": "Not found"}`))
+		warner404.Inc(ip, 1)
 	}
 
 	// 捕捉panic异常，避免程序崩溃
@@ -108,11 +131,16 @@ func main() {
 	// 根据应用配置限制路由
 	d.Use(middleware.NewRouterController())
 
+	// 路由并发限制
+	d.Use(routerLimiter.New(routerLimiter.Config{
+		Limiter: routerLimiter.NewLocalLimiter(config.GetRouterConcurrentLimit()),
+	}))
+
 	// 错误处理，将错误转换为json响应
 	d.Use(errorHandler.NewDefault())
 
-	// 压缩响应数据
-	d.Use(compress.NewDefault())
+	// 压缩响应数据（由pike来压缩数据）
+	// d.Use(compress.NewDefault())
 
 	// etag与fresh的处理
 	d.Use(fresh.NewDefault())

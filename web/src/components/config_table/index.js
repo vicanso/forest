@@ -32,9 +32,6 @@ class ConfigTable extends React.Component {
         params: params
       });
       const { configs } = data;
-      configs.forEach(item => {
-        item.key = `${item.id}`;
-      });
       this.setState({
         configs
       });
@@ -163,7 +160,9 @@ class ConfigTable extends React.Component {
             <Spin tip="加载中..." />
           </div>
         )}
-        {!loading && <Table dataSource={configs} columns={columns} />}
+        {!loading && (
+          <Table rowKey={"id"} dataSource={configs} columns={columns} />
+        )}
       </div>
     );
   }

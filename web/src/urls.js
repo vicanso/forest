@@ -5,6 +5,7 @@ export const USERS_UPDATE = `${prefix}/users/v1/update/:id`;
 export const USERS_ME = `${prefix}/users/v1/me`;
 export const USERS_LOGIN = `${prefix}/users/v1/me/login`;
 export const USERS_LOGOUT = `${prefix}/users/v1/me/logout`;
+export const USERS_LOGIN_RECORDS = `${prefix}/users/v1/login-records`;
 
 export const CONFIGURATIONS = `${prefix}/configurations`;
 export const CONFIGURATIONS_ADD = `${CONFIGURATIONS}/v1`;
