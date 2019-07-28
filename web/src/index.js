@@ -5,7 +5,7 @@ import "antd/dist/antd.css";
 import "./index.sass";
 import * as serviceWorker from "./serviceWorker";
 
-import App from "./app";
+import App from "./App";
 import "./request-interceptors";
 // import * as serviceWorker from "./serviceWorker";
 
