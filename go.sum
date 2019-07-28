@@ -184,6 +184,8 @@ github.com/vicanso/cod-router-concurrent-limiter v0.0.2 h1:NoB7/zjp0Qqb/ZCR4U881
 github.com/vicanso/cod-router-concurrent-limiter v0.0.2/go.mod h1:l3/NySUtBPPzuexeoEZsKimfEoPSQoxBVCZAO7vIzD0=
 github.com/vicanso/cod-session v0.0.6 h1:s5Q74mW3oHtYDuTE4xuYArAPsP0oLCyIaKdlvgsEMQw=
 github.com/vicanso/cod-session v0.0.6/go.mod h1:l04eKysFrjQ9ebtsVoDelwWYmY2NIzwEkK75JHywSHM=
+github.com/vicanso/cod-static-serve v0.0.4 h1:3iE6y8g80URCZ8k3XxOaibOKwkjS6GkRXwTk66kc2Ok=
+github.com/vicanso/cod-static-serve v0.0.4/go.mod h1:at76wu37L+c1wvVhU84aijNyt1TZJXqIf10D+m5SUbw=
 github.com/vicanso/cod-stats v0.0.3 h1:gsF1IRRwETURrRm5AtU8zVt6X4rgazlMHaJt+LY6uWA=
 github.com/vicanso/cod-stats v0.0.3/go.mod h1:+MnSxN25DUjW9+50wQK91A4Wr70TcwOkXlpP4bQSHvc=
 github.com/vicanso/cod-tracker v0.0.3 h1:DFn5bBS1zjK+iiwUkMTOqkQNFxJ8GRmx0yJv1Id+t90=

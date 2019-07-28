@@ -23,6 +23,7 @@ require (
 	github.com/vicanso/cod-responder v0.0.6
 	github.com/vicanso/cod-router-concurrent-limiter v0.0.2
 	github.com/vicanso/cod-session v0.0.6
+	github.com/vicanso/cod-static-serve v0.0.4
 	github.com/vicanso/cod-stats v0.0.3
 	github.com/vicanso/cod-tracker v0.0.3
 	github.com/vicanso/count-warner v0.0.1
