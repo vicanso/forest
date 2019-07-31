@@ -1,16 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { message, Table, Icon, Divider, Spin } from "antd";
-import axios from "axios";
 import moment from "moment";
 
-import {
-  CONFIGURATIONS_LIST,
-  CONFIGURATIONS_DELETE,
-  CONFIGURATIONS_LIST_AVAILABLE
-} from "../../urls";
 import { TIME_FORMAT } from "../../vars";
 import "./config_table.sass";
+import * as configService from "../../services/configuration";
 
 class ConfigTable extends React.Component {
   state = {
@@ -23,15 +18,12 @@ class ConfigTable extends React.Component {
       loading: true
     });
     try {
-      let url = CONFIGURATIONS_LIST;
+      let fn = configService.list;
       if (params.available) {
-        url = CONFIGURATIONS_LIST_AVAILABLE;
+        fn = configService.listAvaiable;
         delete params.available;
       }
-      const { data } = await axios.get(url, {
-        params: params
-      });
-      const { configs } = data;
+      const configs = await fn(params);
       this.setState({
         configs
       });
@@ -46,8 +38,7 @@ class ConfigTable extends React.Component {
   async deleteConfig(id) {
     const { configs } = this.state;
     try {
-      const url = CONFIGURATIONS_DELETE.replace(":id", id);
-      await axios.delete(url);
+      await configService.deleteByID(id);
       const result = [];
       configs.forEach(item => {
         if (item.id !== id) {
@@ -77,11 +68,11 @@ class ConfigTable extends React.Component {
       },
       {
         title: "是否启用",
-        dataIndex: "enabled",
-        key: "enabled",
+        dataIndex: "status",
+        key: "status",
         width: "100px",
         render: value => {
-          if (value) {
+          if (value === 1) {
             return <Icon type="check-circle" theme="twoTone" />;
           }
           return <Icon type="close-circle" />;

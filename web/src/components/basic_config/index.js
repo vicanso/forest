@@ -9,13 +9,12 @@ import {
   notification,
   message
 } from "antd";
-import axios from "axios";
 import moment from "moment";
 import PropTypes from "prop-types";
 
 import "./basic_config.sass";
 import ConfigEditor from "../config_editor";
-import { CONFIGURATIONS_LIST } from "../../urls";
+import * as configService from "../../services/configuration";
 
 const { Paragraph } = Typography;
 
@@ -52,12 +51,10 @@ class BasicConfig extends React.Component {
       loading: true
     });
     try {
-      const { data } = await axios.get(CONFIGURATIONS_LIST, {
-        params: {
-          name: [mockTime].join(",")
-        }
+      const configs = await configService.list({
+        name: [mockTime].join(",")
       });
-      data.configs.forEach(item => {
+      configs.forEach(item => {
         if (item.name === mockTime) {
           this.setState({
             mockTimeConfig: item,

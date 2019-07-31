@@ -11,12 +11,11 @@ import {
   Input,
   message
 } from "antd";
-import axios from "axios";
 
 import ConfigEditor from "../config_editor";
 import ConfigTable from "../config_table";
 import "./router_config.sass";
-import { ROUTERS } from "../../urls";
+import * as routerService from "../../services/router";
 
 const { Paragraph } = Typography;
 const Option = Select.Option;
@@ -41,7 +40,7 @@ class RouterConfig extends React.Component {
   };
   async componentWillMount() {
     try {
-      const { data } = await axios.get(ROUTERS);
+      const data = await routerService.list();
       this.setState({
         routers: data.routers
       });
@@ -107,6 +106,7 @@ class RouterConfig extends React.Component {
         <Col span={colSpan}>
           <Form.Item label="路由选择">
             <Select
+              showSearch
               placeholder="请选择要配置的路由"
               defaultValue={`${method} ${route}`}
               onSelect={value => {
@@ -206,7 +206,11 @@ class RouterConfig extends React.Component {
           if (!data) {
             return "";
           }
-          return <pre>{JSON.stringify(JSON.parse(data), null, 2)}</pre>;
+          const result = JSON.parse(data);
+          if (result.response && result.response[0] === "{") {
+            result.response = JSON.parse(result.response);
+          }
+          return <pre>{JSON.stringify(result, null, 2)}</pre>;
         }}
         onUpdate={data => {
           const routerData = JSON.parse(data.data);

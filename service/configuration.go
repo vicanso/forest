@@ -20,6 +20,7 @@ import (
 
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/util"
 )
 
@@ -44,18 +45,18 @@ type (
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		// 配置名称，唯一
-		Name string `json:"name,omitempty" gorm:"not null;unique"`
+		Name string `json:"name,omitempty" gorm:"type:varchar(30);not null;unique;"`
 		// 配置分类
-		Category string `json:"category,omitempty"`
+		Category string `json:"category,omitempty" gorm:"type:varchar(20);"`
 		// 配置由谁创建
-		Owner string `json:"owner,omitempty" gorm:"not null;"`
-		// 是否启用
-		Enabled bool   `json:"enabled,omitempty"`
-		Data    string `json:"data,omitempty"`
+		Owner string `json:"owner,omitempty" gorm:"type:varchar(20);not null;"`
+		// 配置状态
+		Status int    `json:"status,omitempty"`
+		Data   string `json:"data,omitempty"`
 		// 启用开始时间
-		BeginDate time.Time `json:"beginDate,omitempty"`
+		BeginDate *time.Time `json:"beginDate,omitempty"`
 		// 启用结束时间
-		EndDate time.Time `json:"endDate,omitempty"`
+		EndDate *time.Time `json:"endDate,omitempty"`
 	}
 	// ConfigurationQueryParmas configuration query params
 	ConfigurationQueryParmas struct {
@@ -90,17 +91,17 @@ func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
 	now := util.Now().Unix()
 	result := make([]*Configuration, 0)
 	configs = make([]*Configuration, 0)
-	err = pgGetClient().Where("enabled = ?", true).Find(&result).Error
+	err = pgGetClient().Where("status = ?", cs.ConfigEnabled).Find(&result).Error
 	if err != nil {
 		return
 	}
 	for _, item := range result {
 		// 如果开始时间大于当前时间，未开始启用
-		if item.BeginDate.UTC().Unix() > now {
+		if item.BeginDate != nil && item.BeginDate.UTC().Unix() > now {
 			continue
 		}
 		// 如果结束时间少于当前时间，已结束
-		if item.EndDate.UTC().Unix() < now {
+		if item.EndDate != nil && item.EndDate.UTC().Unix() < now {
 			continue
 		}
 		configs = append(configs, item)

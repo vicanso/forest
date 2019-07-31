@@ -1,9 +1,8 @@
-import axios from "axios";
-
-import LoginRegister from "../login_register";
-import { USERS_LOGIN } from "../../urls";
 import { message } from "antd";
 import PropTypes from "prop-types";
+
+import LoginRegister from "../login_register";
+import * as userService from "../../services/user";
 
 class Login extends LoginRegister {
   constructor(props) {
@@ -12,7 +11,7 @@ class Login extends LoginRegister {
   }
   async componentWillMount() {
     try {
-      const { data } = await axios.get(USERS_LOGIN);
+      const data = await userService.getLoginToken();
       this.setState({
         token: data.token
       });

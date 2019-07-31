@@ -1,12 +1,11 @@
 import React from "react";
-import axios from "axios";
 import { Spin, message, Icon } from "antd";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { USERS_LOGOUT } from "../../urls";
 import { LOGIN_PATH, REGISTER_PATH } from "../../paths";
 import "./app_header.sass";
+import * as userService from "../../services/user";
 
 class AppHeader extends React.Component {
   state = {
@@ -19,7 +18,7 @@ class AppHeader extends React.Component {
       loading: true
     });
     try {
-      axios.delete(USERS_LOGOUT);
+      await userService.logout();
       setUserInfo({
         account: ""
       });

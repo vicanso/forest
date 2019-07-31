@@ -28,19 +28,19 @@ import (
 type (
 	configurationCtrl      struct{}
 	addConfigurationParams struct {
-		Name      string    `json:"name,omitempty" valid:"xConfigName"`
-		Category  string    `json:"category,omitempty" valid:"xConfigCategory,optional"`
-		Enabled   bool      `json:"enabled,omitempty" valid:"-"`
-		Data      string    `json:"data,omitempty" valid:"xConfigData"`
-		BeginDate time.Time `json:"beginDate" valid:"-"`
-		EndDate   time.Time `json:"endDate" valid:"-"`
+		Name      string     `json:"name,omitempty" valid:"xConfigName"`
+		Category  string     `json:"category,omitempty" valid:"xConfigCategory,optional"`
+		Status    int        `json:"status,omitempty" valid:"xConfigStatus"`
+		Data      string     `json:"data,omitempty" valid:"xConfigData"`
+		BeginDate *time.Time `json:"beginDate,omitempty" valid:"-"`
+		EndDate   *time.Time `json:"endDate,omitempty" valid:"-"`
 	}
 	updateConfigurationParams struct {
-		Enabled   bool      `json:"enabled,omitempty" valid:"-"`
-		Category  string    `json:"category,omitempty" valid:"xConfigCategory,optional"`
-		Data      string    `json:"data,omitempty" valid:"xConfigData,optional"`
-		BeginDate time.Time `json:"beginDate" valid:"-"`
-		EndDate   time.Time `json:"endDate" valid:"-"`
+		Status    int        `json:"status,omitempty" valid:"xConfigStatus,optional"`
+		Category  string     `json:"category,omitempty" valid:"xConfigCategory,optional"`
+		Data      string     `json:"data,omitempty" valid:"xConfigData,optional"`
+		BeginDate *time.Time `json:"beginDate" valid:"-"`
+		EndDate   *time.Time `json:"endDate" valid:"-"`
 	}
 	listConfigurationParmas struct {
 		Name     string `json:"name,omitempty" valid:"xConfigName,optional"`
@@ -123,13 +123,13 @@ func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
+	us := getUserSession(c)
 	conf := &service.Configuration{
-		Name:     params.Name,
-		Category: params.Category,
-		Enabled:  params.Enabled,
-		Data:     params.Data,
-		// TODO owner设置为当前登录用户
-		Owner:     "foo",
+		Name:      params.Name,
+		Category:  params.Category,
+		Status:    params.Status,
+		Data:      params.Data,
+		Owner:     us.GetAccount(),
 		BeginDate: params.BeginDate,
 		EndDate:   params.EndDate,
 	}
@@ -152,14 +152,15 @@ func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
+	// TODO 更新时按需更新
 	err = configSrv.Update(&service.Configuration{
 		ID: uint(id),
-	}, map[string]interface{}{
-		"enabled":   params.Enabled,
-		"data":      params.Data,
-		"category":  params.Category,
-		"beginDate": params.BeginDate,
-		"endDate":   params.EndDate,
+	}, service.Configuration{
+		Status:    params.Status,
+		Data:      params.Data,
+		Category:  params.Category,
+		BeginDate: params.BeginDate,
+		EndDate:   params.EndDate,
 	})
 	if err != nil {
 		return

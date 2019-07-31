@@ -25,3 +25,10 @@ const (
 	// UserRoleAdmin admin user
 	UserRoleAdmin = "admin"
 )
+
+const (
+	// ConfigEnabled 启用状态
+	ConfigEnabled = iota + 1
+	// ConfigDiabled 禁用状态
+	ConfigDiabled
+)

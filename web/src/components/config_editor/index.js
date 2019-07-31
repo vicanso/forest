@@ -6,18 +6,18 @@ import {
   Input,
   Row,
   Col,
-  Switch,
+  Select,
   DatePicker,
   Button,
   Spin,
   message
 } from "antd";
-import axios from "axios";
 
 import "./config_editor.sass";
-import { CONFIGURATIONS_ADD, CONFIGURATIONS_UPDATE } from "../../urls";
 import { TIME_FORMAT } from "../../vars";
+import * as configService from "../../services/configuration";
 
+const Option = Select.Option;
 const editMode = "edit";
 
 class ConfigEditor extends React.Component {
@@ -29,7 +29,7 @@ class ConfigEditor extends React.Component {
 
     name: "",
     category: "",
-    enabled: false,
+    status: null,
     beginDate: "",
     endDate: ""
   };
@@ -43,7 +43,7 @@ class ConfigEditor extends React.Component {
     }
   }
   async handleSubmit(e) {
-    const { onSuccess } = this.props;
+    const { onSuccess, originalData } = this.props;
     e.preventDefault();
     const {
       submitting,
@@ -51,6 +51,7 @@ class ConfigEditor extends React.Component {
       mode,
 
       name,
+      status,
       category,
       enabled,
       beginDate,
@@ -66,11 +67,15 @@ class ConfigEditor extends React.Component {
       if (!beginDate || !endDate) {
         throw new Error("开始与结束日期不能为空");
       }
+      if (!status) {
+        throw new Error("配置状态不能为空");
+      }
       this.setState({
         submitting: true
       });
       const configData = {
         name,
+        status,
         category,
         enabled,
         beginDate,
@@ -78,11 +83,18 @@ class ConfigEditor extends React.Component {
         data: this.props.getConfigData()
       };
       if (mode === editMode) {
-        const url = CONFIGURATIONS_UPDATE.replace(":id", id);
-        await axios.patch(url, configData);
+        Object.keys(configData).forEach(key => {
+          if (!originalData) {
+            return;
+          }
+          if (configData[key] === originalData[key]) {
+            delete configData[key];
+          }
+        });
+        await configService.updateByID(id, configData);
         message.info("更新配置已成功");
       } else {
-        await axios.post(CONFIGURATIONS_ADD, configData);
+        await configService.add(configData);
         message.info("添加配置已成功");
       }
       if (onSuccess) {
@@ -103,7 +115,7 @@ class ConfigEditor extends React.Component {
       submitting,
       mode,
 
-      enabled,
+      status,
       name,
       category,
       beginDate,
@@ -152,14 +164,25 @@ class ConfigEditor extends React.Component {
             </Col>
             <Col span={colSpan}>
               <Form.Item label="是否启用">
-                <Switch
+                <Select
+                  defaultValue={status}
+                  onChange={value => {
+                    this.setState({
+                      status: value
+                    });
+                  }}
+                >
+                  <Option value={1}>启用</Option>
+                  <Option value={2}>禁用</Option>
+                </Select>
+                {/* <Switch
                   defaultChecked={enabled}
                   onChange={checked => {
                     this.setState({
                       enabled: checked
                     });
                   }}
-                />
+                /> */}
               </Form.Item>
             </Col>
             <Col span={colSpan}>

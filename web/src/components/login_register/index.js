@@ -1,10 +1,9 @@
 import React from "react";
-import axios from "axios";
 import { Form, Input, Icon, Card, Button, message } from "antd";
 
-import { USERS_LOGIN, USERS_ME } from "../../urls";
 import { sha256 } from "../../helpers/crypto";
 import "./login_register.sass";
+import * as userService from "../../services/user";
 
 class LoginRegister extends React.Component {
   loginMode = "login";
@@ -26,26 +25,25 @@ class LoginRegister extends React.Component {
       message.error("用户名与密码不能为空");
       return;
     }
-    let url = "";
     const postData = {
       account
     };
+    let fn = userService.login;
     if (mode === this.loginMode) {
       if (!token) {
         message.error("Token为不能空");
         return;
       }
-      url = USERS_LOGIN;
       postData.password = sha256(sha256(password) + token);
     } else {
-      url = USERS_ME;
+      fn = userService.register;
       postData.password = sha256(password);
     }
     this.setState({
       submitting: true
     });
     try {
-      const { data } = await axios.post(url, postData);
+      const data = await fn(postData);
       if (setUserInfo) {
         setUserInfo({
           account: data.account || "",

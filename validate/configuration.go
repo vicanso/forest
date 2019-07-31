@@ -14,6 +14,10 @@
 
 package validate
 
+import (
+	"github.com/vicanso/forest/cs"
+)
+
 func init() {
 	// 应用配置名称
 	Add("xConfigName", func(i interface{}, _ interface{}) bool {
@@ -27,5 +31,12 @@ func init() {
 	})
 	Add("xConfigNames", func(i interface{}, _ interface{}) bool {
 		return checkASCIIStringLength(i, 2, 100)
+	})
+	Add("xConfigStatus", func(i interface{}, _ interface{}) bool {
+		value, ok := i.(int)
+		if !ok {
+			return false
+		}
+		return value == cs.ConfigEnabled || value == cs.ConfigDiabled
 	})
 }

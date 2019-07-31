@@ -10,12 +10,11 @@ import {
   notification
 } from "antd";
 import PropTypes from "prop-types";
-import axios from "axios";
 
 import ConfigEditor from "../config_editor";
 import ConfigTable from "../config_table";
 import "./signed_keys_config.sass";
-import { RANDOM_KEYS } from "../../urls";
+import * as commonSerivce from "../../services/common";
 
 const { Paragraph } = Typography;
 const signedKeyCategory = "signedKey";
@@ -46,10 +45,8 @@ class SignedKeysConfig extends React.Component {
   }
   async updateRandomString() {
     try {
-      const { data } = await axios.get(RANDOM_KEYS, {
-        params: {
-          n: 10
-        }
+      const data = await commonSerivce.getRandomKeys({
+        n: 10
       });
       this.setState({
         randomKey: data.keys[0]

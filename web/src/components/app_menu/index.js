@@ -4,8 +4,8 @@ import { Menu, Icon } from "antd";
 import { Link, withRouter } from "react-router-dom";
 
 import {
-  USERS_PATH,
-  USERS_LOGIN_RECORDS_PATH,
+  USER_PATH,
+  USER_LOGIN_RECORDS_PATH,
   ALL_CONFIG_PATH,
   BASIC_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
@@ -58,12 +58,12 @@ const userMenu = {
   children: [
     {
       key: "users",
-      url: USERS_PATH,
+      url: USER_PATH,
       title: "用户列表"
     },
     {
       key: "users-login-records",
-      url: USERS_LOGIN_RECORDS_PATH,
+      url: USER_LOGIN_RECORDS_PATH,
       title: "用户登录查询"
     }
   ]

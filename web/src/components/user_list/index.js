@@ -12,11 +12,10 @@ import {
   Form
 } from "antd";
 import moment from "moment";
-import axios from "axios";
 
 import "./user_list.sass";
 import { TIME_FORMAT } from "../../vars";
-import { USERS, USERS_UPDATE } from "../../urls";
+import * as userService from "../../services/user";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -49,12 +48,10 @@ class UserList extends React.Component {
       if (filterRole === allRole) {
         filterRole = "";
       }
-      const { data } = await axios.get(USERS, {
-        params: {
-          limit: 20,
-          keyword,
-          role: filterRole
-        }
+      const data = await userService.list({
+        limit: 20,
+        keyword,
+        role: filterRole
       });
       const { users } = data;
       users.forEach(item => {
@@ -75,8 +72,7 @@ class UserList extends React.Component {
     e.preventDefault();
     const { current, newRoles } = this.state;
     try {
-      const url = USERS_UPDATE.replace(":id", current.id);
-      await axios.patch(url, {
+      await userService.updateByID(current.id, {
         roles: newRoles
       });
       const users = this.state.users.slice(0);
