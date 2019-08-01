@@ -1,12 +1,11 @@
 import React from "react";
 import { Card, Spin, Input, message, Table, DatePicker } from "antd";
-import axios from "axios";
 import moment from "moment";
 
 import "./user_login_record_list.sass";
-import { USERS_LOGIN_RECORDS } from "../../urls";
 import { TIME_FORMAT } from "../../vars";
 import { setBeginOfDay, setEndOfDay } from "../../helpers/util";
+import * as userService from "../../services/user";
 
 const { Search } = Input;
 const { RangePicker } = DatePicker;
@@ -35,14 +34,12 @@ class UserLoginRecordList extends React.Component {
     });
     try {
       const offset = (pagination.current - 1) * pagination.pageSize;
-      const { data } = await axios.get(USERS_LOGIN_RECORDS, {
-        params: {
-          begin: setBeginOfDay(begin).toISOString(),
-          end: setEndOfDay(end).toISOString(),
-          account,
-          limit: pagination.pageSize,
-          offset
-        }
+      const data = await userService.listLoginRecords({
+        begin: setBeginOfDay(begin).toISOString(),
+        end: setEndOfDay(end).toISOString(),
+        account,
+        limit: pagination.pageSize,
+        offset
       });
       const updateData = {
         loginRecords: data.logins

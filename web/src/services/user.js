@@ -5,7 +5,8 @@ import {
   USERS_UPDATE,
   USERS_LOGOUT,
   USERS_LOGIN,
-  USERS_ME
+  USERS_ME,
+  USERS_LOGIN_RECORDS
 } from "../urls";
 
 // logout 退出登录
@@ -44,5 +45,13 @@ export async function list(params) {
 export async function updateByID(id, params) {
   const url = USERS_UPDATE.replace(":id", id);
   const { data } = await axios.patch(url, params);
+  return data;
+}
+
+// listLoginRecords 获取登录记录
+export async function listLoginRecords(params) {
+  const { data } = await axios.get(USERS_LOGIN_RECORDS, {
+    params,
+  });
   return data;
 }
