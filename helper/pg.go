@@ -16,6 +16,7 @@ package helper
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -52,4 +53,18 @@ func PGCreate(data interface{}) (err error) {
 // PGGetClient pg client
 func PGGetClient() *gorm.DB {
 	return pgClient
+}
+
+// PGFormatSort format sort
+func PGFormatSort(sort string) string {
+	arr := strings.Split(sort, ",")
+	newSort := []string{}
+	for _, item := range arr {
+		if item[0] == '-' {
+			newSort = append(newSort, item[1:]+" desc")
+		} else {
+			newSort = append(newSort, item)
+		}
+	}
+	return strings.Join(newSort, ",")
 }

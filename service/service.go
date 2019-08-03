@@ -25,8 +25,9 @@ var (
 
 	redisGetClient = helper.RedisGetClient
 
-	pgCreate    = helper.PGCreate
-	pgGetClient = helper.PGGetClient
+	pgCreate     = helper.PGCreate
+	pgGetClient  = helper.PGGetClient
+	pgFormatSort = helper.PGFormatSort
 
 	nowString = util.NowString
 	logger    = log.Default()
