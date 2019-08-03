@@ -91,7 +91,9 @@ class ConfigEditor extends React.Component {
             delete configData[key];
           }
         });
-        await configService.updateByID(id, configData);
+        if (Object.keys(configData).length !== 0) {
+          await configService.updateByID(id, configData);
+        }
         message.info("更新配置已成功");
       } else {
         await configService.add(configData);

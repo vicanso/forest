@@ -51,7 +51,7 @@ export async function updateByID(id, params) {
 // listLoginRecords 获取登录记录
 export async function listLoginRecords(params) {
   const { data } = await axios.get(USERS_LOGIN_RECORDS, {
-    params,
+    params
   });
   return data;
 }

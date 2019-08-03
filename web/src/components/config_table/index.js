@@ -22,6 +22,9 @@ class ConfigTable extends React.Component {
       if (params.available) {
         fn = configService.listAvaiable;
         delete params.available;
+      } else if (params.unavailable) {
+        fn = configService.listUnavaiable;
+        delete params.unavailable;
       }
       const configs = await fn(params);
       this.setState({

@@ -34,6 +34,11 @@ class ConfigList extends React.Component {
               available: true
             })}
           </TabPane>
+          <TabPane tab="当前失效配置" key="unavailable">
+            {this.renderConfigs({
+              unavailable: true
+            })}
+          </TabPane>
         </Tabs>
       </div>
     );

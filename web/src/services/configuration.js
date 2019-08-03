@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   CONFIGURATIONS_LIST,
   CONFIGURATIONS_LIST_AVAILABLE,
+  CONFIGURATIONS_LIST_UNAVAILABLE,
   CONFIGURATIONS_ADD,
   CONFIGURATIONS_UPDATE,
   CONFIGURATIONS_DELETE
@@ -20,6 +21,15 @@ export async function list(params) {
 // listAvaiable 列出当前有效配置
 export async function listAvaiable(params) {
   const { data } = await axios.get(CONFIGURATIONS_LIST_AVAILABLE, {
+    params
+  });
+  const configs = data.configs || [];
+  return configs;
+}
+
+// listUnavaiable 列出当前失效配置
+export async function listUnavaiable(params) {
+  const { data } = await axios.get(CONFIGURATIONS_LIST_UNAVAILABLE, {
     params
   });
   const configs = data.configs || [];

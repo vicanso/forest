@@ -9,6 +9,7 @@ import {
   BASIC_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
+  IP_BLOCK_CONFIG_PATH,
   REGISTER_PATH,
   LOGIN_PATH,
   USER_PATH,
@@ -25,6 +26,7 @@ import RouterConfig from "./components/router_config";
 import ConfigList from "./components/config_list";
 import UserList from "./components/user_list";
 import UserLoginRecordList from "./components/user_login_record_list";
+import IPBlockList from "./components/ip_block_list";
 
 function NeedLoginRoute({ component: Component, account, isAdmin, ...rest }) {
   return (
@@ -138,6 +140,12 @@ class App extends React.Component {
               <NeedLoginRoute
                 path={USER_LOGIN_RECORDS_PATH}
                 component={UserLoginRecordList}
+                account={account}
+                isAdmin={isAdmin}
+              />
+              <NeedLoginRoute
+                path={IP_BLOCK_CONFIG_PATH}
+                component={IPBlockList}
                 account={account}
                 isAdmin={isAdmin}
               />

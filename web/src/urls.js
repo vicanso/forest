@@ -13,6 +13,7 @@ export const CONFIGURATIONS_UPDATE = `${CONFIGURATIONS}/v1/:id`;
 export const CONFIGURATIONS_DELETE = `${CONFIGURATIONS}/v1/:id`;
 export const CONFIGURATIONS_LIST = `${CONFIGURATIONS}/v1`;
 export const CONFIGURATIONS_LIST_AVAILABLE = `${CONFIGURATIONS}/v1/available`;
+export const CONFIGURATIONS_LIST_UNAVAILABLE = `${CONFIGURATIONS}/v1/unavailable`;
 
 export const ROUTERS = `${prefix}/routers`;
 

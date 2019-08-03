@@ -29,6 +29,7 @@ require (
 	github.com/vicanso/count-warner v0.0.1
 	github.com/vicanso/go-axios v0.0.3
 	github.com/vicanso/hes v0.2.1
+	github.com/vicanso/ips v0.0.1
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.0.4

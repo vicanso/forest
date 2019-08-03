@@ -63,6 +63,11 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listAvailable,
 	)
+	g.GET(
+		"/v1/unavailable",
+		shouldBeAdmin,
+		ctrl.listUnavailable,
+	)
 
 	g.POST(
 		"/v1",
@@ -116,6 +121,18 @@ func (ctrl configurationCtrl) listAvailable(c *cod.Context) (err error) {
 	return
 }
 
+// listUnavailable list unavailable config
+func (ctrl configurationCtrl) listUnavailable(c *cod.Context) (err error) {
+	result, err := configSrv.Unavailable()
+	if err != nil {
+		return
+	}
+	c.Body = map[string]interface{}{
+		"configs": result,
+	}
+	return
+}
+
 // add configuration
 func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
 	params := &addConfigurationParams{}
@@ -152,7 +169,6 @@ func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
 	if err != nil {
 		return
 	}
-	// TODO 更新时按需更新
 	err = configSrv.Update(&service.Configuration{
 		ID: uint(id),
 	}, service.Configuration{

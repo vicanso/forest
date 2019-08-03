@@ -128,6 +128,12 @@ func main() {
 		},
 	}))
 
+	// 错误处理，将错误转换为json响应
+	d.Use(errorHandler.NewDefault())
+
+	// IP限制
+	d.Use(middleware.NewIPBlock())
+
 	// 根据应用配置限制路由
 	d.Use(middleware.NewRouterController())
 
@@ -135,9 +141,6 @@ func main() {
 	d.Use(routerLimiter.New(routerLimiter.Config{
 		Limiter: routerLimiter.NewLocalLimiter(config.GetRouterConcurrentLimit()),
 	}))
-
-	// 错误处理，将错误转换为json响应
-	d.Use(errorHandler.NewDefault())
 
 	// 压缩响应数据（由pike来压缩数据）
 	// d.Use(compress.NewDefault())

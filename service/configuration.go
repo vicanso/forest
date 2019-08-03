@@ -27,6 +27,7 @@ import (
 const (
 	mockTimeKey              = "mockTime"
 	sessionSignedKeyCateogry = "signedKey"
+	ipBlockCategory          = "ipBlock"
 	routerConfigCategory     = "router-config"
 
 	defaultConfigurationLimit = 100
@@ -74,6 +75,23 @@ func init() {
 	signedKeys.SetKeys(config.GetSignedKeys())
 }
 
+// IsValid check the config is valid
+func (conf *Configuration) IsValid() bool {
+	if conf.Status != cs.ConfigEnabled {
+		return false
+	}
+	now := util.Now().Unix()
+	// 如果开始时间大于当前时间，未开始启用
+	if conf.BeginDate != nil && conf.BeginDate.UTC().Unix() > now {
+		return false
+	}
+	// 如果结束时间少于当前时间，已结束
+	if conf.EndDate != nil && conf.EndDate.UTC().Unix() < now {
+		return false
+	}
+	return true
+}
+
 // Add add configuration
 func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 	err = pgCreate(conf)
@@ -88,7 +106,6 @@ func (srv *ConfigurationSrv) Update(conf *Configuration, attrs ...interface{}) (
 
 // Available get available configs
 func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
-	now := util.Now().Unix()
 	result := make([]*Configuration, 0)
 	configs = make([]*Configuration, 0)
 	err = pgGetClient().Where("status = ?", cs.ConfigEnabled).Find(&result).Error
@@ -96,15 +113,25 @@ func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
 		return
 	}
 	for _, item := range result {
-		// 如果开始时间大于当前时间，未开始启用
-		if item.BeginDate != nil && item.BeginDate.UTC().Unix() > now {
-			continue
+		if item.IsValid() {
+			configs = append(configs, item)
 		}
-		// 如果结束时间少于当前时间，已结束
-		if item.EndDate != nil && item.EndDate.UTC().Unix() < now {
-			continue
+	}
+	return
+}
+
+// Unavailable get unavailable configs
+func (srv *ConfigurationSrv) Unavailable() (configs []*Configuration, err error) {
+	result := make([]*Configuration, 0)
+	configs = make([]*Configuration, 0)
+	err = pgGetClient().Model(&Configuration{}).Find(&result).Error
+	if err != nil {
+		return
+	}
+	for _, item := range result {
+		if !item.IsValid() {
+			configs = append(configs, item)
 		}
-		configs = append(configs, item)
 	}
 	return
 }
@@ -119,6 +146,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 
 	routerConfigs := make([]*Configuration, 0)
 	var signedKeysConfig *Configuration
+	blockIPList := make([]string, 0)
+
 	for _, item := range configs {
 		if item.Name == mockTimeKey {
 			mockTimeConfig = item
@@ -134,6 +163,12 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		// signed key配置
 		if item.Category == sessionSignedKeyCateogry {
 			signedKeysConfig = item
+			continue
+		}
+
+		// 黑名单IP
+		if item.Category == ipBlockCategory {
+			blockIPList = append(blockIPList, item.Data)
 			continue
 		}
 	}
@@ -155,6 +190,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 
 	// 更新router configs
 	updateRouterConfigs(routerConfigs)
+
+	ResetIPBlocker(blockIPList)
 	return
 }
 

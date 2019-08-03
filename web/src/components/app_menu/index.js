@@ -9,6 +9,7 @@ import {
   ALL_CONFIG_PATH,
   BASIC_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
+  IP_BLOCK_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH
 } from "../../paths";
 import "./app_menu.sass";
@@ -43,6 +44,11 @@ const configMenu = {
       key: "signed-keys-config",
       url: SIGNED_KEYS_CONFIG_PATH,
       title: "签名配置"
+    },
+    {
+      key: "ip-block-config",
+      url: IP_BLOCK_CONFIG_PATH,
+      title: "黑名单IP"
     }
   ]
 };
