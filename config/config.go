@@ -189,14 +189,30 @@ func GetRedisConfig() (options RedisOptions, err error) {
 
 // GetPostgresConnectString get postgres connect string
 func GetPostgresConnectString() string {
-	data := viper.GetStringMapString("postgres")
-	pass := data["password"]
-	if pass != "" {
-		data["password"] = os.Getenv(pass)
+	getPostgresConfig := func(key string) string {
+		return viper.GetString("postgres." + key)
+	}
+	keys := []string{
+		"host",
+		"port",
+		"user",
+		"dbname",
+		"password",
+		"sslmode",
 	}
 	arr := []string{}
-	for k, v := range data {
-		arr = append(arr, k+"="+v)
+	for _, key := range keys {
+		value := getPostgresConfig(key)
+		// 密码与用户名支持env中获取
+		if key == "password" || key == "user" {
+			v := os.Getenv(value)
+			if v != "" {
+				value = v
+			}
+		}
+		if value != "" {
+			arr = append(arr, key+"="+value)
+		}
 	}
 	return strings.Join(arr, " ")
 }
