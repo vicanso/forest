@@ -1,9 +1,7 @@
 FROM node:12-alpine as webbuilder
 
-RUN apk update \
-  && apk add git \
-  && git clone --depth=1 https://github.com/vicanso/forest.git /forest \
-  && cd /forest/web \
+ADD . /forest
+RUN cd /forest/web \
   && yarn \
   && yarn build \
   && rm -rf node_module
@@ -13,7 +11,7 @@ FROM golang:1.12-alpine as builder
 COPY --from=webbuilder /forest /forest
 
 RUN apk update \
-  && apk add docker git gcc make \
+  && apk add git make \
   && go get -u github.com/gobuffalo/packr/v2/packr2 \
   && cd /forest \
   && make build

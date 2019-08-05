@@ -25,7 +25,6 @@ import (
 	"github.com/vicanso/cod"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
-	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
@@ -127,12 +126,16 @@ func init() {
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
-		middleware.WaitFor(time.Second),
+		// middleware.WaitFor(time.Second),
 		newTracker(cs.ActionLogin),
 		shouldAnonymous,
 		loginLimit,
 		// 限制相同IP在60秒之内只能调用10次
 		newIPLimit(10, 60*time.Second, cs.ActionLogin),
+		// 限制10分钟内，相同的账号只允许出错5次
+		newErrorLimit(5, 10*time.Minute, func(c *cod.Context) string {
+			return standardJSON.Get(c.RequestBody, "account").ToString()
+		}),
 		ctrl.login,
 	)
 	// 用户退出登录

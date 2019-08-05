@@ -15,7 +15,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/vicanso/cod"
@@ -34,7 +33,6 @@ var (
 // NewIPBlock create a new block ip middleware
 func NewIPBlock() cod.Handler {
 	return func(c *cod.Context) (err error) {
-		fmt.Println(c.RealIP())
 		if service.IsBlockIP(c.RealIP()) {
 			err = errIPNotAllow
 			return

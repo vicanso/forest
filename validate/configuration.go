@@ -21,16 +21,16 @@ import (
 func init() {
 	// 应用配置名称
 	Add("xConfigName", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 2, 20)
+		return checkAlphanumericStringLength(i, 2, 20)
 	})
 	Add("xConfigCategory", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 2, 20)
+		return checkAlphanumericStringLength(i, 2, 20)
 	})
 	Add("xConfigData", func(i interface{}, _ interface{}) bool {
 		return checkStringLength(i, 1, 500)
 	})
 	Add("xConfigNames", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 2, 100)
+		return checkAlphanumericStringLength(i, 2, 100)
 	})
 	Add("xConfigStatus", func(i interface{}, _ interface{}) bool {
 		value, ok := i.(int)

@@ -2,6 +2,7 @@ import React from "react";
 import { Form, Input, Icon, Card, Button, message } from "antd";
 
 import { sha256 } from "../../helpers/crypto";
+import { generatePassword } from "../../helpers/util";
 import "./login_register.sass";
 import * as userService from "../../services/user";
 
@@ -34,10 +35,11 @@ class LoginRegister extends React.Component {
         message.error("Token为不能空");
         return;
       }
-      postData.password = sha256(sha256(password) + token);
+      postData.password = sha256(generatePassword(password) + token);
     } else {
       fn = userService.register;
-      postData.password = sha256(password);
+      // 初始密码可以再加hash
+      postData.password = generatePassword(password);
     }
     this.setState({
       submitting: true
@@ -93,6 +95,7 @@ class LoginRegister extends React.Component {
                     password: e.target.value.trim()
                   });
                 }}
+                autoComplete="off"
                 placeholder="密码"
               />
             </Form.Item>

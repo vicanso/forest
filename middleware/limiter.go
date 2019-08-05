@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/vicanso/cod"
@@ -30,6 +31,7 @@ import (
 const (
 	concurrentLimitKeyPrefix = "mid-concurrent-limit"
 	ipLimitKeyPrefix         = "mid-ip-limit"
+	errorLimitKeyPrefix      = "mid-error-limit"
 	errLimitCategory         = "request-limit"
 )
 
@@ -39,6 +41,11 @@ var (
 		Message:    "request to frequently",
 		Category:   errLimitCategory,
 	}
+)
+
+type (
+	// KeyGenerator key generator
+	KeyGenerator func(c *cod.Context) string
 )
 
 // createConcurrentLimitLock 创建并发限制的lock函数
@@ -85,5 +92,27 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) cod.Handler {
 			return
 		}
 		return c.Next()
+	}
+}
+
+// NewErrorLimit create a error limit middleware
+func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) cod.Handler {
+	return func(c *cod.Context) (err error) {
+		key := errorLimitKeyPrefix + "-" + fn(c)
+		result, err := service.RedisGet(key)
+		if err != nil {
+			return
+		}
+		count, _ := strconv.Atoi(result)
+		if int64(count) > maxCount {
+			err = errTooFrequently
+			return
+		}
+		err = c.Next()
+		// 如果出错，则出错次数+1
+		if err != nil {
+			service.RedisIncWithTTL(key, ttl)
+		}
+		return
 	}
 }

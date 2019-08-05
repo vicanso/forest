@@ -14,7 +14,11 @@
 
 package service
 
-import "time"
+import (
+	"time"
+
+	"github.com/go-redis/redis"
+)
 
 var (
 	redisNoop = func() error {
@@ -63,5 +67,15 @@ func RedisIncWithTTL(key string, ttl time.Duration) (count int64, err error) {
 		return
 	}
 	count = incr.Val()
+	return
+}
+
+// RedisGet get value
+func RedisGet(key string) (result string, err error) {
+	result, err = redisGetClient().Get(key).Result()
+	// key不存在则不返回出错
+	if err == redis.Nil {
+		err = nil
+	}
 	return
 }

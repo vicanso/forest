@@ -25,6 +25,7 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 
+	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
 	tracker "github.com/vicanso/cod-tracker"
@@ -40,9 +41,10 @@ var (
 )
 
 var (
-	logger     = log.Default()
-	now        = util.NowString
-	getTrackID = util.GetTrackID
+	logger       = log.Default()
+	now          = util.NowString
+	getTrackID   = util.GetTrackID
+	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	// 服务列表
 	// 配置服务
@@ -54,6 +56,8 @@ var (
 	newConcurrentLimit = middleware.NewConcurrentLimit
 	// 创建IP限制中间件
 	newIPLimit = middleware.NewIPLimit
+	// 创建出错限制中间件
+	newErrorLimit = middleware.NewErrorLimit
 
 	getUserSession = service.NewUserSession
 	// 加载用户session

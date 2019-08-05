@@ -102,6 +102,37 @@ func checkASCIIStringLength(i interface{}, min, max int) bool {
 	}
 	return true
 }
+
+func checkAlphaStringLength(i interface{}, min, max int) bool {
+	value, ok := i.(string)
+	if !ok {
+		return false
+	}
+	if !govalidator.IsAlpha(value) {
+		return false
+	}
+	size := len(value)
+	if size < min || size > max {
+		return false
+	}
+	return true
+}
+
+func checkAlphanumericStringLength(i interface{}, min, max int) bool {
+	value, ok := i.(string)
+	if !ok {
+		return false
+	}
+	if !govalidator.IsAlphanumeric(value) {
+		return false
+	}
+	size := len(value)
+	if size < min || size > max {
+		return false
+	}
+	return true
+}
+
 func checkStringLength(i interface{}, min, max int) bool {
 	value, ok := i.(string)
 	if !ok {

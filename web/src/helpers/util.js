@@ -1,3 +1,7 @@
+import { sha256 } from "./crypto";
+
+const hash = "JT";
+
 export function setBeginOfDay(date) {
   return date
     .clone()
@@ -14,4 +18,8 @@ export function setEndOfDay(date) {
     .minutes(59)
     .seconds(59)
     .milliseconds(999);
+}
+
+export function generatePassword(pass) {
+  return sha256(pass + hash);
 }

@@ -13,5 +13,10 @@ before_install:
 
 script:
   - env GO111MODULE=on make test
+
+after_success:
   - docker build -t forest .
+  - docker tag forest $DOCKER_USERNAME/forest:latest
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push $DOCKER_USERNAME/forest:latest
   - docker images
