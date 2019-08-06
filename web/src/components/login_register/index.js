@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Icon, Card, Button, message } from "antd";
+import { Form, Input, Icon, Card, Button, message, Spin } from "antd";
 
 import { sha256 } from "../../helpers/crypto";
 import { generatePassword } from "../../helpers/util";
@@ -38,7 +38,6 @@ class LoginRegister extends React.Component {
       postData.password = sha256(generatePassword(password) + token);
     } else {
       fn = userService.register;
-      // 初始密码可以再加hash
       postData.password = generatePassword(password);
     }
     this.setState({
@@ -64,46 +63,48 @@ class LoginRegister extends React.Component {
     }
   }
   render() {
-    const { mode } = this.state;
+    const { mode, submitting } = this.state;
     const title = mode === this.loginMode ? "登录" : "注册";
     return (
       <div className="LoginRegister">
-        <Card title={title}>
-          <Form onSubmit={this.handleSubmit.bind(this)}>
-            <Form.Item>
-              <Input
-                autoFocus
-                prefix={
-                  <Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />
-                }
-                onChange={e => {
-                  this.setState({
-                    account: e.target.value.trim()
-                  });
-                }}
-                placeholder="用户名"
-              />
-            </Form.Item>
-            <Form.Item>
-              <Input
-                prefix={
-                  <Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />
-                }
-                type="password"
-                onChange={e => {
-                  this.setState({
-                    password: e.target.value.trim()
-                  });
-                }}
-                autoComplete="off"
-                placeholder="密码"
-              />
-            </Form.Item>
-            <Button type="primary" htmlType="submit" className="submit">
-              {title}
-            </Button>
-          </Form>
-        </Card>
+        <Spin spinning={submitting}>
+          <Card title={title}>
+            <Form onSubmit={this.handleSubmit.bind(this)}>
+              <Form.Item>
+                <Input
+                  autoFocus
+                  prefix={
+                    <Icon type="user" style={{ color: "rgba(0,0,0,.25)" }} />
+                  }
+                  onChange={e => {
+                    this.setState({
+                      account: e.target.value.trim()
+                    });
+                  }}
+                  placeholder="用户名"
+                />
+              </Form.Item>
+              <Form.Item>
+                <Input
+                  prefix={
+                    <Icon type="lock" style={{ color: "rgba(0,0,0,.25)" }} />
+                  }
+                  type="password"
+                  onChange={e => {
+                    this.setState({
+                      password: e.target.value.trim()
+                    });
+                  }}
+                  autoComplete="off"
+                  placeholder="密码"
+                />
+              </Form.Item>
+              <Button type="primary" htmlType="submit" className="submit">
+                {title}
+              </Button>
+            </Form>
+          </Card>
+        </Spin>
       </div>
     );
   }

@@ -138,9 +138,12 @@ func main() {
 	d.Use(middleware.NewRouterController())
 
 	// 路由并发限制
-	d.Use(routerLimiter.New(routerLimiter.Config{
-		Limiter: routerLimiter.NewLocalLimiter(config.GetRouterConcurrentLimit()),
-	}))
+	routerLimitConfig := config.GetRouterConcurrentLimit()
+	if len(routerLimitConfig) != 0 {
+		d.Use(routerLimiter.New(routerLimiter.Config{
+			Limiter: routerLimiter.NewLocalLimiter(routerLimitConfig),
+		}))
+	}
 
 	// 压缩响应数据（由pike来压缩数据）
 	// d.Use(compress.NewDefault())

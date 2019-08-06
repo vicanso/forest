@@ -83,6 +83,20 @@ type (
 		City          string `json:"city,omitempty" gorm:"type:varchar(64)"`
 		ISP           string `json:"isp,omitempty" gorm:"type:varchar(64)"`
 	}
+	// UserTrackRecord user track record
+	UserTrackRecord struct {
+		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+		CreatedAt time.Time  `json:"createdAt,omitempty"`
+		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+		TrackID   string     `json:"trackId,omitempty" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
+		UserAgent string     `json:"userAgent,omitempty"`
+		IP        string     `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
+		Country   string     `json:"country,omitempty" gorm:"type:varchar(64)"`
+		Province  string     `json:"province,omitempty" gorm:"type:varchar(64)"`
+		City      string     `json:"city,omitempty" gorm:"type:varchar(64)"`
+		ISP       string     `json:"isp,omitempty" gorm:"type:varchar(64)"`
+	}
 	// UserQueryParams user query params
 	UserQueryParams struct {
 		Keyword string
@@ -104,7 +118,8 @@ type (
 
 func init() {
 	pgGetClient().AutoMigrate(&User{}).
-		AutoMigrate(&UserLoginRecord{})
+		AutoMigrate(&UserLoginRecord{}).
+		AutoMigrate(&UserTrackRecord{})
 }
 
 // Add add user
@@ -165,6 +180,35 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 				return
 			}
 			pgGetClient().Model(&UserLoginRecord{
+				ID: id,
+			}).Update(map[string]string{
+				"country":  lo.Country,
+				"province": lo.Province,
+				"city":     lo.City,
+				"isp":      lo.ISP,
+			})
+		}()
+	}
+	return
+}
+
+// AddTrackRecord add track record
+func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord) (err error) {
+	// TODO 后续写入influxdb，避免被攻击而产生大量的无用记录
+	err = pgCreate((r))
+	if r.ID != 0 {
+		id := r.ID
+		ip := r.IP
+		go func() {
+			lo, err := GetLocationByIP(ip, nil)
+			if err != nil {
+				logger.Error("get location by ip fail",
+					zap.String("ip", ip),
+					zap.Error(err),
+				)
+				return
+			}
+			pgGetClient().Model(&UserTrackRecord{
 				ID: id,
 			}).Update(map[string]string{
 				"country":  lo.Country,

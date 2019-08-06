@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 
@@ -126,7 +127,7 @@ func init() {
 	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
-		// middleware.WaitFor(time.Second),
+		middleware.WaitFor(time.Second),
 		newTracker(cs.ActionLogin),
 		shouldAnonymous,
 		loginLimit,
@@ -178,13 +179,20 @@ func (ctrl userCtrl) me(c *cod.Context) (err error) {
 	cookie, _ := c.Cookie(key)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
+		uid := util.GenUlid()
 		c.AddCookie(&http.Cookie{
 			Name:     key,
-			Value:    util.GenUlid(),
+			Value:    uid,
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   365 * 24 * 3600,
 		})
+		trackRecord := &service.UserTrackRecord{
+			UserAgent: c.GetRequestHeader("User-Agent"),
+			IP:        c.RealIP(),
+			TrackID:   util.GetTrackID(c),
+		}
+		userSrv.AddTrackRecord(trackRecord)
 	}
 	c.Body = pickUserInfo(c)
 	return
