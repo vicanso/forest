@@ -22,7 +22,7 @@ const Option = Select.Option;
 const { TextArea } = Input;
 const editMode = "edit";
 
-const routerConfigCategory = "router-config";
+const routerConfigCategory = "routerConfig";
 
 class RouterConfig extends React.Component {
   state = {

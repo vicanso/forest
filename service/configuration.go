@@ -28,7 +28,7 @@ const (
 	mockTimeKey              = "mockTime"
 	sessionSignedKeyCateogry = "signedKey"
 	ipBlockCategory          = "ipBlock"
-	routerConfigCategory     = "router-config"
+	routerConfigCategory     = "routerConfig"
 
 	defaultConfigurationLimit = 100
 )
