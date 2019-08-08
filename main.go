@@ -169,5 +169,8 @@ func main() {
 		)
 		panic(err)
 	}
+	logger.Info("start to linstening...",
+		zap.String("listen", config.GetListen()),
+	)
 	d.ListenAndServe(config.GetListen())
 }
