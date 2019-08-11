@@ -20,7 +20,14 @@ FROM alpine
 
 EXPOSE 7001
 
+RUN addgroup -g 1000 go \
+  && adduser -u 1000 -G go -s /bin/sh -D go \
+  && apk add --no-cache ca-certificates
+
 COPY --from=builder /forest/forest /usr/local/bin/forest
 
+USER go
+
+WORKDIR /home/go
 
 CMD ["forest"]
