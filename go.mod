@@ -30,4 +30,5 @@ require (
 	github.com/vicanso/hes v0.2.1
 	github.com/vicanso/ips v0.0.1
 	go.uber.org/zap v1.10.0
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

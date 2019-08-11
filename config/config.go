@@ -45,6 +45,13 @@ type (
 		Key        string
 		CookiePath string
 	}
+	// MailConfig mail's config
+	MailConfig struct {
+		Host     string
+		Port     int
+		User     string
+		Password string
+	}
 )
 
 const (
@@ -243,4 +250,14 @@ func GetRouterConcurrentLimit() map[string]uint32 {
 		}
 	}
 	return limit
+}
+
+// GetMailConfig get mail config
+func GetMailConfig() MailConfig {
+	return MailConfig{
+		Host:     viper.GetString("mail.host"),
+		Port:     viper.GetInt("mail.port"),
+		User:     viper.GetString("mail.user"),
+		Password: os.Getenv(viper.GetString("mail.password")),
+	}
 }

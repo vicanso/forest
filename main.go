@@ -67,7 +67,7 @@ func main() {
 	warnerException := warner.NewWarner(60*time.Second, 5)
 	warnerException.ResetOnWarn = true
 	warnerException.On(func(_ string, _ int64) {
-		logger.Warn("too many exception")
+		service.AlarmError("too many uncaught exception")
 	})
 	d.OnError(func(c *cod.Context, err error) {
 		// 可以针对实际场景输出更多的日志信息
@@ -85,10 +85,7 @@ func main() {
 	warner404 := warner.NewWarner(60*time.Second, 60)
 	warner404.ResetOnWarn = true
 	warner404.On(func(ip string, createdAt int64) {
-		// TODO 邮件通知
-		logger.Warn("too manry 404 request",
-			zap.String("ip", ip),
-		)
+		service.AlarmError("too many 404 request, client ip:" + ip)
 	})
 
 	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {

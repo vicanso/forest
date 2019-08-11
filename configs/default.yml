@@ -37,3 +37,15 @@ location:
 routerLimit:
   # 限制路由访问并发数
   GET /users/v1/me/login: 50
+
+# mail相关配置
+mail:
+  host: smtp.office365.com
+  port: 587
+  user: tree.xie@outlook.com
+  password: EMAIL_PASS
+
+# 告警接收邮件列表
+alarm:
+  receiver:
+  - tree.xie@outlook.com
