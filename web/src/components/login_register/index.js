@@ -1,10 +1,11 @@
 import React from "react";
-import { Form, Input, Icon, Card, Button, message, Spin } from "antd";
+import { Form, Input, Icon, Card, Button, message, Spin, Row, Col } from "antd";
 
 import { sha256 } from "../../helpers/crypto";
 import { generatePassword } from "../../helpers/util";
 import "./login_register.sass";
 import * as userService from "../../services/user";
+import * as commonService from "../../services/common";
 
 class LoginRegister extends React.Component {
   loginMode = "login";
@@ -14,19 +15,44 @@ class LoginRegister extends React.Component {
     account: "",
     password: "",
     token: "",
-    mode: ""
+    captcha: "",
+    mode: "",
+    captchaID: "",
+    captchaData: ""
   };
+  componentDidMount() {
+    this.getCaptcha();
+  }
+  async getCaptcha() {
+    this.setState({
+      captchaData: ""
+    });
+    try {
+      const data = await commonService.getCaptcha();
+      this.setState({
+        captchaID: data.id,
+        captchaData: `data:image/png;base64,${data.data}`
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
   async handleSubmit(e) {
     const { history } = this.props;
     const { setUserInfo } = this.props;
     e.preventDefault();
-    const { account, password, mode, token } = this.state;
+    const { account, password, mode, token, captchaID, captcha } = this.state;
 
     if (!account || !password) {
       message.error("用户名与密码不能为空");
       return;
     }
+    if (!captcha || !captchaID) {
+      message.error("图形验证码不能为空");
+      return;
+    }
     const postData = {
+      captcha: `${captchaID}:${captcha}`,
       account
     };
     let fn = userService.login;
@@ -56,6 +82,8 @@ class LoginRegister extends React.Component {
       }
     } catch (err) {
       message.error(err.message);
+      // 因为图形验证码只可以使用一次，因此失败自动刷新
+      this.getCaptcha();
     } finally {
       this.setState({
         submitting: false
@@ -63,7 +91,7 @@ class LoginRegister extends React.Component {
     }
   }
   render() {
-    const { mode, submitting } = this.state;
+    const { mode, submitting, captchaData } = this.state;
     const title = mode === this.loginMode ? "登录" : "注册";
     return (
       <div className="LoginRegister">
@@ -98,6 +126,34 @@ class LoginRegister extends React.Component {
                   autoComplete="off"
                   placeholder="密码"
                 />
+              </Form.Item>
+              <Form.Item>
+                <Row gutter={8}>
+                  <Col span={20}>
+                    <Input
+                      placeholder="请输入图形验证码"
+                      onChange={e => {
+                        this.setState({
+                          captcha: e.target.value.trim()
+                        });
+                      }}
+                    />
+                  </Col>
+                  <Col span={4}>
+                    <a
+                      className="captcha"
+                      href="/"
+                      onClick={e => {
+                        e.preventDefault();
+                        this.getCaptcha();
+                      }}
+                    >
+                      {captchaData && (
+                        <img height="38" src={captchaData} alt="captcha" />
+                      )}
+                    </a>
+                  </Col>
+                </Row>
               </Form.Item>
               <Button type="primary" htmlType="submit" className="submit">
                 {title}

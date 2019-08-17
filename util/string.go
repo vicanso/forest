@@ -30,17 +30,18 @@ const (
 	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
 	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
+const digitBytes = "0123456789"
 
-// RandomString create a random string
-func RandomString(n int) string {
+// randomString create a random string
+func randomString(baseLetters string, n int) string {
 	b := make([]byte, n)
 	// A rand.Int63() generates 63 random bits, enough for letterIdxMax letters!
 	for i, cache, remain := n-1, rand.Int63(), letterIdxMax; i >= 0; {
 		if remain == 0 {
 			cache, remain = rand.Int63(), letterIdxMax
 		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
+		if idx := int(cache & letterIdxMask); idx < len(baseLetters) {
+			b[i] = baseLetters[idx]
 			i--
 		}
 		cache >>= letterIdxBits
@@ -48,6 +49,16 @@ func RandomString(n int) string {
 	}
 
 	return string(b)
+}
+
+// RandomString create a random string
+func RandomString(n int) string {
+	return randomString(letterBytes, n)
+}
+
+// RandomDigit create a random digit string
+func RandomDigit(n int) string {
+	return randomString(digitBytes, n)
 }
 
 // GenUlid generater ulid

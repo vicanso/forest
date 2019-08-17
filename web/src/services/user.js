@@ -23,13 +23,25 @@ export async function getLoginToken() {
 
 // login 登录
 export async function login(params) {
-  const { data } = await axios.post(USERS_LOGIN, params);
+  const { captcha } = params;
+  delete params.captcha;
+  const { data } = await axios.post(USERS_LOGIN, params, {
+    headers: {
+      "X-Captcha": captcha
+    }
+  });
   return data;
 }
 
 // register 注册
 export async function register(params) {
-  const { data } = await axios.post(USERS_ME, params);
+  const { captcha } = params;
+  delete params.captcha;
+  const { data } = await axios.post(USERS_ME, params, {
+    headers: {
+      "X-Captcha": captcha
+    }
+  });
   return data;
 }
 

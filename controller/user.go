@@ -23,7 +23,7 @@ import (
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/router"
@@ -105,6 +105,7 @@ func init() {
 		// 限制相同IP在60秒之内只能调用5次
 		newIPLimit(5, 60*time.Second, cs.ActionLogin),
 		shouldAnonymous,
+		middleware.ValidateCaptch(),
 		ctrl.register,
 	)
 	// 刷新user session的ttl
@@ -134,9 +135,10 @@ func init() {
 		// 限制相同IP在60秒之内只能调用10次
 		newIPLimit(10, 60*time.Second, cs.ActionLogin),
 		// 限制10分钟内，相同的账号只允许出错5次
-		newErrorLimit(5, 10*time.Minute, func(c *cod.Context) string {
+		newErrorLimit(5, 10*time.Minute, func(c *elton.Context) string {
 			return standardJSON.Get(c.RequestBody, "account").ToString()
 		}),
+		middleware.ValidateCaptch(),
 		ctrl.login,
 	)
 	// 用户退出登录
@@ -156,7 +158,7 @@ func init() {
 }
 
 // get user info from session
-func pickUserInfo(c *cod.Context) (userInfo *userInfoResp) {
+func pickUserInfo(c *elton.Context) (userInfo *userInfoResp) {
 	us := getUserSession(c)
 	userInfo = &userInfoResp{
 		Anonymous: true,
@@ -174,7 +176,7 @@ func pickUserInfo(c *cod.Context) (userInfo *userInfoResp) {
 }
 
 // get user info
-func (ctrl userCtrl) me(c *cod.Context) (err error) {
+func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	key := config.GetTrackKey()
 	cookie, _ := c.Cookie(key)
 	// ulid的长度为26
@@ -199,7 +201,7 @@ func (ctrl userCtrl) me(c *cod.Context) (err error) {
 }
 
 // getLoginToken get login token
-func (ctrl userCtrl) getLoginToken(c *cod.Context) (err error) {
+func (ctrl userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
 	us.ClearSessionID()
@@ -221,7 +223,7 @@ func omitUserInfo(u *service.User) {
 }
 
 // register user register
-func (ctrl userCtrl) register(c *cod.Context) (err error) {
+func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	params := &registerUserParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
@@ -241,7 +243,7 @@ func (ctrl userCtrl) register(c *cod.Context) (err error) {
 }
 
 // login user login
-func (ctrl userCtrl) login(c *cod.Context) (err error) {
+func (ctrl userCtrl) login(c *elton.Context) (err error) {
 	params := &registerUserParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
@@ -274,7 +276,7 @@ func (ctrl userCtrl) login(c *cod.Context) (err error) {
 }
 
 // logout user logout
-func (ctrl userCtrl) logout(c *cod.Context) (err error) {
+func (ctrl userCtrl) logout(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	if us != nil {
 		err = us.Destroy()
@@ -284,7 +286,7 @@ func (ctrl userCtrl) logout(c *cod.Context) (err error) {
 }
 
 // refresh user refresh
-func (ctrl userCtrl) refresh(c *cod.Context) (err error) {
+func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	if us == nil {
 		c.NoContent()
@@ -320,7 +322,7 @@ func (ctrl userCtrl) refresh(c *cod.Context) (err error) {
 }
 
 // list user list
-func (ctrl userCtrl) list(c *cod.Context) (err error) {
+func (ctrl userCtrl) list(c *elton.Context) (err error) {
 	params := &listUserParams{}
 	err = validate.Do(params, c.Query())
 	if err != nil {
@@ -344,7 +346,7 @@ func (ctrl userCtrl) list(c *cod.Context) (err error) {
 }
 
 // update user update
-func (ctrl userCtrl) update(c *cod.Context) (err error) {
+func (ctrl userCtrl) update(c *elton.Context) (err error) {
 	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		return
@@ -375,7 +377,7 @@ func (ctrl userCtrl) update(c *cod.Context) (err error) {
 }
 
 // listLoginRecord list login record
-func (ctrl userCtrl) listLoginRecord(c *cod.Context) (err error) {
+func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 	params := &listUserLoginRecordParams{}
 	err = validate.Do(params, c.Query())
 	if err != nil {

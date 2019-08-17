@@ -17,7 +17,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 )
@@ -31,8 +31,8 @@ var (
 )
 
 // NewIPBlock create a new block ip middleware
-func NewIPBlock() cod.Handler {
-	return func(c *cod.Context) (err error) {
+func NewIPBlock() elton.Handler {
+	return func(c *elton.Context) (err error) {
 		if service.IsBlockIP(c.RealIP()) {
 			err = errIPNotAllow
 			return

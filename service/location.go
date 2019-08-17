@@ -17,7 +17,7 @@ package service
 import (
 	"time"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 
 	"github.com/vicanso/go-axios"
 
@@ -55,7 +55,7 @@ func init() {
 }
 
 // GetLocationByIP get location by ip
-func GetLocationByIP(ip string, c *cod.Context) (lo Location, err error) {
+func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{

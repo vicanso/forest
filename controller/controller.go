@@ -17,7 +17,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
@@ -28,7 +28,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
-	tracker "github.com/vicanso/cod-tracker"
+	tracker "github.com/vicanso/elton-tracker"
 )
 
 var (
@@ -63,20 +63,20 @@ var (
 	// 加载用户session
 	loadUserSession = middleware.NewSession()
 	// 判断用户是否登录
-	shouldLogined = cod.Compose(loadUserSession, checkLogin)
+	shouldLogined = elton.Compose(loadUserSession, checkLogin)
 	// 判断用户是否未登录
-	shouldAnonymous = cod.Compose(loadUserSession, checkAnonymous)
+	shouldAnonymous = elton.Compose(loadUserSession, checkAnonymous)
 	// 判断用户是否admin权限
-	shouldBeAdmin = cod.Compose(loadUserSession, newCheckRoles([]string{
+	shouldBeAdmin = elton.Compose(loadUserSession, newCheckRoles([]string{
 		cs.UserRoleSu,
 		cs.UserRoleAdmin,
 	}))
 )
 
-func newTracker(action string) cod.Handler {
+func newTracker(action string) elton.Handler {
 	return tracker.New(tracker.Config{
 		// TODO 添加当前登录用户
-		OnTrack: func(info *tracker.Info, c *cod.Context) {
+		OnTrack: func(info *tracker.Info, c *elton.Context) {
 			logger.Info("tracker",
 				zap.String("action", action),
 				zap.String("cid", info.CID),
@@ -92,7 +92,7 @@ func newTracker(action string) cod.Handler {
 	})
 }
 
-func isLogin(c *cod.Context) bool {
+func isLogin(c *elton.Context) bool {
 	us := service.NewUserSession(c)
 	if us == nil || us.GetAccount() == "" {
 		return false
@@ -100,7 +100,7 @@ func isLogin(c *cod.Context) bool {
 	return true
 }
 
-func checkLogin(c *cod.Context) (err error) {
+func checkLogin(c *elton.Context) (err error) {
 	if !isLogin(c) {
 		err = errShouldLogin
 		return
@@ -108,7 +108,7 @@ func checkLogin(c *cod.Context) (err error) {
 	return c.Next()
 }
 
-func checkAnonymous(c *cod.Context) (err error) {
+func checkAnonymous(c *elton.Context) (err error) {
 	if isLogin(c) {
 		err = errLoginAlready
 		return
@@ -116,8 +116,8 @@ func checkAnonymous(c *cod.Context) (err error) {
 	return c.Next()
 }
 
-func newCheckRoles(validRoles []string) cod.Handler {
-	return func(c *cod.Context) (err error) {
+func newCheckRoles(validRoles []string) elton.Handler {
+	return func(c *elton.Context) (err error) {
 		if !isLogin(c) {
 			err = errShouldLogin
 			return

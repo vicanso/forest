@@ -20,10 +20,10 @@ import (
 	"os"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/router"
 
-	staticServe "github.com/vicanso/cod-static-serve"
+	staticServe "github.com/vicanso/elton-static-serve"
 )
 
 type (
@@ -76,7 +76,7 @@ func init() {
 	}))
 }
 
-func sendFile(c *cod.Context, file string) (err error) {
+func sendFile(c *elton.Context, file string) (err error) {
 	buf, err := box.Find(file)
 	if err != nil {
 		return
@@ -87,12 +87,12 @@ func sendFile(c *cod.Context, file string) (err error) {
 	return
 }
 
-func (ctrl assetCtrl) index(c *cod.Context) (err error) {
+func (ctrl assetCtrl) index(c *elton.Context) (err error) {
 	c.CacheMaxAge("10s")
 	return sendFile(c, "index.html")
 }
 
-func (ctrl assetCtrl) favIcon(c *cod.Context) (err error) {
-	c.SetHeader(cod.HeaderAcceptEncoding, "public, max-age=3600, s-maxage=600")
+func (ctrl assetCtrl) favIcon(c *elton.Context) (err error) {
+	c.SetHeader(elton.HeaderAcceptEncoding, "public, max-age=3600, s-maxage=600")
 	return sendFile(c, "favicon.ico")
 }

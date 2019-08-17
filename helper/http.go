@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 
 	"github.com/vicanso/hes"
 
@@ -129,7 +129,7 @@ func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Inst
 }
 
 // AttachWithContext attach with context
-func AttachWithContext(conf *axios.Config, c *cod.Context) {
+func AttachWithContext(conf *axios.Config, c *elton.Context) {
 	if c == nil || conf == nil {
 		return
 	}

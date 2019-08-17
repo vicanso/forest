@@ -15,15 +15,15 @@
 package middleware
 
 import (
-	"github.com/vicanso/cod"
-	session "github.com/vicanso/cod-session"
+	"github.com/vicanso/elton"
+	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
 )
 
 // NewSession new session middleware
-func NewSession() cod.Handler {
+func NewSession() elton.Handler {
 	client := helper.RedisGetClient()
 	if client == nil {
 		panic("session store need redis client")

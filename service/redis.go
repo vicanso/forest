@@ -29,6 +29,8 @@ var (
 type (
 	// RedisDone redis done function
 	RedisDone func() error
+	// RedisSrv redis service
+	RedisSrv struct{}
 )
 
 // RedisPing redis ping
@@ -37,27 +39,33 @@ func RedisPing() (err error) {
 	return
 }
 
-// RedisLock lock the key for ttl seconds
-func RedisLock(key string, ttl time.Duration) (bool, error) {
+// Lock lock the key for ttl seconds
+func (srv *RedisSrv) Lock(key string, ttl time.Duration) (bool, error) {
 	return redisGetClient().SetNX(key, true, ttl).Result()
 }
 
-// RedisLockWithDone lock the key for ttl, and with done function
-func RedisLockWithDone(key string, ttl time.Duration) (bool, RedisDone, error) {
-	success, err := RedisLock(key, ttl)
+// Del del the key of redis
+func (srv *RedisSrv) Del(key string) (err error) {
+	_, err = redisGetClient().Del(key).Result()
+	return
+}
+
+// LockWithDone lock the key for ttl, and with done function
+func (srv *RedisSrv) LockWithDone(key string, ttl time.Duration) (bool, RedisDone, error) {
+	success, err := srv.Lock(key, ttl)
 	// 如果lock失败，则返回no op 的done function
 	if err != nil || !success {
 		return false, redisNoop, err
 	}
 	done := func() error {
-		_, err := redisGetClient().Del(key).Result()
+		err := srv.Del(key)
 		return err
 	}
 	return true, done, nil
 }
 
-// RedisIncWithTTL inc value with ttl
-func RedisIncWithTTL(key string, ttl time.Duration) (count int64, err error) {
+// IncWithTTL inc value with ttl
+func (srv *RedisSrv) IncWithTTL(key string, ttl time.Duration) (count int64, err error) {
 	pipe := redisGetClient().TxPipeline()
 	// 保证只有首次会设置ttl
 	pipe.SetNX(key, 0, ttl)
@@ -70,12 +78,31 @@ func RedisIncWithTTL(key string, ttl time.Duration) (count int64, err error) {
 	return
 }
 
-// RedisGet get value
-func RedisGet(key string) (result string, err error) {
+// Get get value
+func (srv *RedisSrv) Get(key string) (result string, err error) {
 	result, err = redisGetClient().Get(key).Result()
 	// key不存在则不返回出错
 	if err == redis.Nil {
 		err = nil
 	}
+	return
+}
+
+// GetAndDel get value and del
+func (srv *RedisSrv) GetAndDel(key string) (result string, err error) {
+	pipe := redisGetClient().TxPipeline()
+	cmd := pipe.Get(key)
+	pipe.Del(key)
+	_, err = pipe.Exec()
+	if err != nil {
+		return
+	}
+	result = cmd.Val()
+	return
+}
+
+// Set redis set with ttl
+func (srv *RedisSrv) Set(key string, value interface{}, ttl time.Duration) (err error) {
+	redisGetClient().Set(key, value, ttl)
 	return
 }

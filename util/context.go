@@ -15,13 +15,13 @@
 package util
 
 import (
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 
 	"github.com/vicanso/forest/config"
 )
 
 // GetTrackID get track id
-func GetTrackID(c *cod.Context) string {
+func GetTrackID(c *elton.Context) string {
 	trackCookie := config.GetTrackKey()
 	if trackCookie == "" {
 		return ""
@@ -34,7 +34,7 @@ func GetTrackID(c *cod.Context) string {
 }
 
 // GetSessionID get session id
-func GetSessionID(c *cod.Context) string {
+func GetSessionID(c *elton.Context) string {
 	scf := config.GetSessionConfig()
 	cookie, _ := c.Cookie(scf.Key)
 	if cookie == nil {

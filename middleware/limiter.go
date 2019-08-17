@@ -19,13 +19,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 
-	concurrentLimiter "github.com/vicanso/cod-concurrent-limiter"
+	concurrentLimiter "github.com/vicanso/elton-concurrent-limiter"
 )
 
 const (
@@ -41,20 +41,21 @@ var (
 		Message:    "request to frequently",
 		Category:   errLimitCategory,
 	}
+	redisSrv = new(service.RedisSrv)
 )
 
 type (
 	// KeyGenerator key generator
-	KeyGenerator func(c *cod.Context) string
+	KeyGenerator func(c *elton.Context) string
 )
 
 // createConcurrentLimitLock 创建并发限制的lock函数
 func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) concurrentLimiter.Lock {
-	return func(key string, _ *cod.Context) (success bool, done func(), err error) {
+	return func(key string, _ *elton.Context) (success bool, done func(), err error) {
 		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
 		done = nil
 		if withDone {
-			success, redisDone, err := service.RedisLockWithDone(k, ttl)
+			success, redisDone, err := redisSrv.LockWithDone(k, ttl)
 			done = func() {
 				err := redisDone()
 				if err != nil {
@@ -66,13 +67,13 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			}
 			return success, done, err
 		}
-		success, err = service.RedisLock(k, ttl)
+		success, err = redisSrv.Lock(k, ttl)
 		return
 	}
 }
 
 // NewConcurrentLimit create a concurrent limit
-func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) cod.Handler {
+func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) elton.Handler {
 	return concurrentLimiter.New(concurrentLimiter.Config{
 		Lock: createConcurrentLimitLock(prefix, ttl, false),
 		Keys: keys,
@@ -80,10 +81,10 @@ func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) cod.Han
 }
 
 // NewIPLimit create a limit middleware by ip address
-func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) cod.Handler {
-	return func(c *cod.Context) (err error) {
+func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler {
+	return func(c *elton.Context) (err error) {
 		key := ipLimitKeyPrefix + "-" + prefix + "-" + c.RealIP()
-		count, err := service.RedisIncWithTTL(key, ttl)
+		count, err := redisSrv.IncWithTTL(key, ttl)
 		if err != nil {
 			return
 		}
@@ -96,10 +97,10 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) cod.Handler {
 }
 
 // NewErrorLimit create a error limit middleware
-func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) cod.Handler {
-	return func(c *cod.Context) (err error) {
+func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Handler {
+	return func(c *elton.Context) (err error) {
 		key := errorLimitKeyPrefix + "-" + fn(c)
-		result, err := service.RedisGet(key)
+		result, err := redisSrv.Get(key)
 		if err != nil {
 			return
 		}
@@ -111,7 +112,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) cod.Handl
 		err = c.Next()
 		// 如果出错，则出错次数+1
 		if err != nil {
-			service.RedisIncWithTTL(key, ttl)
+			redisSrv.IncWithTTL(key, ttl)
 		}
 		return
 	}

@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
@@ -90,7 +90,7 @@ func init() {
 }
 
 // list configuration
-func (ctrl configurationCtrl) list(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
 	params := &listConfigurationParmas{}
 	err = validate.Do(params, c.Query())
 	if err != nil {
@@ -110,7 +110,7 @@ func (ctrl configurationCtrl) list(c *cod.Context) (err error) {
 }
 
 // listAvailable list available config
-func (ctrl configurationCtrl) listAvailable(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) listAvailable(c *elton.Context) (err error) {
 	result, err := configSrv.Available()
 	if err != nil {
 		return
@@ -122,7 +122,7 @@ func (ctrl configurationCtrl) listAvailable(c *cod.Context) (err error) {
 }
 
 // listUnavailable list unavailable config
-func (ctrl configurationCtrl) listUnavailable(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) listUnavailable(c *elton.Context) (err error) {
 	result, err := configSrv.Unavailable()
 	if err != nil {
 		return
@@ -134,7 +134,7 @@ func (ctrl configurationCtrl) listUnavailable(c *cod.Context) (err error) {
 }
 
 // add configuration
-func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) add(c *elton.Context) (err error) {
 	params := &addConfigurationParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
@@ -159,7 +159,7 @@ func (ctrl configurationCtrl) add(c *cod.Context) (err error) {
 }
 
 // update configuration
-func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
 	id, err := strconv.Atoi(c.Param("configID"))
 	if err != nil {
 		return
@@ -187,7 +187,7 @@ func (ctrl configurationCtrl) update(c *cod.Context) (err error) {
 }
 
 // delete configuration
-func (ctrl configurationCtrl) delete(c *cod.Context) (err error) {
+func (ctrl configurationCtrl) delete(c *elton.Context) (err error) {
 	id, err := strconv.Atoi(c.Param("configID"))
 	if err != nil {
 		return

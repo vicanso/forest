@@ -31,4 +31,6 @@ var (
 
 	nowString = util.NowString
 	logger    = log.Default()
+
+	redisSrv = new(RedisSrv)
 )

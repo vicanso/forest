@@ -18,3 +18,5 @@ export const CONFIGURATIONS_LIST_UNAVAILABLE = `${CONFIGURATIONS}/v1/unavailable
 export const ROUTERS = `${prefix}/routers`;
 
 export const RANDOM_KEYS = `${prefix}/random-keys`;
+
+export const CAPTCHA = `${prefix}/captcha`;

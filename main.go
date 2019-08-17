@@ -19,15 +19,15 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/vicanso/cod"
-	bodyparser "github.com/vicanso/cod-body-parser"
-	errorHandler "github.com/vicanso/cod-error-handler"
-	etag "github.com/vicanso/cod-etag"
-	fresh "github.com/vicanso/cod-fresh"
-	recover "github.com/vicanso/cod-recover"
-	responder "github.com/vicanso/cod-responder"
-	routerLimiter "github.com/vicanso/cod-router-concurrent-limiter"
-	stats "github.com/vicanso/cod-stats"
+	"github.com/vicanso/elton"
+	bodyparser "github.com/vicanso/elton-body-parser"
+	errorHandler "github.com/vicanso/elton-error-handler"
+	etag "github.com/vicanso/elton-etag"
+	fresh "github.com/vicanso/elton-fresh"
+	recover "github.com/vicanso/elton-recover"
+	responder "github.com/vicanso/elton-responder"
+	routerLimiter "github.com/vicanso/elton-router-concurrent-limiter"
+	stats "github.com/vicanso/elton-stats"
 	warner "github.com/vicanso/count-warner"
 
 	"go.uber.org/zap"
@@ -59,7 +59,7 @@ func dependServiceCheck() (err error) {
 
 func main() {
 	logger := log.Default()
-	d := cod.New()
+	d := elton.New()
 	d.SignedKeys = service.GetSignedKeys()
 
 	// 未处理的error才会触发
@@ -69,7 +69,7 @@ func main() {
 	warnerException.On(func(_ string, _ int64) {
 		service.AlarmError("too many uncaught exception")
 	})
-	d.OnError(func(c *cod.Context, err error) {
+	d.OnError(func(c *elton.Context, err error) {
 		// 可以针对实际场景输出更多的日志信息
 		logger.DPanic("exception",
 			zap.String("ip", c.RealIP()),
@@ -89,12 +89,12 @@ func main() {
 	})
 
 	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
-		ip := cod.GetRealIP(req)
+		ip := elton.GetRealIP(req)
 		logger.Info("404",
 			zap.String("ip", ip),
 			zap.String("uri", req.RequestURI),
 		)
-		resp.Header().Set(cod.HeaderContentType, cod.MIMEApplicationJSON)
+		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		resp.WriteHeader(http.StatusNotFound)
 		resp.Write([]byte(`{"statusCode": 404,"message": "Not found"}`))
 		warner404.Inc(ip, 1)
@@ -107,7 +107,7 @@ func main() {
 
 	// 接口相关统计信息
 	d.Use(stats.New(stats.Config{
-		OnStats: func(info *stats.Info, c *cod.Context) {
+		OnStats: func(info *stats.Info, c *elton.Context) {
 			// ping 的日志忽略
 			if info.URI == "/ping" {
 				return

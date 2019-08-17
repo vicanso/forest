@@ -17,13 +17,13 @@ package middleware
 import (
 	"bytes"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
 )
 
 // NewRouterController create a router controller
-func NewRouterController() cod.Handler {
-	return func(c *cod.Context) (err error) {
+func NewRouterController() elton.Handler {
+	return func(c *elton.Context) (err error) {
 		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
 		if routerConfig == nil {
 			return c.Next()
@@ -32,9 +32,9 @@ func NewRouterController() cod.Handler {
 		c.StatusCode = routerConfig.Status
 		contentType := routerConfig.CotentType
 		if contentType == "" {
-			contentType = cod.MIMEApplicationJSON
+			contentType = elton.MIMEApplicationJSON
 		}
-		c.SetHeader(cod.HeaderContentType, contentType)
+		c.SetHeader(elton.HeaderContentType, contentType)
 		c.BodyBuffer = bytes.NewBufferString(routerConfig.Response)
 		return nil
 	}

@@ -16,22 +16,34 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
+)
+
+const (
+	xCaptchHeader = "X-Captcha"
+	errCategory   = "common-validate"
 )
 
 var (
 	errQueryNotAllow = &hes.Error{
 		StatusCode: http.StatusBadRequest,
 		Message:    "query is not allowed",
-		Category:   "common-validate",
+		Category:   errCategory,
+	}
+	errCaptchIsInvalid = &hes.Error{
+		StatusCode: http.StatusBadRequest,
+		Message:    "captcha is invalid",
+		Category:   errCategory,
 	}
 )
 
 // NoQuery no query middleware
-func NoQuery(c *cod.Context) (err error) {
+func NoQuery(c *elton.Context) (err error) {
 	if c.Request.URL.RawQuery != "" {
 		err = errQueryNotAllow
 		return
@@ -40,9 +52,9 @@ func NoQuery(c *cod.Context) (err error) {
 }
 
 // WaitFor at least wait for duration
-func WaitFor(d time.Duration) cod.Handler {
+func WaitFor(d time.Duration) elton.Handler {
 	ns := d.Nanoseconds()
-	return func(c *cod.Context) (err error) {
+	return func(c *elton.Context) (err error) {
 		start := time.Now()
 		err = c.Next()
 		use := time.Now().UnixNano() - start.UnixNano()
@@ -51,5 +63,30 @@ func WaitFor(d time.Duration) cod.Handler {
 			time.Sleep(time.Duration(ns-use) * time.Nanosecond)
 		}
 		return
+	}
+}
+
+// ValidateCaptch validate chapter
+func ValidateCaptch() elton.Handler {
+	return func(c *elton.Context) (err error) {
+		value := c.GetRequestHeader(xCaptchHeader)
+		if value == "" {
+			err = errCaptchIsInvalid
+			return
+		}
+		arr := strings.Split(value, ":")
+		if len(arr) != 2 {
+			err = errCaptchIsInvalid
+			return
+		}
+		valid, err := service.ValidateCaptcha(arr[0], arr[1])
+		if err != nil {
+			return err
+		}
+		if !valid {
+			err = errCaptchIsInvalid
+			return
+		}
+		return c.Next()
 	}
 }
