@@ -41,13 +41,15 @@ type (
 	// CaptchaInfo captcha info
 	CaptchaInfo struct {
 		Data []byte `json:"data,omitempty"`
-		ID   string `json:"id,omitempty"`
+		// json输出时，忽略此字段
+		Value string `json:"-"`
+		ID    string `json:"id,omitempty"`
 	}
 )
 
 func init() {
 	fontPath = config.GetString("resources.font")
-
+	draw2d.SetFontFolder(fontPath)
 }
 
 // createCaptcha create captcha image
@@ -60,17 +62,16 @@ func createCaptcha(width, height int, text string) (img *image.RGBA, err error) 
 	gc.Fill()
 
 	gc.FillStroke()
-	draw2d.SetFontFolder(fontPath)
 
 	// Set the font luximbi.ttf
 	gc.SetFontData(draw2d.FontData{Name: "luxi", Family: draw2d.FontFamilyMono, Style: draw2d.FontStyleBold | draw2d.FontStyleItalic})
-
-	gc.SetFillColor(color.RGBA{
+	c := color.RGBA{
 		R: 0,
 		G: 0,
 		B: 0,
 		A: 120,
-	})
+	}
+	gc.SetFillColor(c)
 	fontCount := len(text)
 	offset := 10
 	eachFontWidth := (width - 2*offset) / fontCount
@@ -86,6 +87,21 @@ func createCaptcha(width, height int, text string) (img *image.RGBA, err error) 
 		}
 		gc.Rotate(angle)
 		gc.FillStringAt(string(ch), offsetX, offsetY)
+	}
+
+	gc.SetStrokeColor(c)
+	gc.SetLineWidth(1)
+	for index := 0; index < 8; index++ {
+		gc.BeginPath() // Initialize a new path
+		x1 := float64(rand.Int31n(int32(width / 2)))
+		y1 := float64(rand.Int31n(int32(height)))
+
+		x2 := float64(rand.Int31n(int32(width/2)) + int32(width/2))
+		y2 := float64(rand.Int31n(int32(height)))
+		gc.MoveTo(x1, y1)
+		gc.LineTo(x2, y2)
+		gc.Close()
+		gc.FillStroke()
 	}
 
 	return
@@ -109,8 +125,9 @@ func GetCaptcha() (info *CaptchaInfo, err error) {
 		return
 	}
 	info = &CaptchaInfo{
-		Data: buffer.Bytes(),
-		ID:   id,
+		Data:  buffer.Bytes(),
+		Value: value,
+		ID:    id,
 	}
 	return
 }
