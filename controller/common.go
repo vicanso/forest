@@ -35,13 +35,13 @@ func init() {
 
 	g.GET("/ping", ctrl.ping)
 
-	g.GET("/ip-location", ctrl.location)
+	g.GET("/commons/ip-location", ctrl.location)
 
-	g.GET("/routers", ctrl.routers)
+	g.GET("/commons/routers", ctrl.routers)
 
-	g.GET("/random-keys", ctrl.randomKeys)
+	g.GET("/commons/random-keys", ctrl.randomKeys)
 
-	g.GET("/captcha", ctrl.captcha)
+	g.GET("/commons/captcha", ctrl.captcha)
 }
 
 func (ctrl commonCtrl) ping(c *elton.Context) error {

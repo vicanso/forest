@@ -15,8 +15,8 @@ export const CONFIGURATIONS_LIST = `${CONFIGURATIONS}/v1`;
 export const CONFIGURATIONS_LIST_AVAILABLE = `${CONFIGURATIONS}/v1/available`;
 export const CONFIGURATIONS_LIST_UNAVAILABLE = `${CONFIGURATIONS}/v1/unavailable`;
 
-export const ROUTERS = `${prefix}/routers`;
+export const ROUTERS = `${prefix}/commons/routers`;
 
-export const RANDOM_KEYS = `${prefix}/random-keys`;
+export const RANDOM_KEYS = `${prefix}/commons/random-keys`;
 
-export const CAPTCHA = `${prefix}/captcha`;
+export const CAPTCHA = `${prefix}/commons/captcha`;
