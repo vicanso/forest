@@ -183,7 +183,11 @@ func GetRedisConfig() (options RedisOptions, err error) {
 	pass, ok := info.User.Password()
 	// 密码从env中读取
 	if ok {
-		pass = os.Getenv(pass)
+		v := os.Getenv(pass)
+		// 如果不为空，则表示从env获取成功
+		if v != "" {
+			pass = v
+		}
 	}
 	options.Password = pass
 

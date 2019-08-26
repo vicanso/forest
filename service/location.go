@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	locationIns *axios.Instance
+	LocationIns *axios.Instance
 )
 
 const (
@@ -51,7 +51,7 @@ type (
 
 func init() {
 	locationBaseURL := config.GetString("location.baseURL")
-	locationIns = helper.NewInstance(locationService, locationBaseURL, 5*time.Second)
+	LocationIns = helper.NewInstance(locationService, locationBaseURL, 5*time.Second)
 }
 
 // GetLocationByIP get location by ip
@@ -63,7 +63,7 @@ func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 		},
 	}
 	helper.AttachWithContext(conf, c)
-	resp, err := locationIns.Request(conf)
+	resp, err := LocationIns.Request(conf)
 	if err != nil {
 		return
 	}

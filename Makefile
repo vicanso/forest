@@ -4,7 +4,7 @@ export GO111MODULE = on
 
 # for dev
 dev:
-	PASS=123456 fresh
+	fresh
 
 test: export GO_ENV=test
 test:

@@ -13,6 +13,7 @@ require (
 	github.com/llgcode/draw2d v0.0.0-20190810100245-79e59b6b8fbc
 	github.com/oklog/ulid v1.3.1
 	github.com/spf13/viper v1.4.0
+	github.com/stretchr/testify v1.3.0
 	github.com/vicanso/count-warner v0.0.1
 	github.com/vicanso/elton v0.2.0
 	github.com/vicanso/elton-body-parser v0.1.1
@@ -27,7 +28,7 @@ require (
 	github.com/vicanso/elton-static-serve v0.1.0
 	github.com/vicanso/elton-stats v0.1.0
 	github.com/vicanso/elton-tracker v0.1.1
-	github.com/vicanso/go-axios v0.0.3
+	github.com/vicanso/go-axios v0.0.4
 	github.com/vicanso/hes v0.2.1
 	github.com/vicanso/ips v0.0.1
 	go.uber.org/zap v1.10.0
