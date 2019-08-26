@@ -31,7 +31,7 @@ class LoginRegister extends React.Component {
       const data = await commonService.getCaptcha();
       this.setState({
         captchaID: data.id,
-        captchaData: `data:image/png;base64,${data.data}`
+        captchaData: `data:image/${data.type};base64,${data.data}`
       });
     } catch (err) {
       message.error(err.message);

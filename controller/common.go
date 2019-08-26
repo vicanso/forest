@@ -85,11 +85,19 @@ func (ctrl commonCtrl) randomKeys(c *elton.Context) (err error) {
 }
 
 func (ctrl commonCtrl) captcha(c *elton.Context) (err error) {
-	info, err := service.GetCaptcha()
+	bgColor := c.QueryParam("bg")
+	fontColor := c.QueryParam("color")
+	if bgColor == "" {
+		bgColor = "255,255,255"
+	}
+	if fontColor == "" {
+		fontColor = "102,102,102"
+	}
+	info, err := service.GetCaptcha(fontColor, bgColor)
 	if err != nil {
 		return
 	}
-	// c.SetContentTypeByExt(".png")
+	// c.SetContentTypeByExt(".jpeg")
 	// c.Body = info.Data
 	c.Body = info
 	return

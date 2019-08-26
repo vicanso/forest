@@ -18,8 +18,10 @@ import (
 	"bytes"
 	"image"
 	"image/color"
-	"image/png"
+	"image/jpeg"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/llgcode/draw2d"
@@ -27,6 +29,7 @@ import (
 	"github.com/llgcode/draw2d/draw2dkit"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 )
 
 var (
@@ -44,6 +47,7 @@ type (
 		// json输出时，忽略此字段
 		Value string `json:"-"`
 		ID    string `json:"id,omitempty"`
+		Type  string `json:"type,omitempty"`
 	}
 )
 
@@ -53,25 +57,19 @@ func init() {
 }
 
 // createCaptcha create captcha image
-func createCaptcha(width, height int, text string) (img *image.RGBA, err error) {
+func createCaptcha(fontColor, bgColor color.Color, width, height int, text string) (img *image.RGBA, err error) {
 	img = image.NewRGBA(image.Rect(0, 0, width, height))
 	gc := draw2dimg.NewGraphicContext(img)
 	draw2dkit.RoundedRectangle(gc, 0, 0, float64(width), float64(height), 0, 0)
-	// 背景色设置为透明
-	gc.SetFillColor(color.RGBA{255, 255, 255, 0})
+	gc.SetFillColor(bgColor)
 	gc.Fill()
 
 	gc.FillStroke()
 
 	// Set the font luximbi.ttf
 	gc.SetFontData(draw2d.FontData{Name: "luxi", Family: draw2d.FontFamilyMono, Style: draw2d.FontStyleBold | draw2d.FontStyleItalic})
-	c := color.RGBA{
-		R: 0,
-		G: 0,
-		B: 0,
-		A: 120,
-	}
-	gc.SetFillColor(c)
+
+	gc.SetFillColor(fontColor)
 	fontCount := len(text)
 	offset := 10
 	eachFontWidth := (width - 2*offset) / fontCount
@@ -89,7 +87,7 @@ func createCaptcha(width, height int, text string) (img *image.RGBA, err error) 
 		gc.FillStringAt(string(ch), offsetX, offsetY)
 	}
 
-	gc.SetStrokeColor(c)
+	gc.SetStrokeColor(fontColor)
 	gc.SetLineWidth(1)
 	for index := 0; index < 8; index++ {
 		gc.BeginPath() // Initialize a new path
@@ -107,15 +105,53 @@ func createCaptcha(width, height int, text string) (img *image.RGBA, err error) 
 	return
 }
 
+func parseColor(s string) (c color.RGBA, err error) {
+	arr := strings.Split(s, ",")
+	if len(arr) != 3 {
+		err = hes.New("color is invalid")
+		return
+	}
+	c.A = 0xff
+	for index, v := range arr {
+		value, e := strconv.Atoi(v)
+		if e != nil {
+			err = hes.Wrap(e)
+			return
+		}
+		if value > 255 || value < 0 {
+			err = hes.New("color value is invalid")
+			return
+		}
+		switch index {
+		case 0:
+			c.R = uint8(value)
+		case 1:
+			c.G = uint8(value)
+		default:
+			c.B = uint8(value)
+		}
+	}
+	return
+}
+
 // GetCaptcha get captcha
-func GetCaptcha() (info *CaptchaInfo, err error) {
+func GetCaptcha(fontColor, bgColor string) (info *CaptchaInfo, err error) {
 	value := util.RandomDigit(4)
-	img, err := createCaptcha(80, 40, value)
+	fc, err := parseColor(fontColor)
+	if err != nil {
+		return
+	}
+	bc, err := parseColor(bgColor)
+	if err != nil {
+		return
+	}
+
+	img, err := createCaptcha(fc, bc, 80, 40, value)
 	if err != nil {
 		return
 	}
 	buffer := new(bytes.Buffer)
-	err = png.Encode(buffer, img)
+	err = jpeg.Encode(buffer, img, nil)
 	if err != nil {
 		return
 	}
@@ -128,6 +164,7 @@ func GetCaptcha() (info *CaptchaInfo, err error) {
 		Data:  buffer.Bytes(),
 		Value: value,
 		ID:    id,
+		Type:  "jpeg",
 	}
 	return
 }
