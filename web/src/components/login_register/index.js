@@ -133,8 +133,12 @@ class LoginRegister extends React.Component {
                     <Input
                       placeholder="请输入图形验证码"
                       onChange={e => {
+                        const v = e.target.value.trim();
+                        if (v.length > 4) {
+                          message.warn("请输入4位长度验证码");
+                        }
                         this.setState({
-                          captcha: e.target.value.trim()
+                          captcha: v,
                         });
                       }}
                     />

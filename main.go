@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
 	bodyparser "github.com/vicanso/elton-body-parser"
 	errorHandler "github.com/vicanso/elton-error-handler"
@@ -28,7 +29,6 @@ import (
 	responder "github.com/vicanso/elton-responder"
 	routerLimiter "github.com/vicanso/elton-router-concurrent-limiter"
 	stats "github.com/vicanso/elton-stats"
-	warner "github.com/vicanso/count-warner"
 
 	"go.uber.org/zap"
 
