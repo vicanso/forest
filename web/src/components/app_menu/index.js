@@ -1,9 +1,10 @@
 import React from "react";
-
+import PropTypes from "prop-types";
 import { Menu, Icon } from "antd";
 import { Link, withRouter } from "react-router-dom";
 
 import {
+  HOME_PATH,
   USER_PATH,
   USER_LOGIN_RECORDS_PATH,
   ALL_CONFIG_PATH,
@@ -75,6 +76,8 @@ const userMenu = {
   ]
 };
 
+const menuList = [configMenu, userMenu];
+
 class AppMenu extends React.Component {
   state = {
     defaultOpenKeys: null,
@@ -85,7 +88,7 @@ class AppMenu extends React.Component {
     const { pathname } = props.location;
     const defaultSelectedKeys = [];
     const defaultOpenKeys = [];
-    [configMenu, userMenu].forEach(menu => {
+    menuList.forEach(menu => {
       menu.children.forEach(item => {
         if (item.url === pathname) {
           defaultSelectedKeys.push(item.key);
@@ -111,28 +114,39 @@ class AppMenu extends React.Component {
       </SubMenu>
     );
   }
-  renderConfigMenus() {
-    return this.renderMenus(configMenu);
-  }
-  renderUserMenus() {
-    return this.renderMenus(userMenu);
+  renderAllMenu() {
+    const { account } = this.props;
+    if (!account) {
+      return;
+    }
+    const arr = menuList.map(item => {
+      return this.renderMenus(item);
+    });
+    return arr;
   }
   render() {
     const { defaultSelectedKeys, defaultOpenKeys } = this.state;
     return (
       <div className="AppMenu">
+        <Link className="logo" to={HOME_PATH}>
+          <Icon type="home" />
+          Forest
+        </Link>
         <Menu
           mode="inline"
           theme="dark"
           defaultOpenKeys={defaultOpenKeys}
           defaultSelectedKeys={defaultSelectedKeys}
         >
-          {this.renderConfigMenus()}
-          {this.renderUserMenus()}
+          {this.renderAllMenu()}
         </Menu>
       </div>
     );
   }
 }
+
+AppMenu.propTypes = {
+  account: PropTypes.string
+};
 
 export default withRouter(AppMenu);

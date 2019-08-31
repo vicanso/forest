@@ -15,6 +15,7 @@ import PropTypes from "prop-types";
 import "./basic_config.sass";
 import ConfigEditor from "../config_editor";
 import * as configService from "../../services/configuration";
+import { isAdminUser } from "../../helpers/util";
 
 const { Paragraph } = Typography;
 
@@ -38,8 +39,8 @@ class BasicConfig extends React.Component {
     this.fetchUserInfo(props);
   }
   async fetchUserInfo(props) {
-    const { isAdmin } = props;
-    if (!isAdmin) {
+    const { roles } = props;
+    if (!isAdminUser(roles)) {
       notification.open({
         message: "请使用管理员登录",
         description: "此功能需要先登录并有管理权限才可使用"
@@ -128,7 +129,7 @@ class BasicConfig extends React.Component {
 
 BasicConfig.propTypes = {
   account: PropTypes.string.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  roles: PropTypes.array.isRequired
 };
 
 export default BasicConfig;

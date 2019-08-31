@@ -1,6 +1,8 @@
 import { sha256 } from "./crypto";
 
 const hash = "JT";
+const suRole = "su";
+const adminRole = "role";
 
 export function setBeginOfDay(date) {
   return date
@@ -22,4 +24,28 @@ export function setEndOfDay(date) {
 
 export function generatePassword(pass) {
   return sha256(pass + hash);
+}
+
+// includeRole 判断是否包括角色
+function includeRole(roles, checkRoles) {
+  let found = false;
+  if (!roles || !checkRoles) {
+    return found;
+  }
+  roles.forEach(item => {
+    if (found) {
+      return;
+    }
+    checkRoles.forEach(checkItem => {
+      if (item === checkItem) {
+        found = true;
+      }
+    });
+  });
+  return found;
+}
+
+// isAdminUser 判断是否admin
+export function isAdminUser(roles) {
+  return includeRole(roles, [suRole, adminRole]);
 }

@@ -15,6 +15,7 @@ import ConfigEditor from "../config_editor";
 import ConfigTable from "../config_table";
 import "./signed_keys_config.sass";
 import * as commonSerivce from "../../services/common";
+import { isAdminUser } from "../../helpers/util";
 
 const { Paragraph } = Typography;
 const signedKeyCategory = "signedKey";
@@ -28,8 +29,8 @@ class SignedKeysConfig extends React.Component {
     currentKeys: null
   };
   componentDidMount() {
-    const { isAdmin } = this.props;
-    if (!isAdmin) {
+    const { roles } = this.props;
+    if (!isAdminUser(roles)) {
       notification.open({
         message: "请使用管理员登录",
         description: "此功能需要先登录并有管理权限才可使用"
@@ -145,8 +146,8 @@ class SignedKeysConfig extends React.Component {
   }
   renderContent() {
     const { mode } = this.state;
-    const { isAdmin } = this.props;
-    if (!isAdmin) {
+    const { roles } = this.props;
+    if (!isAdminUser(roles)) {
       return;
     }
     return (
@@ -176,7 +177,7 @@ class SignedKeysConfig extends React.Component {
 
 SignedKeysConfig.propTypes = {
   account: PropTypes.string.isRequired,
-  isAdmin: PropTypes.bool.isRequired
+  roles: PropTypes.array.isRequired
 };
 
 export default SignedKeysConfig;

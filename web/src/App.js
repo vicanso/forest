@@ -13,7 +13,8 @@ import {
   REGISTER_PATH,
   LOGIN_PATH,
   USER_PATH,
-  USER_LOGIN_RECORDS_PATH
+  USER_LOGIN_RECORDS_PATH,
+  HOME_PATH
 } from "./paths";
 import { USERS_ME } from "./urls";
 import AppMenu from "./components/app_menu";
@@ -27,8 +28,9 @@ import ConfigList from "./components/config_list";
 import UserList from "./components/user_list";
 import UserLoginRecordList from "./components/user_login_record_list";
 import IPBlockList from "./components/ip_block_list";
+import Home from "./components/home";
 
-function NeedLoginRoute({ component: Component, account, isAdmin, ...rest }) {
+function NeedLoginRoute({ component: Component, account, roles, ...rest }) {
   return (
     <Route
       {...rest}
@@ -38,7 +40,7 @@ function NeedLoginRoute({ component: Component, account, isAdmin, ...rest }) {
           history.push(LOGIN_PATH);
           return;
         }
-        return <Component {...props} account={account} isAdmin={isAdmin} />;
+        return <Component {...props} account={account} roles={roles} />;
       }}
     />
   );
@@ -48,7 +50,7 @@ class App extends React.Component {
   state = {
     loading: false,
     account: "",
-    isAdmin: false
+    roles: null
   };
   async componentWillMount() {
     this.setState({
@@ -70,23 +72,17 @@ class App extends React.Component {
     }, 5 * 1000);
   }
   setUserInfo(data) {
-    let isAdmin = false;
-    (data.roles || []).forEach(item => {
-      if (item === "su" || item === "admin") {
-        isAdmin = true;
-      }
-    });
     this.setState({
       account: data.account || "",
-      isAdmin
+      roles: data.roles || []
     });
   }
   render() {
-    const { account, isAdmin, loading } = this.state;
+    const { account, roles, loading } = this.state;
     return (
       <div className="App">
         <HashRouter>
-          <AppMenu />
+          <AppMenu account={account} />
           {loading && (
             <div className="loadingWrapper">
               <Spin tip="加载中..." />
@@ -110,45 +106,46 @@ class App extends React.Component {
                 path={ALL_CONFIG_PATH}
                 component={ConfigList}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 path={BASIC_CONFIG_PATH}
                 component={BasicConfig}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 path={SIGNED_KEYS_CONFIG_PATH}
                 component={SignedKeysConfig}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 path={ROUTER_CONFIG_PATH}
                 component={RouterConfig}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 exact
                 path={USER_PATH}
                 component={UserList}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 path={USER_LOGIN_RECORDS_PATH}
                 component={UserLoginRecordList}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
               <NeedLoginRoute
                 path={IP_BLOCK_CONFIG_PATH}
                 component={IPBlockList}
                 account={account}
-                isAdmin={isAdmin}
+                roles={roles}
               />
+              <Route path={HOME_PATH} component={Home} exact />
             </div>
           )}
         </HashRouter>

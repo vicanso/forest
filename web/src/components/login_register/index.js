@@ -138,7 +138,7 @@ class LoginRegister extends React.Component {
                           message.warn("请输入4位长度验证码");
                         }
                         this.setState({
-                          captcha: v,
+                          captcha: v
                         });
                       }}
                     />

@@ -1,9 +1,11 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Button, Card, Typography, Form, Col, notification, Input } from "antd";
 
 import ConfigEditor from "../config_editor";
 import ConfigTable from "../config_table";
 import "./ip_block_list.sass";
+import { isAdminUser } from "../../helpers/util";
 
 const { Paragraph } = Typography;
 const ipBlockCategory = "ipBlock";
@@ -88,8 +90,8 @@ class IPBlockList extends React.Component {
   }
   renderContent() {
     const { mode } = this.state;
-    const { isAdmin } = this.props;
-    if (!isAdmin) {
+    const { roles } = this.props;
+    if (!isAdminUser(roles)) {
       return;
     }
     return (
@@ -113,8 +115,8 @@ class IPBlockList extends React.Component {
     );
   }
   componentDidMount() {
-    const { isAdmin } = this.props;
-    if (!isAdmin) {
+    const { roles } = this.props;
+    if (!isAdminUser(roles)) {
       notification.open({
         message: "请使用管理员登录",
         description: "此功能需要先登录并有管理权限才可使用"
@@ -125,5 +127,10 @@ class IPBlockList extends React.Component {
     return <div className="IPBlockList">{this.renderContent()}</div>;
   }
 }
+
+IPBlockList.propTypes = {
+  account: PropTypes.string.isRequired,
+  roles: PropTypes.array.isRequired
+};
 
 export default IPBlockList;

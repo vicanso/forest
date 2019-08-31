@@ -1,3 +1,5 @@
+export const HOME_PATH = "/";
+
 export const ALL_CONFIG_PATH = "/config/all";
 export const BASIC_CONFIG_PATH = "/config/basic";
 export const SIGNED_KEYS_CONFIG_PATH = "/config/signed-keys";
