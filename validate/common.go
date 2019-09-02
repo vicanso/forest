@@ -33,4 +33,11 @@ func init() {
 		}
 		return govalidator.InRangeInt(value, "0", "1000")
 	})
+	Add("xDuration", func(i interface{}, _ interface{}) bool {
+		value, ok := i.(string)
+		if !ok {
+			return false
+		}
+		return govalidator.Matches(value, `^[1-9][0-9]*[smh]$`)
+	})
 }
