@@ -20,24 +20,16 @@ import (
 
 func init() {
 	Add("xLimit", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
+		value := govalidator.ToString(i)
 		return govalidator.InRangeInt(value, "1", "20")
 	})
 	Add("xOffset", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
+		value := govalidator.ToString(i)
 		return govalidator.InRangeInt(value, "0", "1000")
 	})
+
 	Add("xDuration", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
+		value := govalidator.ToString(i)
 		return govalidator.Matches(value, `^[1-9][0-9]*[smh]$`)
 	})
 }

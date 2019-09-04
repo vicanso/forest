@@ -159,7 +159,7 @@ func (srv *UserSrv) Login(account, password, token string) (u *User, err error) 
 }
 
 // Update update user
-func (srv *UserSrv) Update(user *User, attrs ...interface{}) (err error) {
+func (srv *UserSrv) Update(user User, attrs ...interface{}) (err error) {
 	err = pgGetClient().Model(user).Update(attrs...).Error
 	return
 }
@@ -195,7 +195,7 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 // AddTrackRecord add track record
 func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord) (err error) {
 	// TODO 后续写入influxdb，避免被攻击而产生大量的无用记录
-	err = pgCreate((r))
+	err = pgCreate(r)
 	if r.ID != 0 {
 		id := r.ID
 		ip := r.IP

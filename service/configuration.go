@@ -99,7 +99,7 @@ func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 }
 
 // Update update configuration
-func (srv *ConfigurationSrv) Update(conf *Configuration, attrs ...interface{}) (err error) {
+func (srv *ConfigurationSrv) Update(conf Configuration, attrs ...interface{}) (err error) {
 	err = pgGetClient().Model(conf).Update(attrs...).Error
 	return
 }

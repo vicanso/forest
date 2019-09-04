@@ -79,7 +79,10 @@ func Sha256(str string) string {
 // ContainsString check the string slice contain the string
 func ContainsString(arr []string, str string) (found bool) {
 	for _, v := range arr {
-		if !found && v == str {
+		if found {
+			break
+		}
+		if v == str {
 			found = true
 		}
 	}

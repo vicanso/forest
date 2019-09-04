@@ -364,7 +364,7 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 			return
 		}
 	}
-	err = userSrv.Update(&service.User{
+	err = userSrv.Update(service.User{
 		ID: uint(id),
 	}, map[string]interface{}{
 		"roles": params.Roles,

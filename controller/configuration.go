@@ -169,7 +169,7 @@ func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	err = configSrv.Update(&service.Configuration{
+	err = configSrv.Update(service.Configuration{
 		ID: uint(id),
 	}, service.Configuration{
 		Status:    params.Status,

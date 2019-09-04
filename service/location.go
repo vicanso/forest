@@ -55,7 +55,7 @@ func init() {
 }
 
 // GetLocationByIP get location by ip
-func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
+func GetLocationByIP(ip string, c *elton.Context) (lo *Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
@@ -67,7 +67,8 @@ func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 	if err != nil {
 		return
 	}
-	err = resp.JSON(&lo)
+	lo = &Location{}
+	err = resp.JSON(lo)
 	if err != nil {
 		return
 	}
