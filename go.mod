@@ -5,8 +5,10 @@ go 1.12
 require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/dustin/go-humanize v1.0.0
+	github.com/fogleman/gg v1.3.0
 	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/gobuffalo/packr/v2 v2.6.0
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/iancoleman/strcase v0.0.0-20190422225806-e506e3ef7365
 	github.com/jinzhu/gorm v1.9.10
 	github.com/json-iterator/go v1.1.7
@@ -33,5 +35,6 @@ require (
 	github.com/vicanso/hes v0.2.1
 	github.com/vicanso/ips v0.0.1
 	go.uber.org/zap v1.10.0
+	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

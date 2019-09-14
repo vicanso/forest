@@ -19,7 +19,7 @@ list-mod:
 
 build:
 	packr2
-	go build -o forest 
+	go build -ldflags "-X main.Version=0.0.1 -X 'main.BuildAt=`date`' -X 'main.GO=`go version`'" -o forest 
 
 clean:
 	packr2 clean

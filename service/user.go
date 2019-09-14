@@ -48,6 +48,14 @@ var (
 	errAccountOrPasswordInvalid = hes.New("account or password is invalid")
 )
 
+var (
+	// admin用户角色
+	adminUserRoles = []string{
+		cs.UserRoleSu,
+		cs.UserRoleAdmin,
+	}
+)
+
 type (
 	// UserSession user session struct
 	UserSession struct {
@@ -335,6 +343,11 @@ func (u *UserSession) GetRoles() []string {
 		}
 	}
 	return roles
+}
+
+// IsAdmin check user is admin
+func (u *UserSession) IsAdmin() bool {
+	return util.UserRoleIsValid(adminUserRoles, u.GetRoles())
 }
 
 // Destroy destroy user session

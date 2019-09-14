@@ -37,17 +37,18 @@ func runTicker(ticker *time.Ticker, message string, do func() error, restart fun
 			log.Default().DPanic(message+" panic",
 				zap.Error(err),
 			)
+			service.AlarmError(message + " panic")
 		}
 		// 如果退出了，重新启动
 		go restart()
 	}()
 	for range ticker.C {
 		err := do()
-		// TODO 检测不通过时，发送告警
 		if err != nil {
 			log.Default().Error(message+" fail",
 				zap.Error(err),
 			)
+			service.AlarmError(message + " fail")
 		}
 	}
 }

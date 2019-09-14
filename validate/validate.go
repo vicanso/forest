@@ -68,7 +68,9 @@ func Do(s interface{}, data interface{}) (err error) {
 	err = doValidate(s, data)
 	if err != nil {
 		he := hes.Wrap(err)
-		he.Category = errCategory
+		if he.Category == "" {
+			he.Category = errCategory
+		}
 		err = he
 	}
 	return

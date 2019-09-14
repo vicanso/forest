@@ -15,6 +15,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -44,6 +46,15 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
+var (
+	// Version version of tiny
+	Version string
+	// BuildAt build at
+	BuildAt string
+	// GO go version
+	GO string
+)
+
 // 相关依赖服务的校验，主要是数据库等
 func dependServiceCheck() (err error) {
 	err = service.RedisPing()
@@ -59,6 +70,14 @@ func dependServiceCheck() (err error) {
 }
 
 func main() {
+	showVersion := flag.Bool("v", false, "show version")
+
+	flag.Parse()
+	if *showVersion {
+		fmt.Printf("version %s\nbuild at %s\n%s\n", Version, BuildAt, GO)
+		return
+	}
+
 	logger := log.Default()
 	d := elton.New()
 	d.SignedKeys = service.GetSignedKeys()
@@ -87,7 +106,6 @@ func main() {
 			zap.String("uri", c.Request.RequestURI),
 			zap.Error(err),
 		)
-		// TODO 邮件通知
 		warnerException.Inc("exception", 1)
 	})
 	// 对于404的请求，不会执行中间件，一般都是因为攻击之类才会导致大量出现404，

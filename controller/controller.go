@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
@@ -67,19 +66,21 @@ var (
 	// 判断用户是否未登录
 	shouldAnonymous = elton.Compose(loadUserSession, checkAnonymous)
 	// 判断用户是否admin权限
-	shouldBeAdmin = elton.Compose(loadUserSession, newCheckRoles([]string{
-		cs.UserRoleSu,
-		cs.UserRoleAdmin,
-	}))
+	shouldBeAdmin = elton.Compose(loadUserSession, isAdmin)
 )
 
 func newTracker(action string) elton.Handler {
 	return tracker.New(tracker.Config{
-		// TODO 添加当前登录用户
 		OnTrack: func(info *tracker.Info, c *elton.Context) {
+			account := ""
+			us := service.NewUserSession(c)
+			if us != nil {
+				account = us.GetAccount()
+			}
 			logger.Info("tracker",
 				zap.String("action", action),
 				zap.String("cid", info.CID),
+				zap.String("account", account),
 				zap.String("ip", c.RealIP()),
 				zap.String("sid", util.GetSessionID(c)),
 				zap.Int("result", info.Result),
@@ -124,17 +125,24 @@ func newCheckRoles(validRoles []string) elton.Handler {
 		}
 		us := service.NewUserSession(c)
 		roles := us.GetRoles()
-		valid := false
-		for _, role := range validRoles {
-			if util.ContainsString(roles, role) {
-				valid = true
-				break
-			}
-		}
+		valid := util.UserRoleIsValid(validRoles, roles)
 		if valid {
 			return c.Next()
 		}
 		err = errForbidden
 		return
 	}
+}
+
+func isAdmin(c *elton.Context) (err error) {
+	if !isLogin(c) {
+		err = errShouldLogin
+		return
+	}
+	us := service.NewUserSession(c)
+	if us.IsAdmin() {
+		return c.Next()
+	}
+	err = errForbidden
+	return
 }

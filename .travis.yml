@@ -6,10 +6,13 @@ go:
 
 services:
   - docker
+  - postgresql
+  - redis
 
-before_install:
-  - docker pull redis:alpine
-  - docker run -p 6379:6379 -d redis:alpine
+before_script:
+  - psql -c "CREATE DATABASE forest;" -U postgres
+  - psql -c "CREATE USER vicanso WITH PASSWORD '123456';" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE forest to vicanso;" -U postgres
 
 script:
   - env GO111MODULE=on make test
