@@ -6,7 +6,7 @@ RUN cd /forest/web \
   && yarn build \
   && rm -rf node_module
 
-FROM golang:1.12-alpine as builder
+FROM golang:1.13-alpine as builder
 
 COPY --from=webbuilder /forest /forest
 
@@ -25,7 +25,6 @@ RUN addgroup -g 1000 go \
   && apk add --no-cache ca-certificates
 
 COPY --from=builder /forest/forest /usr/local/bin/forest
-COPY --from=webbuilder /forest/font /font
 
 USER go
 

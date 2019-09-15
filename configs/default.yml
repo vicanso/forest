@@ -49,7 +49,3 @@ mail:
 alarm:
   receiver:
   - tree.xie@outlook.com
-
-# 资源目录
-resources:
-  font: /Users/xieshuzhou/github/forest/font

@@ -26,6 +26,7 @@ import (
 )
 
 var (
+	// LocationIns location http instance
 	LocationIns *axios.Instance
 )
 
