@@ -23,6 +23,7 @@ import (
 
 var (
 	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
+	fastestJSON  = jsoniter.ConfigFastest
 
 	redisGetClient = helper.RedisGetClient
 

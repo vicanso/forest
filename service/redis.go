@@ -18,12 +18,14 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/vicanso/hes"
 )
 
 var (
 	redisNoop = func() error {
 		return nil
 	}
+	errRedisNil = hes.New("key is not exists or expired")
 )
 
 type (
@@ -32,6 +34,11 @@ type (
 	// RedisSrv redis service
 	RedisSrv struct{}
 )
+
+// IsRedisNilError is redis nil errror
+func IsRedisNilError(err error) bool {
+	return err == errRedisNil
+}
 
 // RedisPing redis ping
 func RedisPing() (err error) {
@@ -81,9 +88,8 @@ func (srv *RedisSrv) IncWithTTL(key string, ttl time.Duration) (count int64, err
 // Get get value
 func (srv *RedisSrv) Get(key string) (result string, err error) {
 	result, err = redisGetClient().Get(key).Result()
-	// key不存在则不返回出错
 	if err == redis.Nil {
-		err = nil
+		err = errRedisNil
 	}
 	return
 }
@@ -105,4 +111,23 @@ func (srv *RedisSrv) GetAndDel(key string) (result string, err error) {
 func (srv *RedisSrv) Set(key string, value interface{}, ttl time.Duration) (err error) {
 	redisGetClient().Set(key, value, ttl)
 	return
+}
+
+// GetStruct get struct
+func (srv *RedisSrv) GetStruct(key string, value interface{}) (err error) {
+	result, err := srv.Get(key)
+	if err != nil {
+		return
+	}
+	err = fastestJSON.UnmarshalFromString(result, value)
+	return
+}
+
+// SetStruct redis set struct with ttl
+func (srv *RedisSrv) SetStruct(key string, value interface{}, ttl time.Duration) (err error) {
+	str, err := fastestJSON.MarshalToString(value)
+	if err != nil {
+		return
+	}
+	return srv.Set(key, str, ttl)
 }
