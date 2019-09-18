@@ -15,8 +15,13 @@
 package util
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/sha256"
+	crand "crypto/rand"
 	"encoding/base64"
+	"errors"
+	"io"
 	"math/rand"
 	"time"
 
@@ -101,4 +106,44 @@ func UserRoleIsValid(validRoles []string, userRoles []string) bool {
 		}
 	}
 	return valid
+}
+
+// Encrypt encrypt
+// https://stackoverflow.com/questions/18817336/golang-encrypting-a-string-with-aes-and-base64
+func Encrypt(key, text []byte) ([]byte, error) {
+	// 需要注意 key的长度必须为32字节
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	b := base64.StdEncoding.EncodeToString(text)
+	ciphertext := make([]byte, aes.BlockSize+len(b))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(crand.Reader, iv); err != nil {
+		return nil, err
+	}
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(b))
+	return ciphertext, nil
+}
+
+// Decrypt decrypt
+// https://stackoverflow.com/questions/18817336/golang-encrypting-a-string-with-aes-and-base64
+func Decrypt(key, text []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	if len(text) < aes.BlockSize {
+		return nil, errors.New("ciphertext too short")
+	}
+	iv := text[:aes.BlockSize]
+	text = text[aes.BlockSize:]
+	cfb := cipher.NewCFBDecrypter(block, iv)
+	cfb.XORKeyStream(text, text)
+	data, err := base64.StdEncoding.DecodeString(string(text))
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
