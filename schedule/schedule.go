@@ -15,8 +15,7 @@
 package schedule
 
 import (
-	"time"
-
+	"github.com/robfig/cron/v3"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 
@@ -24,50 +23,29 @@ import (
 )
 
 func init() {
-	go initRedisCheckTicker()
-	go initConfigurationRefreshTicker()
-	// go initInfluxdbCheckTicker()
-	// go initRouterConfigRefreshTicker()
+	c := cron.New()
+	c.AddFunc("@every 5m", redisCheck)
+	c.AddFunc("@every 1m", configRefresh)
+	c.Start()
 }
 
-func runTicker(ticker *time.Ticker, message string, do func() error, restart func()) {
-	defer func() {
-		if r := recover(); r != nil {
-			err, _ := r.(error)
-			log.Default().DPanic(message+" panic",
-				zap.Error(err),
-			)
-			service.AlarmError(message + " panic")
-		}
-		// 如果退出了，重新启动
-		go restart()
-	}()
-	for range ticker.C {
-		err := do()
-		if err != nil {
-			log.Default().Error(message+" fail",
-				zap.Error(err),
-			)
-			service.AlarmError(message + " fail")
-		}
+func redisCheck() {
+	err := service.RedisPing()
+	if err != nil {
+		log.Default().Error("redis check fail",
+			zap.Error(err),
+		)
+		service.AlarmError("redis check fail")
 	}
 }
 
-func initRedisCheckTicker() {
-	// 每一分钟检测一次
-	ticker := time.NewTicker(60 * time.Second)
-	runTicker(ticker, "redis check", func() error {
-		err := service.RedisPing()
-		return err
-	}, initRedisCheckTicker)
-}
-
-func initConfigurationRefreshTicker() {
-	// 每一分钟更新一次
+func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
-	ticker := time.NewTicker(60 * time.Second)
-	runTicker(ticker, "configuration refresh", func() error {
-		err := configSrv.Refresh()
-		return err
-	}, initConfigurationRefreshTicker)
+	err := configSrv.Refresh()
+	if err != nil {
+		log.Default().Error("config refresh fail",
+			zap.Error(err),
+		)
+		service.AlarmError("config refresh fail")
+	}
 }

@@ -14,6 +14,7 @@ require (
 	github.com/json-iterator/go v1.1.7
 	github.com/lib/pq v1.2.0
 	github.com/oklog/ulid/v2 v2.0.2
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.3.0
 	github.com/vicanso/count-warner v0.0.1
