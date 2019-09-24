@@ -42,6 +42,8 @@ func init() {
 	g.GET("/commons/random-keys", ctrl.randomKeys)
 
 	g.GET("/commons/captcha", ctrl.captcha)
+
+	g.GET("/commons/performance", ctrl.getPerformance)
 }
 
 func (ctrl commonCtrl) ping(c *elton.Context) error {
@@ -100,5 +102,10 @@ func (ctrl commonCtrl) captcha(c *elton.Context) (err error) {
 	// c.SetContentTypeByExt(".jpeg")
 	// c.Body = info.Data
 	c.Body = info
+	return
+}
+
+func (ctrl commonCtrl) getPerformance(c *elton.Context) (err error) {
+	c.Body = service.GetPerformance()
 	return
 }

@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
 
@@ -26,6 +27,8 @@ const (
 // NewEntry create an entry middleware
 func NewEntry() elton.Handler {
 	return func(c *elton.Context) (err error) {
+		service.IncreaseConcurrency()
+		defer service.DecreaseConcurrency()
 		// 生成context id
 		c.ID = util.RandomString(6)
 		c.SetHeader(xResponseID, c.ID)
