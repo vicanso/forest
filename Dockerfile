@@ -20,9 +20,11 @@ FROM alpine
 
 EXPOSE 7001
 
+# tzdata 安装所有时区配置或可根据需要只添加所需时区
+
 RUN addgroup -g 1000 go \
   && adduser -u 1000 -G go -s /bin/sh -D go \
-  && apk add --no-cache ca-certificates
+  && apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /forest/forest /usr/local/bin/forest
 
