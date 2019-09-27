@@ -78,6 +78,6 @@ func FormatTime(t time.Time) string {
 
 // ChinaNow get the now time of china
 func ChinaNow() time.Time {
-	loc, _ := time.LoadLocation("Asia/Chongqing")
+	loc, _ := time.LoadLocation("Asia/Shanghai")
 	return Now().In(loc)
 }
