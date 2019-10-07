@@ -39,16 +39,23 @@ const (
 	locationURL = "/ip-locations/json/:ip"
 )
 
-type (
-	// Location location
-	Location struct {
-		IP       string `json:"ip,omitempty"`
-		Country  string `json:"country,omitempty"`
-		Province string `json:"province,omitempty"`
-		City     string `json:"city,omitempty"`
-		ISP      string `json:"isp,omitempty"`
-	}
-)
+// LocationResponse location information
+// swagger:response locationResponse
+type LocationResponse struct {
+
+	// in: body
+	Payload *Location
+}
+
+// Location location
+type Location struct {
+	IP string `json:"ip,omitempty"`
+	// IP the country of location
+	Country  string `json:"country,omitempty"`
+	Province string `json:"province,omitempty"`
+	City     string `json:"city,omitempty"`
+	ISP      string `json:"isp,omitempty"`
+}
 
 func init() {
 	locationBaseURL := config.GetString("location.baseURL")

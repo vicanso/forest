@@ -6,6 +6,9 @@ export GO111MODULE = on
 dev:
 	fresh
 
+doc:
+	swagger generate spec -o ./api.yml && swagger validate ./api.yml 
+
 test: export GO_ENV=test
 test:
 	go test -cover ./...
