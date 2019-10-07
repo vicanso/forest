@@ -15,14 +15,13 @@
 /*
 Package main Forest Server
 
-API documents
+	This should demonstrate all the possible comment annotations
+	that are available to turn go code into a fully compliant swagger 2.0 spec
 
 Host: localhost
 BasePath: /
 Version: 1.0.0
-
-Schemes:
-- http
+Schemes: http
 
 Consumes:
 - application/json
