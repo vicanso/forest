@@ -46,11 +46,14 @@ func init() {
 	g.GET("/commons/performance", ctrl.getPerformance)
 }
 
-// Pong return pong if the server is running
+// pongResponse return pong if the server is running
 // swagger:response pingResponse
-// In: body
 // Example: pong
-type Pong struct{}
+type pongResponse struct {
+
+	// in: body
+	Payload string
+}
 
 // swagger:route GET /ping ping
 // server health check
@@ -58,10 +61,17 @@ type Pong struct{}
 // 	default: pingResponse
 // Produces:
 // 	- plain/text
-
 func (ctrl commonCtrl) ping(c *elton.Context) error {
 	c.BodyBuffer = bytes.NewBufferString("pong")
 	return nil
+}
+
+// locationResponse location information
+// swagger:response locationResponse
+type locationResponse struct {
+
+	// in: body
+	Payload *service.Location
 }
 
 // swagger:route GET /commons/ip-location commonsIPLocation
@@ -118,6 +128,7 @@ func (ctrl commonCtrl) captcha(c *elton.Context) (err error) {
 	}
 	// c.SetContentTypeByExt(".jpeg")
 	// c.Body = info.Data
+	c.NoStore()
 	c.Body = info
 	return
 }

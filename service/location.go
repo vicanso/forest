@@ -39,14 +39,6 @@ const (
 	locationURL = "/ip-locations/json/:ip"
 )
 
-// LocationResponse location information
-// swagger:response locationResponse
-type LocationResponse struct {
-
-	// in: body
-	Payload *Location
-}
-
 // Location location
 type Location struct {
 	IP string `json:"ip,omitempty"`
