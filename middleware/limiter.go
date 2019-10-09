@@ -100,7 +100,7 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler 
 func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		key := errorLimitKeyPrefix + "-" + fn(c)
-		result, err := redisSrv.Get(key)
+		result, err := redisSrv.GetIgnoreNilErr(key)
 		if err != nil {
 			return
 		}

@@ -58,7 +58,7 @@ type pongResponse struct {
 // swagger:route GET /ping ping
 // server health check
 // Responses:
-// 	default: pingResponse
+// 	200: pingResponse
 // Produces:
 // 	- plain/text
 func (ctrl commonCtrl) ping(c *elton.Context) error {
@@ -77,7 +77,7 @@ type locationResponse struct {
 // swagger:route GET /commons/ip-location commonsIPLocation
 // get location by request real ip
 // Responses:
-// 	default: locationResponse
+// 	200: locationResponse
 func (ctrl commonCtrl) location(c *elton.Context) (err error) {
 	info, err := service.GetLocationByIP(c.RealIP(), c)
 	if err != nil {

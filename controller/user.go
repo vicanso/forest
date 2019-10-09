@@ -31,8 +31,8 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
+type userCtrl struct{}
 type (
-	userCtrl struct{}
 	// userInfoResp user info response
 	userInfoResp struct {
 		Anonymous bool     `json:"anonymous,omitempty"`
@@ -44,7 +44,12 @@ type (
 		TrackID   string   `json:"trackId,omitempty"`
 		LoginAt   string   `json:"loginAt,omitempty"`
 	}
+	loginTokenResp struct {
+		Token string `json:"token,omitempty"`
+	}
+)
 
+type (
 	registerUserParams struct {
 		Account  string `json:"account,omitempty" valid:"xUserAccount"`
 		Password string `json:"password,omitempty" valid:"xUserPassword"`
@@ -78,6 +83,7 @@ var (
 )
 
 func init() {
+
 	g := router.NewGroup("/users", loadUserSession)
 	ctrl := userCtrl{}
 	// 获取用户列表
@@ -105,7 +111,7 @@ func init() {
 		// 限制相同IP在60秒之内只能调用5次
 		newIPLimit(5, 60*time.Second, cs.ActionLogin),
 		shouldAnonymous,
-		middleware.ValidateCaptch(),
+		captchaValidate,
 		ctrl.register,
 	)
 	// 刷新user session的ttl
@@ -138,7 +144,7 @@ func init() {
 		newErrorLimit(5, 10*time.Minute, func(c *elton.Context) string {
 			return standardJSON.Get(c.RequestBody, "account").ToString()
 		}),
-		middleware.ValidateCaptch(),
+		captchaValidate,
 		ctrl.login,
 	)
 	// 用户退出登录
@@ -175,7 +181,17 @@ func pickUserInfo(c *elton.Context) (userInfo *userInfoResp) {
 	return
 }
 
+// usersMeInfoResponse the user's information
+// swagger:response usersMeInfoResponse
+type usersMeInfoResponse struct {
+	// in: body
+	Body *userInfoResp
+}
+
+// swagger:route GET /users/v1/me usersMe
 // get user info
+// Responses:
+// 	200: usersMeInfoResponse
 func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	key := config.GetTrackKey()
 	cookie, _ := c.Cookie(key)
@@ -200,7 +216,17 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	return
 }
 
+// usersLoginTokenResponse login token
+// swagger:response usersLoginTokenResponse
+type usersLoginTokenResponse struct {
+	// in: body
+	Body *loginTokenResp
+}
+
+// swagger:route GET /users/v1/me/login usersLoginToken
 // getLoginToken get login token
+// Responses:
+// 	200: usersLoginTokenResponse
 func (ctrl userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
@@ -210,10 +236,8 @@ func (ctrl userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.Body = &struct {
-		Token string `json:"token,omitempty"`
-	}{
-		token,
+	c.Body = &loginTokenResp{
+		Token: token,
 	}
 	return
 }
@@ -222,7 +246,25 @@ func omitUserInfo(u *service.User) {
 	u.Password = ""
 }
 
+// usersRegisterResponse user's information
+// swagger:response usersRegisterResponse
+type usersRegisterResponse struct {
+	// in: body
+	Body *service.User
+}
+
+// swagger:parameters usersRegister usersMeLogin
+type usersRegisterParams struct {
+	// in: body
+	Payload *registerUserParams
+	// in: header
+	Captcha string `json:"X-Captcha"`
+}
+
+// swagger:route POST /users/v1/me usersRegister
 // register user register
+// Responses:
+// 	201: usersRegisterResponse
 func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	params := &registerUserParams{}
 	err = validate.Do(params, c.RequestBody)
@@ -242,7 +284,17 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	return
 }
 
+// usersLoginResponse user login's response
+// swagger:response usersLoginResponse
+type usersLoginResponse struct {
+	// in: body
+	Body *service.User
+}
+
+// swagger:route POST /users/v1/me/login usersMeLogin
 // login user login
+// Responses:
+// 	200: usersLoginResponse
 func (ctrl userCtrl) login(c *elton.Context) (err error) {
 	params := &registerUserParams{}
 	err = validate.Do(params, c.RequestBody)

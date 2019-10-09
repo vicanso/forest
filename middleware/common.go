@@ -67,7 +67,7 @@ func WaitFor(d time.Duration) elton.Handler {
 }
 
 // ValidateCaptch validate chapter
-func ValidateCaptch() elton.Handler {
+func ValidateCaptch(magicalCaptcha string) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		value := c.GetRequestHeader(xCaptchHeader)
 		if value == "" {
@@ -78,6 +78,10 @@ func ValidateCaptch() elton.Handler {
 		if len(arr) != 2 {
 			err = errCaptchIsInvalid
 			return
+		}
+		// 如果有配置万能验证码，则判断是否相等
+		if magicalCaptcha != "" && arr[1] == magicalCaptcha {
+			return c.Next()
 		}
 		valid, err := service.ValidateCaptcha(arr[0], arr[1])
 		if err != nil {

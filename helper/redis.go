@@ -15,7 +15,7 @@
 package helper
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	"go.uber.org/zap"
 
 	"github.com/vicanso/forest/config"

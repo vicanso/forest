@@ -174,7 +174,9 @@ func main() {
 	}))
 
 	// 错误处理，将错误转换为json响应
-	d.Use(errorHandler.NewDefault())
+	d.Use(errorHandler.New(errorHandler.Config{
+		ResponseType: "json",
+	}))
 
 	// IP限制
 	d.Use(middleware.NewIPBlock())

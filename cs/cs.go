@@ -27,8 +27,13 @@ const (
 )
 
 const (
-	// ConfigEnabled 启用状态
+	// ConfigEnabled config enabled
 	ConfigEnabled = iota + 1
-	// ConfigDiabled 禁用状态
+	// ConfigDiabled config disabled
 	ConfigDiabled
+)
+
+const (
+	// MagicalCaptcha magical captcha(for test only)
+	MagicalCaptcha = "0145"
 )

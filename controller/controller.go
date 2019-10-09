@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
@@ -67,7 +68,18 @@ var (
 	shouldAnonymous = elton.Compose(loadUserSession, checkAnonymous)
 	// 判断用户是否admin权限
 	shouldBeAdmin = elton.Compose(loadUserSession, isAdmin)
+
+	// 图形验证码校验
+	captchaValidate elton.Handler
 )
+
+func init() {
+	magicalValue := ""
+	if !util.IsProduction() {
+		magicalValue = cs.MagicalCaptcha
+	}
+	captchaValidate = middleware.ValidateCaptch(magicalValue)
+}
 
 func newTracker(action string) elton.Handler {
 	return tracker.New(tracker.Config{

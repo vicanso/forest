@@ -19,6 +19,7 @@ import (
 	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
 
@@ -28,8 +29,9 @@ func NewSession() elton.Handler {
 	if client == nil {
 		panic("session store need redis client")
 	}
-	store := session.NewRedisStore(client, nil)
-	store.Prefix = "ss-"
+	store := &service.RedisSessionStore{
+		Prefix: "ss-",
+	}
 	scf := config.GetSessionConfig()
 	return session.NewByCookie(session.CookieConfig{
 		Store:   store,

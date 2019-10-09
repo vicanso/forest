@@ -17,7 +17,7 @@ package service
 import (
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	"github.com/vicanso/hes"
 )
 
@@ -33,6 +33,11 @@ type (
 	RedisDone func() error
 	// RedisSrv redis service
 	RedisSrv struct{}
+
+	// RedisSessionStore redis session store
+	RedisSessionStore struct {
+		Prefix string
+	}
 )
 
 // IsRedisNilError is redis nil errror
@@ -94,6 +99,15 @@ func (srv *RedisSrv) Get(key string) (result string, err error) {
 	return
 }
 
+// GetIgnoreNilErr get value ignore nil error
+func (srv *RedisSrv) GetIgnoreNilErr(key string) (result string, err error) {
+	result, err = srv.Get(key)
+	if IsRedisNilError(err) {
+		err = nil
+	}
+	return
+}
+
 // GetAndDel get value and del
 func (srv *RedisSrv) GetAndDel(key string) (result string, err error) {
 	pipe := redisGetClient().TxPipeline()
@@ -101,6 +115,9 @@ func (srv *RedisSrv) GetAndDel(key string) (result string, err error) {
 	pipe.Del(key)
 	_, err = pipe.Exec()
 	if err != nil {
+		if err == redis.Nil {
+			err = errRedisNil
+		}
 		return
 	}
 	result = cmd.Val()
@@ -130,4 +147,27 @@ func (srv *RedisSrv) SetStruct(key string, value interface{}, ttl time.Duration)
 		return
 	}
 	return srv.Set(key, str, ttl)
+}
+
+func (rs *RedisSessionStore) getKey(key string) string {
+	return rs.Prefix + key
+}
+
+// Get get the session from redis
+func (rs *RedisSessionStore) Get(key string) ([]byte, error) {
+	buf, err := redisGetClient().Get(rs.getKey(key)).Bytes()
+	if err == redis.Nil {
+		return buf, nil
+	}
+	return buf, err
+}
+
+// Set set the session to redis
+func (rs *RedisSessionStore) Set(key string, data []byte, ttl time.Duration) error {
+	return redisGetClient().Set(rs.getKey(key), data, ttl).Err()
+}
+
+// Destroy remove the session from redis
+func (rs *RedisSessionStore) Destroy(key string) error {
+	return redisGetClient().Del(rs.getKey(key)).Err()
 }
