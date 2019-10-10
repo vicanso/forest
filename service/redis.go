@@ -155,19 +155,19 @@ func (rs *RedisSessionStore) getKey(key string) string {
 
 // Get get the session from redis
 func (rs *RedisSessionStore) Get(key string) ([]byte, error) {
-	buf, err := redisGetClient().Get(rs.getKey(key)).Bytes()
-	if err == redis.Nil {
-		return buf, nil
+	result, err := redisSrv.Get(rs.getKey(key))
+	if IsRedisNilError(err) {
+		return nil, nil
 	}
-	return buf, err
+	return []byte(result), err
 }
 
 // Set set the session to redis
 func (rs *RedisSessionStore) Set(key string, data []byte, ttl time.Duration) error {
-	return redisGetClient().Set(rs.getKey(key), data, ttl).Err()
+	return redisSrv.Set(rs.getKey(key), data, ttl)
 }
 
 // Destroy remove the session from redis
 func (rs *RedisSessionStore) Destroy(key string) error {
-	return redisGetClient().Del(rs.getKey(key)).Err()
+	return redisSrv.Del(rs.getKey(key))
 }

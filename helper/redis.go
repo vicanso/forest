@@ -15,6 +15,10 @@
 package helper
 
 import (
+	"context"
+	"strings"
+	"time"
+
 	"github.com/go-redis/redis/v7"
 	"go.uber.org/zap"
 
@@ -24,6 +28,75 @@ import (
 var (
 	redisClient *redis.Client
 )
+
+type (
+	contextKey int
+	// redisStats redis stats
+	redisStats struct {
+		Slow time.Duration
+	}
+)
+
+const (
+	// 记录命令开始时间
+	startedAtKey contextKey = iota
+)
+
+func (rs *redisStats) logSlowOrError(ctx context.Context, cmd, message string) {
+	t := ctx.Value(startedAtKey).(*time.Time)
+	d := time.Since(*t)
+	if d > rs.Slow || message != "" {
+		// TODO 写入influxdb
+		logger.Info("redis process slow or error",
+			zap.String("cmd", cmd),
+			zap.String("use", d.String()),
+			zap.String("message", message),
+		)
+	}
+}
+
+// BeforeProcess before process
+func (rs *redisStats) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+	t := time.Now()
+	ctx = context.WithValue(ctx, startedAtKey, &t)
+	return ctx, nil
+}
+
+// AfterProcess after process
+func (rs *redisStats) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+	message := ""
+	err := cmd.Err()
+	if err != nil {
+		message = err.Error()
+	}
+	rs.logSlowOrError(ctx, cmd.Name(), message)
+	return nil
+}
+
+// BeforeProcessPipeline before process pipeline
+func (rs *redisStats) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+	t := time.Now()
+	ctx = context.WithValue(ctx, startedAtKey, &t)
+	return ctx, nil
+}
+
+// AfterProcessPipeline after process pipeline
+func (rs *redisStats) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
+	cmdSb := new(strings.Builder)
+	message := ""
+	for index, cmd := range cmds {
+		if index != 0 {
+			cmdSb.WriteString(",")
+		}
+		cmdSb.WriteString(cmd.Name())
+		err := cmd.Err()
+		if err != nil {
+			message += err.Error()
+		}
+	}
+	rs.logSlowOrError(ctx, cmdSb.String(), message)
+	return nil
+}
 
 func init() {
 	options, err := config.GetRedisConfig()
@@ -38,6 +111,13 @@ func init() {
 		Addr:     options.Addr,
 		Password: options.Password,
 		DB:       options.DB,
+		OnConnect: func(_ *redis.Conn) error {
+			logger.Info("redis new connection is established")
+			return nil
+		},
+	})
+	redisClient.AddHook(&redisStats{
+		Slow: 300 * time.Millisecond,
 	})
 }
 
