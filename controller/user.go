@@ -33,30 +33,47 @@ import (
 
 type userCtrl struct{}
 type (
-	// userInfoResp user info response
 	userInfoResp struct {
-		Anonymous bool     `json:"anonymous,omitempty"`
-		Account   string   `json:"account,omitempty"`
-		Roles     []string `json:"roles,omitempty"`
-		Date      string   `json:"date,omitempty"`
-		UpdatedAt string   `json:"updatedAt,omitempty"`
-		IP        string   `json:"ip,omitempty"`
-		TrackID   string   `json:"trackId,omitempty"`
-		LoginAt   string   `json:"loginAt,omitempty"`
+		// 是否匿名
+		// Example: true
+		Anonymous bool `json:"anonymous,omitempty"`
+		// 账号
+		// Example: vicanso
+		Account string `json:"account,omitempty"`
+		// 角色
+		// Example: ["su", "admin"]
+		Roles []string `json:"roles,omitempty"`
+		// 系统时间
+		// Example: 2019-10-26T10:11:25+08:00
+		Date string `json:"date,omitempty"`
+		// 信息更新时间
+		// Example: 2019-10-26T10:11:25+08:00
+		UpdatedAt string `json:"updatedAt,omitempty"`
+		// IP地址
+		// Example: 1.1.1.1
+		IP string `json:"ip,omitempty"`
+		// rack id
+		// Example: 01DPNPDXH4MQJHBF4QX1EFD6Y3
+		TrackID string `json:"trackId,omitempty"`
+		// 登录时间
+		// Example: 2019-10-26T10:11:25+08:00
+		LoginAt string `json:"loginAt,omitempty"`
 	}
 	loginTokenResp struct {
+		// 登录Token
+		// Example: IaHnYepm
 		Token string `json:"token,omitempty"`
 	}
 )
 
 type (
-	registerUserParams struct {
-		Account  string `json:"account,omitempty" valid:"xUserAccount"`
-		Password string `json:"password,omitempty" valid:"xUserPassword"`
-	}
-
-	loginUserParams struct {
-		Account  string `json:"account,omitempty" valid:"xUserAccount"`
+	// 注册与登录参数
+	registerLoginUserParams struct {
+		// 账户
+		// Example: vicanso
+		Account string `json:"account,omitempty" valid:"xUserAccount"`
+		// 密码，密码为sha256后的加密串
+		// Example: JgX9742WqzaNHVP+YiPy/RXP0eoX29k00hEF3BdghGU=
 		Password string `json:"password,omitempty" valid:"xUserPassword"`
 	}
 
@@ -181,16 +198,18 @@ func pickUserInfo(c *elton.Context) (userInfo *userInfoResp) {
 	return
 }
 
-// usersMeInfoResponse the user's information
+// 用户信息
 // swagger:response usersMeInfoResponse
 type usersMeInfoResponse struct {
 	// in: body
 	Body *userInfoResp
 }
 
-// swagger:route GET /users/v1/me usersMe
-// get user info
-// Responses:
+// swagger:route GET /users/v1/me users usersMe
+// getUserInfo
+//
+// 获取用户信息，如果用户已登录，则返回用户相关信息
+// responses:
 // 	200: usersMeInfoResponse
 func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	key := config.GetTrackKey()
@@ -216,16 +235,18 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	return
 }
 
-// usersLoginTokenResponse login token
+// 用户登录Token，用于客户登录密码加密
 // swagger:response usersLoginTokenResponse
 type usersLoginTokenResponse struct {
 	// in: body
 	Body *loginTokenResp
 }
 
-// swagger:route GET /users/v1/me/login usersLoginToken
-// getLoginToken get login token
-// Responses:
+// swagger:route GET /users/v1/me/login users usersLoginToken
+// getLoginToken
+//
+// 获取用户登录Token
+// responses:
 // 	200: usersLoginTokenResponse
 func (ctrl userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
@@ -246,7 +267,7 @@ func omitUserInfo(u *service.User) {
 	u.Password = ""
 }
 
-// usersRegisterResponse user's information
+// 用户注册响应
 // swagger:response usersRegisterResponse
 type usersRegisterResponse struct {
 	// in: body
@@ -256,17 +277,19 @@ type usersRegisterResponse struct {
 // swagger:parameters usersRegister usersMeLogin
 type usersRegisterParams struct {
 	// in: body
-	Payload *registerUserParams
+	Payload *registerLoginUserParams
 	// in: header
 	Captcha string `json:"X-Captcha"`
 }
 
-// swagger:route POST /users/v1/me usersRegister
-// register user register
-// Responses:
+// swagger:route POST /users/v1/me users usersRegister
+// userRegister
+//
+// 用户注册，注册需要使用通用图形验证码，在成功时返回用户信息
+// responses:
 // 	201: usersRegisterResponse
 func (ctrl userCtrl) register(c *elton.Context) (err error) {
-	params := &registerUserParams{}
+	params := &registerLoginUserParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
 		return
@@ -284,19 +307,21 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	return
 }
 
-// usersLoginResponse user login's response
+// 用户登录响应
 // swagger:response usersLoginResponse
 type usersLoginResponse struct {
 	// in: body
 	Body *service.User
 }
 
-// swagger:route POST /users/v1/me/login usersMeLogin
-// login user login
-// Responses:
+// swagger:route POST /users/v1/me/login users usersMeLogin
+// userLogin
+//
+// 用户登录，需要使用通用图形验证码
+// responses:
 // 	200: usersLoginResponse
 func (ctrl userCtrl) login(c *elton.Context) (err error) {
-	params := &registerUserParams{}
+	params := &registerLoginUserParams{}
 	err = validate.Do(params, c.RequestBody)
 	if err != nil {
 		return

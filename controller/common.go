@@ -46,17 +46,18 @@ func init() {
 	g.GET("/commons/performance", ctrl.getPerformance)
 }
 
-// pongResponse return pong if the server is running
+// 服务检测ping的响应
 // swagger:response pingResponse
-// Example: pong
 type pongResponse struct {
 
 	// in: body
 	Payload string
 }
 
-// swagger:route GET /ping ping
-// server health check
+// swagger:route GET /ping common ping
+// ping
+//
+// 服务正常启动后则返回`pong`，主要用于反向代理的health check
 // Responses:
 // 	200: pingResponse
 // Produces:
@@ -66,7 +67,7 @@ func (ctrl commonCtrl) ping(c *elton.Context) error {
 	return nil
 }
 
-// locationResponse location information
+// IP定位信息
 // swagger:response locationResponse
 type locationResponse struct {
 
@@ -74,8 +75,10 @@ type locationResponse struct {
 	Payload *service.Location
 }
 
-// swagger:route GET /commons/ip-location commonsIPLocation
-// get location by request real ip
+// swagger:route GET /commons/ip-location common commonsIPLocation
+// ip2Location
+//
+// 从客户的真实IP地址获取定位信息
 // Responses:
 // 	200: locationResponse
 func (ctrl commonCtrl) location(c *elton.Context) (err error) {
