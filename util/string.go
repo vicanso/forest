@@ -17,8 +17,8 @@ package util
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/sha256"
 	crand "crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"io"
@@ -67,7 +67,7 @@ func RandomDigit(n int) string {
 	return randomString(digitBytes, n)
 }
 
-var entropy = ulid.Monotonic(rand.New(rand.NewSource(time.Unix(1000000, 0).UnixNano())), 0)
+var entropy = rand.New(rand.NewSource(time.Unix(0, 0).UnixNano()))
 
 // GenUlid generate ulid
 func GenUlid() string {
