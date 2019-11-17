@@ -15,6 +15,7 @@
 package helper
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -42,6 +43,10 @@ func init() {
 		panic(err)
 	}
 	db.SetLogger(log.PGLogger())
+	// TODO 添加各类callback记录性能指标
+	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", func(scope *gorm.Scope) {
+		fmt.Println(scope.QuotedTableName())
+	})
 	pgClient = db
 }
 

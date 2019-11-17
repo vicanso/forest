@@ -15,7 +15,6 @@
 package validate
 
 import (
-	"encoding/json"
 	"regexp"
 
 	"github.com/asaskevich/govalidator"
@@ -41,7 +40,7 @@ func doValidate(s interface{}, data interface{}) (err error) {
 	if data != nil {
 		switch data.(type) {
 		case []byte:
-			err = json.Unmarshal(data.([]byte), s)
+			err = standardJSON.Unmarshal(data.([]byte), s)
 			if err != nil {
 				he := hes.Wrap(err)
 				he.Category = errJSONParseCategory
@@ -49,11 +48,11 @@ func doValidate(s interface{}, data interface{}) (err error) {
 				return
 			}
 		default:
-			buf, err := json.Marshal(data)
+			buf, err := standardJSON.Marshal(data)
 			if err != nil {
 				return err
 			}
-			err = json.Unmarshal(buf, s)
+			err = standardJSON.Unmarshal(buf, s)
 			if err != nil {
 				return err
 			}
