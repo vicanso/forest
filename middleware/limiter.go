@@ -112,7 +112,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 		err = c.Next()
 		// 如果出错，则出错次数+1
 		if err != nil {
-			redisSrv.IncWithTTL(key, ttl)
+			_, _ = redisSrv.IncWithTTL(key, ttl)
 		}
 		return
 	}

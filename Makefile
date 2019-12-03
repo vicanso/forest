@@ -26,3 +26,6 @@ build:
 
 clean:
 	packr2 clean
+
+lint:
+	golangci-lint run

@@ -18,7 +18,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/util"
 )
 
 var (
@@ -27,12 +26,10 @@ var (
 
 	redisGetClient = helper.RedisGetClient
 
-	pgCreate      = helper.PGCreate
-	pgGetClient   = helper.PGGetClient
-	pgFormatOrder = helper.PGFormatOrder
+	pgCreate    = helper.PGCreate
+	pgGetClient = helper.PGGetClient
 
-	nowString = util.NowString
-	logger    = log.Default()
+	logger = log.Default()
 
 	redisSrv = new(RedisSrv)
 )

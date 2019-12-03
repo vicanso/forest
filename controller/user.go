@@ -200,6 +200,7 @@ func pickUserInfo(c *elton.Context) (userInfo *userInfoResp) {
 
 // 用户信息
 // swagger:response usersMeInfoResponse
+// nolint
 type usersMeInfoResponse struct {
 	// in: body
 	Body *userInfoResp
@@ -217,7 +218,7 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
 		uid := util.GenUlid()
-		c.AddCookie(&http.Cookie{
+		_ = c.AddCookie(&http.Cookie{
 			Name:     key,
 			Value:    uid,
 			Path:     "/",
@@ -229,7 +230,7 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 			IP:        c.RealIP(),
 			TrackID:   util.GetTrackID(c),
 		}
-		userSrv.AddTrackRecord(trackRecord)
+		_ = userSrv.AddTrackRecord(trackRecord)
 	}
 	c.Body = pickUserInfo(c)
 	return
@@ -237,6 +238,7 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 
 // 用户登录Token，用于客户登录密码加密
 // swagger:response usersLoginTokenResponse
+// nolint
 type usersLoginTokenResponse struct {
 	// in: body
 	Body *loginTokenResp
@@ -269,12 +271,14 @@ func omitUserInfo(u *service.User) {
 
 // 用户注册响应
 // swagger:response usersRegisterResponse
+// nolint
 type usersRegisterResponse struct {
 	// in: body
 	Body *service.User
 }
 
 // swagger:parameters usersRegister usersMeLogin
+// nolint
 type usersRegisterParams struct {
 	// in: body
 	Payload *registerLoginUserParams
@@ -309,6 +313,7 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 
 // 用户登录响应
 // swagger:response usersLoginResponse
+// nolint
 type usersLoginResponse struct {
 	// in: body
 	Body *service.User
@@ -344,10 +349,10 @@ func (ctrl userCtrl) login(c *elton.Context) (err error) {
 		SessionID:     util.GetSessionID(c),
 		XForwardedFor: c.GetRequestHeader("X-Forwarded-For"),
 	}
-	userSrv.AddLoginRecord(loginRecord)
+	_ = userSrv.AddLoginRecord(loginRecord)
 	omitUserInfo(u)
-	us.SetAccount(u.Account)
-	us.SetRoles(u.Roles)
+	_ = us.SetAccount(u.Account)
+	_ = us.SetRoles(u.Roles)
 	c.Body = u
 	return
 }

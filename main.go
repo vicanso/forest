@@ -144,7 +144,14 @@ func main() {
 		)
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		resp.WriteHeader(http.StatusNotFound)
-		resp.Write([]byte(`{"statusCode": 404,"message": "Not found"}`))
+		_, err := resp.Write([]byte(`{"statusCode": 404,"message": "Not found"}`))
+		if err != nil {
+			logger.Info("404 response fail",
+				zap.String("ip", ip),
+				zap.String("uri", req.RequestURI),
+				zap.Error(err),
+			)
+		}
 		warner404.Inc(ip, 1)
 	}
 
@@ -219,5 +226,8 @@ func main() {
 	logger.Info("start to linstening...",
 		zap.String("listen", config.GetListen()),
 	)
-	d.ListenAndServe(config.GetListen())
+	err = d.ListenAndServe(config.GetListen())
+	if err != nil {
+		panic(err)
+	}
 }

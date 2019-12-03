@@ -78,7 +78,7 @@ func GenUlid() string {
 // Sha256 gen sha256 string
 func Sha256(str string) string {
 	hash := sha256.New()
-	hash.Write([]byte(str))
+	_, _ = hash.Write([]byte(str))
 	hashBytes := hash.Sum(nil)
 	return base64.StdEncoding.EncodeToString(hashBytes)
 }

@@ -62,11 +62,8 @@ const (
 	// Production production env
 	Production = "production"
 
-	defaultListen     = ":7001"
-	defaultTrackKey   = "jt"
-	defaultSessionTTL = 24 * time.Hour
-	defaultSessionKey = "forest"
-	defaultCookiePath = "/"
+	defaultListen   = ":7001"
+	defaultTrackKey = "jt"
 )
 
 func init() {

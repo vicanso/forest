@@ -129,22 +129,22 @@ func checkAnonymous(c *elton.Context) (err error) {
 	return c.Next()
 }
 
-func newCheckRoles(validRoles []string) elton.Handler {
-	return func(c *elton.Context) (err error) {
-		if !isLogin(c) {
-			err = errShouldLogin
-			return
-		}
-		us := service.NewUserSession(c)
-		roles := us.GetRoles()
-		valid := util.UserRoleIsValid(validRoles, roles)
-		if valid {
-			return c.Next()
-		}
-		err = errForbidden
-		return
-	}
-}
+// func newCheckRoles(validRoles []string) elton.Handler {
+// 	return func(c *elton.Context) (err error) {
+// 		if !isLogin(c) {
+// 			err = errShouldLogin
+// 			return
+// 		}
+// 		us := service.NewUserSession(c)
+// 		roles := us.GetRoles()
+// 		valid := util.UserRoleIsValid(validRoles, roles)
+// 		if valid {
+// 			return c.Next()
+// 		}
+// 		err = errForbidden
+// 		return
+// 	}
+// }
 
 func isAdmin(c *elton.Context) (err error) {
 	if !isLogin(c) {

@@ -38,9 +38,9 @@ func init() {
 func doValidate(s interface{}, data interface{}) (err error) {
 	// statusCode := http.StatusBadRequest
 	if data != nil {
-		switch data.(type) {
+		switch data := data.(type) {
 		case []byte:
-			err = standardJSON.Unmarshal(data.([]byte), s)
+			err = standardJSON.Unmarshal(data, s)
 			if err != nil {
 				he := hes.Wrap(err)
 				he.Category = errJSONParseCategory
@@ -99,21 +99,6 @@ func checkASCIIStringLength(i interface{}, min, max int) bool {
 		return false
 	}
 	if !govalidator.IsASCII(value) {
-		return false
-	}
-	size := len(value)
-	if size < min || size > max {
-		return false
-	}
-	return true
-}
-
-func checkAlphaStringLength(i interface{}, min, max int) bool {
-	value, ok := i.(string)
-	if !ok {
-		return false
-	}
-	if !govalidator.IsAlpha(value) {
 		return false
 	}
 	size := len(value)

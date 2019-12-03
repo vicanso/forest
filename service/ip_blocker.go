@@ -38,7 +38,7 @@ type (
 func ResetIPBlocker(ipList []string) {
 	iPS := ips.New()
 	for _, value := range ipList {
-		iPS.Add(value)
+		_ = iPS.Add(value)
 	}
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&ipBlocker.IPS)), unsafe.Pointer(iPS))
 }

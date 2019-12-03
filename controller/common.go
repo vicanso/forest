@@ -48,6 +48,7 @@ func init() {
 
 // 服务检测ping的响应
 // swagger:response pingResponse
+// nolint
 type pongResponse struct {
 
 	// in: body
@@ -69,6 +70,7 @@ func (ctrl commonCtrl) ping(c *elton.Context) error {
 
 // IP定位信息
 // swagger:response locationResponse
+// nolint
 type locationResponse struct {
 
 	// in: body

@@ -24,8 +24,8 @@ import (
 
 func init() {
 	c := cron.New()
-	c.AddFunc("@every 5m", redisCheck)
-	c.AddFunc("@every 1m", configRefresh)
+	_, _ = c.AddFunc("@every 5m", redisCheck)
+	_, _ = c.AddFunc("@every 1m", configRefresh)
 	c.Start()
 }
 
