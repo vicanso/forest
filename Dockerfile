@@ -1,6 +1,6 @@
 FROM node:12-alpine as webbuilder
 
-ADD . /forest
+COPY . /forest
 RUN cd /forest/web \
   && yarn \
   && yarn build \
