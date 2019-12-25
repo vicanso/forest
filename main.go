@@ -135,6 +135,12 @@ func main() {
 	warner404.On(func(ip string, createdAt int64) {
 		service.AlarmError("too many 404 request, client ip:" + ip)
 	})
+	go func() {
+		// 定时清除过期数据
+		for range time.NewTicker(5 * time.Minute).C {
+			warner404.ClearExpired()
+		}
+	}()
 
 	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetRealIP(req)
