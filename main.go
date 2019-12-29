@@ -50,19 +50,18 @@ import (
 	responder "github.com/vicanso/elton-responder"
 	routerLimiter "github.com/vicanso/elton-router-concurrent-limiter"
 	stats "github.com/vicanso/elton-stats"
-	"github.com/vicanso/hes"
-
-	"go.uber.org/zap"
-
 	"github.com/vicanso/forest/config"
 	_ "github.com/vicanso/forest/controller"
-	_ "github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 var (
@@ -76,7 +75,7 @@ var (
 
 // 相关依赖服务的校验，主要是数据库等
 func dependServiceCheck() (err error) {
-	err = service.RedisPing()
+	err = helper.RedisPing()
 	if err != nil {
 		return
 	}
@@ -173,16 +172,34 @@ func main() {
 			if info.URI == "/ping" {
 				return
 			}
+			sid := util.GetSessionID(c)
 			logger.Info("access log",
 				zap.String("id", info.CID),
 				zap.String("ip", info.IP),
-				zap.String("sid", util.GetSessionID(c)),
+				zap.String("sid", sid),
 				zap.String("method", info.Method),
+				zap.String("route", info.Route),
 				zap.String("uri", info.URI),
 				zap.Int("status", info.Status),
+				zap.Uint32("connecting", info.Connecting),
 				zap.String("consuming", info.Consuming.String()),
 				zap.String("size", humanize.Bytes(uint64(info.Size))),
 			)
+			tags := map[string]string{
+				"method": info.Method,
+				"route":  info.Route,
+			}
+			fields := map[string]interface{}{
+				"id":         info.CID,
+				"ip":         info.IP,
+				"sid":        sid,
+				"uri":        info.URI,
+				"status":     info.Status,
+				"use":        info.Consuming.Milliseconds(),
+				"size":       info.Size,
+				"connecting": info.Connecting,
+			}
+			helper.GetInfluxSrv().Write(cs.MeasurementHTTP, fields, tags)
 		},
 	}))
 

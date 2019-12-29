@@ -38,12 +38,13 @@ func newHTTPStats(serviceName string) axios.ResponseInterceptor {
 		reused := false
 		addr := ""
 		use := ""
+		ms := 0
 		if ht != nil {
 			reused = ht.Reused
 			addr = ht.Addr
 			use = ht.Stats().Total.String()
+			ms = int(ht.Stats().Total.Milliseconds())
 		}
-		// TODO 统计可以写入influxdb
 		logger.Info("http stats",
 			zap.String("service", serviceName),
 			zap.String("cid", conf.GetString(cs.CID)),
@@ -55,6 +56,20 @@ func newHTTPStats(serviceName string) axios.ResponseInterceptor {
 			zap.Bool("reused", reused),
 			zap.String("use", use),
 		)
+		tags := map[string]string{
+			"service": serviceName,
+			"route":   conf.Route,
+			"method":  conf.Method,
+		}
+		fields := map[string]interface{}{
+			"cid":    conf.GetString(cs.CID),
+			"url":    conf.URL,
+			"status": resp.Status,
+			"addr":   addr,
+			"reused": reused,
+			"use":    ms,
+		}
+		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
 		return
 	}
 }

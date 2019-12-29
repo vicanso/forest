@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 
@@ -41,7 +41,7 @@ var (
 		Message:    "request to frequently",
 		Category:   errLimitCategory,
 	}
-	redisSrv = new(service.RedisSrv)
+	redisSrv = new(helper.Redis)
 )
 
 type (

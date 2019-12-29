@@ -22,14 +22,11 @@ import (
 
 var (
 	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
-	fastestJSON  = jsoniter.ConfigFastest
-
-	redisGetClient = helper.RedisGetClient
 
 	pgCreate    = helper.PGCreate
 	pgGetClient = helper.PGGetClient
 
 	logger = log.Default()
 
-	redisSrv = new(RedisSrv)
+	redisSrv = new(helper.Redis)
 )

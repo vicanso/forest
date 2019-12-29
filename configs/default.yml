@@ -19,6 +19,14 @@ postgres:
   password: 123456
   sslmode: disable
 
+# influxdb 配置
+influxdb:
+  uri: http://127.0.0.1:9999
+  bucket: forest
+  org: bigtree
+  token: YecVRjkFWQHQCq-Qs9NH7XZy8ApyAp9QfwVjqwQC_8bWmjsYRAfYTNveCswl1NPHS8reFoXELQBWKO27maa9tw==
+  batchSize: 100
+
 # session的相关配置
 session:
   path: /

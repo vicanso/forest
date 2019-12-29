@@ -202,7 +202,6 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 
 // AddTrackRecord add track record
 func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord) (err error) {
-	// TODO 后续写入influxdb，避免被攻击而产生大量的无用记录
 	err = pgCreate(r)
 	if r.ID != 0 {
 		id := r.ID

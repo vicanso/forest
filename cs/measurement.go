@@ -12,21 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
-
-import (
-	jsoniter "github.com/json-iterator/go"
-	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/util"
-)
-
-var (
-	logger       = log.Default()
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
-	isProduction = util.IsProduction
-)
+package cs
 
 const (
-	// 记录命令开始时间
-	startedAtKey = "startedAt"
+	MeasurementHTTPRequest = "http-request"
+	MeasurementPG          = "pg-stats"
+	MeasurementRedis       = "redis-stats"
+	MeasurementHTTP        = "http-stats"
 )

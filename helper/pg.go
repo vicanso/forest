@@ -15,21 +15,64 @@
 package helper
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 	"go.uber.org/zap"
 )
 
 var (
 	pgClient *gorm.DB
+	pgSlow   = time.Second
 )
+
+func pgAddStartedAt(scope *gorm.Scope) {
+	scope.InstanceSet(startedAtKey, time.Now())
+}
+func pgStats(category string) func(*gorm.Scope) {
+	return func(scope *gorm.Scope) {
+		value, ok := scope.InstanceGet(startedAtKey)
+		if !ok {
+			return
+		}
+		startedAt, ok := value.(time.Time)
+		if !ok {
+			return
+		}
+		use := time.Since(startedAt)
+		db := scope.DB()
+		if time.Since(startedAt) > pgSlow || db.Error != nil {
+			message := ""
+			if db.Error != nil {
+				message = db.Error.Error()
+			}
+			logger.Info("pg process slow or error",
+				zap.String("table", scope.TableName()),
+				zap.String("category", category),
+				zap.String("use", use.String()),
+				zap.Int64("rowsAffected", db.RowsAffected),
+				zap.String("error", message),
+			)
+			tags := map[string]string{
+				"table":    scope.TableName(),
+				"category": category,
+			}
+			fields := map[string]interface{}{
+				"use":          use.Milliseconds(),
+				"rowsAffected": db.RowsAffected,
+				"error":        message,
+			}
+			GetInfluxSrv().Write(cs.MeasurementPG, fields, tags)
+		}
+	}
+}
 
 func init() {
 	str := config.GetPostgresConnectString()
@@ -43,10 +86,11 @@ func init() {
 		panic(err)
 	}
 	db.SetLogger(log.PGLogger())
-	// TODO 添加各类callback记录性能指标
-	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", func(scope *gorm.Scope) {
-		fmt.Println(scope.QuotedTableName())
-	})
+	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", pgAddStartedAt)
+	db.Callback().Query().After("gorm:query").Register("stats:afterQuery", pgStats("query"))
+	db.Callback().Update().Before("gorm:update").Register("stats:beforeUpdate", pgAddStartedAt)
+	db.Callback().Update().After("gorm:update").Register("stats:afterUpdate", pgStats("update"))
+
 	pgClient = db
 }
 

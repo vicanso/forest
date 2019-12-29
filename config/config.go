@@ -25,6 +25,7 @@ import (
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/spf13/viper"
+	"github.com/vicanso/forest/validate"
 )
 
 var (
@@ -41,16 +42,25 @@ type (
 	}
 	// SessionConfig session's config
 	SessionConfig struct {
-		TTL        time.Duration
-		Key        string
-		CookiePath string
+		TTL        time.Duration `valid:"-"`
+		Key        string        `valid:"ascii"`
+		CookiePath string        `valid:"ascii"`
 	}
 	// MailConfig mail's config
 	MailConfig struct {
-		Host     string
-		Port     int
-		User     string
-		Password string
+		Host     string `valid:"host"`
+		Port     int    `valid:"port"`
+		User     string `valid:"email"`
+		Password string `valid:"runelength(1|100)"`
+	}
+
+	// Influxdb config
+	InfluxdbConfig struct {
+		Bucket    string `valid:"runelength(1|50)"`
+		Org       string `valid:"runelength(1|100)"`
+		URI       string `valid:"url"`
+		Token     string `valid:"ascii"`
+		BatchSize int    `valid:"range(1|5000)"`
 	}
 )
 
@@ -95,6 +105,13 @@ func init() {
 	}
 	// 读取当前运行环境对应的配置
 	err = viper.ReadConfig(bytes.NewReader(data))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func validatePanic(v interface{}) {
+	err := validate.Do(v, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -227,11 +244,17 @@ func GetPostgresConnectString() string {
 
 // GetSessionConfig get sesion config
 func GetSessionConfig() SessionConfig {
-	return SessionConfig{
+	sessConfig := SessionConfig{
 		TTL:        viper.GetDuration("session.ttl"),
 		Key:        viper.GetString("session.key"),
 		CookiePath: viper.GetString("session.path"),
 	}
+	// 如果session设置过短，则使用默认为24小时
+	if sessConfig.TTL < time.Second {
+		sessConfig.TTL = 24 * time.Hour
+	}
+	validatePanic(&sessConfig)
+	return sessConfig
 }
 
 // GetSignedKeys get signed keys
@@ -255,10 +278,31 @@ func GetRouterConcurrentLimit() map[string]uint32 {
 
 // GetMailConfig get mail config
 func GetMailConfig() MailConfig {
-	return MailConfig{
-		Host:     viper.GetString("mail.host"),
-		Port:     viper.GetInt("mail.port"),
-		User:     viper.GetString("mail.user"),
-		Password: os.Getenv(viper.GetString("mail.password")),
+	prefix := "mail."
+	pass := viper.GetString(prefix + "password")
+	if os.Getenv(pass) != "" {
+		pass = os.Getenv(pass)
 	}
+	mailConfig := MailConfig{
+		Host:     viper.GetString(prefix + "host"),
+		Port:     viper.GetInt(prefix + "port"),
+		User:     viper.GetString(prefix + "user"),
+		Password: pass,
+	}
+	validatePanic(&mailConfig)
+	return mailConfig
+}
+
+// GetInfluxdbConfig get influxdb config
+func GetInfluxdbConfig() InfluxdbConfig {
+	prefix := "influxdb."
+	influxdbConfig := InfluxdbConfig{
+		URI:       viper.GetString(prefix + "uri"),
+		Bucket:    viper.GetString(prefix + "bucket"),
+		Org:       viper.GetString(prefix + "org"),
+		Token:     viper.GetString(prefix + "token"),
+		BatchSize: viper.GetInt(prefix + "batchSize"),
+	}
+	validatePanic(&influxdbConfig)
+	return influxdbConfig
 }

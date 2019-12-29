@@ -16,6 +16,7 @@ package schedule
 
 import (
 	"github.com/robfig/cron/v3"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 
@@ -30,7 +31,7 @@ func init() {
 }
 
 func redisCheck() {
-	err := service.RedisPing()
+	err := helper.RedisPing()
 	if err != nil {
 		log.Default().Error("redis check fail",
 			zap.Error(err),
