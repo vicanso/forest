@@ -64,8 +64,8 @@ type (
 	// User user
 	User struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt time.Time  `json:"createdAt,omitempty"`
-		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		Account  string         `json:"account,omitempty" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
@@ -76,8 +76,8 @@ type (
 	// UserLoginRecord user login
 	UserLoginRecord struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt time.Time  `json:"createdAt,omitempty"`
-		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		Account       string `json:"account,omitempty" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
@@ -94,8 +94,8 @@ type (
 	// UserTrackRecord user track record
 	UserTrackRecord struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt time.Time  `json:"createdAt,omitempty"`
-		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 		TrackID   string     `json:"trackId,omitempty" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
 		UserAgent string     `json:"userAgent,omitempty"`

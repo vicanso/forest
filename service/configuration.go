@@ -41,8 +41,8 @@ type (
 	// Configuration configuration of application
 	Configuration struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt time.Time  `json:"createdAt,omitempty"`
-		UpdatedAt time.Time  `json:"updatedAt,omitempty"`
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		// 配置名称，唯一
