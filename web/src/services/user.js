@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import {
   USERS,
   USERS_UPDATE,
@@ -8,16 +6,17 @@ import {
   USERS_ME,
   USERS_LOGIN_RECORDS
 } from "../urls";
+import request from "../request";
 
 // logout 退出登录
 export async function logout() {
-  const { data } = await axios.delete(USERS_LOGOUT);
+  const { data } = await request.delete(USERS_LOGOUT);
   return data;
 }
 
 // getLoginToken 获取登录token
 export async function getLoginToken() {
-  const { data } = await axios.get(USERS_LOGIN);
+  const { data } = await request.get(USERS_LOGIN);
   return data;
 }
 
@@ -25,7 +24,7 @@ export async function getLoginToken() {
 export async function login(params) {
   const { captcha } = params;
   delete params.captcha;
-  const { data } = await axios.post(USERS_LOGIN, params, {
+  const { data } = await request.post(USERS_LOGIN, params, {
     headers: {
       "X-Captcha": captcha
     }
@@ -37,7 +36,7 @@ export async function login(params) {
 export async function register(params) {
   const { captcha } = params;
   delete params.captcha;
-  const { data } = await axios.post(USERS_ME, params, {
+  const { data } = await request.post(USERS_ME, params, {
     headers: {
       "X-Captcha": captcha
     }
@@ -47,7 +46,7 @@ export async function register(params) {
 
 // list 列出用户列表
 export async function list(params) {
-  const { data } = await axios.get(USERS, {
+  const { data } = await request.get(USERS, {
     params
   });
   return data;
@@ -56,13 +55,13 @@ export async function list(params) {
 // updateByID 通过ID更新用户信息
 export async function updateByID(id, params) {
   const url = USERS_UPDATE.replace(":id", id);
-  const { data } = await axios.patch(url, params);
+  const { data } = await request.patch(url, params);
   return data;
 }
 
 // listLoginRecords 获取登录记录
 export async function listLoginRecords(params) {
-  const { data } = await axios.get(USERS_LOGIN_RECORDS, {
+  const { data } = await request.get(USERS_LOGIN_RECORDS, {
     params
   });
   return data;

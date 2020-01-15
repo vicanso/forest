@@ -1,10 +1,7 @@
-import request from "axios";
+import axios from "axios";
 
-request.interceptors.request.use(config => {
-  if (!config.timeout) {
-    config.timeout = 10 * 1000;
-  }
-  return config;
+const request = axios.create({
+  timeout: 10 * 1000
 });
 
 request.interceptors.response.use(null, err => {
@@ -18,3 +15,5 @@ request.interceptors.response.use(null, err => {
   }
   return Promise.reject(err);
 });
+
+export default request;

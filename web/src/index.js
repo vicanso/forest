@@ -6,7 +6,7 @@ import "./index.sass";
 import * as serviceWorker from "./serviceWorker";
 
 import App from "./App";
-import "./request-interceptors";
+// import "./request-interceptors";
 // import * as serviceWorker from "./serviceWorker";
 
 import { getHistory } from "./router";

@@ -1,6 +1,5 @@
 import React from "react";
 import { Route, HashRouter } from "react-router-dom";
-import axios from "axios";
 import { message, Spin } from "antd";
 
 import "./app.sass";
@@ -29,6 +28,7 @@ import UserList from "./components/user_list";
 import UserLoginRecordList from "./components/user_login_record_list";
 import IPBlockList from "./components/ip_block_list";
 import Home from "./components/home";
+import request from "./request";
 
 function NeedLoginRoute({ component: Component, account, roles, ...rest }) {
   return (
@@ -57,7 +57,7 @@ class App extends React.Component {
       loading: true
     });
     try {
-      const { data } = await axios.get(USERS_ME);
+      const { data } = await request.get(USERS_ME);
       this.setUserInfo(data);
     } catch (err) {
       message.error(err.message);
@@ -68,7 +68,7 @@ class App extends React.Component {
     }
     // 更新session与cookie有效期
     setTimeout(() => {
-      axios.patch(USERS_ME);
+      request.patch(USERS_ME);
     }, 5 * 1000);
   }
   setUserInfo(data) {
