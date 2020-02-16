@@ -296,11 +296,15 @@ func GetMailConfig() MailConfig {
 // GetInfluxdbConfig get influxdb config
 func GetInfluxdbConfig() InfluxdbConfig {
 	prefix := "influxdb."
+	token := viper.GetString(prefix + "token")
+	if os.Getenv(token) != "" {
+		token = os.Getenv(token)
+	}
 	influxdbConfig := InfluxdbConfig{
 		URI:       viper.GetString(prefix + "uri"),
 		Bucket:    viper.GetString(prefix + "bucket"),
 		Org:       viper.GetString(prefix + "org"),
-		Token:     viper.GetString(prefix + "token"),
+		Token:     token,
 		BatchSize: viper.GetInt(prefix + "batchSize"),
 	}
 	validatePanic(&influxdbConfig)
