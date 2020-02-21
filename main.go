@@ -61,7 +61,7 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
-	_ "go.uber.org/automaxprocs"
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 )
 
@@ -73,6 +73,13 @@ var (
 	// GO go version
 	GO string
 )
+
+func init() {
+	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
+		value := fmt.Sprintf(format, args...)
+		log.Default().Info(value)
+	}))
+}
 
 // 相关依赖服务的校验，主要是数据库等
 func dependServiceCheck() (err error) {
