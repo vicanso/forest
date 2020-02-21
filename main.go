@@ -61,6 +61,7 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
 
