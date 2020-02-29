@@ -366,12 +366,12 @@ func (u *UserSession) ClearSessionID() {
 
 // NewUserSession create a user session
 func NewUserSession(c *elton.Context) *UserSession {
-	v := c.Get(session.Key)
-	if v == nil {
+	v, ok := c.Get(session.Key)
+	if !ok {
 		return nil
 	}
-	data := c.Get(cs.UserSession)
-	if data != nil {
+	data, ok := c.Get(cs.UserSession)
+	if ok {
 		us, ok := data.(*UserSession)
 		if ok {
 			return us

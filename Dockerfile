@@ -6,7 +6,7 @@ RUN cd /forest/web \
   && yarn build \
   && rm -rf node_module
 
-FROM golang:1.13-alpine as builder
+FROM golang:1.14-alpine as builder
 
 COPY --from=webbuilder /forest /forest
 
@@ -27,6 +27,7 @@ RUN addgroup -g 1000 go \
   && apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /forest/forest /usr/local/bin/forest
+COPY --from=builder /forest/entrypoint.sh /home/go/entrypoint.sh
 
 USER go
 
@@ -35,3 +36,5 @@ WORKDIR /home/go
 HEALTHCHECK --timeout=10s CMD [ "wget", "http://127.0.0.1:7001/ping", "-q", "-O", "-"]
 
 CMD ["forest"]
+
+ENTRYPOINT ["entrypoint.sh"]
