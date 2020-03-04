@@ -19,4 +19,6 @@ const (
 	MeasurementPG          = "pg-stats"
 	MeasurementRedis       = "redis-stats"
 	MeasurementHTTP        = "http-stats"
+	MeasurementRedisStats  = "redis-stats"
+	MeasurementPGStats     = "pg-stats"
 )

@@ -15,6 +15,8 @@
 package schedule
 
 import (
+	"github.com/vicanso/forest/cs"
+
 	"github.com/robfig/cron/v3"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
@@ -27,6 +29,8 @@ func init() {
 	c := cron.New()
 	_, _ = c.AddFunc("@every 5m", redisCheck)
 	_, _ = c.AddFunc("@every 1m", configRefresh)
+	_, _ = c.AddFunc("@every 5m", redisStats)
+	_, _ = c.AddFunc("@every 1m", pgStats)
 	c.Start()
 }
 
@@ -49,4 +53,14 @@ func configRefresh() {
 		)
 		service.AlarmError("config refresh fail")
 	}
+}
+
+func redisStats() {
+	stats := helper.RedisStats()
+	helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, stats, nil)
+}
+
+func pgStats() {
+	stats := helper.PGStats()
+	helper.GetInfluxSrv().Write(cs.MeasurementPGStats, stats, nil)
 }

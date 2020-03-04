@@ -39,6 +39,10 @@ type (
 		Addr     string
 		Password string
 		DB       int
+		// 慢请求时长
+		Slow time.Duration
+		// 最大的正在处理请求量
+		MaxProcessing int
 	}
 	// SessionConfig session's config
 	SessionConfig struct {
@@ -193,6 +197,10 @@ func GetRedisConfig() (options RedisOptions, err error) {
 	if err != nil {
 		return
 	}
+	// 设置默认值
+	options.Slow = 300 * time.Millisecond
+	options.MaxProcessing = 1000
+
 	options.Addr = info.Host
 	pass, ok := info.User.Password()
 	// 密码从env中读取
@@ -204,10 +212,24 @@ func GetRedisConfig() (options RedisOptions, err error) {
 		}
 	}
 	options.Password = pass
-
-	db := info.Query().Get("db")
+	query := info.Query()
+	db := query.Get("db")
 	if db != "" {
 		options.DB, _ = strconv.Atoi(db)
+	}
+	slow := query.Get("slow")
+	if slow != "" {
+		d, _ := time.ParseDuration(slow)
+		if d != 0 {
+			options.Slow = d
+		}
+	}
+	maxProcessing := query.Get("maxProcessing")
+	if maxProcessing != "" {
+		v, _ := strconv.Atoi(maxProcessing)
+		if v != 0 {
+			options.MaxProcessing = v
+		}
 	}
 	return
 }

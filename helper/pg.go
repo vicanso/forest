@@ -17,6 +17,7 @@ package helper
 import (
 	"regexp"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/iancoleman/strcase"
@@ -29,15 +30,59 @@ import (
 )
 
 var (
-	pgClient *gorm.DB
-	pgSlow   = time.Second
+	pgClient    *gorm.DB
+	pgStatsHook = &pgStats{
+		Slow: time.Second,
+	}
 )
 
-func pgAddStartedAt(scope *gorm.Scope) {
-	scope.InstanceSet(startedAtKey, time.Now())
+const (
+	queryCMD  = "query"
+	updateCMD = "update"
+)
+
+type (
+	pgStats struct {
+		Slow             time.Duration
+		queryProcessing  uint32
+		updateProcessing uint32
+		total            uint64
+	}
+)
+
+func (ps *pgStats) getProcessingAndTotal() (uint32, uint32, uint64) {
+	queryProcessing := atomic.LoadUint32(&ps.queryProcessing)
+	updateProcessing := atomic.LoadUint32(&ps.updateProcessing)
+	total := atomic.LoadUint64(&ps.total)
+	return queryProcessing, updateProcessing, total
 }
-func pgStats(category string) func(*gorm.Scope) {
+
+// Before before pg sql handle
+func (ps *pgStats) Before(category string) (callback func(scope *gorm.Scope)) {
 	return func(scope *gorm.Scope) {
+		// TODO 是不可以在此判断如果请求量过大时，则禁止请求
+		// scope.Err
+		atomic.AddUint64(&ps.total, 1)
+		switch category {
+		case queryCMD:
+			atomic.AddUint32(&ps.queryProcessing, 1)
+		case updateCMD:
+			atomic.AddUint32(&ps.updateProcessing, 1)
+		}
+		scope.InstanceSet(startedAtKey, time.Now())
+	}
+}
+
+// After after pg sql handle
+func (ps *pgStats) After(category string) func(*gorm.Scope) {
+	return func(scope *gorm.Scope) {
+		switch category {
+		case queryCMD:
+			atomic.AddUint32(&ps.queryProcessing, ^uint32(0))
+		case updateCMD:
+			atomic.AddUint32(&ps.updateProcessing, ^uint32(0))
+		}
+
 		value, ok := scope.InstanceGet(startedAtKey)
 		if !ok {
 			return
@@ -48,7 +93,7 @@ func pgStats(category string) func(*gorm.Scope) {
 		}
 		use := time.Since(startedAt)
 		db := scope.DB()
-		if time.Since(startedAt) > pgSlow || db.Error != nil {
+		if time.Since(startedAt) > ps.Slow || db.Error != nil {
 			message := ""
 			if db.Error != nil {
 				message = db.Error.Error()
@@ -86,10 +131,10 @@ func init() {
 		panic(err)
 	}
 	db.SetLogger(log.PGLogger())
-	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", pgAddStartedAt)
-	db.Callback().Query().After("gorm:query").Register("stats:afterQuery", pgStats("query"))
-	db.Callback().Update().Before("gorm:update").Register("stats:beforeUpdate", pgAddStartedAt)
-	db.Callback().Update().After("gorm:update").Register("stats:afterUpdate", pgStats("update"))
+	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", pgStatsHook.Before(queryCMD))
+	db.Callback().Query().After("gorm:query").Register("stats:afterQuery", pgStatsHook.After(queryCMD))
+	db.Callback().Update().Before("gorm:update").Register("stats:beforeUpdate", pgStatsHook.Before(updateCMD))
+	db.Callback().Update().After("gorm:update").Register("stats:afterUpdate", pgStatsHook.After(updateCMD))
 
 	pgClient = db
 }
@@ -122,4 +167,14 @@ func PGFormatOrder(sort string) string {
 // PGFormatSelect format select
 func PGFormatSelect(fields string) string {
 	return strcase.ToSnake(fields)
+}
+
+// PGStats get pg stats
+func PGStats() map[string]interface{} {
+	queryProcessing, updateProcessing, total := pgStatsHook.getProcessingAndTotal()
+	return map[string]interface{}{
+		"queryProcessing":  queryProcessing,
+		"updateProcessing": updateProcessing,
+		"total":            total,
+	}
 }

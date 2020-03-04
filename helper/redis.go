@@ -17,7 +17,9 @@ package helper
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-redis/redis/v7"
@@ -34,13 +36,18 @@ var (
 	}
 	errRedisNil = hes.New("key is not exists or expired")
 	redisSrv    = new(Redis)
+	rh          *redisHook
 )
 
 type (
 
-	// redisStats redis stats
-	redisStats struct {
-		Slow time.Duration
+	// redisHook redis hook
+	redisHook struct {
+		maxProcessing  uint32
+		slow           time.Duration
+		processing     uint32
+		pipeProcessing uint32
+		total          uint64
 	}
 )
 
@@ -56,10 +63,11 @@ type (
 	}
 )
 
-func (rs *redisStats) logSlowOrError(ctx context.Context, cmd, err string) {
+// 对于慢或出错请求输出日志并写入influxdb
+func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 	t := ctx.Value(startedAtKey).(*time.Time)
 	d := time.Since(*t)
-	if d > rs.Slow || err != "" {
+	if d > rh.slow || err != "" {
 		logger.Info("redis process slow or error",
 			zap.String("cmd", cmd),
 			zap.String("use", d.String()),
@@ -77,32 +85,37 @@ func (rs *redisStats) logSlowOrError(ctx context.Context, cmd, err string) {
 }
 
 // BeforeProcess before process
-func (rs *redisStats) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
 	t := time.Now()
 	ctx = context.WithValue(ctx, startedAtKey, &t)
+	atomic.AddUint32(&rh.processing, 1)
+	atomic.AddUint64(&rh.total, 1)
 	return ctx, nil
 }
 
 // AfterProcess after process
-func (rs *redisStats) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	message := ""
 	err := cmd.Err()
 	if err != nil {
 		message = err.Error()
 	}
-	rs.logSlowOrError(ctx, cmd.Name(), message)
+	rh.logSlowOrError(ctx, cmd.Name(), message)
+	atomic.AddUint32(&rh.processing, ^uint32(0))
 	return nil
 }
 
 // BeforeProcessPipeline before process pipeline
-func (rs *redisStats) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
 	t := time.Now()
 	ctx = context.WithValue(ctx, startedAtKey, &t)
+	atomic.AddUint32(&rh.pipeProcessing, 1)
+	atomic.AddUint64(&rh.total, 1)
 	return ctx, nil
 }
 
 // AfterProcessPipeline after process pipeline
-func (rs *redisStats) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
+func (rh *redisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
 	cmdSb := new(strings.Builder)
 	message := ""
 	for index, cmd := range cmds {
@@ -115,8 +128,33 @@ func (rs *redisStats) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmd
 			message += err.Error()
 		}
 	}
-	rs.logSlowOrError(ctx, cmdSb.String(), message)
+	rh.logSlowOrError(ctx, cmdSb.String(), message)
+	atomic.AddUint32(&rh.pipeProcessing, ^uint32(0))
 	return nil
+}
+
+// getProcessingAndTotal get processing and total
+func (rh *redisHook) getProcessingAndTotal() (uint32, uint32, uint64) {
+	processing := atomic.LoadUint32(&rh.processing)
+	pipeProcessing := atomic.LoadUint32(&rh.pipeProcessing)
+	total := atomic.LoadUint64(&rh.total)
+	return processing, pipeProcessing, total
+}
+
+func (rh *redisHook) Allow() error {
+	// 如果处理请求量超出，则不允许继续请求
+	if atomic.LoadUint32(&rh.processing) > rh.maxProcessing {
+		return errors.New("too many redis processing")
+	}
+	return nil
+}
+
+func (*redisHook) ReportResult(result error) {
+	if result != nil {
+		logger.Error("redis process fail",
+			zap.Error(result),
+		)
+	}
 }
 
 func init() {
@@ -128,18 +166,17 @@ func init() {
 		zap.String("addr", options.Addr),
 		zap.Int("db", options.DB),
 	)
+	rh = &redisHook{
+		slow:          options.Slow,
+		maxProcessing: uint32(options.MaxProcessing),
+	}
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     options.Addr,
 		Password: options.Password,
 		DB:       options.DB,
-		OnConnect: func(_ *redis.Conn) error {
-			logger.Info("redis new connection is established")
-			return nil
-		},
+		Limiter:  rh,
 	})
-	redisClient.AddHook(&redisStats{
-		Slow: 300 * time.Millisecond,
-	})
+	redisClient.AddHook(rh)
 }
 
 // RedisGetClient get redis client
@@ -150,6 +187,23 @@ func RedisGetClient() *redis.Client {
 // IsRedisNilError is redis nil errror
 func IsRedisNilError(err error) bool {
 	return err == errRedisNil
+}
+
+// RedisStats get redis stats
+func RedisStats() map[string]interface{} {
+	stats := redisClient.PoolStats()
+	processing, pipeProcessing, total := rh.getProcessingAndTotal()
+	return map[string]interface{}{
+		"hits":           stats.Hits,
+		"missed":         stats.Misses,
+		"timeouts":       stats.Timeouts,
+		"totalConns":     stats.TotalConns,
+		"idleConns":      stats.IdleConns,
+		"staleConns":     stats.StaleConns,
+		"processing":     processing,
+		"pipeProcessing": pipeProcessing,
+		"total":          total,
+	}
 }
 
 // RedisPing redis ping
