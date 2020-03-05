@@ -173,13 +173,13 @@ func (srv *UserSrv) Update(user User, attrs ...interface{}) (err error) {
 }
 
 // AddLoginRecord add user login record
-func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
+func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord, c *elton.Context) (err error) {
 	err = pgCreate(r)
 	if r.ID != 0 {
 		id := r.ID
 		ip := r.IP
 		go func() {
-			lo, err := GetLocationByIP(ip, nil)
+			lo, err := GetLocationByIP(ip, c)
 			if err != nil {
 				logger.Error("get location by ip fail",
 					zap.String("ip", ip),
@@ -201,13 +201,13 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord) (err error) {
 }
 
 // AddTrackRecord add track record
-func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord) (err error) {
+func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord, c *elton.Context) (err error) {
 	err = pgCreate(r)
 	if r.ID != 0 {
 		id := r.ID
 		ip := r.IP
 		go func() {
-			lo, err := GetLocationByIP(ip, nil)
+			lo, err := GetLocationByIP(ip, c)
 			if err != nil {
 				logger.Error("get location by ip fail",
 					zap.String("ip", ip),

@@ -230,7 +230,7 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 			IP:        c.RealIP(),
 			TrackID:   util.GetTrackID(c),
 		}
-		_ = userSrv.AddTrackRecord(trackRecord)
+		_ = userSrv.AddTrackRecord(trackRecord, c)
 	}
 	c.Body = pickUserInfo(c)
 	return
@@ -349,7 +349,7 @@ func (ctrl userCtrl) login(c *elton.Context) (err error) {
 		SessionID:     util.GetSessionID(c),
 		XForwardedFor: c.GetRequestHeader("X-Forwarded-For"),
 	}
-	_ = userSrv.AddLoginRecord(loginRecord)
+	_ = userSrv.AddLoginRecord(loginRecord, c)
 	omitUserInfo(u)
 	_ = us.SetAccount(u.Account)
 	_ = us.SetRoles(u.Roles)

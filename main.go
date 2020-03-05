@@ -105,8 +105,12 @@ func main() {
 	}
 
 	logger := log.Default()
-	d := elton.New()
-	d.SignedKeys = service.GetSignedKeys()
+	e := elton.New()
+
+	e.SignedKeys = service.GetSignedKeys()
+	e.GenerateID = func() string {
+		return util.RandomString(8)
+	}
 
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
@@ -115,7 +119,7 @@ func main() {
 	warnerException.On(func(_ string, _ int64) {
 		service.AlarmError("too many uncaught exception")
 	})
-	d.OnError(func(c *elton.Context, err error) {
+	e.OnError(func(c *elton.Context, err error) {
 		if !util.IsProduction() {
 			he, ok := err.(*hes.Error)
 			if ok {
@@ -149,7 +153,7 @@ func main() {
 		}
 	}()
 
-	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
+	e.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetRealIP(req)
 		logger.Info("404",
 			zap.String("ip", ip),
@@ -169,12 +173,12 @@ func main() {
 	}
 
 	// 捕捉panic异常，避免程序崩溃
-	d.Use(recover.New())
+	e.Use(recover.New())
 
-	d.Use(middleware.NewEntry())
+	e.Use(middleware.NewEntry())
 
 	// 接口相关统计信息
-	d.Use(stats.New(stats.Config{
+	e.Use(stats.New(stats.Config{
 		OnStats: func(info *stats.Info, c *elton.Context) {
 			// ping 的日志忽略
 			if info.URI == "/ping" {
@@ -212,20 +216,20 @@ func main() {
 	}))
 
 	// 错误处理，将错误转换为json响应
-	d.Use(errorHandler.New(errorHandler.Config{
+	e.Use(errorHandler.New(errorHandler.Config{
 		ResponseType: "json",
 	}))
 
 	// IP限制
-	d.Use(middleware.NewIPBlock())
+	e.Use(middleware.NewIPBlock())
 
 	// 根据应用配置限制路由
-	d.Use(middleware.NewRouterController())
+	e.Use(middleware.NewRouterController())
 
 	// 路由并发限制
 	routerLimitConfig := config.GetRouterConcurrentLimit()
 	if len(routerLimitConfig) != 0 {
-		d.Use(routerLimiter.New(routerLimiter.Config{
+		e.Use(routerLimiter.New(routerLimiter.Config{
 			Limiter: routerLimiter.NewLocalLimiter(routerLimitConfig),
 		}))
 	}
@@ -234,17 +238,17 @@ func main() {
 	// d.Use(compress.NewDefault())
 
 	// etag与fresh的处理
-	d.Use(fresh.NewDefault())
-	d.Use(etag.NewDefault())
+	e.Use(fresh.NewDefault())
+	e.Use(etag.NewDefault())
 
 	// 对响应数据 c.Body 转换为相应的json响应
-	d.Use(responder.NewDefault())
+	e.Use(responder.NewDefault())
 
 	// 读取读取body的数的，转换为json bytes
-	d.Use(bodyparser.NewDefault())
+	e.Use(bodyparser.NewDefault())
 
 	// 初始化路由
-	router.Init(d)
+	router.Init(e)
 
 	err := dependServiceCheck()
 	if err != nil {
@@ -257,7 +261,7 @@ func main() {
 	logger.Info("start to linstening...",
 		zap.String("listen", config.GetListen()),
 	)
-	err = d.ListenAndServe(config.GetListen())
+	err = e.ListenAndServe(config.GetListen())
 	if err != nil {
 		panic(err)
 	}

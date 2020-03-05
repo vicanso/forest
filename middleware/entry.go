@@ -17,7 +17,6 @@ package middleware
 import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/util"
 )
 
 const (
@@ -29,8 +28,6 @@ func NewEntry() elton.Handler {
 	return func(c *elton.Context) (err error) {
 		service.IncreaseConcurrency()
 		defer service.DecreaseConcurrency()
-		// 生成context id
-		c.ID = util.RandomString(6)
 		c.SetHeader(xResponseID, c.ID)
 
 		// 设置所有的请求响应默认都为no cache

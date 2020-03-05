@@ -42,7 +42,7 @@ type (
 		// 慢请求时长
 		Slow time.Duration
 		// 最大的正在处理请求量
-		MaxProcessing int
+		MaxProcessing uint32
 	}
 	// SessionConfig session's config
 	SessionConfig struct {
@@ -65,6 +65,13 @@ type (
 		URI       string `valid:"url"`
 		Token     string `valid:"ascii"`
 		BatchSize int    `valid:"range(1|5000)"`
+	}
+
+	// PostgresConfig postgres config
+	PostgresConfig struct {
+		Slow                time.Duration
+		MaxQueryProcessing  uint32
+		MaxUpdateProcessing uint32
 	}
 )
 
@@ -227,8 +234,8 @@ func GetRedisConfig() (options RedisOptions, err error) {
 	maxProcessing := query.Get("maxProcessing")
 	if maxProcessing != "" {
 		v, _ := strconv.Atoi(maxProcessing)
-		if v != 0 {
-			options.MaxProcessing = v
+		if v > 0 {
+			options.MaxProcessing = uint32(v)
 		}
 	}
 	return
@@ -264,12 +271,35 @@ func GetPostgresConnectString() string {
 	return strings.Join(arr, " ")
 }
 
+// GetPostgresConfig get postgres config
+func GetPostgresConfig() PostgresConfig {
+	prefix := "postgres."
+	slow := viper.GetDuration(prefix + "slow")
+	if slow == 0 {
+		slow = time.Second
+	}
+	maxQueryProcessing := viper.GetUint32(prefix + "maxQueryProcessing")
+	if maxQueryProcessing == 0 {
+		maxQueryProcessing = 1000
+	}
+	maxUpdateProcessing := viper.GetUint32(prefix + "maxUpdateProcessing")
+	if maxUpdateProcessing == 0 {
+		maxUpdateProcessing = 500
+	}
+	return PostgresConfig{
+		Slow:                slow,
+		MaxQueryProcessing:  maxQueryProcessing,
+		MaxUpdateProcessing: maxUpdateProcessing,
+	}
+}
+
 // GetSessionConfig get sesion config
 func GetSessionConfig() SessionConfig {
+	prefix := "session."
 	sessConfig := SessionConfig{
-		TTL:        viper.GetDuration("session.ttl"),
-		Key:        viper.GetString("session.key"),
-		CookiePath: viper.GetString("session.path"),
+		TTL:        viper.GetDuration(prefix + "ttl"),
+		Key:        viper.GetString(prefix + "key"),
+		CookiePath: viper.GetString(prefix + "path"),
 	}
 	// 如果session设置过短，则使用默认为24小时
 	if sessConfig.TTL < time.Second {

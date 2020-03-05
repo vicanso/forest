@@ -15,6 +15,7 @@
 package helper
 
 import (
+	"net/http"
 	"regexp"
 	"strings"
 	"sync/atomic"
@@ -26,13 +27,23 @@ import (
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
+	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
 
 var (
 	pgClient    *gorm.DB
-	pgStatsHook = &pgStats{
-		Slow: time.Second,
+	pgStatsHook *pgStats
+
+	ErrPGTooManyQueryProcessing = &hes.Error{
+		Message:    "too many query processing",
+		StatusCode: http.StatusInternalServerError,
+		Category:   "pg",
+	}
+	ErrPGTooManyUpdateProcessing = &hes.Error{
+		Message:    "too many update processing",
+		StatusCode: http.StatusInternalServerError,
+		Category:   "pg",
 	}
 )
 
@@ -43,10 +54,12 @@ const (
 
 type (
 	pgStats struct {
-		Slow             time.Duration
-		queryProcessing  uint32
-		updateProcessing uint32
-		total            uint64
+		slow                time.Duration
+		maxQueryProcessing  uint32
+		maxUpdateProcessing uint32
+		queryProcessing     uint32
+		updateProcessing    uint32
+		total               uint64
 	}
 )
 
@@ -60,14 +73,19 @@ func (ps *pgStats) getProcessingAndTotal() (uint32, uint32, uint64) {
 // Before before pg sql handle
 func (ps *pgStats) Before(category string) (callback func(scope *gorm.Scope)) {
 	return func(scope *gorm.Scope) {
-		// TODO 是不可以在此判断如果请求量过大时，则禁止请求
-		// scope.Err
 		atomic.AddUint64(&ps.total, 1)
+
 		switch category {
 		case queryCMD:
-			atomic.AddUint32(&ps.queryProcessing, 1)
+			v := atomic.AddUint32(&ps.queryProcessing, 1)
+			if v > ps.maxQueryProcessing {
+				_ = scope.Err(ErrPGTooManyQueryProcessing)
+			}
 		case updateCMD:
-			atomic.AddUint32(&ps.updateProcessing, 1)
+			v := atomic.AddUint32(&ps.updateProcessing, 1)
+			if v > ps.maxUpdateProcessing {
+				_ = scope.Err(ErrPGTooManyUpdateProcessing)
+			}
 		}
 		scope.InstanceSet(startedAtKey, time.Now())
 	}
@@ -93,7 +111,7 @@ func (ps *pgStats) After(category string) func(*gorm.Scope) {
 		}
 		use := time.Since(startedAt)
 		db := scope.DB()
-		if time.Since(startedAt) > ps.Slow || db.Error != nil {
+		if time.Since(startedAt) > ps.slow || db.Error != nil {
 			message := ""
 			if db.Error != nil {
 				message = db.Error.Error()
@@ -121,6 +139,7 @@ func (ps *pgStats) After(category string) func(*gorm.Scope) {
 
 func init() {
 	str := config.GetPostgresConnectString()
+	pgConfig := config.GetPostgresConfig()
 	reg := regexp.MustCompile(`password=\S*`)
 	maskStr := reg.ReplaceAllString(str, "password=***")
 	logger.Info("connect to pg",
@@ -130,6 +149,12 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	pgStatsHook = &pgStats{
+		slow:                pgConfig.Slow,
+		maxQueryProcessing:  pgConfig.MaxQueryProcessing,
+		maxUpdateProcessing: pgConfig.MaxUpdateProcessing,
+	}
+
 	db.SetLogger(log.PGLogger())
 	db.Callback().Query().Before("gorm:query").Register("stats:beforeQuery", pgStatsHook.Before(queryCMD))
 	db.Callback().Query().After("gorm:query").Register("stats:afterQuery", pgStatsHook.After(queryCMD))

@@ -18,6 +18,9 @@ postgres:
   dbname: forest
   password: 123456
   sslmode: disable
+  slow: 1s
+  maxQueryProcessing: 1000
+  maxUpdateProcessing: 500
 
 # influxdb 配置
 influxdb:

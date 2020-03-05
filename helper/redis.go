@@ -17,7 +17,7 @@ package helper
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"net/http"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -34,9 +34,14 @@ var (
 	redisNoop   = func() error {
 		return nil
 	}
-	errRedisNil = hes.New("key is not exists or expired")
-	redisSrv    = new(Redis)
-	rh          *redisHook
+	errRedisNil               = hes.New("key is not exists or expired")
+	redisSrv                  = new(Redis)
+	rh                        *redisHook
+	ErrRedisTooManyProcessing = &hes.Error{
+		Message:    "too many processing",
+		StatusCode: http.StatusInternalServerError,
+		Category:   "redis",
+	}
 )
 
 type (
@@ -144,7 +149,7 @@ func (rh *redisHook) getProcessingAndTotal() (uint32, uint32, uint64) {
 func (rh *redisHook) Allow() error {
 	// 如果处理请求量超出，则不允许继续请求
 	if atomic.LoadUint32(&rh.processing) > rh.maxProcessing {
-		return errors.New("too many redis processing")
+		return ErrRedisTooManyProcessing
 	}
 	return nil
 }
@@ -168,7 +173,7 @@ func init() {
 	)
 	rh = &redisHook{
 		slow:          options.Slow,
-		maxProcessing: uint32(options.MaxProcessing),
+		maxProcessing: options.MaxProcessing,
 	}
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     options.Addr,
