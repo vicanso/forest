@@ -16,10 +16,7 @@ package config
 
 import (
 	"bytes"
-	"errors"
-	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -36,13 +33,13 @@ var (
 type (
 	// RedisOptions redis options
 	RedisOptions struct {
-		Addr     string
-		Password string
-		DB       int
+		Addr     string `valid:"runelength(5|30)"`
+		Password string `valid:"-"`
+		DB       int    `valid:"-"`
 		// 慢请求时长
-		Slow time.Duration
+		Slow time.Duration `valid:"-"`
 		// 最大的正在处理请求量
-		MaxProcessing uint32
+		MaxProcessing uint32 `valid:"-"`
 	}
 	// SessionConfig session's config
 	SessionConfig struct {
@@ -87,6 +84,10 @@ const (
 	defaultTrackKey = "jt"
 )
 
+var (
+	defaultViper = viper.New()
+)
+
 func init() {
 	configType := "yml"
 	configExt := "." + configType
@@ -105,7 +106,7 @@ func init() {
 	configs := v.AllSettings()
 	// 将default中的配置全部以默认配置写入
 	for k, v := range configs {
-		viper.SetDefault(k, v)
+		defaultViper.SetDefault(k, v)
 	}
 
 	// 根据当前运行环境配置读取
@@ -115,7 +116,7 @@ func init() {
 		panic(err)
 	}
 	// 读取当前运行环境对应的配置
-	err = viper.ReadConfig(bytes.NewReader(data))
+	err = defaultViper.ReadConfig(bytes.NewReader(data))
 	if err != nil {
 		panic(err)
 	}
@@ -138,7 +139,12 @@ func GetENV() string {
 
 // GetInt viper get int
 func GetInt(key string) int {
-	return viper.GetInt(key)
+	return defaultViper.GetInt(key)
+}
+
+// GetUint32 viper get uint32
+func GetUint32(key string) uint32 {
+	return defaultViper.GetUint32(key)
 }
 
 // GetIntDefault get int with default value
@@ -150,9 +156,18 @@ func GetIntDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
+// GetUint32Default get uint32 with default value
+func GetUint32Default(key string, defaultValue uint32) uint32 {
+	v := GetUint32(key)
+	if v != 0 {
+		return v
+	}
+	return defaultValue
+}
+
 // GetString viper get string
 func GetString(key string) string {
-	return viper.GetString(key)
+	return defaultViper.GetString(key)
 }
 
 // GetStringDefault get string with default value
@@ -166,7 +181,7 @@ func GetStringDefault(key, defaultValue string) string {
 
 // GetDuration viper get duration
 func GetDuration(key string) time.Duration {
-	return viper.GetDuration(key)
+	return defaultViper.GetDuration(key)
 }
 
 // GetDurationDefault get duration with default value
@@ -180,7 +195,12 @@ func GetDurationDefault(key string, defaultValue time.Duration) time.Duration {
 
 // GetStringSlice viper get string slice
 func GetStringSlice(key string) []string {
-	return viper.GetStringSlice(key)
+	return defaultViper.GetStringSlice(key)
+}
+
+// GetStringMap get string map
+func GetStringMap(key string) map[string]interface{} {
+	return defaultViper.GetStringMap(key)
 }
 
 // GetListen get server listen address
@@ -195,56 +215,22 @@ func GetTrackKey() string {
 
 // GetRedisConfig get redis config
 func GetRedisConfig() (options RedisOptions, err error) {
-	value := GetString("redis")
-	if value == "" {
-		err = errors.New("redis connect uri can't be nil")
-		return
+	prefix := "redis."
+	options = RedisOptions{
+		Addr:          GetString(prefix + "addr"),
+		Password:      GetString(prefix + "password"),
+		DB:            GetInt(prefix + "db"),
+		Slow:          GetDurationDefault(prefix+"slow", 300*time.Millisecond),
+		MaxProcessing: GetUint32Default(prefix+"maxProcessing", 1000),
 	}
-	info, err := url.Parse(value)
-	if err != nil {
-		return
-	}
-	// 设置默认值
-	options.Slow = 300 * time.Millisecond
-	options.MaxProcessing = 1000
-
-	options.Addr = info.Host
-	pass, ok := info.User.Password()
-	// 密码从env中读取
-	if ok {
-		v := os.Getenv(pass)
-		// 如果不为空，则表示从env获取成功
-		if v != "" {
-			pass = v
-		}
-	}
-	options.Password = pass
-	query := info.Query()
-	db := query.Get("db")
-	if db != "" {
-		options.DB, _ = strconv.Atoi(db)
-	}
-	slow := query.Get("slow")
-	if slow != "" {
-		d, _ := time.ParseDuration(slow)
-		if d != 0 {
-			options.Slow = d
-		}
-	}
-	maxProcessing := query.Get("maxProcessing")
-	if maxProcessing != "" {
-		v, _ := strconv.Atoi(maxProcessing)
-		if v > 0 {
-			options.MaxProcessing = uint32(v)
-		}
-	}
+	validatePanic(&options)
 	return
 }
 
 // GetPostgresConnectString get postgres connect string
 func GetPostgresConnectString() string {
 	getPostgresConfig := func(key string) string {
-		return viper.GetString("postgres." + key)
+		return GetString("postgres." + key)
 	}
 	keys := []string{
 		"host",
@@ -274,15 +260,15 @@ func GetPostgresConnectString() string {
 // GetPostgresConfig get postgres config
 func GetPostgresConfig() PostgresConfig {
 	prefix := "postgres."
-	slow := viper.GetDuration(prefix + "slow")
+	slow := GetDuration(prefix + "slow")
 	if slow == 0 {
 		slow = time.Second
 	}
-	maxQueryProcessing := viper.GetUint32(prefix + "maxQueryProcessing")
+	maxQueryProcessing := GetUint32(prefix + "maxQueryProcessing")
 	if maxQueryProcessing == 0 {
 		maxQueryProcessing = 1000
 	}
-	maxUpdateProcessing := viper.GetUint32(prefix + "maxUpdateProcessing")
+	maxUpdateProcessing := GetUint32(prefix + "maxUpdateProcessing")
 	if maxUpdateProcessing == 0 {
 		maxUpdateProcessing = 500
 	}
@@ -297,9 +283,9 @@ func GetPostgresConfig() PostgresConfig {
 func GetSessionConfig() SessionConfig {
 	prefix := "session."
 	sessConfig := SessionConfig{
-		TTL:        viper.GetDuration(prefix + "ttl"),
-		Key:        viper.GetString(prefix + "key"),
-		CookiePath: viper.GetString(prefix + "path"),
+		TTL:        GetDuration(prefix + "ttl"),
+		Key:        GetString(prefix + "key"),
+		CookiePath: GetString(prefix + "path"),
 	}
 	// 如果session设置过短，则使用默认为24小时
 	if sessConfig.TTL < time.Second {
@@ -311,13 +297,13 @@ func GetSessionConfig() SessionConfig {
 
 // GetSignedKeys get signed keys
 func GetSignedKeys() []string {
-	return viper.GetStringSlice("keys")
+	return GetStringSlice("keys")
 }
 
 // GetRouterConcurrentLimit get router concurrent limit
 func GetRouterConcurrentLimit() map[string]uint32 {
 	limit := make(map[string]uint32)
-	data := viper.GetStringMap("routerLimit")
+	data := GetStringMap("routerLimit")
 	for key, value := range data {
 		v, _ := value.(int)
 		if v != 0 {
@@ -331,14 +317,14 @@ func GetRouterConcurrentLimit() map[string]uint32 {
 // GetMailConfig get mail config
 func GetMailConfig() MailConfig {
 	prefix := "mail."
-	pass := viper.GetString(prefix + "password")
+	pass := GetString(prefix + "password")
 	if os.Getenv(pass) != "" {
 		pass = os.Getenv(pass)
 	}
 	mailConfig := MailConfig{
-		Host:     viper.GetString(prefix + "host"),
-		Port:     viper.GetInt(prefix + "port"),
-		User:     viper.GetString(prefix + "user"),
+		Host:     GetString(prefix + "host"),
+		Port:     GetInt(prefix + "port"),
+		User:     GetString(prefix + "user"),
 		Password: pass,
 	}
 	validatePanic(&mailConfig)
@@ -348,16 +334,16 @@ func GetMailConfig() MailConfig {
 // GetInfluxdbConfig get influxdb config
 func GetInfluxdbConfig() InfluxdbConfig {
 	prefix := "influxdb."
-	token := viper.GetString(prefix + "token")
+	token := GetString(prefix + "token")
 	if os.Getenv(token) != "" {
 		token = os.Getenv(token)
 	}
 	influxdbConfig := InfluxdbConfig{
-		URI:       viper.GetString(prefix + "uri"),
-		Bucket:    viper.GetString(prefix + "bucket"),
-		Org:       viper.GetString(prefix + "org"),
+		URI:       GetString(prefix + "uri"),
+		Bucket:    GetString(prefix + "bucket"),
+		Org:       GetString(prefix + "org"),
 		Token:     token,
-		BatchSize: viper.GetInt(prefix + "batchSize"),
+		BatchSize: GetInt(prefix + "batchSize"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig

@@ -8,7 +8,10 @@ track: jt
 
 
 # redis 配置(pass从env中获取pass这个配置为密码，如果未配置则为空)
-redis: redis://127.0.0.1:6379?slow=200ms&maxProcessing=1000
+redis:
+  addr: 127.0.0.1:6379
+  slow: 200ms
+  maxProcessing: 1000
 
 # postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
 postgres:
