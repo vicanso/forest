@@ -39,6 +39,7 @@ func init() {
 // AlarmError alarm error message
 func AlarmError(message string) {
 	logger.Error(message,
+		zap.String("app", config.GetAppName()),
 		zap.String("category", "alarm-error"),
 	)
 	if mailDialer != nil {
@@ -46,7 +47,7 @@ func AlarmError(message string) {
 		receivers := config.GetStringSlice("alarm.receiver")
 		m.SetHeader("From", mailSender)
 		m.SetHeader("To", receivers...)
-		m.SetHeader("Subject", "Alarm")
+		m.SetHeader("Subject", "Alarm-"+config.GetAppName())
 		m.SetBody("text/plain", message)
 		// 避免发送邮件时太慢影响现有流程
 		go func() {

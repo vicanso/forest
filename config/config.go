@@ -26,8 +26,9 @@ import (
 )
 
 var (
-	box = packr.New("config", "../configs")
-	env = os.Getenv("GO_ENV")
+	box     = packr.New("config", "../configs")
+	env     = os.Getenv("GO_ENV")
+	appName string
 )
 
 type (
@@ -120,6 +121,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	appName = GetString("app")
 }
 
 func validatePanic(v interface{}) {
@@ -127,6 +129,10 @@ func validatePanic(v interface{}) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetAppName() string {
+	return appName
 }
 
 // GetENV get go env

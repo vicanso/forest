@@ -114,6 +114,7 @@ func main() {
 
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
+	// exception的warner只有一个key，因此无需定时清除
 	warnerException := warner.NewWarner(60*time.Second, 5)
 	warnerException.ResetOnWarn = true
 	warnerException.On(func(_ string, _ int64) {
@@ -147,14 +148,14 @@ func main() {
 		service.AlarmError("too many 404 request, client ip:" + ip)
 	})
 	go func() {
-		// 定时清除过期数据
+		// 因为404是根据IP来告警，因此可能存在大量不同的key，因此定时清除过期数据
 		for range time.NewTicker(5 * time.Minute).C {
 			warner404.ClearExpired()
 		}
 	}()
 
 	e.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
-		ip := elton.GetRealIP(req)
+		ip := elton.GetClientIP(req)
 		logger.Info("404",
 			zap.String("ip", ip),
 			zap.String("uri", req.RequestURI),
