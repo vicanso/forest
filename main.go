@@ -253,6 +253,7 @@ func main() {
 
 	err := dependServiceCheck()
 	if err != nil {
+		service.AlarmError("check depend service fail, " + err.Error())
 		// 可以针对实际场景输出更多的日志信息
 		logger.DPanic("exception",
 			zap.Error(err),
@@ -264,6 +265,7 @@ func main() {
 	)
 	err = e.ListenAndServe(config.GetListen())
 	if err != nil {
+		service.AlarmError("listen and serve fail, " + err.Error())
 		panic(err)
 	}
 }
