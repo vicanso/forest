@@ -42,14 +42,8 @@ import (
 	"github.com/dustin/go-humanize"
 	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
-	bodyparser "github.com/vicanso/elton-body-parser"
-	errorHandler "github.com/vicanso/elton-error-handler"
-	etag "github.com/vicanso/elton-etag"
-	fresh "github.com/vicanso/elton-fresh"
-	recover "github.com/vicanso/elton-recover"
-	responder "github.com/vicanso/elton-responder"
 	routerLimiter "github.com/vicanso/elton-router-concurrent-limiter"
-	stats "github.com/vicanso/elton-stats"
+	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/config"
 	_ "github.com/vicanso/forest/controller"
 	"github.com/vicanso/forest/cs"
@@ -103,6 +97,10 @@ func main() {
 		fmt.Printf("version %s\nbuild at %s\n%s\n", Version, BuildAt, GO)
 		return
 	}
+	defer func() {
+		// 关闭influxdb，flush统计数据
+		helper.GetInfluxSrv().Close()
+	}()
 
 	logger := log.Default()
 	e := elton.New()
@@ -174,13 +172,13 @@ func main() {
 	}
 
 	// 捕捉panic异常，避免程序崩溃
-	e.Use(recover.New())
+	e.Use(M.NewRecover())
 
 	e.Use(middleware.NewEntry())
 
 	// 接口相关统计信息
-	e.Use(stats.New(stats.Config{
-		OnStats: func(info *stats.Info, c *elton.Context) {
+	e.Use(M.NewStats(M.StatsConfig{
+		OnStats: func(info *M.StatsInfo, c *elton.Context) {
 			// ping 的日志忽略
 			if info.URI == "/ping" {
 				return
@@ -217,7 +215,7 @@ func main() {
 	}))
 
 	// 错误处理，将错误转换为json响应
-	e.Use(errorHandler.New(errorHandler.Config{
+	e.Use(M.NewError(M.ErrorConfig{
 		ResponseType: "json",
 	}))
 
@@ -239,14 +237,14 @@ func main() {
 	// d.Use(compress.NewDefault())
 
 	// etag与fresh的处理
-	e.Use(fresh.NewDefault())
-	e.Use(etag.NewDefault())
+	e.Use(M.NewDefaultFresh())
+	e.Use(M.NewDefaultETag())
 
 	// 对响应数据 c.Body 转换为相应的json响应
-	e.Use(responder.NewDefault())
+	e.Use(M.NewDefaultResponder())
 
 	// 读取读取body的数的，转换为json bytes
-	e.Use(bodyparser.NewDefault())
+	e.Use(M.NewDefaultBodyParser())
 
 	// 初始化路由
 	router.Init(e)

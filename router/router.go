@@ -15,10 +15,7 @@
 package router
 
 import (
-	"regexp"
-
 	"github.com/vicanso/elton"
-	"github.com/vicanso/hes"
 )
 
 var (
@@ -39,27 +36,4 @@ func Init(d *elton.Elton) {
 	for _, g := range groupList {
 		d.AddGroup(g)
 	}
-
-	createError := func(message string) error {
-		he := hes.New(message)
-		he.Category = "router-param-validate"
-		return he
-	}
-
-	configIDReg := regexp.MustCompile(`^[1-9][0-9]{0,3}$`)
-	d.AddValidator("configID", func(value string) error {
-		if !configIDReg.MatchString(value) {
-			return createError("config id should be numbers")
-		}
-		return nil
-	})
-
-	// 如果用户量增大，需要调整此限制
-	userIDReg := regexp.MustCompile(`^[1-9][0-9]{0,6}$`)
-	d.AddValidator("userID", func(value string) error {
-		if !userIDReg.MatchString(value) {
-			return createError("user id should be numbers")
-		}
-		return nil
-	})
 }

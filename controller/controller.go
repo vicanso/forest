@@ -28,7 +28,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
-	tracker "github.com/vicanso/elton-tracker"
+	M "github.com/vicanso/elton/middleware"
 )
 
 var (
@@ -82,25 +82,36 @@ func init() {
 }
 
 func newTracker(action string) elton.Handler {
-	return tracker.New(tracker.Config{
-		OnTrack: func(info *tracker.Info, c *elton.Context) {
+	return M.NewTracker(M.TrackerConfig{
+		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			us := service.NewUserSession(c)
 			if us != nil {
 				account = us.GetAccount()
 			}
-			logger.Info("tracker",
+			fields := make([]zap.Field, 0, 10)
+			fields = append(
+				fields,
 				zap.String("action", action),
 				zap.String("cid", info.CID),
 				zap.String("account", account),
 				zap.String("ip", c.RealIP()),
 				zap.String("sid", util.GetSessionID(c)),
 				zap.Int("result", info.Result),
-				zap.Any("query", info.Query),
-				zap.Any("params", info.Params),
-				zap.Any("form", info.Form),
-				zap.Error(info.Err),
 			)
+			if info.Query != nil {
+				fields = append(fields, zap.Any("query", info.Query))
+			}
+			if info.Params != nil {
+				fields = append(fields, zap.Any("params", info.Params))
+			}
+			if info.Form != nil {
+				fields = append(fields, zap.Any("form", info.Form))
+			}
+			if info.Err != nil {
+				fields = append(fields, zap.Error(info.Err))
+			}
+			logger.Info("tracker", fields...)
 		},
 	})
 }

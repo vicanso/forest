@@ -61,6 +61,14 @@ type (
 		updateProcessing    uint32
 		total               uint64
 	}
+
+	// PGQueryParams pg query params
+	PGQueryParams struct {
+		Limit  int    `json:"limit,omitempty" valid:"xLimit"`
+		Offset int    `json:"offset,omitempty" valid:"xOffset,optional"`
+		Fields string `json:"fields,omitempty" valid:"runelength(1|100),optional"`
+		Order  string `json:"order,omitempty" valid:"runelength(1|100),optional"`
+	}
 )
 
 func (ps *pgStats) getProcessingAndTotal() (uint32, uint32, uint64) {
@@ -202,4 +210,22 @@ func PGStats() map[string]interface{} {
 		"updateProcessing": updateProcessing,
 		"total":            total,
 	}
+}
+
+// PGQuery pg query
+func PGQuery(params PGQueryParams) *gorm.DB {
+	db := PGGetClient()
+	if params.Limit != 0 {
+		db = db.Limit(params.Limit)
+	}
+	if params.Offset != 0 {
+		db = db.Offset(params.Offset)
+	}
+	if params.Fields != "" {
+		db = db.Select(PGFormatSelect(params.Fields))
+	}
+	if params.Order != "" {
+		db = db.Order(PGFormatOrder(params.Order))
+	}
+	return db
 }

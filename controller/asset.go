@@ -23,7 +23,7 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/router"
 
-	staticServe "github.com/vicanso/elton-static-serve"
+	M "github.com/vicanso/elton/middleware"
 )
 
 type (
@@ -65,7 +65,7 @@ func init() {
 	sf := &staticFile{
 		box: box,
 	}
-	g.GET("/static/*file", staticServe.New(sf, staticServe.Config{
+	g.GET("/static/*", M.NewStaticServe(sf, M.StaticServeConfig{
 		Path: "/static",
 		// 客户端缓存一年
 		MaxAge: 365 * 24 * 3600,

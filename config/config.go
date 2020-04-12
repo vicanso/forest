@@ -58,11 +58,12 @@ type (
 
 	// Influxdb config
 	InfluxdbConfig struct {
-		Bucket    string `valid:"runelength(1|50)"`
-		Org       string `valid:"runelength(1|100)"`
-		URI       string `valid:"url"`
-		Token     string `valid:"ascii"`
-		BatchSize int    `valid:"range(1|5000)"`
+		Bucket        string        `valid:"runelength(1|50)"`
+		Org           string        `valid:"runelength(1|100)"`
+		URI           string        `valid:"url"`
+		Token         string        `valid:"ascii"`
+		BatchSize     uint          `valid:"range(1|5000)"`
+		FlushInterval time.Duration `valid:"-"`
 	}
 
 	// PostgresConfig postgres config
@@ -146,6 +147,11 @@ func GetENV() string {
 // GetInt viper get int
 func GetInt(key string) int {
 	return defaultViper.GetInt(key)
+}
+
+// GetUint viper get uint
+func GetUint(key string) uint {
+	return defaultViper.GetUint(key)
 }
 
 // GetUint32 viper get uint32
@@ -345,11 +351,12 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		token = os.Getenv(token)
 	}
 	influxdbConfig := InfluxdbConfig{
-		URI:       GetString(prefix + "uri"),
-		Bucket:    GetString(prefix + "bucket"),
-		Org:       GetString(prefix + "org"),
-		Token:     token,
-		BatchSize: GetInt(prefix + "batchSize"),
+		URI:           GetString(prefix + "uri"),
+		Bucket:        GetString(prefix + "bucket"),
+		Org:           GetString(prefix + "org"),
+		Token:         token,
+		BatchSize:     GetUint(prefix + "batchSize"),
+		FlushInterval: GetDuration(prefix + "flushInterval"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig
