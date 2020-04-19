@@ -25,7 +25,7 @@ import (
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 
-	concurrentLimiter "github.com/vicanso/elton-concurrent-limiter"
+	"github.com/vicanso/elton/middleware"
 )
 
 const (
@@ -50,7 +50,7 @@ type (
 )
 
 // createConcurrentLimitLock 创建并发限制的lock函数
-func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) concurrentLimiter.Lock {
+func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) middleware.ConcurrentLimiterLock {
 	return func(key string, _ *elton.Context) (success bool, done func(), err error) {
 		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
 		done = nil
@@ -74,7 +74,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 
 // NewConcurrentLimit create a concurrent limit
 func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) elton.Handler {
-	return concurrentLimiter.New(concurrentLimiter.Config{
+	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
 		Lock: createConcurrentLimitLock(prefix, ttl, false),
 		Keys: keys,
 	})

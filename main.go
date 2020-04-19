@@ -42,7 +42,6 @@ import (
 	"github.com/dustin/go-humanize"
 	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
-	routerLimiter "github.com/vicanso/elton-router-concurrent-limiter"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/config"
 	_ "github.com/vicanso/forest/controller"
@@ -228,8 +227,8 @@ func main() {
 	// 路由并发限制
 	routerLimitConfig := config.GetRouterConcurrentLimit()
 	if len(routerLimitConfig) != 0 {
-		e.Use(routerLimiter.New(routerLimiter.Config{
-			Limiter: routerLimiter.NewLocalLimiter(routerLimitConfig),
+		e.Use(M.NewRCL(M.RCLConfig{
+			Limiter: M.NewLocalLimiter(routerLimitConfig),
 		}))
 	}
 

@@ -19,11 +19,9 @@ require (
 	github.com/spf13/viper v1.6.3
 	github.com/stretchr/testify v1.5.1
 	github.com/vicanso/count-warner v0.0.1
-	github.com/vicanso/elton v0.5.0
-	github.com/vicanso/elton-concurrent-limiter v0.3.0
-	github.com/vicanso/elton-router-concurrent-limiter v0.3.0
-	github.com/vicanso/elton-session v0.3.0
-	github.com/vicanso/go-axios v0.1.0
+	github.com/vicanso/elton v1.0.0
+	github.com/vicanso/elton-session v1.0.0
+	github.com/vicanso/go-axios v0.1.2
 	github.com/vicanso/hes v0.2.1
 	github.com/vicanso/ips v0.0.1
 	go.uber.org/automaxprocs v1.3.0
