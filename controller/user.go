@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/tidwall/gjson"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
@@ -113,7 +114,7 @@ func init() {
 	// 更新用户信息
 	g.PATCH(
 		// 因为与/me有冲突，因此路径增加update
-		"/v1/update/:userID",
+		"/v1/{userID}",
 		shouldBeAdmin,
 		ctrl.update,
 	)
@@ -159,7 +160,7 @@ func init() {
 		newIPLimit(10, 60*time.Second, cs.ActionLogin),
 		// 限制10分钟内，相同的账号只允许出错5次
 		newErrorLimit(5, 10*time.Minute, func(c *elton.Context) string {
-			return standardJSON.Get(c.RequestBody, "account").ToString()
+			return gjson.GetBytes(c.RequestBody, "account").String()
 		}),
 		captchaValidate,
 		ctrl.login,

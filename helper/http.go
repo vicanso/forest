@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 
 	"github.com/vicanso/hes"
@@ -78,7 +79,7 @@ func newHTTPStats(serviceName string) axios.ResponseInterceptor {
 func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
-			message := standardJSON.Get(resp.Data, "message").ToString()
+			message := gjson.GetBytes(resp.Data, "message").String()
 			if message == "" {
 				message = string(resp.Data)
 			}

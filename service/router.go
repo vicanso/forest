@@ -15,6 +15,7 @@
 package service
 
 import (
+	"encoding/json"
 	"sync"
 
 	"go.uber.org/zap"
@@ -41,7 +42,7 @@ func updateRouterConfigs(configs []*Configuration) {
 	result := make(map[string]*RouterConfig)
 	for _, item := range configs {
 		v := &RouterConfig{}
-		err := standardJSON.UnmarshalFromString(item.Data, v)
+		err := json.Unmarshal([]byte(item.Data), v)
 		if err != nil {
 			logger.Error("router config is invalid",
 				zap.Error(err),

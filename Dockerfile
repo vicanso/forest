@@ -27,7 +27,7 @@ RUN addgroup -g 1000 go \
   && apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /forest/forest /usr/local/bin/forest
-COPY --from=builder /forest/entrypoint.sh /home/go/entrypoint.sh
+COPY --from=builder /forest/entrypoint.sh /entrypoint.sh
 
 USER go
 
@@ -37,4 +37,4 @@ HEALTHCHECK --timeout=10s CMD [ "wget", "http://127.0.0.1:7001/ping", "-q", "-O"
 
 CMD ["forest"]
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

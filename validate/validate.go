@@ -15,15 +15,14 @@
 package validate
 
 import (
+	"encoding/json"
 	"regexp"
 
 	"github.com/asaskevich/govalidator"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/vicanso/hes"
 )
 
 var (
-	standardJSON         = jsoniter.ConfigCompatibleWithStandardLibrary
 	paramTagRegexMap     = govalidator.ParamTagRegexMap
 	paramTagMap          = govalidator.ParamTagMap
 	customTypeTagMap     = govalidator.CustomTypeTagMap
@@ -40,7 +39,7 @@ func doValidate(s interface{}, data interface{}) (err error) {
 	if data != nil {
 		switch data := data.(type) {
 		case []byte:
-			err = standardJSON.Unmarshal(data, s)
+			err = json.Unmarshal(data, s)
 			if err != nil {
 				he := hes.Wrap(err)
 				he.Category = errJSONParseCategory
@@ -48,11 +47,11 @@ func doValidate(s interface{}, data interface{}) (err error) {
 				return
 			}
 		default:
-			buf, err := standardJSON.Marshal(data)
+			buf, err := json.Marshal(data)
 			if err != nil {
 				return err
 			}
-			err = standardJSON.Unmarshal(buf, s)
+			err = json.Unmarshal(buf, s)
 			if err != nil {
 				return err
 			}

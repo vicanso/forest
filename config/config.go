@@ -276,14 +276,8 @@ func GetPostgresConfig() PostgresConfig {
 	if slow == 0 {
 		slow = time.Second
 	}
-	maxQueryProcessing := GetUint32(prefix + "maxQueryProcessing")
-	if maxQueryProcessing == 0 {
-		maxQueryProcessing = 1000
-	}
-	maxUpdateProcessing := GetUint32(prefix + "maxUpdateProcessing")
-	if maxUpdateProcessing == 0 {
-		maxUpdateProcessing = 500
-	}
+	maxQueryProcessing := GetUint32Default(prefix+"maxQueryProcessing", 1000)
+	maxUpdateProcessing := GetUint32Default(prefix+"maxUpdateProcessing", 500)
 	return PostgresConfig{
 		Slow:                slow,
 		MaxQueryProcessing:  maxQueryProcessing,

@@ -25,7 +25,6 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 
-	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
 	M "github.com/vicanso/elton/middleware"
@@ -41,10 +40,9 @@ var (
 )
 
 var (
-	logger       = log.Default()
-	now          = util.NowString
-	getTrackID   = util.GetTrackID
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
+	logger     = log.Default()
+	now        = util.NowString
+	getTrackID = util.GetTrackID
 
 	// 服务列表
 	// 配置服务

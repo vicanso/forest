@@ -15,14 +15,11 @@
 package service
 
 import (
-	jsoniter "github.com/json-iterator/go"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 )
 
 var (
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
-
 	pgCreate    = helper.PGCreate
 	pgGetClient = helper.PGGetClient
 

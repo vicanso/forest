@@ -15,14 +15,12 @@
 package helper
 
 import (
-	jsoniter "github.com/json-iterator/go"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 )
 
 var (
 	logger       = log.Default()
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
 	isProduction = util.IsProduction
 )
 
