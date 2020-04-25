@@ -2,7 +2,7 @@ language: go
 sudo: required
 
 go:
-  - "1.13"
+  - "1.14"
 
 services:
   - docker
@@ -15,7 +15,9 @@ before_script:
   - psql -c "GRANT ALL PRIVILEGES ON DATABASE forest to vicanso;" -U postgres
 
 script:
-  - env GO111MODULE=on make test
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+  - make lint
+  - make test
 
 after_success:
   - docker build -t forest .

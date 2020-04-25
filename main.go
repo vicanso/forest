@@ -114,7 +114,7 @@ func main() {
 	// exception的warner只有一个key，因此无需定时清除
 	warnerException := warner.NewWarner(60*time.Second, 5)
 	warnerException.ResetOnWarn = true
-	warnerException.On(func(_ string, _ int64) {
+	warnerException.On(func(_ string, _ warner.Count) {
 		service.AlarmError("too many uncaught exception")
 	})
 	e.OnError(func(c *elton.Context, err error) {
@@ -141,7 +141,7 @@ func main() {
 	// 如果1分钟同一个IP出现60次404
 	warner404 := warner.NewWarner(60*time.Second, 60)
 	warner404.ResetOnWarn = true
-	warner404.On(func(ip string, createdAt int64) {
+	warner404.On(func(ip string, _ warner.Count) {
 		service.AlarmError("too many 404 request, client ip:" + ip)
 	})
 	go func() {
@@ -246,7 +246,9 @@ func main() {
 	e.Use(M.NewDefaultBodyParser())
 
 	// 初始化路由
-	router.Init(e)
+	for _, g := range router.GetGroups() {
+		e.AddGroup(g)
+	}
 
 	err := dependServiceCheck()
 	if err != nil {
