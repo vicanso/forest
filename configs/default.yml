@@ -19,7 +19,7 @@ postgres:
   port: 5432
   user: vicanso 
   dbname: forest
-  password: 123456
+  password: A123456
   sslmode: disable
   slow: 1s
   maxQueryProcessing: 1000

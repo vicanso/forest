@@ -191,7 +191,7 @@ func RedisGetClient() *redis.Client {
 
 // IsRedisNilError is redis nil errror
 func IsRedisNilError(err error) bool {
-	return err == errRedisNil
+	return err == errRedisNil || err == redis.Nil
 }
 
 // RedisStats get redis stats

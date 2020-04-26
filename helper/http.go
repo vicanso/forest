@@ -29,47 +29,52 @@ import (
 	"go.uber.org/zap"
 )
 
+func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, map[string]interface{}) {
+	conf := resp.Config
+
+	ht := conf.HTTPTrace
+
+	reused := false
+	addr := ""
+	use := ""
+	ms := 0
+	if ht != nil {
+		reused = ht.Reused
+		addr = ht.Addr
+		use = ht.Stats().Total.String()
+		ms = int(ht.Stats().Total.Milliseconds())
+	}
+	logger.Info("http stats",
+		zap.String("service", serviceName),
+		zap.String("cid", conf.GetString(cs.CID)),
+		zap.String("method", conf.Method),
+		zap.String("route", conf.Route),
+		zap.String("url", conf.URL),
+		zap.Int("status", resp.Status),
+		zap.String("addr", addr),
+		zap.Bool("reused", reused),
+		zap.String("use", use),
+	)
+	tags := map[string]string{
+		"service": serviceName,
+		"route":   conf.Route,
+		"method":  conf.Method,
+	}
+	fields := map[string]interface{}{
+		"cid":    conf.GetString(cs.CID),
+		"url":    conf.URL,
+		"status": resp.Status,
+		"addr":   addr,
+		"reused": reused,
+		"use":    ms,
+	}
+	return tags, fields
+}
+
 // newHTTPStats http stats
 func newHTTPStats(serviceName string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
-		conf := resp.Config
-
-		ht := conf.HTTPTrace
-
-		reused := false
-		addr := ""
-		use := ""
-		ms := 0
-		if ht != nil {
-			reused = ht.Reused
-			addr = ht.Addr
-			use = ht.Stats().Total.String()
-			ms = int(ht.Stats().Total.Milliseconds())
-		}
-		logger.Info("http stats",
-			zap.String("service", serviceName),
-			zap.String("cid", conf.GetString(cs.CID)),
-			zap.String("method", conf.Method),
-			zap.String("route", conf.Route),
-			zap.String("url", conf.URL),
-			zap.Int("status", resp.Status),
-			zap.String("addr", addr),
-			zap.Bool("reused", reused),
-			zap.String("use", use),
-		)
-		tags := map[string]string{
-			"service": serviceName,
-			"route":   conf.Route,
-			"method":  conf.Method,
-		}
-		fields := map[string]interface{}{
-			"cid":    conf.GetString(cs.CID),
-			"url":    conf.URL,
-			"status": resp.Status,
-			"addr":   addr,
-			"reused": reused,
-			"use":    ms,
-		}
+		tags, fields := getHTTPStats(serviceName, resp)
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
 		return
 	}
@@ -94,31 +99,34 @@ func newOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
 		e, ok := err.(*axios.Error)
 		id := conf.GetString(cs.CID)
-		if ok {
-			code := e.Code
-
-			he := &hes.Error{
-				StatusCode: code,
-				Message:    e.Message,
-				ID:         id,
+		if !ok {
+			e = &axios.Error{
+				Message: err.Error(),
 			}
-			if code < http.StatusBadRequest {
-				he.Exception = true
-				he.StatusCode = http.StatusInternalServerError
-			}
-
-			// 请求超时
-			if e.Timeout() {
-				he.Message = "Timeout"
-			}
-			if !isProduction() {
-				he.Extra = map[string]interface{}{
-					"route":   conf.Route,
-					"service": serviceName,
-				}
-			}
-			newErr = he
 		}
+		code := e.Code
+
+		he := &hes.Error{
+			StatusCode: code,
+			Message:    e.Message,
+			ID:         id,
+		}
+		if code < http.StatusBadRequest {
+			he.Exception = true
+			he.StatusCode = http.StatusInternalServerError
+		}
+
+		// 请求超时
+		if e.Timeout() {
+			he.Message = "Timeout"
+		}
+		if !isProduction() {
+			he.Extra = map[string]interface{}{
+				"route":   conf.Route,
+				"service": serviceName,
+			}
+		}
+		newErr = he
 		logger.Info("http error",
 			zap.String("service", serviceName),
 			zap.String("cid", id),
