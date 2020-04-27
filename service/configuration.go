@@ -82,11 +82,11 @@ func (conf *Configuration) IsValid() bool {
 	}
 	now := util.Now().Unix()
 	// 如果开始时间大于当前时间，未开始启用
-	if conf.BeginDate != nil && conf.BeginDate.UTC().Unix() > now {
+	if conf.BeginDate != nil && conf.BeginDate.Unix() > now {
 		return false
 	}
 	// 如果结束时间少于当前时间，已结束
-	if conf.EndDate != nil && conf.EndDate.UTC().Unix() < now {
+	if conf.EndDate != nil && conf.EndDate.Unix() < now {
 		return false
 	}
 	return true

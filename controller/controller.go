@@ -76,7 +76,7 @@ func init() {
 	if !util.IsProduction() {
 		magicalValue = cs.MagicalCaptcha
 	}
-	captchaValidate = middleware.ValidateCaptch(magicalValue)
+	captchaValidate = middleware.ValidateCaptcha(magicalValue)
 }
 
 func newTracker(action string) elton.Handler {

@@ -23,8 +23,8 @@ import (
 )
 
 func TestConfigurationService(t *testing.T) {
+	assert := assert.New(t)
 	t.Run("is valid", func(t *testing.T) {
-		assert := assert.New(t)
 		conf := &Configuration{
 			Status: cs.ConfigDiabled,
 		}
@@ -48,5 +48,24 @@ func TestConfigurationService(t *testing.T) {
 
 		conf.EndDate = &oneMonthLater
 		assert.True(conf.IsValid())
+	})
+
+	id := uint(0)
+
+	srv := ConfigurationSrv{}
+	t.Run("add", func(t *testing.T) {
+		conf := &Configuration{
+			Name:  "test",
+			Owner: "tree.xie",
+		}
+		err := srv.Add(conf)
+		assert.Nil(err)
+		assert.NotEmpty(conf.ID)
+		id = conf.ID
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		err := srv.DeleteByID(id)
+		assert.Nil(err)
 	})
 }

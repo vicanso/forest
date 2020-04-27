@@ -66,8 +66,8 @@ func WaitFor(d time.Duration) elton.Handler {
 	}
 }
 
-// ValidateCaptch validate chapter
-func ValidateCaptch(magicalCaptcha string) elton.Handler {
+// ValidateCaptcha validate chapter
+func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		value := c.GetRequestHeader(xCaptchHeader)
 		if value == "" {

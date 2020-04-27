@@ -11,7 +11,7 @@ services:
 
 before_script:
   - psql -c "CREATE DATABASE forest;" -U postgres
-  - psql -c "CREATE USER vicanso WITH PASSWORD '123456';" -U postgres
+  - psql -c "CREATE USER vicanso WITH PASSWORD 'A123456';" -U postgres
   - psql -c "GRANT ALL PRIVILEGES ON DATABASE forest to vicanso;" -U postgres
 
 script:

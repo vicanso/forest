@@ -21,8 +21,8 @@ import (
 	"github.com/vicanso/forest/service"
 )
 
-// NewRouterController create a router controller
-func NewRouterController() elton.Handler {
+// NewRouterMocker create a router mocker
+func NewRouterMocker() elton.Handler {
 	return func(c *elton.Context) (err error) {
 		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
 		if routerConfig == nil {

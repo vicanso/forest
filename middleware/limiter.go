@@ -105,7 +105,8 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 			return
 		}
 		count, _ := strconv.Atoi(result)
-		if int64(count) > maxCount {
+		// 因为count是处理完才inc，因此增加等于的判断
+		if int64(count) >= maxCount {
 			err = errTooFrequently
 			return
 		}

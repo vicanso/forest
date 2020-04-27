@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package service
 
 import (
 	"testing"
@@ -20,21 +20,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTime(t *testing.T) {
+func TestCaptcha(t *testing.T) {
 	assert := assert.New(t)
-	mockTime := "2020-04-26T20:34:33+08:00"
-	SetMockTime(mockTime)
-	defer SetMockTime("")
 
-	assert.Equal(int64(1587904473000000000), Now().UnixNano())
-	// travis中为0时区
-	// assert.Equal(mockTime, NowString())
-
-	assert.Equal("2020-04-26 12:34:33 +0000 UTC", UTCNow().String())
-
-	value, err := ParseTime(mockTime)
+	info, err := GetCaptcha("255,255,255", "102,102,102")
 	assert.Nil(err)
-	assert.Equal("2020-04-26T20:34:33+08:00", FormatTime(value))
+	assert.NotNil(info)
 
-	assert.Equal("2020-04-26T20:34:33+08:00", FormatTime(ChinaNow()))
+	valid, err := ValidateCaptcha(info.ID, info.Value)
+	assert.Nil(err)
+	assert.True(valid)
 }

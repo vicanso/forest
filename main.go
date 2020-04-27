@@ -221,8 +221,8 @@ func main() {
 	// IP限制
 	e.Use(middleware.NewIPBlock())
 
-	// 根据应用配置限制路由
-	e.Use(middleware.NewRouterController())
+	// 根据配置对路由mock返回
+	e.Use(middleware.NewRouterMocker())
 
 	// 路由并发限制
 	routerLimitConfig := config.GetRouterConcurrentLimit()
@@ -231,9 +231,6 @@ func main() {
 			Limiter: M.NewLocalLimiter(routerLimitConfig),
 		}))
 	}
-
-	// 压缩响应数据（由pike来压缩数据）
-	// d.Use(compress.NewDefault())
 
 	// etag与fresh的处理
 	e.Use(M.NewDefaultFresh())

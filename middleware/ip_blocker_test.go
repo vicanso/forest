@@ -12,29 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package middleware
 
 import (
+	"net/http/httptest"
 	"testing"
+
+	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/service"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTime(t *testing.T) {
+func TestNewIPBlock(t *testing.T) {
 	assert := assert.New(t)
-	mockTime := "2020-04-26T20:34:33+08:00"
-	SetMockTime(mockTime)
-	defer SetMockTime("")
 
-	assert.Equal(int64(1587904473000000000), Now().UnixNano())
-	// travis中为0时区
-	// assert.Equal(mockTime, NowString())
-
-	assert.Equal("2020-04-26 12:34:33 +0000 UTC", UTCNow().String())
-
-	value, err := ParseTime(mockTime)
+	fn := NewIPBlock()
+	req := httptest.NewRequest("GET", "/", nil)
+	req.Header.Set(elton.HeaderXForwardedFor, "1.1.1.1")
+	resp := httptest.NewRecorder()
+	c := elton.NewContext(resp, req)
+	c.Next = func() error {
+		return nil
+	}
+	err := fn(c)
 	assert.Nil(err)
-	assert.Equal("2020-04-26T20:34:33+08:00", FormatTime(value))
 
-	assert.Equal("2020-04-26T20:34:33+08:00", FormatTime(ChinaNow()))
+	service.ResetIPBlocker([]string{
+		"1.1.1.1",
+	})
+	err = fn(c)
+	assert.Equal(errIPNotAllow, err)
 }
