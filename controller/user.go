@@ -72,27 +72,27 @@ type (
 	registerLoginUserParams struct {
 		// 账户
 		// Example: vicanso
-		Account string `json:"account,omitempty" valid:"xUserAccount"`
+		Account string `json:"account,omitempty" validate:"xUserAccount,required"`
 		// 密码，密码为sha256后的加密串
 		// Example: JgX9742WqzaNHVP+YiPy/RXP0eoX29k00hEF3BdghGU=
-		Password string `json:"password,omitempty" valid:"xUserPassword"`
+		Password string `json:"password,omitempty" validate:"xUserPassword,required"`
 	}
 
 	listUserParams struct {
-		Limit   string `json:"limit,omitempty" valid:"xLimit"`
-		Keyword string `json:"keyword,omitempty" valid:"xUserAccountKeyword,optional"`
-		Role    string `json:"role,omitempty" valid:"xUserRole,optional"`
+		Limit   string `json:"limit,omitempty" validate:"xLimit"`
+		Keyword string `json:"keyword,omitempty" validate:"xUserAccountKeyword,required"`
+		Role    string `json:"role,omitempty" validate:"xUserRole"`
 	}
 
 	updateUserParams struct {
-		Roles []string `json:"roles,omitempty" valid:"xUserRoles,optional"`
+		Roles []string `json:"roles,omitempty" validate:"xUserRoles"`
 	}
 	listUserLoginRecordParams struct {
-		Begin   time.Time `json:"begin,omitempty" valid:"-"`
-		End     time.Time `json:"end,omitempty" valid:"-"`
-		Account string    `json:"account,omitempty" valid:"xUserAccount,optional"`
-		Limit   string    `json:"limit,omitempty" valid:"xLimit"`
-		Offset  string    `json:"offset,omitempty" valid:"xOffset"`
+		Begin   time.Time `json:"begin,omitempty"`
+		End     time.Time `json:"end,omitempty"`
+		Account string    `json:"account,omitempty" validate:"xUserAccount,required"`
+		Limit   string    `json:"limit,omitempty" validate:"xLimit,required"`
+		Offset  string    `json:"offset,omitempty" validate:"xOffset"`
 	}
 )
 

@@ -64,10 +64,10 @@ type (
 
 	// PGQueryParams pg query params
 	PGQueryParams struct {
-		Limit  int    `json:"limit,omitempty" valid:"xLimit"`
-		Offset int    `json:"offset,omitempty" valid:"xOffset,optional"`
-		Fields string `json:"fields,omitempty" valid:"runelength(1|100),optional"`
-		Order  string `json:"order,omitempty" valid:"runelength(1|100),optional"`
+		Limit  int    `json:"limit,omitempty" validate:"xLimit,required"`
+		Offset int    `json:"offset,omitempty" validate:"xOffset"`
+		Fields string `json:"fields,omitempty" validate:"min=1,max=100"`
+		Order  string `json:"order,omitempty" validate:"min=1,max=100"`
 	}
 )
 

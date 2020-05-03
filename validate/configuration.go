@@ -15,28 +15,22 @@
 package validate
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/vicanso/forest/cs"
 )
 
 func init() {
 	// 应用配置名称
-	Add("xConfigName", func(i interface{}, _ interface{}) bool {
-		return checkAlphanumericStringLength(i, 2, 20)
-	})
-	Add("xConfigCategory", func(i interface{}, _ interface{}) bool {
-		return checkAlphanumericStringLength(i, 2, 20)
-	})
-	Add("xConfigData", func(i interface{}, _ interface{}) bool {
-		return checkStringLength(i, 1, 500)
-	})
-	Add("xConfigNames", func(i interface{}, _ interface{}) bool {
-		return checkAlphanumericStringLength(i, 2, 100)
-	})
-	Add("xConfigStatus", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(int)
-		if !ok {
-			return false
-		}
-		return value == cs.ConfigEnabled || value == cs.ConfigDiabled
+	AddAlias("xConfigName", "alphanum,len=0|min=2,max=20")
+	AddAlias("xConfigCategory", "alphanum,len=0|min=2,max=20")
+	AddAlias("xConfigData", "min=0,max=500")
+	AddAlias("xConfigNames", "min=0,max=100")
+
+	Add("xConfigStatus", func(fl validator.FieldLevel) bool {
+		// 公共配置的都允许为空
+		return isZero(fl) || isInInt(fl, []int{
+			cs.ConfigEnabled,
+			cs.ConfigDiabled,
+		})
 	})
 }

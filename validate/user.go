@@ -15,39 +15,32 @@
 package validate
 
 import (
-	"github.com/asaskevich/govalidator"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/vicanso/forest/cs"
 )
 
 func init() {
 	// 账号
-	Add("xUserAccount", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 4, 10)
+	AddAlias("xUserAccount", "ascii,len=0|min=4,max=10")
+	AddAlias("xUserPassword", "ascii,len=0|len=44")
+	AddAlias("xUserAccountKeyword", "ascii,min=0,max=10")
+	Add("xUserRole", func(fl validator.FieldLevel) bool {
+		return isZero(fl) || isInString(fl, []string{
+			cs.UserRoleSu,
+			cs.UserRoleAdmin,
+		})
 	})
-	Add("xUserPassword", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 44, 44)
-	})
-	Add("xUserAccountKeyword", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 1, 10)
-	})
-	Add("xUserRole", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
-		return govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin)
-	})
-	Add("xUserRoles", func(i interface{}, _ interface{}) bool {
-		values, ok := i.([]string)
-		if !ok {
-			return false
-		}
-		for _, value := range values {
-			if !govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin) {
-				return false
-			}
-		}
-		return true
-	})
+	// Add("xUserRoles", func(i interface{}, _ interface{}) bool {
+	// 	values, ok := i.([]string)
+	// 	if !ok {
+	// 		return false
+	// 	}
+	// 	for _, value := range values {
+	// 		if !govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin) {
+	// 			return false
+	// 		}
+	// 	}
+	// 	return true
+	// })
 }

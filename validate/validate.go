@@ -12,26 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// !!!important!!!
+// common custom tag should allow empty
+// !!!important!!!
+
 package validate
 
 import (
 	"encoding/json"
-	"regexp"
+	"reflect"
 
-	"github.com/asaskevich/govalidator"
+	"github.com/go-playground/validator/v10"
 	"github.com/vicanso/hes"
 )
 
 var (
-	paramTagRegexMap     = govalidator.ParamTagRegexMap
-	paramTagMap          = govalidator.ParamTagMap
-	customTypeTagMap     = govalidator.CustomTypeTagMap
+	defaultValidator = validator.New()
+
 	errCategory          = "validate"
 	errJSONParseCategory = "json-parse"
 )
 
-func init() {
-	govalidator.SetFieldsRequiredByDefault(true)
+func toString(fl validator.FieldLevel) (string, bool) {
+	value := fl.Field()
+	if value.Kind() != reflect.String {
+		return "", false
+	}
+	return value.String(), true
+}
+func toInt(fl validator.FieldLevel) (int, bool) {
+	value := fl.Field()
+	if value.Kind() != reflect.Int {
+		return 0, false
+	}
+	return int(value.Int()), true
+}
+func isInInt(fl validator.FieldLevel, values []int) bool {
+	value, ok := toInt(fl)
+	if !ok {
+		return false
+	}
+	exists := false
+	for _, v := range values {
+		if v == value {
+			exists = true
+		}
+	}
+	return exists
+}
+func isInString(fl validator.FieldLevel, values []string) bool {
+	value, ok := toString(fl)
+	if !ok {
+		return false
+	}
+	exists := false
+	for _, v := range values {
+		if v == value {
+			exists = true
+		}
+	}
+	return exists
+}
+func isZero(fl validator.FieldLevel) bool {
+	return fl.Field().IsZero()
 }
 
 func doValidate(s interface{}, data interface{}) (err error) {
@@ -57,7 +100,7 @@ func doValidate(s interface{}, data interface{}) (err error) {
 			}
 		}
 	}
-	_, err = govalidator.ValidateStruct(s)
+	err = defaultValidator.Struct(s)
 	return
 }
 
@@ -74,62 +117,15 @@ func Do(s interface{}, data interface{}) (err error) {
 	return
 }
 
-// AddRegex add a regexp validate
-func AddRegex(name, reg string, fn govalidator.ParamValidator) {
-	if paramTagMap[name] != nil {
-		panic(name + ", reg:" + reg + " is duplicated")
-	}
-	paramTagRegexMap[name] = regexp.MustCompile(reg)
-	paramTagMap[name] = fn
-}
-
 // Add add validate
-func Add(name string, fn govalidator.CustomTypeValidator) {
-	_, exists := customTypeTagMap.Get(name)
-	if exists {
-		panic(name + " is duplicated")
+func Add(tag string, fn validator.Func, args ...bool) {
+	err := defaultValidator.RegisterValidation(tag, fn, args...)
+	if err != nil {
+		panic(err)
 	}
-	customTypeTagMap.Set(name, fn)
 }
 
-func checkASCIIStringLength(i interface{}, min, max int) bool {
-	value, ok := i.(string)
-	if !ok {
-		return false
-	}
-	if !govalidator.IsASCII(value) {
-		return false
-	}
-	size := len(value)
-	if size < min || size > max {
-		return false
-	}
-	return true
-}
-
-func checkAlphanumericStringLength(i interface{}, min, max int) bool {
-	value, ok := i.(string)
-	if !ok {
-		return false
-	}
-	if !govalidator.IsAlphanumeric(value) {
-		return false
-	}
-	size := len(value)
-	if size < min || size > max {
-		return false
-	}
-	return true
-}
-
-func checkStringLength(i interface{}, min, max int) bool {
-	value, ok := i.(string)
-	if !ok {
-		return false
-	}
-	size := len(value)
-	if size < min || size > max {
-		return false
-	}
-	return true
+// AddAlias add alias
+func AddAlias(alias, tags string) {
+	defaultValidator.RegisterAlias(alias, tags)
 }

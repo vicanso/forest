@@ -15,21 +15,21 @@
 package validate
 
 import (
-	"github.com/asaskevich/govalidator"
+	"regexp"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func init() {
-	Add("xLimit", func(i interface{}, _ interface{}) bool {
-		value := govalidator.ToString(i)
-		return govalidator.InRangeInt(value, "1", "20")
-	})
-	Add("xOffset", func(i interface{}, _ interface{}) bool {
-		value := govalidator.ToString(i)
-		return govalidator.InRangeInt(value, "0", "1000")
-	})
+	AddAlias("xLimit", "number,min=0,max=10")
+	AddAlias("xOffset", "number,min=0,max=1000")
 
-	Add("xDuration", func(i interface{}, _ interface{}) bool {
-		value := govalidator.ToString(i)
-		return govalidator.Matches(value, `^[1-9][0-9]*[smh]$`)
+	durationRegexp := regexp.MustCompile("^[1-9][0-9]*[smh]$")
+	Add("xDuration", func(fl validator.FieldLevel) bool {
+		value, ok := toString(fl)
+		if !ok {
+			return false
+		}
+		return durationRegexp.MatchString(value)
 	})
 }

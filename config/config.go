@@ -34,36 +34,36 @@ var (
 type (
 	// RedisOptions redis options
 	RedisOptions struct {
-		Addr     string `valid:"runelength(5|30)"`
-		Password string `valid:"-"`
-		DB       int    `valid:"-"`
+		Addr     string `validate:"min=5,max=30"`
+		Password string
+		DB       int `validate:"xLimit"`
 		// 慢请求时长
-		Slow time.Duration `valid:"-"`
+		Slow time.Duration
 		// 最大的正在处理请求量
-		MaxProcessing uint32 `valid:"-"`
+		MaxProcessing uint32
 	}
 	// SessionConfig session's config
 	SessionConfig struct {
-		TTL        time.Duration `valid:"-"`
-		Key        string        `valid:"ascii"`
-		CookiePath string        `valid:"ascii"`
+		TTL        time.Duration
+		Key        string `validate:"ascii,required"`
+		CookiePath string `validate:"ascii,required"`
 	}
 	// MailConfig mail's config
 	MailConfig struct {
-		Host     string `valid:"host"`
-		Port     int    `valid:"port"`
-		User     string `valid:"email"`
-		Password string `valid:"runelength(1|100)"`
+		Host     string `validate:"hostname,required"`
+		Port     int    `validate:"number,required"`
+		User     string `validate:"email,required"`
+		Password string `validate:"min=1,max=100"`
 	}
 
 	// Influxdb config
 	InfluxdbConfig struct {
-		Bucket        string        `valid:"runelength(1|50)"`
-		Org           string        `valid:"runelength(1|100)"`
-		URI           string        `valid:"url"`
-		Token         string        `valid:"ascii"`
-		BatchSize     uint          `valid:"range(1|5000)"`
-		FlushInterval time.Duration `valid:"-"`
+		Bucket        string `validate:"min=1,max=50"`
+		Org           string `validate:"min=1,max=100"`
+		URI           string `validate:"url,required"`
+		Token         string `validate:"ascii,required"`
+		BatchSize     uint   `validate:"min=1,max=5000"`
+		FlushInterval time.Duration
 	}
 
 	// PostgresConfig postgres config
