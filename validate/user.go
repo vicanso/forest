@@ -15,6 +15,8 @@
 package validate
 
 import (
+	"reflect"
+
 	"github.com/go-playground/validator/v10"
 
 	"github.com/vicanso/forest/cs"
@@ -23,6 +25,7 @@ import (
 func init() {
 	// 账号
 	AddAlias("xUserAccount", "ascii,len=0|min=4,max=10")
+
 	AddAlias("xUserPassword", "ascii,len=0|len=44")
 	AddAlias("xUserAccountKeyword", "ascii,min=0,max=10")
 	Add("xUserRole", func(fl validator.FieldLevel) bool {
@@ -31,16 +34,31 @@ func init() {
 			cs.UserRoleAdmin,
 		})
 	})
-	// Add("xUserRoles", func(i interface{}, _ interface{}) bool {
-	// 	values, ok := i.([]string)
-	// 	if !ok {
-	// 		return false
-	// 	}
-	// 	for _, value := range values {
-	// 		if !govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin) {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// })
+	Add("xUserRoles", func(fl validator.FieldLevel) bool {
+		if fl.Field().Kind() != reflect.Slice {
+			return false
+		}
+		v := fl.Field().Interface()
+		value, ok := v.([]string)
+		if !ok {
+			return false
+		}
+		valid := true
+		for _, item := range value {
+			exists := false
+			for _, role := range []string{
+				cs.UserRoleSu,
+				cs.UserRoleAdmin,
+			} {
+				if item == role {
+					exists = true
+				}
+			}
+			if !exists {
+				valid = false
+			}
+		}
+		return valid
+	})
+
 }

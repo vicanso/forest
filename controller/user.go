@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/validate"
@@ -113,7 +114,6 @@ func init() {
 
 	// 更新用户信息
 	g.PATCH(
-		// 因为与/me有冲突，因此路径增加update
 		"/v1/{userID}",
 		shouldBeAdmin,
 		ctrl.update,
@@ -450,7 +450,7 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 	err = userSrv.Update(service.User{
 		ID: uint(id),
 	}, map[string]interface{}{
-		"roles": params.Roles,
+		"roles": pq.StringArray(params.Roles),
 	})
 	if err != nil {
 		return
