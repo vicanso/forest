@@ -64,6 +64,7 @@ type (
 		Token         string `validate:"ascii,required"`
 		BatchSize     uint   `validate:"min=1,max=5000"`
 		FlushInterval time.Duration
+		Disabled      bool
 	}
 
 	// PostgresConfig postgres config
@@ -145,6 +146,11 @@ func GetENV() string {
 	return env
 }
 
+// GetBool viper get bool
+func GetBool(key string) bool {
+	return defaultViper.GetBool(key)
+}
+
 // GetInt viper get int
 func GetInt(key string) int {
 	return defaultViper.GetInt(key)
@@ -181,6 +187,16 @@ func GetUint32Default(key string, defaultValue uint32) uint32 {
 // GetString viper get string
 func GetString(key string) string {
 	return defaultViper.GetString(key)
+}
+
+// GetStringFromENV get string from env, if not exists, it will return the value of config
+func GetStringFromENV(key string) string {
+	value := GetString(key)
+	v := os.Getenv(value)
+	if v != "" {
+		return v
+	}
+	return value
 }
 
 // GetStringDefault get string with default value
@@ -230,8 +246,8 @@ func GetTrackKey() string {
 func GetRedisConfig() (options RedisOptions, err error) {
 	prefix := "redis."
 	options = RedisOptions{
-		Addr:          GetString(prefix + "addr"),
-		Password:      GetString(prefix + "password"),
+		Addr:          GetStringFromENV(prefix + "addr"),
+		Password:      GetStringFromENV(prefix + "password"),
 		DB:            GetInt(prefix + "db"),
 		Slow:          GetDurationDefault(prefix+"slow", 300*time.Millisecond),
 		MaxProcessing: GetUint32Default(prefix+"maxProcessing", 1000),
@@ -242,9 +258,6 @@ func GetRedisConfig() (options RedisOptions, err error) {
 
 // GetPostgresConnectString get postgres connect string
 func GetPostgresConnectString() string {
-	getPostgresConfig := func(key string) string {
-		return GetString("postgres." + key)
-	}
 	keys := []string{
 		"host",
 		"port",
@@ -254,14 +267,13 @@ func GetPostgresConnectString() string {
 		"sslmode",
 	}
 	arr := []string{}
-	for _, key := range keys {
-		value := getPostgresConfig(key)
+	prefix := "postgres."
+	for _, k := range keys {
+		key := prefix + k
+		value := GetString(key)
 		// 密码与用户名支持env中获取
-		if key == "password" || key == "user" {
-			v := os.Getenv(value)
-			if v != "" {
-				value = v
-			}
+		if k == "password" || k == "user" {
+			value = GetStringFromENV(key)
 		}
 		if value != "" {
 			arr = append(arr, key+"="+value)
@@ -324,15 +336,11 @@ func GetRouterConcurrentLimit() map[string]uint32 {
 // GetMailConfig get mail config
 func GetMailConfig() MailConfig {
 	prefix := "mail."
-	pass := GetString(prefix + "password")
-	if os.Getenv(pass) != "" {
-		pass = os.Getenv(pass)
-	}
 	mailConfig := MailConfig{
 		Host:     GetString(prefix + "host"),
 		Port:     GetInt(prefix + "port"),
-		User:     GetString(prefix + "user"),
-		Password: pass,
+		User:     GetStringFromENV(prefix + "user"),
+		Password: GetStringFromENV(prefix + "password"),
 	}
 	validatePanic(&mailConfig)
 	return mailConfig
@@ -341,15 +349,11 @@ func GetMailConfig() MailConfig {
 // GetInfluxdbConfig get influxdb config
 func GetInfluxdbConfig() InfluxdbConfig {
 	prefix := "influxdb."
-	token := GetString(prefix + "token")
-	if os.Getenv(token) != "" {
-		token = os.Getenv(token)
-	}
 	influxdbConfig := InfluxdbConfig{
-		URI:           GetString(prefix + "uri"),
+		URI:           GetStringFromENV(prefix + "uri"),
 		Bucket:        GetString(prefix + "bucket"),
 		Org:           GetString(prefix + "org"),
-		Token:         token,
+		Token:         GetStringFromENV(prefix + "token"),
 		BatchSize:     GetUint(prefix + "batchSize"),
 		FlushInterval: GetDuration(prefix + "flushInterval"),
 	}
