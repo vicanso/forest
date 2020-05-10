@@ -268,12 +268,16 @@ func GetPostgresConnectString() string {
 	}
 	arr := []string{}
 	prefix := "postgres."
-	for _, k := range keys {
-		key := prefix + k
-		value := GetString(key)
+	uri := GetStringFromENV(prefix + "uri")
+	if uri != "" {
+		return uri
+	}
+	for _, key := range keys {
+		k := prefix + key
+		value := GetString(k)
 		// 密码与用户名支持env中获取
-		if k == "password" || k == "user" {
-			value = GetStringFromENV(key)
+		if key == "password" || key == "user" {
+			value = GetStringFromENV(k)
 		}
 		if value != "" {
 			arr = append(arr, key+"="+value)
