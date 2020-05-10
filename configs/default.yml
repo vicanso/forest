@@ -33,6 +33,7 @@ influxdb:
   token: YecVRjkFWQHQCq-Qs9NH7XZy8ApyAp9QfwVjqwQC_8bWmjsYRAfYTNveCswl1NPHS8reFoXELQBWKO27maa9tw==
   batchSize: 100
   flushInterval: 10s
+  disabled: false
 
 # session的相关配置
 session:
