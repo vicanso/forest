@@ -167,7 +167,7 @@ func init() {
 	)
 	// 用户退出登录
 	g.DELETE(
-		"/v1/me/logout",
+		"/v1/me",
 		newTracker(cs.ActionLogout),
 		shouldLogined,
 		ctrl.logout,
