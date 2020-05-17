@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
@@ -40,10 +41,7 @@ var (
 type (
 	// Configuration configuration of application
 	Configuration struct {
-		ID        uint       `gorm:"primary_key" json:"id"`
-		CreatedAt *time.Time `json:"createdAt"`
-		UpdatedAt *time.Time `json:"updatedAt"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+		gorm.Model
 
 		// 配置名称，唯一
 		Name string `json:"name" gorm:"type:varchar(30);not null;unique;"`
@@ -92,15 +90,22 @@ func (conf *Configuration) IsValid() bool {
 	return true
 }
 
+// createByID create a configuration by id
+func (srv *ConfigurationSrv) createByID(id uint) *Configuration {
+	c := &Configuration{}
+	c.Model.ID = id
+	return c
+}
+
 // Add add configuration
 func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 	err = pgCreate(conf)
 	return
 }
 
-// Update update configuration
-func (srv *ConfigurationSrv) Update(conf Configuration, attrs ...interface{}) (err error) {
-	err = pgGetClient().Model(conf).Update(attrs...).Error
+// UpdateByID update configuration by id
+func (srv *ConfigurationSrv) UpdateByID(id uint, attrs ...interface{}) (err error) {
+	err = pgGetClient().Model(srv.createByID(id)).Update(attrs...).Error
 	return
 }
 
@@ -234,8 +239,6 @@ func (srv *ConfigurationSrv) List(params ConfigurationQueryParmas) (result []*Co
 
 // DeleteByID delete configuration
 func (srv *ConfigurationSrv) DeleteByID(id uint) (err error) {
-	err = pgGetClient().Unscoped().Delete(&Configuration{
-		ID: id,
-	}).Error
+	err = pgGetClient().Unscoped().Delete(srv.createByID(id)).Error
 	return
 }

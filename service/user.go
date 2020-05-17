@@ -15,8 +15,6 @@
 package service
 
 import (
-	"time"
-
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 	"github.com/vicanso/elton"
@@ -63,10 +61,7 @@ type (
 	}
 	// User user
 	User struct {
-		ID        uint       `gorm:"primary_key" json:"id"`
-		CreatedAt *time.Time `json:"createdAt"`
-		UpdatedAt *time.Time `json:"updatedAt"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+		gorm.Model
 
 		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
 		Password string         `json:"-" gorm:"type:varchar(128);not null;"`
@@ -75,10 +70,7 @@ type (
 
 	// UserLoginRecord user login
 	UserLoginRecord struct {
-		ID        uint       `gorm:"primary_key" json:"id"`
-		CreatedAt *time.Time `json:"createdAt"`
-		UpdatedAt *time.Time `json:"updatedAt"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+		gorm.Model
 
 		Account       string `json:"account" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
 		UserAgent     string `json:"userAgent"`
@@ -93,17 +85,15 @@ type (
 	}
 	// UserTrackRecord user track record
 	UserTrackRecord struct {
-		ID        uint       `gorm:"primary_key" json:"id"`
-		CreatedAt *time.Time `json:"createdAt"`
-		UpdatedAt *time.Time `json:"updatedAt"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
-		TrackID   string     `json:"trackId" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
-		UserAgent string     `json:"userAgent"`
-		IP        string     `json:"ip" gorm:"type:varchar(64);not null"`
-		Country   string     `json:"country" gorm:"type:varchar(64)"`
-		Province  string     `json:"province" gorm:"type:varchar(64)"`
-		City      string     `json:"city" gorm:"type:varchar(64)"`
-		ISP       string     `json:"isp" gorm:"type:varchar(64)"`
+		gorm.Model
+
+		TrackID   string `json:"trackId" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
+		UserAgent string `json:"userAgent"`
+		IP        string `json:"ip" gorm:"type:varchar(64);not null"`
+		Country   string `json:"country" gorm:"type:varchar(64)"`
+		Province  string `json:"province" gorm:"type:varchar(64)"`
+		City      string `json:"city" gorm:"type:varchar(64)"`
+		ISP       string `json:"isp" gorm:"type:varchar(64)"`
 	}
 	// UserQueryParams user query params
 	UserQueryParams struct {
@@ -130,13 +120,27 @@ func init() {
 		AutoMigrate(&UserTrackRecord{})
 }
 
+// createByID create a user model by id
+func (srv *UserSrv) createByID(id uint) *User {
+	u := &User{}
+	u.Model.ID = id
+	return u
+}
+
+// createLoginRecordByID cerate login record by id
+func (srv *UserSrv) createLoginRecordByID(id uint) *UserLoginRecord {
+	ulr := &UserLoginRecord{}
+	ulr.Model.ID = id
+	return ulr
+}
+
 // Add add user
 func (srv *UserSrv) Add(u *User) (err error) {
 	err = pgCreate(u)
 	// 首次创建账号，设置su权限
 	if u.ID == 1 {
-		pgGetClient().Model(u).Update(map[string]interface{}{
-			"roles": []string{
+		srv.UpdateByID(u.ID, User{
+			Roles: []string{
 				cs.UserRoleSu,
 			},
 		})
@@ -168,15 +172,19 @@ func (srv *UserSrv) Login(account, password, token string) (u *User, err error) 
 
 // UpdateByID update user by id
 func (srv *UserSrv) UpdateByID(id uint, value interface{}) (err error) {
-	err = pgGetClient().Model(&User{
-		ID: id,
-	}).Updates(value).Error
+	err = pgGetClient().Model(srv.createByID(id)).Updates(value).Error
 	return
 }
 
 // UpdateByAccount update user by account
 func (srv *UserSrv) UpdateByAccount(account string, value interface{}) (err error) {
 	err = pgGetClient().Model(&User{}).Where("account = ?", account).Updates(value).Error
+	return
+}
+
+// UpdateLoginRecordByID update login record by id
+func (srv *UserSrv) UpdateLoginRecordByID(id uint, value interface{}) (err error) {
+	err = pgGetClient().Model(srv.createLoginRecordByID(id)).Updates(value).Error
 	return
 }
 
@@ -195,9 +203,7 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord, c *elton.Context) (err er
 				)
 				return
 			}
-			pgGetClient().Model(&UserLoginRecord{
-				ID: id,
-			}).Update(map[string]string{
+			srv.UpdateLoginRecordByID(id, map[string]string{
 				"country":  lo.Country,
 				"province": lo.Province,
 				"city":     lo.City,
@@ -223,9 +229,7 @@ func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord, c *elton.Context) (err er
 				)
 				return
 			}
-			pgGetClient().Model(&UserTrackRecord{
-				ID: id,
-			}).Update(map[string]string{
+			srv.UpdateLoginRecordByID(id, map[string]string{
 				"country":  lo.Country,
 				"province": lo.Province,
 				"city":     lo.City,

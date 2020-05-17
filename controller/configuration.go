@@ -28,23 +28,23 @@ import (
 type (
 	configurationCtrl      struct{}
 	addConfigurationParams struct {
-		Name      string     `json:"name" validate:"xConfigName,required"`
+		Name      string     `json:"name" validate:"xConfigName"`
 		Category  string     `json:"category" validate:"xConfigCategory"`
-		Status    int        `json:"status" validate:"xConfigStatus,required"`
-		Data      string     `json:"data" validate:"xConfigData,required"`
+		Status    int        `json:"status" validate:"xConfigStatus"`
+		Data      string     `json:"data" validate:"xConfigData"`
 		BeginDate *time.Time `json:"beginDate"`
 		EndDate   *time.Time `json:"endDate"`
 	}
 	updateConfigurationParams struct {
-		Status    int    `json:"status" validate:"xConfigStatus"`
-		Category  string `json:"category" validate:"xConfigCategory"`
-		Data      string `json:"data" validate:"xConfigData"`
+		Status    int    `json:"status" validate:"omitempty,xConfigStatus"`
+		Category  string `json:"category" validate:"omitempty,xConfigCategory"`
+		Data      string `json:"data" validate:"omitempty,xConfigData"`
 		BeginDate *time.Time
 		EndDate   *time.Time
 	}
 	listConfigurationParmas struct {
-		Name     string `json:"name" validate:"xConfigName"`
-		Category string `json:"category" validate:"xConfigCategory"`
+		Name     string `json:"name" validate:"omitempty,xConfigName"`
+		Category string `json:"category" validate:"omitempty,xConfigCategory"`
 	}
 )
 
@@ -169,9 +169,7 @@ func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	err = configSrv.Update(service.Configuration{
-		ID: uint(id),
-	}, service.Configuration{
+	err = configSrv.UpdateByID(uint(id), service.Configuration{
 		Status:    params.Status,
 		Data:      params.Data,
 		Category:  params.Category,

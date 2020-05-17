@@ -73,16 +73,16 @@ type (
 	registerLoginUserParams struct {
 		// 账户
 		// Example: vicanso
-		Account string `json:"account" validate:"xUserAccount,required"`
+		Account string `json:"account" validate:"xUserAccount"`
 		// 密码，密码为sha256后的加密串
 		// Example: JgX9742WqzaNHVP+YiPy/RXP0eoX29k00hEF3BdghGU=
-		Password string `json:"password" validate:"xUserPassword,required"`
+		Password string `json:"password" validate:"xUserPassword"`
 	}
 
 	listUserParams struct {
-		Limit   string `json:"limit" validate:"xLimit"`
-		Keyword string `json:"keyword" validate:"xUserAccountKeyword,required"`
-		Role    string `json:"role" validate:"xUserRole"`
+		Limit   string `json:"limit" validate:"omitempty,xLimit"`
+		Keyword string `json:"keyword" validate:"xUserAccountKeyword"`
+		Role    string `json:"role" validate:"omitempty,xUserRole"`
 	}
 
 	updateUserParams struct {
@@ -91,9 +91,9 @@ type (
 	listUserLoginRecordParams struct {
 		Begin   time.Time `json:"begin"`
 		End     time.Time `json:"end"`
-		Account string    `json:"account" validate:"xUserAccount,required"`
-		Limit   string    `json:"limit" validate:"xLimit,required"`
-		Offset  string    `json:"offset" validate:"xOffset"`
+		Account string    `json:"account" validate:"xUserAccount"`
+		Limit   string    `json:"limit" validate:"xLimit"`
+		Offset  string    `json:"offset" validate:"omitempty,xOffset"`
 	}
 )
 

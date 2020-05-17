@@ -38,7 +38,7 @@ type (
 	RedisOptions struct {
 		Addr     string `validate:"min=5,max=30"`
 		Password string
-		DB       int `validate:"omitempty,xLimit"`
+		DB       int
 		// 慢请求时长
 		Slow time.Duration
 		// 最大的正在处理请求量
