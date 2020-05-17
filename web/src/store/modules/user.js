@@ -1,6 +1,7 @@
 import request from "@/helpers/request";
-
-import { USERS_ME } from "@/constants/url";
+import { USERS_ME, USERS_LOGIN, COMMONS_CAPTCHA } from "@/constants/url";
+import { generatePassword } from "@/helpers/util";
+import { sha256 } from "@/helpers/crypto";
 
 const mutationUserProcessing = "user.processing";
 const mutationUserInfo = "user.info";
@@ -32,6 +33,7 @@ export default {
     }
   },
   actions: {
+    // fetchUserInfo 获取用户信息
     async fetchUserInfo({ commit }) {
       commit(mutationUserProcessing, true);
       try {
@@ -41,7 +43,9 @@ export default {
         commit(mutationUserProcessing, false);
       }
     },
+    // logout 退出登录
     async logout({ commit }) {
+      // 设置处理中
       commit(mutationUserProcessing, true);
       try {
         await request.delete(USERS_ME);
@@ -49,6 +53,58 @@ export default {
       } finally {
         commit(mutationUserProcessing, false);
       }
+    },
+    // login 用户登录
+    async login({ commit }, { account, password, captcha }) {
+      commit(mutationUserProcessing, true);
+      try {
+        // 先获取登录用的token
+        const res = await request.get(USERS_LOGIN);
+        const { token } = res.data;
+        // 根据token与密码生成登录密码
+        const { data } = await request.post(
+          USERS_LOGIN,
+          {
+            account,
+            password: sha256(generatePassword(password) + token)
+          },
+          {
+            headers: {
+              // 图形验证码
+              "X-Captcha": captcha
+            }
+          }
+        );
+        commitUserInfo(commit, data);
+      } finally {
+        commit(mutationUserProcessing, false);
+      }
+    },
+    // register 用户注册
+    async register({ commit }, { account, password, captcha }) {
+      commit(mutationUserProcessing, true);
+      try {
+        await request.post(
+          USERS_ME,
+          {
+            account,
+            // 密码加密
+            password: generatePassword(password)
+          },
+          {
+            headers: {
+              "X-Captcha": captcha
+            }
+          }
+        );
+      } finally {
+        commit(mutationUserProcessing, false);
+      }
+    },
+    // getCaptcha 获取图形验证码
+    async getCaptcha() {
+      const { data } = await request.get(COMMONS_CAPTCHA);
+      return data;
     }
   }
 };

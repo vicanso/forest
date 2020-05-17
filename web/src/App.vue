@@ -2,7 +2,9 @@
   <div id="app">
     <MainHeader class="header" />
     <MainNav class="nav" />
-    <router-view />
+    <div class="mainContent">
+      <router-view />
+    </div>
   </div>
 </template>
 <script>

@@ -1,6 +1,11 @@
 <template>
   <div class="mainNav">
-    <h1>Origin</h1>
+    <h1>
+      <router-link :to="{ name: home }">
+        <i class="el-icon-eleme" />
+        Origin
+      </router-link>
+    </h1>
     <nav>
       <el-menu
         class="menu"
@@ -33,6 +38,7 @@
   </div>
 </template>
 <script>
+import { HOME } from "@/constants/route";
 const navs = [
   {
     name: "配置",
@@ -60,6 +66,7 @@ export default {
   name: "MainNav",
   data() {
     return {
+      home: HOME,
       active: "",
       navs
     };
@@ -79,6 +86,8 @@ h1
   color: $white
   padding-left: 20px
   font-size: 18px
+  i
+    font-weight: bold
 nav
   border-top: 1px solid rgba($white, 0.3)
 .menu

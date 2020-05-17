@@ -13,12 +13,12 @@
         </a>
       </div>
       <div v-else>
-        <router-link :to="loginPath" class="login">
+        <router-link :to="{ name: login }" class="login">
           <i class="el-icon-user" />
           登录
         </router-link>
         <span class="divided">|</span>
-        <router-link :to="registerPath" class="register">
+        <router-link :to="{ name: register }" class="register">
           <i class="el-icon-circle-plus" />
           注册
         </router-link>
@@ -28,7 +28,7 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import { LOGIN, REGISTER } from "@/constants/path";
+import { LOGIN, REGISTER } from "@/constants/route";
 export default {
   name: "MainHeader",
   computed: mapState({
@@ -37,8 +37,8 @@ export default {
   }),
   data() {
     return {
-      loginPath: LOGIN,
-      registerPath: REGISTER
+      login: LOGIN,
+      register: REGISTER
     };
   },
   methods: {
