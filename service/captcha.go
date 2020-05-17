@@ -38,11 +38,11 @@ const (
 type (
 	// CaptchaInfo captcha info
 	CaptchaInfo struct {
-		Data []byte `json:"data,omitempty"`
+		Data []byte `json:"data"`
 		// json输出时，忽略此字段
 		Value string `json:"-"`
-		ID    string `json:"id,omitempty"`
-		Type  string `json:"type,omitempty"`
+		ID    string `json:"id"`
+		Type  string `json:"type"`
 	}
 )
 

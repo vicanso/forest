@@ -63,47 +63,47 @@ type (
 	}
 	// User user
 	User struct {
-		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt *time.Time `json:"createdAt,omitempty"`
-		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+		ID        uint       `gorm:"primary_key" json:"id"`
+		CreatedAt *time.Time `json:"createdAt"`
+		UpdatedAt *time.Time `json:"updatedAt"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
 
-		Account  string         `json:"account,omitempty" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
+		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
 		Password string         `json:"-" gorm:"type:varchar(128);not null;"`
-		Roles    pq.StringArray `json:"roles,omitempty" gorm:"type:text[]"`
+		Roles    pq.StringArray `json:"roles" gorm:"type:text[]"`
 	}
 
 	// UserLoginRecord user login
 	UserLoginRecord struct {
-		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt *time.Time `json:"createdAt,omitempty"`
-		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+		ID        uint       `gorm:"primary_key" json:"id"`
+		CreatedAt *time.Time `json:"createdAt"`
+		UpdatedAt *time.Time `json:"updatedAt"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
 
-		Account       string `json:"account,omitempty" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
-		UserAgent     string `json:"userAgent,omitempty"`
-		IP            string `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
-		TrackID       string `json:"trackId,omitempty" gorm:"type:varchar(64);not null"`
-		SessionID     string `json:"sessionId,omitempty" gorm:"type:varchar(64);not null"`
-		XForwardedFor string `json:"xForwardedFor,omitempty" gorm:"type:varchar(128)"`
-		Country       string `json:"country,omitempty" gorm:"type:varchar(64)"`
-		Province      string `json:"province,omitempty" gorm:"type:varchar(64)"`
-		City          string `json:"city,omitempty" gorm:"type:varchar(64)"`
-		ISP           string `json:"isp,omitempty" gorm:"type:varchar(64)"`
+		Account       string `json:"account" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
+		UserAgent     string `json:"userAgent"`
+		IP            string `json:"ip" gorm:"type:varchar(64);not null"`
+		TrackID       string `json:"trackId" gorm:"type:varchar(64);not null"`
+		SessionID     string `json:"sessionId" gorm:"type:varchar(64);not null"`
+		XForwardedFor string `json:"xForwardedFor" gorm:"type:varchar(128)"`
+		Country       string `json:"country" gorm:"type:varchar(64)"`
+		Province      string `json:"province" gorm:"type:varchar(64)"`
+		City          string `json:"city" gorm:"type:varchar(64)"`
+		ISP           string `json:"isp" gorm:"type:varchar(64)"`
 	}
 	// UserTrackRecord user track record
 	UserTrackRecord struct {
-		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt *time.Time `json:"createdAt,omitempty"`
-		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
-		TrackID   string     `json:"trackId,omitempty" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
-		UserAgent string     `json:"userAgent,omitempty"`
-		IP        string     `json:"ip,omitempty" gorm:"type:varchar(64);not null"`
-		Country   string     `json:"country,omitempty" gorm:"type:varchar(64)"`
-		Province  string     `json:"province,omitempty" gorm:"type:varchar(64)"`
-		City      string     `json:"city,omitempty" gorm:"type:varchar(64)"`
-		ISP       string     `json:"isp,omitempty" gorm:"type:varchar(64)"`
+		ID        uint       `gorm:"primary_key" json:"id"`
+		CreatedAt *time.Time `json:"createdAt"`
+		UpdatedAt *time.Time `json:"updatedAt"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+		TrackID   string     `json:"trackId" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
+		UserAgent string     `json:"userAgent"`
+		IP        string     `json:"ip" gorm:"type:varchar(64);not null"`
+		Country   string     `json:"country" gorm:"type:varchar(64)"`
+		Province  string     `json:"province" gorm:"type:varchar(64)"`
+		City      string     `json:"city" gorm:"type:varchar(64)"`
+		ISP       string     `json:"isp" gorm:"type:varchar(64)"`
 	}
 	// UserQueryParams user query params
 	UserQueryParams struct {

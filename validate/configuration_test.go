@@ -24,7 +24,7 @@ func TestConfigurationValidate(t *testing.T) {
 	assert := assert.New(t)
 	t.Run("xConfigName", func(t *testing.T) {
 		type xConfigName struct {
-			Value string `json:"value,omitempty" validate:"xConfigName"`
+			Value string `json:"value" validate:"xConfigName"`
 		}
 		x := xConfigName{}
 
@@ -41,7 +41,7 @@ func TestConfigurationValidate(t *testing.T) {
 
 	t.Run("xConfigCategory", func(t *testing.T) {
 		type xConfigCategory struct {
-			Value string `json:"value,omitempty" validate:"xConfigCategory"`
+			Value string `json:"value" validate:"xConfigCategory"`
 		}
 
 		x := xConfigCategory{}
@@ -58,7 +58,7 @@ func TestConfigurationValidate(t *testing.T) {
 
 	t.Run("xConfigData", func(t *testing.T) {
 		type xConfigData struct {
-			Value string `json:"value,omitempty" validate:"xConfigData"`
+			Value string `json:"value" validate:"xConfigData"`
 		}
 
 		x := xConfigData{}
@@ -71,7 +71,7 @@ func TestConfigurationValidate(t *testing.T) {
 
 	t.Run("xConfigStatus", func(t *testing.T) {
 		type xConfigStatus struct {
-			Value int `json:"value,omitempty" validate:"xConfigStatus"`
+			Value int `json:"value" validate:"xConfigStatus"`
 		}
 		x := xConfigStatus{}
 		err := doValidate(&x, []byte(`{"value": 0}`))

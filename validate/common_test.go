@@ -25,7 +25,7 @@ func TestCommonValidate(t *testing.T) {
 
 	t.Run("xLimit", func(t *testing.T) {
 		type xLimit struct {
-			Value int `json:"value,omitempty" validate:"xLimit"`
+			Value int `json:"value" validate:"xLimit"`
 		}
 
 		x := xLimit{}
@@ -46,7 +46,7 @@ func TestCommonValidate(t *testing.T) {
 
 	t.Run("xDuration", func(t *testing.T) {
 		type xDuration struct {
-			Value string `json:"value,omitempty" validate:"xDuration"`
+			Value string `json:"value" validate:"xDuration"`
 		}
 
 		x := xDuration{}
@@ -61,9 +61,6 @@ func TestCommonValidate(t *testing.T) {
 		assert.Nil(err)
 
 		err = doValidate(&x, []byte(`{"value": ""}`))
-		assert.Equal(`Key: 'xDuration.Value' Error:Field validation for 'Value' failed on the 'xDuration' tag`, err.Error())
-
-		err = doValidate(&x, []byte(`{"value": "1ms"}`))
 		assert.Equal(`Key: 'xDuration.Value' Error:Field validation for 'Value' failed on the 'xDuration' tag`, err.Error())
 	})
 }

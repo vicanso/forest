@@ -24,7 +24,7 @@ func TestUserValidate(t *testing.T) {
 	assert := assert.New(t)
 	t.Run("xUserAccount", func(t *testing.T) {
 		type xUserAccount struct {
-			Value string `json:"value,omitempty" validate:"xUserAccount"`
+			Value string `json:"value" validate:"xUserAccount"`
 		}
 		x := xUserAccount{}
 		err := doValidate(&x, []byte(`{"value": ""}`))
@@ -39,7 +39,7 @@ func TestUserValidate(t *testing.T) {
 
 	t.Run("xUserPassword", func(t *testing.T) {
 		type xUserPassword struct {
-			Value string `json:"value,omitempty" validate:"xUserPassword"`
+			Value string `json:"value" validate:"xUserPassword"`
 		}
 		x := xUserPassword{}
 		err := doValidate(&x, []byte(`{"value": ""}`))
@@ -54,7 +54,7 @@ func TestUserValidate(t *testing.T) {
 
 	t.Run("xUserRole", func(t *testing.T) {
 		type xUserRole struct {
-			Value string `json:"value,omitempty" validate:"xUserRole"`
+			Value string `json:"value" validate:"xUserRole"`
 		}
 		x := xUserRole{}
 
@@ -70,7 +70,7 @@ func TestUserValidate(t *testing.T) {
 
 	t.Run("xUserRoles", func(t *testing.T) {
 		type xUserRoles struct {
-			Value []string `json:"value,omitempty" validate:"xUserRoles"`
+			Value []string `json:"value" validate:"xUserRoles"`
 		}
 		x := xUserRoles{}
 		err := doValidate(&x, []byte(`{"value": []}`))

@@ -41,12 +41,12 @@ const (
 
 // Location location
 type Location struct {
-	IP string `json:"ip,omitempty"`
+	IP string `json:"ip"`
 	// IP the country of location
-	Country  string `json:"country,omitempty"`
-	Province string `json:"province,omitempty"`
-	City     string `json:"city,omitempty"`
-	ISP      string `json:"isp,omitempty"`
+	Country  string `json:"country"`
+	Province string `json:"province"`
+	City     string `json:"city"`
+	ISP      string `json:"isp"`
 }
 
 func init() {

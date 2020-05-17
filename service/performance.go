@@ -22,12 +22,12 @@ import (
 type (
 	// Performance performance
 	Performance struct {
-		GoMaxProcs   int    `json:"goMaxProcs,omitempty"`
-		Concurrency  uint32 `json:"concurrency,omitempty"`
-		Sys          int    `json:"sys,omitempty"`
-		HeapSys      int    `json:"heapSys,omitempty"`
-		HeapInuse    int    `json:"heapInuse,omitempty"`
-		RoutineCount int    `json:"routineCount,omitempty"`
+		GoMaxProcs   int    `json:"goMaxProcs"`
+		Concurrency  uint32 `json:"concurrency"`
+		Sys          int    `json:"sys"`
+		HeapSys      int    `json:"heapSys"`
+		HeapInuse    int    `json:"heapInuse"`
+		RoutineCount int    `json:"routineCount"`
 	}
 )
 

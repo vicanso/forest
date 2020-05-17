@@ -28,23 +28,23 @@ import (
 type (
 	configurationCtrl      struct{}
 	addConfigurationParams struct {
-		Name      string     `json:"name,omitempty" validate:"xConfigName,required"`
-		Category  string     `json:"category,omitempty" validate:"xConfigCategory"`
-		Status    int        `json:"status,omitempty" validate:"xConfigStatus,required"`
-		Data      string     `json:"data,omitempty" validate:"xConfigData,required"`
-		BeginDate *time.Time `json:"beginDate,omitempty"`
-		EndDate   *time.Time `json:"endDate,omitempty"`
+		Name      string     `json:"name" validate:"xConfigName,required"`
+		Category  string     `json:"category" validate:"xConfigCategory"`
+		Status    int        `json:"status" validate:"xConfigStatus,required"`
+		Data      string     `json:"data" validate:"xConfigData,required"`
+		BeginDate *time.Time `json:"beginDate"`
+		EndDate   *time.Time `json:"endDate"`
 	}
 	updateConfigurationParams struct {
-		Status    int    `json:"status,omitempty" validate:"xConfigStatus"`
-		Category  string `json:"category,omitempty" validate:"xConfigCategory"`
-		Data      string `json:"data,omitempty" validate:"xConfigData"`
+		Status    int    `json:"status" validate:"xConfigStatus"`
+		Category  string `json:"category" validate:"xConfigCategory"`
+		Data      string `json:"data" validate:"xConfigData"`
 		BeginDate *time.Time
 		EndDate   *time.Time
 	}
 	listConfigurationParmas struct {
-		Name     string `json:"name,omitempty" validate:"xConfigName"`
-		Category string `json:"category,omitempty" validate:"xConfigCategory"`
+		Name     string `json:"name" validate:"xConfigName"`
+		Category string `json:"category" validate:"xConfigCategory"`
 	}
 )
 

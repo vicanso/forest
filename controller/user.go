@@ -38,33 +38,33 @@ type (
 	userInfoResp struct {
 		// 是否匿名
 		// Example: true
-		Anonymous bool `json:"anonymous,omitempty"`
+		Anonymous bool `json:"anonymous"`
 		// 账号
 		// Example: vicanso
-		Account string `json:"account,omitempty"`
+		Account string `json:"account"`
 		// 角色
 		// Example: ["su", "admin"]
-		Roles []string `json:"roles,omitempty"`
+		Roles []string `json:"roles"`
 		// 系统时间
 		// Example: 2019-10-26T10:11:25+08:00
-		Date string `json:"date,omitempty"`
+		Date string `json:"date"`
 		// 信息更新时间
 		// Example: 2019-10-26T10:11:25+08:00
-		UpdatedAt string `json:"updatedAt,omitempty"`
+		UpdatedAt string `json:"updatedAt"`
 		// IP地址
 		// Example: 1.1.1.1
-		IP string `json:"ip,omitempty"`
+		IP string `json:"ip"`
 		// rack id
 		// Example: 01DPNPDXH4MQJHBF4QX1EFD6Y3
-		TrackID string `json:"trackId,omitempty"`
+		TrackID string `json:"trackId"`
 		// 登录时间
 		// Example: 2019-10-26T10:11:25+08:00
-		LoginAt string `json:"loginAt,omitempty"`
+		LoginAt string `json:"loginAt"`
 	}
 	loginTokenResp struct {
 		// 登录Token
 		// Example: IaHnYepm
-		Token string `json:"token,omitempty"`
+		Token string `json:"token"`
 	}
 )
 
@@ -73,27 +73,27 @@ type (
 	registerLoginUserParams struct {
 		// 账户
 		// Example: vicanso
-		Account string `json:"account,omitempty" validate:"xUserAccount,required"`
+		Account string `json:"account" validate:"xUserAccount,required"`
 		// 密码，密码为sha256后的加密串
 		// Example: JgX9742WqzaNHVP+YiPy/RXP0eoX29k00hEF3BdghGU=
-		Password string `json:"password,omitempty" validate:"xUserPassword,required"`
+		Password string `json:"password" validate:"xUserPassword,required"`
 	}
 
 	listUserParams struct {
-		Limit   string `json:"limit,omitempty" validate:"xLimit"`
-		Keyword string `json:"keyword,omitempty" validate:"xUserAccountKeyword,required"`
-		Role    string `json:"role,omitempty" validate:"xUserRole"`
+		Limit   string `json:"limit" validate:"xLimit"`
+		Keyword string `json:"keyword" validate:"xUserAccountKeyword,required"`
+		Role    string `json:"role" validate:"xUserRole"`
 	}
 
 	updateUserParams struct {
-		Roles []string `json:"roles,omitempty" validate:"xUserRoles"`
+		Roles []string `json:"roles" validate:"xUserRoles"`
 	}
 	listUserLoginRecordParams struct {
-		Begin   time.Time `json:"begin,omitempty"`
-		End     time.Time `json:"end,omitempty"`
-		Account string    `json:"account,omitempty" validate:"xUserAccount,required"`
-		Limit   string    `json:"limit,omitempty" validate:"xLimit,required"`
-		Offset  string    `json:"offset,omitempty" validate:"xOffset"`
+		Begin   time.Time `json:"begin"`
+		End     time.Time `json:"end"`
+		Account string    `json:"account" validate:"xUserAccount,required"`
+		Limit   string    `json:"limit" validate:"xLimit,required"`
+		Offset  string    `json:"offset" validate:"xOffset"`
 	}
 )
 
@@ -421,7 +421,7 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	c.Body = &struct {
-		Users []*service.User `json:"users,omitempty"`
+		Users []*service.User `json:"users"`
 	}{
 		users,
 	}
@@ -486,8 +486,8 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 		count, err = userSrv.CountLoginRecord(query)
 	}
 	c.Body = struct {
-		Logins []*service.UserLoginRecord `json:"logins,omitempty"`
-		Count  int                        `json:"count,omitempty"`
+		Logins []*service.UserLoginRecord `json:"logins"`
+		Count  int                        `json:"count"`
 	}{
 		result,
 		count,

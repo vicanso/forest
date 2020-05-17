@@ -24,11 +24,11 @@ import (
 type (
 	// RouterConfig route config
 	RouterConfig struct {
-		Route      string `json:"route,omitempty"`
-		Method     string `json:"method,omitempty"`
-		Status     int    `json:"status,omitempty"`
-		CotentType string `json:"cotentType,omitempty"`
-		Response   string `json:"response,omitempty"`
+		Route      string `json:"route"`
+		Method     string `json:"method"`
+		Status     int    `json:"status"`
+		CotentType string `json:"cotentType"`
+		Response   string `json:"response"`
 	}
 )
 

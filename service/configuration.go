@@ -40,24 +40,24 @@ var (
 type (
 	// Configuration configuration of application
 	Configuration struct {
-		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
-		CreatedAt *time.Time `json:"createdAt,omitempty"`
-		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
+		ID        uint       `gorm:"primary_key" json:"id"`
+		CreatedAt *time.Time `json:"createdAt"`
+		UpdatedAt *time.Time `json:"updatedAt"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
 
 		// 配置名称，唯一
-		Name string `json:"name,omitempty" gorm:"type:varchar(30);not null;unique;"`
+		Name string `json:"name" gorm:"type:varchar(30);not null;unique;"`
 		// 配置分类
-		Category string `json:"category,omitempty" gorm:"type:varchar(20);"`
+		Category string `json:"category" gorm:"type:varchar(20);"`
 		// 配置由谁创建
-		Owner string `json:"owner,omitempty" gorm:"type:varchar(20);not null;"`
+		Owner string `json:"owner" gorm:"type:varchar(20);not null;"`
 		// 配置状态
-		Status int    `json:"status,omitempty"`
-		Data   string `json:"data,omitempty"`
+		Status int    `json:"status"`
+		Data   string `json:"data"`
 		// 启用开始时间
-		BeginDate *time.Time `json:"beginDate,omitempty"`
+		BeginDate *time.Time `json:"beginDate"`
 		// 启用结束时间
-		EndDate *time.Time `json:"endDate,omitempty"`
+		EndDate *time.Time `json:"endDate"`
 	}
 	// ConfigurationQueryParmas configuration query params
 	ConfigurationQueryParmas struct {

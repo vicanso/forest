@@ -37,7 +37,7 @@ func TestCommonCtrl(t *testing.T) {
 
 	t.Run("location", func(t *testing.T) {
 		ins := service.LocationIns
-		originalData := []byte(`{"ip":"1.1.1.1","country":"澳大利亚"}`)
+		originalData := []byte(`{"ip":"1.1.1.1","country":"澳大利亚","province":"","city":"","isp":""}`)
 		done := ins.Mock(&axios.Response{
 			Data:   originalData,
 			Status: 200,
