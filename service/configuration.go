@@ -44,11 +44,11 @@ type (
 		gorm.Model
 
 		// 配置名称，唯一
-		Name string `json:"name" gorm:"type:varchar(30);not null;unique;"`
+		Name string `json:"name" gorm:"type:varchar(30);not null;unique"`
 		// 配置分类
-		Category string `json:"category" gorm:"type:varchar(20);"`
+		Category string `json:"category" gorm:"type:varchar(20)"`
 		// 配置由谁创建
-		Owner string `json:"owner" gorm:"type:varchar(20);not null;"`
+		Owner string `json:"owner" gorm:"type:varchar(20);not null"`
 		// 配置状态
 		Status int    `json:"status"`
 		Data   string `json:"data"`

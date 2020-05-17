@@ -64,7 +64,7 @@ type (
 		gorm.Model
 
 		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
-		Password string         `json:"-" gorm:"type:varchar(128);not null;"`
+		Password string         `json:"-" gorm:"type:varchar(128);not null"`
 		Roles    pq.StringArray `json:"roles" gorm:"type:text[]"`
 	}
 
