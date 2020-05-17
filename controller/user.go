@@ -126,10 +126,10 @@ func init() {
 	g.POST(
 		"/v1/me",
 		newTracker(cs.ActionRegister),
+		captchaValidate,
 		// 限制相同IP在60秒之内只能调用5次
 		newIPLimit(5, 60*time.Second, cs.ActionLogin),
 		shouldAnonymous,
-		captchaValidate,
 		ctrl.register,
 	)
 	// 刷新user session的ttl
@@ -154,6 +154,7 @@ func init() {
 		"/v1/me/login",
 		middleware.WaitFor(time.Second),
 		newTracker(cs.ActionLogin),
+		captchaValidate,
 		shouldAnonymous,
 		loginLimit,
 		// 限制相同IP在60秒之内只能调用10次
@@ -162,7 +163,6 @@ func init() {
 		newErrorLimit(5, 10*time.Minute, func(c *elton.Context) string {
 			return gjson.GetBytes(c.RequestBody, "account").String()
 		}),
-		captchaValidate,
 		ctrl.login,
 	)
 	// 用户退出登录
@@ -447,9 +447,7 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 			return
 		}
 	}
-	err = userSrv.Update(service.User{
-		ID: uint(id),
-	}, map[string]interface{}{
+	err = userSrv.UpdateByID(uint(id), map[string]interface{}{
 		"roles": pq.StringArray(params.Roles),
 	})
 	if err != nil {

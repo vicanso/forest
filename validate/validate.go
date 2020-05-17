@@ -73,9 +73,6 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 	}
 	return exists
 }
-func isZero(fl validator.FieldLevel) bool {
-	return fl.Field().IsZero()
-}
 
 func doValidate(s interface{}, data interface{}) (err error) {
 	// statusCode := http.StatusBadRequest

@@ -16,7 +16,9 @@ package config
 
 import (
 	"bytes"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -36,7 +38,7 @@ type (
 	RedisOptions struct {
 		Addr     string `validate:"min=5,max=30"`
 		Password string
-		DB       int `validate:"xLimit"`
+		DB       int `validate:"omitempty,xLimit"`
 		// 慢请求时长
 		Slow time.Duration
 		// 最大的正在处理请求量
@@ -45,14 +47,14 @@ type (
 	// SessionConfig session's config
 	SessionConfig struct {
 		TTL        time.Duration
-		Key        string `validate:"ascii,required"`
-		CookiePath string `validate:"ascii,required"`
+		Key        string `validate:"ascii"`
+		CookiePath string `validate:"ascii"`
 	}
 	// MailConfig mail's config
 	MailConfig struct {
-		Host     string `validate:"hostname,required"`
-		Port     int    `validate:"number,required"`
-		User     string `validate:"email,required"`
+		Host     string `validate:"hostname"`
+		Port     int    `validate:"number"`
+		User     string `validate:"email"`
 		Password string `validate:"min=1,max=100"`
 	}
 
@@ -60,8 +62,8 @@ type (
 	InfluxdbConfig struct {
 		Bucket        string `validate:"min=1,max=50"`
 		Org           string `validate:"min=1,max=100"`
-		URI           string `validate:"url,required"`
-		Token         string `validate:"ascii,required"`
+		URI           string `validate:"url"`
+		Token         string `validate:"ascii"`
 		BatchSize     uint   `validate:"min=1,max=5000"`
 		FlushInterval time.Duration
 		Disabled      bool
@@ -245,12 +247,42 @@ func GetTrackKey() string {
 // GetRedisConfig get redis config
 func GetRedisConfig() (options RedisOptions, err error) {
 	prefix := "redis."
-	options = RedisOptions{
-		Addr:          GetStringFromENV(prefix + "addr"),
-		Password:      GetStringFromENV(prefix + "password"),
-		DB:            GetInt(prefix + "db"),
-		Slow:          GetDurationDefault(prefix+"slow", 300*time.Millisecond),
-		MaxProcessing: GetUint32Default(prefix+"maxProcessing", 1000),
+	uri := GetStringFromENV(prefix + "uri")
+	defaultSlow := 300 * time.Millisecond
+	defaultMaxProcessing := 1000
+	if len(uri) != 0 {
+		urlInfo, e := url.Parse(uri)
+		if e != nil {
+			err = e
+			return
+		}
+		pass, _ := urlInfo.User.Password()
+		query := urlInfo.Query()
+		db, _ := strconv.Atoi(query.Get("db"))
+		slow, _ := time.ParseDuration(query.Get("slow"))
+		if slow == 0 {
+			slow = defaultSlow
+		}
+		maxProcessing, _ := strconv.Atoi(query.Get("maxProcessing"))
+		if maxProcessing == 0 {
+			maxProcessing = defaultMaxProcessing
+		}
+
+		options = RedisOptions{
+			Addr:          urlInfo.Host,
+			Password:      pass,
+			DB:            db,
+			Slow:          slow,
+			MaxProcessing: uint32(maxProcessing),
+		}
+	} else {
+		options = RedisOptions{
+			Addr:          GetStringFromENV(prefix + "addr"),
+			Password:      GetStringFromENV(prefix + "password"),
+			DB:            GetInt(prefix + "db"),
+			Slow:          GetDurationDefault(prefix+"slow", defaultSlow),
+			MaxProcessing: GetUint32Default(prefix+"maxProcessing", uint32(defaultMaxProcessing)),
+		}
 	}
 	validatePanic(&options)
 	return
@@ -360,6 +392,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		Token:         GetStringFromENV(prefix + "token"),
 		BatchSize:     GetUint(prefix + "batchSize"),
 		FlushInterval: GetDuration(prefix + "flushInterval"),
+		Disabled:      GetBool(prefix + "disabled"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig

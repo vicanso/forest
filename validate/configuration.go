@@ -21,13 +21,12 @@ import (
 
 func init() {
 	// 应用配置名称
-	AddAlias("xConfigName", "isdefault|alphanum,min=2,max=20")
-	AddAlias("xConfigCategory", "isdefault|alphanum,min=2,max=20")
+	AddAlias("xConfigName", "alphanum,min=2,max=20")
+	AddAlias("xConfigCategory", "alphanum,min=2,max=20")
 	AddAlias("xConfigData", "min=0,max=500")
-	AddAlias("xConfigNames", "min=0,max=100")
 
 	Add("xConfigStatus", func(fl validator.FieldLevel) bool {
-		return isZero(fl) || isInInt(fl, []int{
+		return isInInt(fl, []int{
 			cs.ConfigEnabled,
 			cs.ConfigDiabled,
 		})

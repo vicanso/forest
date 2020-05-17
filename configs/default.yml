@@ -9,14 +9,19 @@ track: jt
 
 # redis 配置(pass从env中获取pass这个配置为密码，如果未配置则为空)
 redis:
+  # 可以配置为下面的形式，则从env中获取REDIS_URI对应的字符串来当redis连接串
+  # uri: REDIS_URI
+  # 配置redis连接串，如果有配置此参数，则忽略addr等参数
+  # uri: redis://:pass@127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
   addr: 127.0.0.1:6379
+  db: 0
   slow: 200ms
   maxProcessing: 1000
 
 # postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
 postgres:
   # 如果配置了uri连接串，直接使用
-  # uri: host=127.0.0.1 port=5432
+  # uri: host=127.0.0.1 port=5432 user=vicanso dbname=forest password=A123456 sslmode=disable
   host: 127.0.0.1
   port: 5432
   user: vicanso 

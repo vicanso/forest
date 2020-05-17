@@ -24,26 +24,23 @@ import (
 
 func init() {
 	// 账号
-	AddAlias("xUserAccount", "isdefault|ascii,min=4,max=10")
+	AddAlias("xUserAccount", "ascii,min=2,max=10")
 
-	AddAlias("xUserPassword", "isdefault|ascii,len=44")
-	AddAlias("xUserAccountKeyword", "ascii,min=0,max=10")
+	AddAlias("xUserPassword", "ascii,len=44")
+	AddAlias("xUserAccountKeyword", "ascii,min=1,max=10")
 	Add("xUserRole", func(fl validator.FieldLevel) bool {
-		return isZero(fl) || isInString(fl, []string{
+		return isInString(fl, []string{
 			cs.UserRoleSu,
 			cs.UserRoleAdmin,
 		})
 	})
 	Add("xUserRoles", func(fl validator.FieldLevel) bool {
-		if isZero(fl) {
-			return true
-		}
 		if fl.Field().Kind() != reflect.Slice {
 			return false
 		}
 		v := fl.Field().Interface()
 		value, ok := v.([]string)
-		if !ok {
+		if !ok || len(value) == 0 {
 			return false
 		}
 		valid := true

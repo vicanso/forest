@@ -41,4 +41,7 @@ func TestPGQuery(t *testing.T) {
 		Order:  "-id,date,-price",
 	})
 	assert.NotNil(db)
+
+	db = PGQuery(PGQueryParams{}, "id = ?", 1)
+	assert.NotNil(db)
 }
