@@ -75,14 +75,19 @@ func init() {
 		shouldBeAdmin,
 		ctrl.add,
 	)
+	g.GET(
+		"/v1/{id}",
+		shouldBeAdmin,
+		ctrl.findByID,
+	)
 	g.PATCH(
-		"/v1/{configID}",
+		"/v1/{id}",
 		newTracker(cs.ActionConfigurationUpdate),
 		shouldBeAdmin,
 		ctrl.update,
 	)
 	g.DELETE(
-		"/v1/{configID}",
+		"/v1/{id}",
 		newTracker(cs.ActionConfigurationDelete),
 		shouldBeAdmin,
 		ctrl.delete,
@@ -160,7 +165,7 @@ func (ctrl configurationCtrl) add(c *elton.Context) (err error) {
 
 // update configuration
 func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("configID"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return
 	}
@@ -186,7 +191,7 @@ func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
 
 // delete configuration
 func (ctrl configurationCtrl) delete(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("configID"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return
 	}
@@ -195,5 +200,19 @@ func (ctrl configurationCtrl) delete(c *elton.Context) (err error) {
 		return
 	}
 	c.NoContent()
+	return
+}
+
+// findByID find configuration by id
+func (ctrl configurationCtrl) findByID(c *elton.Context) (err error) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return
+	}
+	data, err := configSrv.FindByID(uint(id))
+	if err != nil {
+		return
+	}
+	c.Body = data
 	return
 }

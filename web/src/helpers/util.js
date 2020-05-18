@@ -6,11 +6,13 @@ export function generatePassword(pass) {
   return sha256(pass + hash);
 }
 
+// formatDate 格式化日期
 export function formatDate(str) {
   const d = new Date(str);
   return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
 }
 
+// formatDuration 格式化duration
 export function formatDuration(d) {
   if (!d) {
     return "--";
@@ -26,10 +28,12 @@ export function formatDuration(d) {
   return `${d}毫秒`;
 }
 
+// delay 延时promise
 export function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// diff  对比两个object的差异
 export function diff(current, original) {
   const data = {};
   let modifiedCount = 0;

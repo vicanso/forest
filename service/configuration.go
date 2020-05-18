@@ -18,10 +18,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
 )
 
@@ -41,7 +41,7 @@ var (
 type (
 	// Configuration configuration of application
 	Configuration struct {
-		gorm.Model
+		helper.Model
 
 		// 配置名称，唯一
 		Name string `json:"name" gorm:"type:varchar(30);not null;unique"`
@@ -106,6 +106,13 @@ func (srv *ConfigurationSrv) Add(conf *Configuration) (err error) {
 // UpdateByID update configuration by id
 func (srv *ConfigurationSrv) UpdateByID(id uint, attrs ...interface{}) (err error) {
 	err = pgGetClient().Model(srv.createByID(id)).Update(attrs...).Error
+	return
+}
+
+// FindByID find configuration by id
+func (srv *ConfigurationSrv) FindByID(id uint) (config *Configuration, err error) {
+	config = new(Configuration)
+	err = pgGetClient().First(config, "id = ?", id).Error
 	return
 }
 

@@ -3,7 +3,7 @@
     <h1>
       <router-link :to="{ name: home }">
         <i class="el-icon-eleme" />
-        Origin
+        Forest
       </router-link>
     </h1>
     <nav>
@@ -29,6 +29,7 @@
             v-for="(subItem, j) in nav.children"
             :index="`${i}-${j}`"
             :key="`${i}-${j}`"
+            @click="goTo(subItem)"
           >
             <span>{{ subItem.name }}</span>
           </el-menu-item>
@@ -38,7 +39,7 @@
   </div>
 </template>
 <script>
-import { HOME } from "@/constants/route";
+import { HOME, CONFIG_MOCK_TIME } from "@/constants/route";
 const navs = [
   {
     name: "配置",
@@ -46,7 +47,11 @@ const navs = [
     children: [
       {
         name: "所有配置",
-        path: ""
+        route: ""
+      },
+      {
+        name: "MockTime配置",
+        route: CONFIG_MOCK_TIME
       }
     ]
   },
@@ -56,7 +61,7 @@ const navs = [
     children: [
       {
         name: "用户列表",
-        path: ""
+        route: ""
       }
     ]
   }
@@ -70,6 +75,31 @@ export default {
       active: "",
       navs
     };
+  },
+  watch: {
+    // 路由变化时设置对应的导航为活动状态
+    $route(to) {
+      const { navs } = this;
+      let active = "";
+      navs.forEach((nav, i) => {
+        nav.children.forEach((item, j) => {
+          if (item.route === to.name) {
+            active = `${i}-${j}`;
+          }
+        });
+      });
+      this.active = active;
+    }
+  },
+  methods: {
+    goTo({ route }) {
+      if (!route || this.$route.name === route) {
+        return;
+      }
+      this.$router.push({
+        name: route
+      });
+    }
   }
 };
 </script>

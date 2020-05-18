@@ -69,6 +69,13 @@ type (
 		Fields string `json:"fields" validate:"min=1,max=100"`
 		Order  string `json:"order" validate:"min=1,max=100"`
 	}
+
+	Model struct {
+		ID        uint       `gorm:"primary_key" json:"id"`
+		CreatedAt time.Time  `json:"createdAt"`
+		UpdatedAt time.Time  `json:"updatedAt"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+	}
 )
 
 func (ps *pgStats) getProcessingAndTotal() (uint32, uint32, uint64) {

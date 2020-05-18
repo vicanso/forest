@@ -20,6 +20,7 @@ import (
 	"github.com/vicanso/elton"
 	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 
@@ -61,7 +62,7 @@ type (
 	}
 	// User user
 	User struct {
-		gorm.Model
+		helper.Model
 
 		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
 		Password string         `json:"-" gorm:"type:varchar(128);not null"`
@@ -70,7 +71,7 @@ type (
 
 	// UserLoginRecord user login
 	UserLoginRecord struct {
-		gorm.Model
+		helper.Model
 
 		Account       string `json:"account" gorm:"type:varchar(20);not null;index:idx_user_logins_account"`
 		UserAgent     string `json:"userAgent"`
@@ -85,7 +86,7 @@ type (
 	}
 	// UserTrackRecord user track record
 	UserTrackRecord struct {
-		gorm.Model
+		helper.Model
 
 		TrackID   string `json:"trackId" gorm:"type:varchar(64);not null;index:idx_user_track_id"`
 		UserAgent string `json:"userAgent"`

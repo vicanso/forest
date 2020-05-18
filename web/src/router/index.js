@@ -1,10 +1,11 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import store from "@/store";
-import { HOME, LOGIN, REGISTER } from "@/constants/route";
+import { HOME, LOGIN, REGISTER, CONFIG_MOCK_TIME } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
+import MockTime from "@/views/MockTime.vue";
 
 Vue.use(VueRouter);
 
@@ -23,6 +24,11 @@ const routes = [
     path: "/register",
     name: REGISTER,
     component: Register
+  },
+  {
+    path: "/configs/mockTime",
+    name: CONFIG_MOCK_TIME,
+    component: MockTime
   },
   {
     path: "/about",
