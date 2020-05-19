@@ -25,11 +25,10 @@ export default {
   },
   watch: {
     time: function(value) {
-      if (!value) {
-        this.$emit("change", "");
-        return;
+      if (value) {
+        value = value.toISOString();
       }
-      this.$emit("change", value.toISOString());
+      this.$emit("change", value);
     }
   }
 };

@@ -1,5 +1,12 @@
 <template>
-  <ConfigEditor :category="category" v-if="!processing" :id="currentID" />
+  <ConfigEditor
+    name="添加/更新MockTime配置"
+    summary="针对应用时间Mock，用于测试环境中调整应用时间"
+    :category="category"
+    :defaultValue="defaultValue"
+    v-if="!processing"
+    :id="currentID"
+  />
 </template>
 <script>
 import ConfigEditor from "@/components/configs/Editor.vue";
@@ -13,6 +20,10 @@ export default {
   },
   data() {
     return {
+      defaultValue: {
+        name: MOCK_TIME,
+        category: MOCK_TIME
+      },
       processing: false,
       currentID: 0,
       category: MOCK_TIME
@@ -28,7 +39,11 @@ export default {
         name: MOCK_TIME
       });
       if (configs.length !== 0) {
-        this.currentID = configs[0].id;
+        this.$router.push({
+          query: {
+            id: configs[0].id
+          }
+        });
       }
     } catch (err) {
       this.$message.error(err.message);

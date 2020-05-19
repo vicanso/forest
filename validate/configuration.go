@@ -21,7 +21,7 @@ import (
 
 func init() {
 	// 应用配置名称
-	AddAlias("xConfigName", "alphanum,min=2,max=20")
+	AddAlias("xConfigName", "min=2,max=20")
 	AddAlias("xConfigCategory", "alphanum,min=2,max=20")
 	AddAlias("xConfigData", "min=0,max=500")
 

@@ -39,7 +39,12 @@
   </div>
 </template>
 <script>
-import { HOME, CONFIG_MOCK_TIME } from "@/constants/route";
+import {
+  HOME,
+  CONFIG_MOCK_TIME,
+  CONFIG_BLOCK_IP,
+  CONFIG_SIGNED_KEY
+} from "@/constants/route";
 const navs = [
   {
     name: "配置",
@@ -52,6 +57,14 @@ const navs = [
       {
         name: "MockTime配置",
         route: CONFIG_MOCK_TIME
+      },
+      {
+        name: "黑名单IP",
+        route: CONFIG_BLOCK_IP
+      },
+      {
+        name: "SignedKey",
+        route: CONFIG_SIGNED_KEY
       }
     ]
   },

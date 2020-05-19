@@ -19,10 +19,23 @@ export default {
     MainNav
   },
   methods: {
-    ...mapActions(["fetchUserInfo"])
+    ...mapActions(["fetchUserInfo", "updateUser"]),
+    refreshSessionTTL() {
+      if (!this.userAccount) {
+        return;
+      }
+      this.updateUser({});
+    }
   },
-  mounted() {
-    this.fetchUserInfo();
+  async mounted() {
+    setInterval(() => {
+      this.refreshSessionTTL();
+    }, 5 * 60 * 1000);
+    try {
+      await this.fetchUserInfo();
+    } catch (err) {
+      this.$message.error(err.message);
+    }
   }
 };
 </script>

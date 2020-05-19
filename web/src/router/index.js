@@ -1,11 +1,20 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import store from "@/store";
-import { HOME, LOGIN, REGISTER, CONFIG_MOCK_TIME } from "@/constants/route";
+import {
+  HOME,
+  LOGIN,
+  REGISTER,
+  CONFIG_MOCK_TIME,
+  CONFIG_BLOCK_IP,
+  CONFIG_SIGNED_KEY
+} from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
-import MockTime from "@/views/MockTime.vue";
+import MockTime from "@/views/configs/MockTime.vue";
+import BlockIP from "@/views/configs/BlockIP.vue";
+import SignedKey from "@/views/configs/SignedKey.vue";
 
 Vue.use(VueRouter);
 
@@ -29,6 +38,16 @@ const routes = [
     path: "/configs/mockTime",
     name: CONFIG_MOCK_TIME,
     component: MockTime
+  },
+  {
+    path: "/configs/blockIP",
+    name: CONFIG_BLOCK_IP,
+    component: BlockIP
+  },
+  {
+    path: "/configs/signedKey",
+    name: CONFIG_SIGNED_KEY,
+    component: SignedKey
   },
   {
     path: "/about",
@@ -72,11 +91,11 @@ router.beforeEach(async (to, from, next) => {
   if (!to.meta.requiresAuth) {
     return next();
   }
-  // if (!store.state.user.account) {
-  //   return next({
-  //     name: ROUTE_LOGIN
-  //   })
-  // }
+  if (!store.state.user.account) {
+    return next({
+      name: LOGIN
+    });
+  }
   return next();
 });
 

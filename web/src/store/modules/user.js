@@ -105,6 +105,9 @@ export default {
     async getCaptcha() {
       const { data } = await request.get(COMMONS_CAPTCHA);
       return data;
+    },
+    async updateUser() {
+      await request.patch(USERS_ME, {});
     }
   }
 };

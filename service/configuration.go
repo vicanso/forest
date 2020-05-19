@@ -28,7 +28,7 @@ import (
 const (
 	mockTimeKey              = "mockTime"
 	sessionSignedKeyCateogry = "signedKey"
-	ipBlockCategory          = "ipBlock"
+	blockIPCategory          = "blockIP"
 	routerConfigCategory     = "routerConfig"
 
 	defaultConfigurationLimit = 100
@@ -179,7 +179,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		}
 
 		// 黑名单IP
-		if item.Category == ipBlockCategory {
+		if item.Category == blockIPCategory {
 			blockIPList = append(blockIPList, item.Data)
 			continue
 		}

@@ -1,17 +1,56 @@
 import request from "@/helpers/request";
 import { CONFIGS, CONFIGS_ID } from "@/constants/url";
+import { formatDate } from "@/helpers/util";
 
 const mutationConfigProcessing = "config.processing";
+const mutationConfigList = "config.list";
+const mutationConfigListReset = "config.list.reset";
+const mutationConfigListDelete = "config.list.delete";
 
+const statusList = [
+  {
+    label: "启用",
+    value: 1
+  },
+  {
+    label: "禁用",
+    value: 2
+  }
+];
 const state = {
-  processing: false
+  status: statusList,
+  processing: false,
+  items: null
 };
 
 export default {
   state,
   mutations: {
+    // 设置状态为处理中
     [mutationConfigProcessing](state, processing) {
       state.processing = processing;
+    },
+    // 重置列表数据
+    [mutationConfigListReset](state) {
+      state.count = -1;
+      state.items = null;
+    },
+    // 设置列表数据
+    [mutationConfigList](state, { configs }) {
+      state.items = configs;
+    },
+    // 删除该id对应数据
+    [mutationConfigListDelete](state, id) {
+      if (!state.items) {
+        return;
+      }
+      const arr = [];
+      state.items.slice(0).forEach(item => {
+        if (item.id !== id) {
+          arr.push(item);
+        }
+      });
+      state.items = arr;
     }
   },
   actions: {
@@ -28,10 +67,28 @@ export default {
     // listConfig 获取config列表
     async listConfig({ commit }, params) {
       commit(mutationConfigProcessing, true);
+      if (!params.offset) {
+        commit(mutationConfigListReset);
+      }
       try {
         const { data } = await request.get(CONFIGS, {
           params
         });
+        data.configs.forEach(item => {
+          if (item.beginDate) {
+            item.beginDateDesc = formatDate(item.beginDate);
+          }
+          if (item.endDate) {
+            item.endDateDesc = formatDate(item.endDate);
+          }
+          item.updatedAtDesc = formatDate(item.updatedAt);
+          statusList.forEach(status => {
+            if (item.status === status.value) {
+              item.statusDesc = status.label;
+            }
+          });
+        });
+        commit(mutationConfigList, data);
         return data;
       } finally {
         commit(mutationConfigProcessing, false);
@@ -55,6 +112,17 @@ export default {
         const url = CONFIGS_ID.replace(":id", id);
         const res = await request.patch(url, data);
         return res.data;
+      } finally {
+        commit(mutationConfigProcessing, false);
+      }
+    },
+    // removeConfigByID 通过id删除config
+    async removeConfigByID({ commit }, id) {
+      commit(mutationConfigProcessing, true);
+      try {
+        const url = CONFIGS_ID.replace(":id", id);
+        await request.delete(url);
+        commit(mutationConfigListDelete, id);
       } finally {
         commit(mutationConfigProcessing, false);
       }

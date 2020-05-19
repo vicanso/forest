@@ -3,7 +3,7 @@
     <el-card>
       <div slot="header">
         <i class="el-icon-s-tools" />
-        <span>{{ $props.title || "添加/更新配置" }}</span>
+        <span>{{ $props.name || "添加/更新配置" }}</span>
       </div>
       <el-form label-width="90px" v-loading="processing" v-if="!fetching">
         <p>
@@ -17,7 +17,7 @@
                 placeholder="请输入配置名称"
                 v-model="form.name"
                 clearable
-                :disabled="!!defaultValue.name"
+                :disabled="!!$props.defaultValue.name"
               />
             </el-form-item>
           </el-col>
@@ -27,7 +27,7 @@
                 placeholder="请输入配置分类（可选）"
                 v-model="form.category"
                 clearable
-                :disabled="!!defaultValue.category"
+                :disabled="!!$props.defaultValue.category"
               />
             </el-form-item>
           </el-col>
@@ -70,16 +70,32 @@
               </el-date-picker>
             </el-form-item>
           </el-col>
+          <!-- TODO 研究怎样通过内容部分添加进来 -->
           <MockTimeData
             :data="form.data"
             v-if="$props.category === catMockTime"
             @change="handleChange"
           />
-          <el-col :span="24">
+          <BlockIPData
+            :data="form.data"
+            v-else-if="$props.category === catBlockIP"
+            @change="handleChange"
+          />
+          <SignedKeyData
+            :data="form.data"
+            v-else-if="$props.category === catSignedKey"
+            @change="handleChange"
+          />
+          <el-col :span="12">
             <el-form-item>
               <el-button class="submit" type="primary" @click="submit">{{
                 submitText
               }}</el-button>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item>
+              <el-button class="submit" @click="goBack">返回</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -89,56 +105,57 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import { MOCK_TIME } from "@/constants/config";
+import { MOCK_TIME, BLOCK_IP, SIGNED_KEY } from "@/constants/config";
 import MockTimeData from "@/components/configs/MockTimeData.vue";
+import BlockIPData from "@/components/configs/BlockIPData.vue";
+import SignedKeyData from "@/components/configs/SignedKeyData.vue";
 import { diff } from "@/helpers/util";
 
 export default {
   name: "ConfigEditor",
   props: {
+    defaultValue: {
+      type: Object,
+      default: () => {
+        return {};
+      }
+    },
     category: {
       type: String,
       required: true
     },
-    title: String,
-    summary: String,
-    id: Number
+    name: String,
+    summary: String
   },
   components: {
-    MockTimeData
+    MockTimeData,
+    BlockIPData,
+    SignedKeyData
   },
-  computed: mapState({
-    processing: state => state.config.processing
-  }),
-  data() {
-    const defaultValue = {};
-    const { $props } = this;
-    // 如果是mock time，则固定名字与分类
-    switch ($props.category) {
-      case MOCK_TIME:
-        defaultValue.name = MOCK_TIME;
-        defaultValue.category = MOCK_TIME;
-        break;
-      default:
-        break;
+  computed: {
+    ...mapState({
+      processing: state => state.config.processing,
+      status: state => state.config.status
+    }),
+    id() {
+      const { id } = this.$route.query;
+      if (!id) {
+        return 0;
+      }
+      return Number(id);
     }
+  },
+  data() {
+    const { $props } = this;
+    const { defaultValue } = $props;
     const submitText = $props.id ? "更新" : "提交";
     return {
       originalValue: null,
       fetching: false,
       catMockTime: MOCK_TIME,
-      defaultValue,
+      catBlockIP: BLOCK_IP,
+      catSignedKey: SIGNED_KEY,
       submitText,
-      status: [
-        {
-          label: "启用",
-          value: 1
-        },
-        {
-          label: "禁用",
-          value: 2
-        }
-      ],
       form: {
         name: defaultValue.name || "",
         category: defaultValue.category || "",
@@ -190,14 +207,17 @@ export default {
           await this.addConfig(config);
           this.$message.info("添加配置成功");
         }
-        this.$router.back();
+        this.goBack();
       } catch (err) {
         this.$message.error(err.message);
       }
+    },
+    goBack() {
+      this.$router.back();
     }
   },
   async beforeMount() {
-    const { id } = this.$props;
+    const { id } = this;
     if (!id) {
       return;
     }
