@@ -1,5 +1,5 @@
 import request from "@/helpers/request";
-import { USERS_ME, USERS_LOGIN, COMMONS_CAPTCHA } from "@/constants/url";
+import { USERS_ME, USERS_LOGIN } from "@/constants/url";
 import { generatePassword } from "@/helpers/util";
 import { sha256 } from "@/helpers/crypto";
 
@@ -100,11 +100,6 @@ export default {
       } finally {
         commit(mutationUserProcessing, false);
       }
-    },
-    // getCaptcha 获取图形验证码
-    async getCaptcha() {
-      const { data } = await request.get(COMMONS_CAPTCHA);
-      return data;
     },
     async updateUser() {
       await request.patch(USERS_ME, {});

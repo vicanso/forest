@@ -3,6 +3,11 @@
     <div slot="header">
       <i class="el-icon-s-tools" />
       <span>{{ $props.name || "系统配置" }}</span>
+      <span class="filters">
+        <el-checkbox title="仅展示有效的" v-model="available"
+          >仅展示有效配置</el-checkbox
+        >
+      </span>
     </div>
     <el-table
       v-loading="processing"
@@ -20,6 +25,7 @@
         width="120"
       />
       <el-table-column
+        sortable
         prop="statusDesc"
         key="statusDesc"
         label="状态"
@@ -39,7 +45,15 @@
         label="结束时间"
         width="180"
       />
-      <el-table-column prop="data" key="data" label="配置数据" />
+      <el-table-column prop="data" key="data" label="配置数据">
+        <template slot-scope="scope">
+          <el-tooltip placement="bottom" v-if="scope.row.isJSON">
+            <pre slot="content">{{ scope.row.data }}</pre>
+            <i class="el-icon-info" />
+          </el-tooltip>
+          <span v-else>{{ scope.row.data }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="owner" key="owner" label="创建者" width="150" />
       <el-table-column
         sortable
@@ -76,6 +90,7 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import { CONFIG_EDITE_MODE } from "@/constants/route";
+import { CONFIG_ENABLED } from "@/constants/config";
 
 export default {
   name: "ConfigurationList",
@@ -88,13 +103,34 @@ export default {
   },
   data() {
     return {
+      available: false,
       query: {
         category: this.$props.category
       }
     };
   },
   computed: mapState({
-    configs: state => state.config.items || [],
+    configs: function(state) {
+      const { available } = this;
+      const arr = (state.config.items || []).filter(item => {
+        // 如果非选择仅展示有效的
+        if (!available) {
+          return true;
+        }
+        if (item.status !== CONFIG_ENABLED) {
+          return false;
+        }
+        const now = Date.now();
+        const beginDate = new Date(item.beginDate).getTime();
+        const endDate = new Date(item.endDate).getTime();
+        // 如果未到开始时间或者已结束
+        if (beginDate > now || endDate < now) {
+          return false;
+        }
+        return true;
+      });
+      return arr;
+    },
     processing: state => state.config.processing,
     userAccount: state => state.user.info.account
   }),
@@ -134,4 +170,6 @@ export default {
     margin-right: 3px
   .op
     margin: 0 10px
+  .filters
+    margin-left: 20px
 </style>

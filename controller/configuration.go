@@ -49,7 +49,6 @@ type (
 )
 
 func init() {
-	// TODO 增加用户权限判断
 	g := router.NewGroup("/configurations", loadUserSession)
 	ctrl := configurationCtrl{}
 
@@ -57,16 +56,6 @@ func init() {
 		"/v1",
 		shouldBeAdmin,
 		ctrl.list,
-	)
-	g.GET(
-		"/v1/available",
-		shouldBeAdmin,
-		ctrl.listAvailable,
-	)
-	g.GET(
-		"/v1/unavailable",
-		shouldBeAdmin,
-		ctrl.listUnavailable,
 	)
 
 	g.POST(
@@ -105,30 +94,6 @@ func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
 		Name:     params.Name,
 		Category: params.Category,
 	})
-	if err != nil {
-		return
-	}
-	c.Body = map[string]interface{}{
-		"configs": result,
-	}
-	return
-}
-
-// listAvailable list available config
-func (ctrl configurationCtrl) listAvailable(c *elton.Context) (err error) {
-	result, err := configSrv.Available()
-	if err != nil {
-		return
-	}
-	c.Body = map[string]interface{}{
-		"configs": result,
-	}
-	return
-}
-
-// listUnavailable list unavailable config
-func (ctrl configurationCtrl) listUnavailable(c *elton.Context) (err error) {
-	result, err := configSrv.Unavailable()
 	if err != nil {
 		return
 	}

@@ -6,16 +6,25 @@
     :defaultValue="defaultValue"
     v-if="!processing"
     :id="currentID"
-  />
+  >
+    <template v-slot:data="configProps">
+      <MockTimeData
+        :data="configProps.form.data"
+        @change="configProps.form.data = $event"
+      />
+    </template>
+  </ConfigEditor>
 </template>
 <script>
 import ConfigEditor from "@/components/configs/Editor.vue";
+import MockTimeData from "@/components/configs/MockTimeData.vue";
 import { MOCK_TIME } from "@/constants/config";
 import { mapActions } from "vuex";
 
 export default {
   name: "MockTime",
   components: {
+    MockTimeData,
     ConfigEditor
   },
   data() {
@@ -39,7 +48,7 @@ export default {
         name: MOCK_TIME
       });
       if (configs.length !== 0) {
-        this.$router.push({
+        this.$router.replace({
           query: {
             id: configs[0].id
           }

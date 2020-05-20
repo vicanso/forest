@@ -1,6 +1,7 @@
 import request from "@/helpers/request";
 import { CONFIGS, CONFIGS_ID } from "@/constants/url";
 import { formatDate } from "@/helpers/util";
+import { CONFIG_ENABLED, CONFIG_DISABLED } from "@/constants/config";
 
 const mutationConfigProcessing = "config.processing";
 const mutationConfigList = "config.list";
@@ -10,11 +11,11 @@ const mutationConfigListDelete = "config.list.delete";
 const statusList = [
   {
     label: "启用",
-    value: 1
+    value: CONFIG_ENABLED
   },
   {
     label: "禁用",
-    value: 2
+    value: CONFIG_DISABLED
   }
 ];
 const state = {
@@ -22,6 +23,14 @@ const state = {
   processing: false,
   items: null
 };
+
+function formatJSON(data) {
+  const item = JSON.parse(data);
+  if (item.response && item.response[0] === "{") {
+    item.response = JSON.parse(item.response);
+  }
+  return JSON.stringify(item, null, 2);
+}
 
 export default {
   state,
@@ -75,6 +84,11 @@ export default {
           params
         });
         data.configs.forEach(item => {
+          item.isJSON = false;
+          if (item.data[0] === "{") {
+            item.isJSON = true;
+            item.data = formatJSON(item.data);
+          }
           if (item.beginDate) {
             item.beginDateDesc = formatDate(item.beginDate);
           }

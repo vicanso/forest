@@ -43,17 +43,14 @@ import {
   HOME,
   CONFIG_MOCK_TIME,
   CONFIG_BLOCK_IP,
-  CONFIG_SIGNED_KEY
+  CONFIG_SIGNED_KEY,
+  CONFIG_ROUTER
 } from "@/constants/route";
 const navs = [
   {
     name: "配置",
     icon: "el-icon-setting",
     children: [
-      {
-        name: "所有配置",
-        route: ""
-      },
       {
         name: "MockTime配置",
         route: CONFIG_MOCK_TIME
@@ -65,6 +62,10 @@ const navs = [
       {
         name: "SignedKey",
         route: CONFIG_SIGNED_KEY
+      },
+      {
+        name: "路由配置",
+        route: CONFIG_ROUTER
       }
     ]
   },

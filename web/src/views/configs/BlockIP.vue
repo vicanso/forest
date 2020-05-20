@@ -12,7 +12,14 @@
       :category="category"
       :defaultValue="defaultValue"
       v-else
-    />
+    >
+      <template v-slot:data="configProps">
+        <BlockIPData
+          :data="configProps.form.data"
+          @change="configProps.form.data = $event"
+        />
+      </template>
+    </ConfigEditor>
   </div>
 </template>
 <script>
@@ -20,10 +27,12 @@ import { BLOCK_IP } from "@/constants/config";
 import { CONFIG_EDITE_MODE } from "@/constants/route";
 import ConfigEditor from "@/components/configs/Editor.vue";
 import ConfigTable from "@/components/configs/Table.vue";
+import BlockIPData from "@/components/configs/BlockIPData.vue";
 
 export default {
   name: "BlockIP",
   components: {
+    BlockIPData,
     ConfigTable,
     ConfigEditor
   },

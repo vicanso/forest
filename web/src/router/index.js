@@ -7,7 +7,8 @@ import {
   REGISTER,
   CONFIG_MOCK_TIME,
   CONFIG_BLOCK_IP,
-  CONFIG_SIGNED_KEY
+  CONFIG_SIGNED_KEY,
+  CONFIG_ROUTER
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -15,6 +16,7 @@ import Register from "@/views/Register.vue";
 import MockTime from "@/views/configs/MockTime.vue";
 import BlockIP from "@/views/configs/BlockIP.vue";
 import SignedKey from "@/views/configs/SignedKey.vue";
+import Router from "@/views/configs/Router.vue";
 
 Vue.use(VueRouter);
 
@@ -48,6 +50,11 @@ const routes = [
     path: "/configs/signedKey",
     name: CONFIG_SIGNED_KEY,
     component: SignedKey
+  },
+  {
+    path: "/configs/router",
+    name: CONFIG_ROUTER,
+    component: Router
   },
   {
     path: "/about",

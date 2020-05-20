@@ -29,7 +29,7 @@ const (
 	mockTimeKey              = "mockTime"
 	sessionSignedKeyCateogry = "signedKey"
 	blockIPCategory          = "blockIP"
-	routerConfigCategory     = "routerConfig"
+	routerConfigCategory     = "router"
 
 	defaultConfigurationLimit = 100
 )
@@ -126,22 +126,6 @@ func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
 	}
 	for _, item := range result {
 		if item.IsValid() {
-			configs = append(configs, item)
-		}
-	}
-	return
-}
-
-// Unavailable get unavailable configs
-func (srv *ConfigurationSrv) Unavailable() (configs []*Configuration, err error) {
-	result := make([]*Configuration, 0)
-	configs = make([]*Configuration, 0)
-	err = pgGetClient().Model(&Configuration{}).Find(&result).Error
-	if err != nil {
-		return
-	}
-	for _, item := range result {
-		if !item.IsValid() {
 			configs = append(configs, item)
 		}
 	}

@@ -1,20 +1,20 @@
 <template>
-  <div class="signedKey">
+  <div class="router">
     <div v-if="!editMode">
-      <ConfigTable :category="category" name="SignedKey配置" />
+      <ConfigTable :category="category" name="路由配置" />
       <div class="add">
         <el-button class="addBtn" type="primary" @click="add">添加</el-button>
       </div>
     </div>
     <ConfigEditor
-      name="添加/更新SignedKey配置"
-      summary="用于配置session中使用的signed key"
+      name="添加/更新路由配置"
+      summary="配置针对各路由响应的Mock"
       :category="category"
       :defaultValue="defaultValue"
       v-else
     >
       <template v-slot:data="configProps">
-        <SignedKeyData
+        <RouterData
           :data="configProps.form.data"
           @change="configProps.form.data = $event"
         />
@@ -23,24 +23,25 @@
   </div>
 </template>
 <script>
-import { SIGNED_KEY } from "@/constants/config";
+import { ROUTER } from "@/constants/config";
 import { CONFIG_EDITE_MODE } from "@/constants/route";
 import ConfigEditor from "@/components/configs/Editor.vue";
 import ConfigTable from "@/components/configs/Table.vue";
-import SignedKeyData from "@/components/configs/SignedKeyData.vue";
+import RouterData from "@/components/configs/RouterData.vue";
+
 export default {
-  name: "SignedKey",
+  name: "Router",
   components: {
+    RouterData,
     ConfigTable,
-    ConfigEditor,
-    SignedKeyData
+    ConfigEditor
   },
   data() {
     return {
       defaultValue: {
-        category: SIGNED_KEY
+        category: ROUTER
       },
-      category: SIGNED_KEY
+      category: ROUTER
     };
   },
   computed: {

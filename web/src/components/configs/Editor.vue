@@ -70,22 +70,7 @@
               </el-date-picker>
             </el-form-item>
           </el-col>
-          <!-- TODO 研究怎样通过内容部分添加进来 -->
-          <MockTimeData
-            :data="form.data"
-            v-if="$props.category === catMockTime"
-            @change="handleChange"
-          />
-          <BlockIPData
-            :data="form.data"
-            v-else-if="$props.category === catBlockIP"
-            @change="handleChange"
-          />
-          <SignedKeyData
-            :data="form.data"
-            v-else-if="$props.category === catSignedKey"
-            @change="handleChange"
-          />
+          <slot :form="form" name="data"></slot>
           <el-col :span="12">
             <el-form-item>
               <el-button class="submit" type="primary" @click="submit">{{
@@ -105,10 +90,6 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import { MOCK_TIME, BLOCK_IP, SIGNED_KEY } from "@/constants/config";
-import MockTimeData from "@/components/configs/MockTimeData.vue";
-import BlockIPData from "@/components/configs/BlockIPData.vue";
-import SignedKeyData from "@/components/configs/SignedKeyData.vue";
 import { diff } from "@/helpers/util";
 
 export default {
@@ -127,11 +108,6 @@ export default {
     name: String,
     summary: String
   },
-  components: {
-    MockTimeData,
-    BlockIPData,
-    SignedKeyData
-  },
   computed: {
     ...mapState({
       processing: state => state.config.processing,
@@ -146,15 +122,12 @@ export default {
     }
   },
   data() {
-    const { $props } = this;
+    const { $props, $route } = this;
     const { defaultValue } = $props;
-    const submitText = $props.id ? "更新" : "提交";
+    const submitText = $route.query.id ? "更新" : "提交";
     return {
       originalValue: null,
       fetching: false,
-      catMockTime: MOCK_TIME,
-      catBlockIP: BLOCK_IP,
-      catSignedKey: SIGNED_KEY,
       submitText,
       form: {
         name: defaultValue.name || "",
@@ -168,16 +141,13 @@ export default {
   },
   methods: {
     ...mapActions(["addConfig", "getConfigByID", "updateConfigByID"]),
-    handleChange(data) {
-      this.form.data = data;
-    },
     async submit() {
       const { name, category, status, beginDate, endDate, data } = this.form;
       if (!name || !status || !beginDate || !endDate || !data) {
         this.$message.warning("名称、状态、开始结束日期以及配置数据均不能为空");
         return;
       }
-      const { id } = this.$props;
+      const { id } = this;
       try {
         const config = {
           name,
