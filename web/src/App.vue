@@ -8,7 +8,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import MainHeader from "@/components/MainHeader.vue";
 import MainNav from "@/components/MainNav.vue";
 
@@ -18,6 +18,9 @@ export default {
     MainHeader,
     MainNav
   },
+  computed: mapState({
+    userAccount: state => state.user.info.account
+  }),
   methods: {
     ...mapActions(["fetchUserInfo", "updateUser"]),
     refreshSessionTTL() {

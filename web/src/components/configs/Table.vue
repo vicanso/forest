@@ -22,7 +22,7 @@
         prop="category"
         key="category"
         label="分类"
-        width="120"
+        width="150"
       />
       <el-table-column
         sortable

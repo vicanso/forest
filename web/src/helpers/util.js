@@ -33,13 +33,19 @@ export function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function isEqual(value, originalValue) {
+  // 使用json stringify对比是否相同
+  return JSON.stringify(value) == JSON.stringify(originalValue);
+}
+
 // diff  对比两个object的差异
 export function diff(current, original) {
   const data = {};
   let modifiedCount = 0;
   Object.keys(current).forEach(key => {
-    if (current[key] !== original[key]) {
-      data[key] = current[key];
+    const value = current[key];
+    if (!isEqual(value, original[key])) {
+      data[key] = value;
       modifiedCount++;
     }
   });
@@ -47,4 +53,17 @@ export function diff(current, original) {
     modifiedCount,
     data
   };
+}
+
+// isAllowedUser 判断是否允许该用户
+export function isAllowedUser(allowedRoles, userRoles) {
+  let allowed = false;
+  allowedRoles.forEach(item => {
+    userRoles.forEach(userRole => {
+      if (userRole === item) {
+        allowed = true;
+      }
+    });
+  });
+  return allowed;
 }

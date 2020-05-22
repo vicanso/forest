@@ -7,20 +7,11 @@
     </el-col>
     <el-col :span="8">
       <el-form-item label="路由选择：">
-        <el-select
+        <RouterSelector
           class="selector"
-          v-model="form.router"
-          placeholder="请选择路由"
-          v-loading="processing"
-        >
-          <el-option
-            v-for="item in routers"
-            :key="item.key"
-            :label="item.key"
-            :value="item.key"
-          >
-          </el-option>
-        </el-select>
+          :router="form.router"
+          @change="handleChangeRouter"
+        />
       </el-form-item>
     </el-col>
     <el-col :span="8">
@@ -49,6 +40,25 @@
         </el-select>
       </el-form-item>
     </el-col>
+    <el-col :span="8">
+      <el-form-item label="延时响应：">
+        <el-input
+          type="number"
+          v-model="form.delay"
+          placeholder="请输入延时时长，可选"
+        >
+          <template slot="append">秒</template>
+        </el-input>
+      </el-form-item>
+    </el-col>
+    <el-col :span="16">
+      <el-form-item label="完整URL：">
+        <el-input
+          v-model="form.url"
+          placeholder="请输入完整的请求URL(包含参数部分），可选"
+        />
+      </el-form-item>
+    </el-col>
     <el-col :span="24">
       <el-form-item label="响应数据：">
         <el-input
@@ -62,14 +72,18 @@
   </div>
 </template>
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState } from "vuex";
+import RouterSelector from "@/components/RouterSelector.vue";
+
 export default {
   name: "RouterData",
+  components: {
+    RouterSelector
+  },
   props: {
     data: String
   },
   computed: mapState({
-    processing: state => state.common.processing,
     routers: state => state.common.routers || []
   }),
   data() {
@@ -77,7 +91,9 @@ export default {
       router: "",
       status: null,
       contentType: "",
-      response: ""
+      response: "",
+      delay: null,
+      path: ""
     };
     if (this.$props.data) {
       const data = JSON.parse(this.$props.data);
@@ -97,9 +113,6 @@ export default {
     };
   },
   watch: {
-    "form.router": function() {
-      this.handleChange();
-    },
     "form.status": function() {
       this.handleChange();
     },
@@ -108,31 +121,44 @@ export default {
     },
     "form.response": function() {
       this.handleChange();
+    },
+    "form.delay": function() {
+      this.handleChange();
+    },
+    "form.url": function() {
+      this.handleChange();
     }
   },
   methods: {
-    ...mapActions(["listRouter"]),
+    handleChangeRouter(value) {
+      this.form.router = value;
+      this.handleChange();
+    },
     handleChange() {
-      const { router, status, contentType, response } = this.form;
+      const { router, status, contentType, response, delay, url } = this.form;
       let value = "";
       if (router && status && contentType && response) {
         const [method, route] = router.split(" ");
-        value = JSON.stringify({
+        const data = {
           route,
           method,
           status: Number(status),
           contentType,
           response: response.trim()
-        });
+        };
+        if (delay) {
+          data.delay = Number(delay);
+          if (data.delay < 0) {
+            this.$message.error("延时时长不能小于0");
+            return;
+          }
+        }
+        if (url) {
+          data.url = url;
+        }
+        value = JSON.stringify(data);
       }
       this.$emit("change", value);
-    }
-  },
-  async beforeMount() {
-    try {
-      await this.listRouter();
-    } catch (err) {
-      this.$message.error(err.message);
     }
   }
 };

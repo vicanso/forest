@@ -20,6 +20,8 @@ const (
 	// UserSession user session
 	UserSession = "userSession"
 
+	// UserRoleNormal normal user
+	UserRoleNormal = "normal"
 	// UserRoleSu super user
 	UserRoleSu = "su"
 	// UserRoleAdmin admin user
@@ -36,4 +38,11 @@ const (
 const (
 	// MagicalCaptcha magical captcha(for test only)
 	MagicalCaptcha = "0145"
+)
+
+const (
+	// AccountStatusEnabled account enabled
+	AccountStatusEnabled = iota + 1
+	// AccountStatusForbidden account forbidden
+	AccountStatusForbidden
 )

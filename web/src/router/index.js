@@ -8,7 +8,9 @@ import {
   CONFIG_MOCK_TIME,
   CONFIG_BLOCK_IP,
   CONFIG_SIGNED_KEY,
-  CONFIG_ROUTER
+  CONFIG_ROUTER,
+  CONFIG_ROUTER_CONCURRENCY,
+  USER
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -17,6 +19,8 @@ import MockTime from "@/views/configs/MockTime.vue";
 import BlockIP from "@/views/configs/BlockIP.vue";
 import SignedKey from "@/views/configs/SignedKey.vue";
 import Router from "@/views/configs/Router.vue";
+import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
+import User from "@/views/User.vue";
 
 Vue.use(VueRouter);
 
@@ -39,22 +43,50 @@ const routes = [
   {
     path: "/configs/mockTime",
     name: CONFIG_MOCK_TIME,
-    component: MockTime
+    component: MockTime,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/configs/blockIP",
     name: CONFIG_BLOCK_IP,
-    component: BlockIP
+    component: BlockIP,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/configs/signedKey",
     name: CONFIG_SIGNED_KEY,
-    component: SignedKey
+    component: SignedKey,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/configs/router",
     name: CONFIG_ROUTER,
-    component: Router
+    component: Router,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/configs/router-concurrency",
+    name: CONFIG_ROUTER_CONCURRENCY,
+    component: RouterConcurrency,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/users",
+    name: USER,
+    component: User,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/about",
@@ -98,7 +130,7 @@ router.beforeEach(async (to, from, next) => {
   if (!to.meta.requiresAuth) {
     return next();
   }
-  if (!store.state.user.account) {
+  if (!store.state.user.info.account) {
     return next({
       name: LOGIN
     });

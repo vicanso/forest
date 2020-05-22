@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"bytes"
+	"time"
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
@@ -27,6 +28,16 @@ func NewRouterMocker() elton.Handler {
 		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
 		if routerConfig == nil {
 			return c.Next()
+		}
+
+		// 如果有配置Path，则还要判断path是否相等
+		if routerConfig.URL != "" && c.Request.URL.RequestURI() != routerConfig.URL {
+			return c.Next()
+		}
+
+		// 如果delay大于0，则延时
+		if routerConfig.Delay > 0 {
+			time.Sleep(time.Second * time.Duration(routerConfig.Delay))
 		}
 
 		c.StatusCode = routerConfig.Status

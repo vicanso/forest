@@ -61,11 +61,18 @@ var (
 	// 加载用户session
 	loadUserSession = middleware.NewSession()
 	// 判断用户是否登录
-	shouldLogined = elton.Compose(loadUserSession, checkLogin)
+	shouldLogined = checkLogin
 	// 判断用户是否未登录
-	shouldAnonymous = elton.Compose(loadUserSession, checkAnonymous)
+	shouldAnonymous = checkAnonymous
 	// 判断用户是否admin权限
-	shouldBeAdmin = elton.Compose(loadUserSession, isAdmin)
+	shouldBeAdmin = newCheckRoles([]string{
+		cs.UserRoleSu,
+		cs.UserRoleAdmin,
+	})
+	// shouldBeSu 判断用户是否su权限
+	shouldBeSu = newCheckRoles([]string{
+		cs.UserRoleSu,
+	})
 
 	// 图形验证码校验
 	captchaValidate elton.Handler
@@ -138,32 +145,19 @@ func checkAnonymous(c *elton.Context) (err error) {
 	return c.Next()
 }
 
-// func newCheckRoles(validRoles []string) elton.Handler {
-// 	return func(c *elton.Context) (err error) {
-// 		if !isLogin(c) {
-// 			err = errShouldLogin
-// 			return
-// 		}
-// 		us := service.NewUserSession(c)
-// 		roles := us.GetRoles()
-// 		valid := util.UserRoleIsValid(validRoles, roles)
-// 		if valid {
-// 			return c.Next()
-// 		}
-// 		err = errForbidden
-// 		return
-// 	}
-// }
-
-func isAdmin(c *elton.Context) (err error) {
-	if !isLogin(c) {
-		err = errShouldLogin
+func newCheckRoles(validRoles []string) elton.Handler {
+	return func(c *elton.Context) (err error) {
+		if !isLogin(c) {
+			err = errShouldLogin
+			return
+		}
+		us := service.NewUserSession(c)
+		roles := us.GetRoles()
+		valid := util.UserRoleIsValid(validRoles, roles)
+		if valid {
+			return c.Next()
+		}
+		err = errForbidden
 		return
 	}
-	us := service.NewUserSession(c)
-	if us.IsAdmin() {
-		return c.Next()
-	}
-	err = errForbidden
-	return
 }

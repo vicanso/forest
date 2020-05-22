@@ -44,12 +44,19 @@ import {
   CONFIG_MOCK_TIME,
   CONFIG_BLOCK_IP,
   CONFIG_SIGNED_KEY,
-  CONFIG_ROUTER
+  CONFIG_ROUTER,
+  CONFIG_ROUTER_CONCURRENCY,
+  USER
 } from "@/constants/route";
+import { USER_ADMIN, USER_SU } from "@/constants/user";
+import { mapState } from "vuex";
+import { isAllowedUser } from "@/helpers/util";
+
 const navs = [
   {
     name: "配置",
     icon: "el-icon-setting",
+    roles: [USER_SU],
     children: [
       {
         name: "MockTime配置",
@@ -66,16 +73,21 @@ const navs = [
       {
         name: "路由配置",
         route: CONFIG_ROUTER
+      },
+      {
+        name: "路由并发配置",
+        route: CONFIG_ROUTER_CONCURRENCY
       }
     ]
   },
   {
     name: "用户",
     icon: "el-icon-user",
+    roles: [USER_ADMIN, USER_SU],
     children: [
       {
         name: "用户列表",
-        route: ""
+        route: USER
       }
     ]
   }
@@ -86,9 +98,29 @@ export default {
   data() {
     return {
       home: HOME,
-      active: "",
-      navs
+      active: ""
     };
+  },
+  computed: {
+    ...mapState({
+      userInfo: state => state.user.info
+    }),
+    navs() {
+      const { userInfo } = this;
+      if (!userInfo || !userInfo.account) {
+        return [];
+      }
+      const { roles } = userInfo;
+      const filterNavs = [];
+      navs.forEach(item => {
+        // 如果该栏目有配置权限，而且用户无该权限
+        if (item.roles && !isAllowedUser(item.roles, roles)) {
+          return;
+        }
+        filterNavs.push(item);
+      });
+      return filterNavs;
+    }
   },
   watch: {
     // 路由变化时设置对应的导航为活动状态

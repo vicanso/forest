@@ -28,6 +28,12 @@ func init() {
 
 	AddAlias("xUserPassword", "ascii,len=44")
 	AddAlias("xUserAccountKeyword", "ascii,min=1,max=10")
+	Add("xUserStatus", func(fl validator.FieldLevel) bool {
+		return isInInt(fl, []int{
+			cs.AccountStatusEnabled,
+			cs.AccountStatusForbidden,
+		})
+	})
 	Add("xUserRole", func(fl validator.FieldLevel) bool {
 		return isInString(fl, []string{
 			cs.UserRoleSu,
@@ -49,6 +55,7 @@ func init() {
 			for _, role := range []string{
 				cs.UserRoleSu,
 				cs.UserRoleAdmin,
+				cs.UserRoleNormal,
 			} {
 				if item == role {
 					exists = true

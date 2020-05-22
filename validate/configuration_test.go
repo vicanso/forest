@@ -33,10 +33,6 @@ func TestConfigurationValidate(t *testing.T) {
 
 		err = doValidate(&x, []byte(`{"value": "abcd"}`))
 		assert.Nil(err)
-
-		err = doValidate(&x, []byte(`{"value": "测试"}`))
-		assert.Equal(`Key: 'xConfigName.Value' Error:Field validation for 'Value' failed on the 'xConfigName' tag`, err.Error())
-
 	})
 
 	t.Run("xConfigCategory", func(t *testing.T) {

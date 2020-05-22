@@ -21,6 +21,7 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/tidwall/gjson"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
@@ -81,12 +82,15 @@ type (
 
 	listUserParams struct {
 		Limit   string `json:"limit" validate:"omitempty,xLimit"`
-		Keyword string `json:"keyword" validate:"xUserAccountKeyword"`
+		Offset  string `json:"offset" validate:"omitempty,xOffset"`
+		Order   string `json:"order" validate:"omitempty,xOrder"`
+		Keyword string `json:"keyword" validate:"omitempty,xUserAccountKeyword"`
 		Role    string `json:"role" validate:"omitempty,xUserRole"`
 	}
 
 	updateUserParams struct {
-		Roles []string `json:"roles" validate:"xUserRoles"`
+		Roles  []string `json:"roles" validate:"omitempty,xUserRoles"`
+		Status int      `json:"status" validate:"omitempty,xUserStatus"`
 	}
 	listUserLoginRecordParams struct {
 		Begin   time.Time `json:"begin"`
@@ -302,6 +306,7 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	u := &service.User{
 		Account:  params.Account,
 		Password: params.Password,
+		Status:   cs.AccountStatusEnabled,
 	}
 	err = userSrv.Add(u)
 	if err != nil {
@@ -412,17 +417,27 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	limit, _ := strconv.Atoi(params.Limit)
-	users, err := userSrv.List(service.UserQueryParams{
-		Role:    params.Role,
-		Keyword: params.Keyword,
-		Limit:   limit,
+	offset, _ := strconv.Atoi(params.Offset)
+	count := -1
+	if offset == 0 {
+		count, err = userSrv.Count()
+		if err != nil {
+			return
+		}
+	}
+	users, err := userSrv.List(helper.PGQueryParams{
+		Order:  params.Order,
+		Offset: offset,
+		Limit:  limit,
 	})
 	if err != nil {
 		return
 	}
 	c.Body = &struct {
+		Count int             `json:"count"`
 		Users []*service.User `json:"users"`
 	}{
+		count,
 		users,
 	}
 	return
@@ -447,8 +462,9 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 			return
 		}
 	}
-	err = userSrv.UpdateByID(uint(id), map[string]interface{}{
-		"roles": pq.StringArray(params.Roles),
+	err = userSrv.UpdateByID(uint(id), service.User{
+		Roles:  pq.StringArray(params.Roles),
+		Status: params.Status,
 	})
 	if err != nil {
 		return

@@ -26,12 +26,13 @@ import (
 )
 
 const (
-	mockTimeKey              = "mockTime"
-	sessionSignedKeyCateogry = "signedKey"
-	blockIPCategory          = "blockIP"
-	routerConfigCategory     = "router"
+	mockTimeKey               = "mockTime"
+	sessionSignedKeyCateogry  = "signedKey"
+	blockIPCategory           = "blockIP"
+	routerConfigCategory      = "router"
+	routerConcurrencyCategory = "routerConcurrency"
 
-	defaultConfigurationLimit = 100
+	defaultConfigurationLimit = 200
 )
 
 var (
@@ -118,16 +119,11 @@ func (srv *ConfigurationSrv) FindByID(id uint) (config *Configuration, err error
 
 // Available get available configs
 func (srv *ConfigurationSrv) Available() (configs []*Configuration, err error) {
-	result := make([]*Configuration, 0)
 	configs = make([]*Configuration, 0)
-	err = pgGetClient().Where("status = ?", cs.ConfigEnabled).Find(&result).Error
+	now := time.Now()
+	err = pgGetClient().Where("status = ? and begin_date < ? and end_date > ?", cs.ConfigEnabled, now, now).Find(&configs).Error
 	if err != nil {
 		return
-	}
-	for _, item := range result {
-		if item.IsValid() {
-			configs = append(configs, item)
-		}
 	}
 	return
 }
@@ -143,6 +139,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	routerConfigs := make([]*Configuration, 0)
 	var signedKeysConfig *Configuration
 	blockIPList := make([]string, 0)
+	routerConcurrencyConfigs := make([]string, 0)
 
 	for _, item := range configs {
 		if item.Name == mockTimeKey {
@@ -150,22 +147,17 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 			continue
 		}
 
-		// 路由配置
-		if item.Category == routerConfigCategory {
+		switch item.Category {
+		case routerConfigCategory:
+			// 路由配置
 			routerConfigs = append(routerConfigs, item)
-			continue
-		}
-
-		// signed key配置
-		if item.Category == sessionSignedKeyCateogry {
+		case sessionSignedKeyCateogry:
+			// session的签名串配置
 			signedKeysConfig = item
-			continue
-		}
-
-		// 黑名单IP
-		if item.Category == blockIPCategory {
+		case blockIPCategory:
 			blockIPList = append(blockIPList, item.Data)
-			continue
+		case routerConcurrencyCategory:
+			routerConcurrencyConfigs = append(routerConcurrencyConfigs, item.Data)
 		}
 	}
 
@@ -188,6 +180,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	updateRouterConfigs(routerConfigs)
 
 	ResetIPBlocker(blockIPList)
+	ResetRouterConcurrency(routerConcurrencyConfigs)
 	return
 }
 

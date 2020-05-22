@@ -355,20 +355,6 @@ func GetSignedKeys() []string {
 	return GetStringSlice("keys")
 }
 
-// GetRouterConcurrentLimit get router concurrent limit
-func GetRouterConcurrentLimit() map[string]uint32 {
-	limit := make(map[string]uint32)
-	data := GetStringMap("routerLimit")
-	for key, value := range data {
-		v, _ := value.(int)
-		if v != 0 {
-			arr := strings.Split(key, " ")
-			limit[strings.ToUpper(arr[0])+" "+arr[1]] = uint32(v)
-		}
-	}
-	return limit
-}
-
 // GetMailConfig get mail config
 func GetMailConfig() MailConfig {
 	prefix := "mail."

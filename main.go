@@ -225,12 +225,9 @@ func main() {
 	e.Use(middleware.NewRouterMocker())
 
 	// 路由并发限制
-	routerLimitConfig := config.GetRouterConcurrentLimit()
-	if len(routerLimitConfig) != 0 {
-		e.Use(M.NewRCL(M.RCLConfig{
-			Limiter: M.NewLocalLimiter(routerLimitConfig),
-		}))
-	}
+	e.Use(M.NewRCL(M.RCLConfig{
+		Limiter: service.GetRouterConcurrencyLimiter(),
+	}))
 
 	// etag与fresh的处理
 	e.Use(M.NewDefaultFresh())
@@ -246,6 +243,8 @@ func main() {
 	for _, g := range router.GetGroups() {
 		e.AddGroup(g)
 	}
+
+	service.InitRouterConcurrencyLimiter(e.Routers)
 
 	err := dependServiceCheck()
 	if err != nil {

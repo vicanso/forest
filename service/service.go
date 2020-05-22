@@ -22,6 +22,8 @@ import (
 var (
 	pgCreate    = helper.PGCreate
 	pgGetClient = helper.PGGetClient
+	pgQuery = helper.PGQuery
+	pgCount = helper.PGCount
 
 	logger = log.Default()
 

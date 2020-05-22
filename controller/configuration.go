@@ -49,36 +49,31 @@ type (
 )
 
 func init() {
-	g := router.NewGroup("/configurations", loadUserSession)
+	g := router.NewGroup("/configurations", loadUserSession, shouldBeSu)
 	ctrl := configurationCtrl{}
 
 	g.GET(
 		"/v1",
-		shouldBeAdmin,
 		ctrl.list,
 	)
 
 	g.POST(
 		"/v1",
 		newTracker(cs.ActionConfigurationAdd),
-		shouldBeAdmin,
 		ctrl.add,
 	)
 	g.GET(
 		"/v1/{id}",
-		shouldBeAdmin,
 		ctrl.findByID,
 	)
 	g.PATCH(
 		"/v1/{id}",
 		newTracker(cs.ActionConfigurationUpdate),
-		shouldBeAdmin,
 		ctrl.update,
 	)
 	g.DELETE(
 		"/v1/{id}",
 		newTracker(cs.ActionConfigurationDelete),
-		shouldBeAdmin,
 		ctrl.delete,
 	)
 }

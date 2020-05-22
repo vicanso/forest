@@ -166,12 +166,14 @@ export default {
         // 更新
         if (id) {
           const info = diff(config, this.originalValue);
-          if (info.modifiedCount) {
-            await this.updateConfigByID({
-              id,
-              data: info.data
-            });
+          if (!info.modifiedCount) {
+            this.$message.warning("未修改配置无法更新");
+            return;
           }
+          await this.updateConfigByID({
+            id,
+            data: info.data
+          });
           this.$message.info("修改配置成功");
         } else {
           await this.addConfig(config);

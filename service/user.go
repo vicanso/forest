@@ -47,14 +47,6 @@ var (
 	errAccountOrPasswordInvalid = hes.New("account or password is invalid")
 )
 
-var (
-	// admin用户角色
-	adminUserRoles = []string{
-		cs.UserRoleSu,
-		cs.UserRoleAdmin,
-	}
-)
-
 type (
 	// UserSession user session struct
 	UserSession struct {
@@ -67,8 +59,19 @@ type (
 		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
 		Password string         `json:"-" gorm:"type:varchar(128);not null"`
 		Roles    pq.StringArray `json:"roles" gorm:"type:text[]"`
+		// 用户状态
+		Status int `json:"status"`
 	}
-
+	// UserRole user role
+	UserRole struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	}
+	// UserStatus user status
+	UserStatus struct {
+		Name  string `json:"name"`
+		Value int    `json:"value"`
+	}
 	// UserLoginRecord user login
 	UserLoginRecord struct {
 		helper.Model
@@ -96,12 +99,6 @@ type (
 		City      string `json:"city" gorm:"type:varchar(64)"`
 		ISP       string `json:"isp" gorm:"type:varchar(64)"`
 	}
-	// UserQueryParams user query params
-	UserQueryParams struct {
-		Keyword string
-		Role    string
-		Limit   int
-	}
 	// UserLoginRecordQueryParams user login record query params
 	UserLoginRecordQueryParams struct {
 		Begin   string
@@ -119,6 +116,38 @@ func init() {
 	pgGetClient().AutoMigrate(&User{}).
 		AutoMigrate(&UserLoginRecord{}).
 		AutoMigrate(&UserTrackRecord{})
+}
+
+// ListRoles list all user roles
+func (srv *UserSrv) ListRoles() []*UserRole {
+	return []*UserRole{
+		&UserRole{
+			Name:  "普通用户",
+			Value: cs.UserRoleNormal,
+		},
+		&UserRole{
+			Name:  "管理员",
+			Value: cs.UserRoleAdmin,
+		},
+		&UserRole{
+			Name:  "超级用户",
+			Value: cs.UserRoleSu,
+		},
+	}
+}
+
+// ListStatuses list all user status
+func (srv *UserSrv) ListStatuses() []*UserStatus {
+	return []*UserStatus{
+		&UserStatus{
+			Name:  "正常",
+			Value: cs.AccountStatusEnabled,
+		},
+		&UserStatus{
+			Name:  "禁用",
+			Value: cs.AccountStatusForbidden,
+		},
+	}
 }
 
 // createByID create a user model by id
@@ -242,22 +271,28 @@ func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord, c *elton.Context) (err er
 }
 
 // List list users
-func (srv *UserSrv) List(params UserQueryParams) (result []*User, err error) {
+func (srv *UserSrv) List(params helper.PGQueryParams, args ...interface{}) (result []*User, err error) {
 	result = make([]*User, 0)
-	db := pgGetClient()
-	if params.Limit <= 0 {
-		db = db.Limit(defaultUserLimit)
-	} else {
-		db = db.Limit(params.Limit)
-	}
-	if params.Role != "" {
-		db = db.Where("? = ANY(roles)", params.Role)
-	}
-	if params.Keyword != "" {
-		db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
-	}
-	err = db.Find(&result).Error
+	err = pgQuery(params, args...).Find(&result).Error
+	// db := pgGetClient()
+	// if params.Limit <= 0 {
+	// 	db = db.Limit(defaultUserLimit)
+	// } else {
+	// 	db = db.Limit(params.Limit)
+	// }
+	// if params.Role != "" {
+	// 	db = db.Where("? = ANY(roles)", params.Role)
+	// }
+	// if params.Keyword != "" {
+	// 	db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
+	// }
+	// err = db.Find(&result).Error
 	return
+}
+
+// Count count the users
+func (srv *UserSrv) Count(args ...interface{}) (count int, err error) {
+	return pgCount(&User{}, args...)
 }
 
 func newUserLoginRecordQuery(params UserLoginRecordQueryParams) *gorm.DB {
@@ -355,11 +390,6 @@ func (u *UserSession) GetRoles() []string {
 		}
 	}
 	return roles
-}
-
-// IsAdmin check user is admin
-func (u *UserSession) IsAdmin() bool {
-	return util.UserRoleIsValid(adminUserRoles, u.GetRoles())
 }
 
 // Destroy destroy user session
