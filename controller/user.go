@@ -87,11 +87,13 @@ type (
 		Order   string `json:"order" validate:"omitempty,xOrder"`
 		Keyword string `json:"keyword" validate:"omitempty,xUserAccountKeyword"`
 		Role    string `json:"role" validate:"omitempty,xUserRole"`
+		Group   string `json:"group" validate:"omitempty,xUserGroup"`
 		Status  string `json:"status" validate:"omitempty,xUserStatusString"`
 	}
 
 	updateUserParams struct {
 		Roles  []string `json:"roles" validate:"omitempty,xUserRoles"`
+		Groups []string `json:"groups" validate:"omitempty,xUserGroups"`
 		Status int      `json:"status" validate:"omitempty,xUserStatus"`
 	}
 	listUserLoginRecordParams struct {
@@ -122,6 +124,7 @@ func init() {
 	g.PATCH(
 		"/v1/{userID}",
 		shouldBeAdmin,
+		newTracker(cs.ActionUserInfoUpdate),
 		ctrl.update,
 	)
 
@@ -193,6 +196,10 @@ func (params *listUserParams) toConditions() (conditions []interface{}) {
 	if params.Role != "" {
 		queryList = append(queryList, "? = ANY(roles)")
 		args = append(args, params.Role)
+	}
+	if params.Group != "" {
+		queryList = append(queryList, "? = ANY(groups)")
+		args = append(args, params.Group)
 	}
 	if params.Keyword != "" {
 		queryList = append(queryList, "account LIKE ?")
@@ -331,7 +338,6 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	u := &service.User{
 		Account:  params.Account,
 		Password: params.Password,
-		// Status:   cs.AccountStatusEnabled,
 	}
 	err = userSrv.Add(u)
 	if err != nil {
@@ -487,10 +493,17 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 			return
 		}
 	}
-	err = userSrv.UpdateByID(uint(id), service.User{
-		Roles:  pq.StringArray(params.Roles),
-		Status: params.Status,
-	})
+	user := service.User{}
+	if params.Status != 0 {
+		user.Status = params.Status
+	}
+	if len(params.Roles) != 0 {
+		user.Roles = pq.StringArray(params.Roles)
+	}
+	if len(params.Groups) != 0 {
+		user.Groups = pq.StringArray(params.Groups)
+	}
+	err = userSrv.UpdateByID(uint(id), user)
 	if err != nil {
 		return
 	}

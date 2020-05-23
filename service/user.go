@@ -59,6 +59,7 @@ type (
 		Account  string         `json:"account" gorm:"type:varchar(20);not null;unique_index:idx_users_account"`
 		Password string         `json:"-" gorm:"type:varchar(128);not null"`
 		Roles    pq.StringArray `json:"roles" gorm:"type:text[]"`
+		Groups   pq.StringArray `json:"groups" gorm:"type:text[]"`
 		// 用户状态
 		Status int `json:"status"`
 	}
@@ -71,6 +72,11 @@ type (
 	UserStatus struct {
 		Name  string `json:"name"`
 		Value int    `json:"value"`
+	}
+	// UserGroup user group
+	UserGroup struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
 	}
 	// UserLoginRecord user login
 	UserLoginRecord struct {
@@ -146,6 +152,20 @@ func (srv *UserSrv) ListStatuses() []*UserStatus {
 		&UserStatus{
 			Name:  "禁用",
 			Value: cs.AccountStatusForbidden,
+		},
+	}
+}
+
+// ListGroups list all user group
+func (srv *UserSrv) ListGroups() []*UserGroup {
+	return []*UserGroup{
+		&UserGroup{
+			Name:  "IT",
+			Value: cs.UserGroupIT,
+		},
+		&UserGroup{
+			Name:  "财务",
+			Value: cs.UserGroupFinance,
 		},
 	}
 }

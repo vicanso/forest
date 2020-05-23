@@ -35,6 +35,23 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
+            <el-form-item label="用户组：">
+              <el-select
+                class="selector"
+                v-model="currentUser.groups"
+                placeholder="请选择用户组"
+                multiple
+              >
+                <el-option
+                  v-for="item in userGroups"
+                  :key="item.value"
+                  :label="item.name"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="用户状态：">
               <el-select
                 class="selector"
@@ -49,6 +66,11 @@
                 >
                 </el-option>
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item class="hidden">
+              <el-input class="hidden" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -76,7 +98,7 @@
       <!-- 搜索条件 -->
       <el-form label-width="90px">
         <el-row :gutter="15">
-          <el-col :span="6">
+          <el-col :span="5">
             <el-form-item label="用户角色：">
               <el-select class="selector" v-model="query.role">
                 <el-option key="all" label="所有" value=""></el-option>
@@ -90,7 +112,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="5">
             <el-form-item label="用户状态：">
               <el-select class="selector" v-model="query.status">
                 <el-option key="all" label="所有" value=""></el-option>
@@ -99,6 +121,20 @@
                   :key="status.value"
                   :label="status.name"
                   :value="status.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="5">
+            <el-form-item label="用户组：">
+              <el-select class="selector" v-model="query.group">
+                <el-option key="all" label="所有" value=""></el-option>
+                <el-option
+                  v-for="group in userGroups"
+                  :key="group.value"
+                  :label="group.name"
+                  :value="group.value"
                 >
                 </el-option>
               </el-select>
@@ -113,8 +149,8 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="6">
-            <el-form-item>
+          <el-col :span="3">
+            <el-form-item label-width="0px">
               <el-button class="submit" type="primary" @click="submit"
                 >查询</el-button
               >
@@ -145,8 +181,17 @@
           <el-table-column label="用户角色">
             <template slot-scope="scope">
               <ul>
-                <li v-for="role in scope.row.roleDescList" :key="role">
+                <li v-for="role in scope.row.rolesDesc" :key="role">
                   {{ role }}
+                </li>
+              </ul>
+            </template>
+          </el-table-column>
+          <el-table-column label="用户组">
+            <template slot-scope="scope">
+              <ul>
+                <li v-for="group in scope.row.groupsDesc" :key="group">
+                  {{ group }}
                 </li>
               </ul>
             </template>
@@ -205,7 +250,8 @@ export default {
         order: "-updatedAt",
         role: "",
         keyword: "",
-        status: ""
+        status: "",
+        group: ""
       }
     };
   },
@@ -219,6 +265,7 @@ export default {
       users: state => state.user.list.data || [],
       userRoles: state => state.user.roles || [],
       userStatuses: state => state.user.statuses || [],
+      userGroups: state => state.user.groups || [],
       processing: state => state.user.userListProcessing,
       updateProcessing: state => state.user.updateProcessing
     })
@@ -228,6 +275,7 @@ export default {
       "listUser",
       "listUserRole",
       "listUserStatus",
+      "listUserGroup",
       "updateUserByID"
     ]),
     async fetch() {
@@ -267,6 +315,7 @@ export default {
       try {
         await this.listUserRole();
         await this.listUserStatus();
+        await this.listUserGroup();
       } catch (err) {
         this.$message.error(err.message);
       }

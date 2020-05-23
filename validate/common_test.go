@@ -36,7 +36,7 @@ func TestCommonValidate(t *testing.T) {
 		err = doValidate(&x, []byte(`{"value": 10}`))
 		assert.Nil(err)
 
-		err = doValidate(&x, []byte(`{"value": 11}`))
+		err = doValidate(&x, []byte(`{"value": 110}`))
 		assert.Equal(`Key: 'xLimit.Value' Error:Field validation for 'Value' failed on the 'xLimit' tag`, err.Error())
 
 		err = doValidate(&x, []byte(`{"value": -1}`))

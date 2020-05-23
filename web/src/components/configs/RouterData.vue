@@ -166,6 +166,4 @@ export default {
 <style lang="sass" scoped>
 .selector
   width: 100%
-.hidden
-  visibility: hidden
 </style>

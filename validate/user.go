@@ -15,9 +15,6 @@
 package validate
 
 import (
-	"reflect"
-	"strconv"
-
 	"github.com/go-playground/validator/v10"
 
 	"github.com/vicanso/forest/cs"
@@ -30,50 +27,21 @@ func init() {
 	AddAlias("xUserPassword", "ascii,len=44")
 	AddAlias("xUserAccountKeyword", "ascii,min=1,max=10")
 	Add("xUserStatus", func(fl validator.FieldLevel) bool {
-		return isInInt(fl, []int{
-			cs.AccountStatusEnabled,
-			cs.AccountStatusForbidden,
-		})
+		return isInInt(fl, cs.AccountStatuses)
 	})
 	Add("xUserStatusString", func(fl validator.FieldLevel) bool {
-		return isInString(fl, []string{
-			strconv.Itoa(cs.AccountStatusEnabled),
-			strconv.Itoa(cs.AccountStatusForbidden),
-		})
+		return isInString(fl, cs.AccountStatusesString)
 	})
 	Add("xUserRole", func(fl validator.FieldLevel) bool {
-		return isInString(fl, []string{
-			cs.UserRoleSu,
-			cs.UserRoleAdmin,
-			cs.UserRoleNormal,
-		})
+		return isInString(fl, cs.UserRoles)
 	})
 	Add("xUserRoles", func(fl validator.FieldLevel) bool {
-		if fl.Field().Kind() != reflect.Slice {
-			return false
-		}
-		v := fl.Field().Interface()
-		value, ok := v.([]string)
-		if !ok || len(value) == 0 {
-			return false
-		}
-		valid := true
-		for _, item := range value {
-			exists := false
-			for _, role := range []string{
-				cs.UserRoleSu,
-				cs.UserRoleAdmin,
-				cs.UserRoleNormal,
-			} {
-				if item == role {
-					exists = true
-				}
-			}
-			if !exists {
-				valid = false
-			}
-		}
-		return valid
+		return isAllInString(fl, cs.UserRoles)
 	})
-
+	Add("xUserGroup", func(fl validator.FieldLevel) bool {
+		return isInString(fl, cs.UserGroups)
+	})
+	Add("xUserGroups", func(fl validator.FieldLevel) bool {
+		return isAllInString(fl, cs.UserGroups)
+	})
 }

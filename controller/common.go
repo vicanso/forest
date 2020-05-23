@@ -47,6 +47,7 @@ func init() {
 
 	g.GET("/commons/user-roles", ctrl.listUserRoles)
 	g.GET("/commons/user-statuses", ctrl.listUserStatuses)
+	g.GET("/commons/user-groups", ctrl.listUserGroups)
 }
 
 // 服务检测ping的响应
@@ -160,6 +161,15 @@ func (ctrl commonCtrl) listUserStatuses(c *elton.Context) (err error) {
 	c.CacheMaxAge("5m")
 	c.Body = map[string][]*service.UserStatus{
 		"statuses": userSrv.ListStatuses(),
+	}
+	return
+}
+
+// listUserGroups list user group
+func (ctrl commonCtrl) listUserGroups(c *elton.Context) (err error) {
+	c.CacheMaxAge("5m")
+	c.Body = map[string][]*service.UserGroup{
+		"groups": userSrv.ListGroups(),
 	}
 	return
 }

@@ -14,18 +14,13 @@
 
 package cs
 
+import "strconv"
+
 const (
 	// CID context id
 	CID = "cid"
 	// UserSession user session
 	UserSession = "userSession"
-
-	// UserRoleNormal normal user
-	UserRoleNormal = "normal"
-	// UserRoleSu super user
-	UserRoleSu = "su"
-	// UserRoleAdmin admin user
-	UserRoleAdmin = "admin"
 )
 
 const (
@@ -40,9 +35,52 @@ const (
 	MagicalCaptcha = "0145"
 )
 
+// 用户状态
 const (
 	// AccountStatusEnabled account enabled
 	AccountStatusEnabled = iota + 1
 	// AccountStatusForbidden account forbidden
 	AccountStatusForbidden
+)
+
+var (
+	AccountStatuses = []int{
+		AccountStatusEnabled,
+		AccountStatusForbidden,
+	}
+	AccountStatusesString = []string{
+		strconv.Itoa(AccountStatusEnabled),
+		strconv.Itoa(AccountStatusForbidden),
+	}
+)
+
+// 用户角色
+const (
+	// UserRoleNormal normal user
+	UserRoleNormal = "normal"
+	// UserRoleSu super user
+	UserRoleSu = "su"
+	// UserRoleAdmin admin user
+	UserRoleAdmin = "admin"
+)
+
+var (
+	UserRoles = []string{
+		UserRoleNormal,
+		UserRoleSu,
+		UserRoleAdmin,
+	}
+)
+
+// 用户群组
+const (
+	UserGroupIT      = "it"
+	UserGroupFinance = "finance"
+)
+
+var (
+	UserGroups = []string{
+		UserGroupIT,
+		UserGroupFinance,
+	}
 )

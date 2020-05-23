@@ -22,6 +22,9 @@ const (
 	// ActionLogout logout
 	ActionLogout = "logout"
 
+	// ActionUserInfoUpdate update user info
+	ActionUserInfoUpdate = "update-user-info"
+
 	// ActionConfigurationAdd add configuration
 	ActionConfigurationAdd = "add-configuration"
 	// ActionConfigurationUpdate update configuration

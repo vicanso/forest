@@ -74,6 +74,37 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 	return exists
 }
 
+func isAllInString(fl validator.FieldLevel, values []string) bool {
+	if fl.Field().Kind() != reflect.Slice {
+		return false
+	}
+	v := fl.Field().Interface()
+	value, ok := v.([]string)
+	if !ok || len(value) == 0 {
+		return false
+	}
+	valid := true
+	for _, item := range value {
+		exists := containsString(values, item)
+		if !exists {
+			valid = false
+		}
+	}
+	return valid
+}
+
+func containsString(arr []string, str string) (found bool) {
+	for _, v := range arr {
+		if found {
+			break
+		}
+		if v == str {
+			found = true
+		}
+	}
+	return
+}
+
 func doValidate(s interface{}, data interface{}) (err error) {
 	// statusCode := http.StatusBadRequest
 	if data != nil {

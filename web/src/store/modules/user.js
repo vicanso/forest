@@ -5,7 +5,8 @@ import {
   USERS,
   USERS_ID,
   COMMONS_LIST_USER_ROLE,
-  COMMONS_LIST_USER_STATUS
+  COMMONS_LIST_USER_STATUS,
+  COMMONS_LIST_USER_GROUPS
 } from "@/constants/url";
 import { generatePassword, formatDate } from "@/helpers/util";
 import { sha256 } from "@/helpers/crypto";
@@ -22,6 +23,9 @@ const mutationUserListRole = "user.list.role";
 const mutationUserListStatusProcessing = "user.list.status.processing";
 const mutationuserListStatus = "user.list.status";
 
+const mutationUserListGroupProcessing = "user.list.group.processing";
+const mutationuserListGroup = "user.list.group";
+
 const mutationUserUpdateProcessing = "user.updae.processing";
 const mutationUserUpdate = "user.update";
 
@@ -30,6 +34,9 @@ const state = {
   roles: null,
   statusListProcessing: false,
   statuses: null,
+  groupListProcessing: false,
+  groups: null,
+
   // 默认为处理中（程序一开始则拉取用户信息）
   processing: true,
   info: {
@@ -53,17 +60,27 @@ function commitUserInfo(commit, data) {
   });
 }
 
-function updateUserRoleDesc(user) {
-  const { roles } = state;
-  const roleDescList = [];
-  user.roles.map(role => {
-    roles.forEach(roleDesc => {
-      if (roleDesc.value === role) {
-        roleDescList.push(roleDesc.name);
+function updateDescList(user, key) {
+  if (!user[key]) {
+    user[key] = [];
+  }
+  const descList = [];
+  user[key].map(item => {
+    state[key].forEach(desc => {
+      if (desc.value === item) {
+        descList.push(desc.name);
       }
     });
   });
-  user.roleDescList = roleDescList;
+  user[`${key}Desc`] = descList;
+}
+
+function updateUserRoleDesc(user) {
+  updateDescList(user, "roles");
+}
+
+function updateUserGroupDesc(user) {
+  updateDescList(user, "groups");
 }
 
 // listUserStatus 获取用户状态列表
@@ -91,6 +108,20 @@ async function listUserRole({ commit }) {
     commit(mutationUserListRole, data);
   } finally {
     commit(mutationUserListRoleProcessing, false);
+  }
+}
+
+// listUserGroup 获取用户分组列表
+async function listUserGroup({ commit }) {
+  if (state.groups) {
+    return;
+  }
+  commit(mutationUserListGroupProcessing, true);
+  try {
+    const { data } = await request.get(COMMONS_LIST_USER_GROUPS);
+    commit(mutationuserListGroup, data);
+  } finally {
+    commit(mutationUserListGroupProcessing, false);
   }
 }
 
@@ -124,6 +155,12 @@ export default {
     [mutationuserListStatus](state, { statuses }) {
       state.statuses = statuses;
     },
+    [mutationUserListGroupProcessing](state, processing) {
+      state.groupListProcessing = processing;
+    },
+    [mutationuserListGroup](state, { groups }) {
+      state.groups = groups;
+    },
     [mutationUserUpdateProcessing](state, processing) {
       state.updateProcessing = processing;
     },
@@ -135,7 +172,8 @@ export default {
       users.forEach(item => {
         if (item.id === id) {
           Object.assign(item, data);
-          updateUserRoleDesc(item);
+          updateUserRoleDesc(data);
+          updateUserGroupDesc(data);
         }
       });
       state.list.data = users;
@@ -220,15 +258,14 @@ export default {
       try {
         await listUserRole({ commit });
         await listUserStatus({ commit });
+        await listUserGroup({ commit });
         const { data } = await request.get(USERS, {
           params
         });
         const { statuses } = state;
         data.users.forEach(item => {
-          if (!item.roles) {
-            item.roles = [];
-          }
           updateUserRoleDesc(item);
+          updateUserGroupDesc(item);
           item.updatedAtDesc = formatDate(item.updatedAt);
           statuses.forEach(status => {
             if (status.value === item.status) {
@@ -246,6 +283,7 @@ export default {
     },
     listUserRole,
     listUserStatus,
+    listUserGroup,
     async updateUserByID({ commit }, { id, data }) {
       commit(mutationUserUpdateProcessing, true);
       try {

@@ -10,3 +10,4 @@ export const COMMONS_CAPTCHA = "/commons/captcha";
 export const COMMONS_ROUTERS = "/commons/routers";
 export const COMMONS_LIST_USER_ROLE = "/commons/user-roles";
 export const COMMONS_LIST_USER_STATUS = "/commons/user-statuses";
+export const COMMONS_LIST_USER_GROUPS = "/commons/user-groups";
