@@ -100,7 +100,11 @@
         <el-row :gutter="15">
           <el-col :span="5">
             <el-form-item label="用户角色：">
-              <el-select class="selector" v-model="query.role">
+              <el-select
+                class="selector"
+                v-model="query.role"
+                key="filterUserRoleSelector"
+              >
                 <el-option key="all" label="所有" value=""></el-option>
                 <el-option
                   v-for="role in userRoles"
@@ -114,7 +118,11 @@
           </el-col>
           <el-col :span="5">
             <el-form-item label="用户状态：">
-              <el-select class="selector" v-model="query.status">
+              <el-select
+                class="selector"
+                v-model="query.status"
+                key="filterUserStatusSelector"
+              >
                 <el-option key="all" label="所有" value=""></el-option>
                 <el-option
                   v-for="status in userStatuses"
@@ -128,7 +136,11 @@
           </el-col>
           <el-col :span="5">
             <el-form-item label="用户组：">
-              <el-select class="selector" v-model="query.group">
+              <el-select
+                class="selector"
+                v-model="query.group"
+                key="filterUserGroupSelector"
+              >
                 <el-option key="all" label="所有" value=""></el-option>
                 <el-option
                   v-for="group in userGroups"
@@ -146,12 +158,18 @@
                 placeholder="请输入关键字"
                 v-model="query.keyword"
                 clearable
+                @keyup.enter.native="handleSearch"
               />
             </el-form-item>
           </el-col>
           <el-col :span="3">
             <el-form-item label-width="0px">
-              <el-button class="submit" type="primary" @click="submit"
+              <el-button
+                :loading="processing"
+                icon="el-icon-search"
+                class="submit"
+                type="primary"
+                @click="handleSearch"
                 >查询</el-button
               >
             </el-form-item>
@@ -279,14 +297,17 @@ export default {
       "updateUserByID"
     ]),
     async fetch() {
-      const { query } = this;
+      const { query, processing } = this;
+      if (processing) {
+        return;
+      }
       try {
         await this.listUser(query);
       } catch (err) {
         this.$message.error(err.message);
       }
     },
-    submit() {
+    handleSearch() {
       this.query.offset = 0;
       this.fetch();
     },
