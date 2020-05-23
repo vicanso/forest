@@ -39,7 +39,6 @@ const (
 )
 
 const (
-	defaultUserLimit            = 10
 	defaultUserLoginRecordLimit = 10
 )
 
@@ -61,7 +60,9 @@ type (
 		Roles    pq.StringArray `json:"roles" gorm:"type:text[]"`
 		Groups   pq.StringArray `json:"groups" gorm:"type:text[]"`
 		// 用户状态
-		Status int `json:"status"`
+		Status int    `json:"status"`
+		Email  string `json:"email"`
+		Mobile string `json:"mobile"`
 	}
 	// UserRole user role
 	UserRole struct {
@@ -197,7 +198,7 @@ func (srv *UserSrv) Add(u *User) (err error) {
 	err = pgCreate(u)
 	// 首次创建账号，设置su权限
 	if u.ID == 1 {
-		srv.UpdateByID(u.ID, User{
+		_ = srv.UpdateByID(u.ID, User{
 			Roles: []string{
 				cs.UserRoleSu,
 			},
@@ -240,6 +241,13 @@ func (srv *UserSrv) UpdateByAccount(account string, value interface{}) (err erro
 	return
 }
 
+// FindOneByAccount find one by account
+func (srv *UserSrv) FindOneByAccount(account string) (user *User, err error) {
+	user = &User{}
+	err = pgGetClient().Where("account = ?", account).First(user).Error
+	return
+}
+
 // UpdateLoginRecordByID update login record by id
 func (srv *UserSrv) UpdateLoginRecordByID(id uint, value interface{}) (err error) {
 	err = pgGetClient().Model(srv.createLoginRecordByID(id)).Updates(value).Error
@@ -261,7 +269,7 @@ func (srv *UserSrv) AddLoginRecord(r *UserLoginRecord, c *elton.Context) (err er
 				)
 				return
 			}
-			srv.UpdateLoginRecordByID(id, map[string]string{
+			_ = srv.UpdateLoginRecordByID(id, map[string]string{
 				"country":  lo.Country,
 				"province": lo.Province,
 				"city":     lo.City,
@@ -287,7 +295,7 @@ func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord, c *elton.Context) (err er
 				)
 				return
 			}
-			srv.UpdateLoginRecordByID(id, map[string]string{
+			_ = srv.UpdateLoginRecordByID(id, map[string]string{
 				"country":  lo.Country,
 				"province": lo.Province,
 				"city":     lo.City,

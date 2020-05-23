@@ -10,7 +10,8 @@ import {
   CONFIG_SIGNED_KEY,
   CONFIG_ROUTER,
   CONFIG_ROUTER_CONCURRENCY,
-  USER
+  USER,
+  PROFILE
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -84,6 +85,14 @@ const routes = [
     path: "/users",
     name: USER,
     component: User,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/profile",
+    name: PROFILE,
+    component: () => import("@/views/Profile.vue"),
     meta: {
       requiresAuth: true
     }

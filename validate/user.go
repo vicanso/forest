@@ -44,4 +44,6 @@ func init() {
 	Add("xUserGroups", func(fl validator.FieldLevel) bool {
 		return isAllInString(fl, cs.UserGroups)
 	})
+	AddAlias("xUserEmail", "email")
+	AddAlias("xUserMobile", "number,len=11")
 }

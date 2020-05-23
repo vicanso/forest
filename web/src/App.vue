@@ -22,12 +22,12 @@ export default {
     userAccount: state => state.user.info.account
   }),
   methods: {
-    ...mapActions(["fetchUserInfo", "updateUser"]),
+    ...mapActions(["fetchUserInfo", "updateMe"]),
     refreshSessionTTL() {
       if (!this.userAccount) {
         return;
       }
-      this.updateUser({});
+      this.updateMe({});
     }
   },
   async mounted() {

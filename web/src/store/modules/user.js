@@ -4,6 +4,7 @@ import {
   USERS_LOGIN,
   USERS,
   USERS_ID,
+  USERS_ME_PROFILE,
   COMMONS_LIST_USER_ROLE,
   COMMONS_LIST_USER_STATUS,
   COMMONS_LIST_USER_GROUPS
@@ -26,8 +27,12 @@ const mutationuserListStatus = "user.list.status";
 const mutationUserListGroupProcessing = "user.list.group.processing";
 const mutationuserListGroup = "user.list.group";
 
-const mutationUserUpdateProcessing = "user.updae.processing";
+const mutationUserUpdateProcessing = "user.update.processing";
 const mutationUserUpdate = "user.update";
+
+const mutationUserProfileProcessing = "user.profile.processing";
+const mutationUserProfile = "user.profile";
+const mutationUserProfileUpdate = "user.profile.update";
 
 const state = {
   roleListProcessing: false,
@@ -44,6 +49,11 @@ const state = {
     trackID: "",
     roles: null
   },
+
+  // 用户详情信息
+  profileProcessing: false,
+  profile: null,
+
   userListProcessing: false,
   list: {
     data: null,
@@ -81,6 +91,24 @@ function updateUserRoleDesc(user) {
 
 function updateUserGroupDesc(user) {
   updateDescList(user, "groups");
+}
+
+function updateStatusDesc(user) {
+  state.statuses.forEach(status => {
+    if (status.value === user.status) {
+      user.statusDesc = status.name;
+    }
+  });
+  if (!user.statusDesc) {
+    user.statusDesc = "未知";
+  }
+}
+
+function updateUserDesc(user) {
+  user.updatedAtDesc = formatDate(user.updatedAt);
+  updateStatusDesc(user);
+  updateUserRoleDesc(user);
+  updateUserGroupDesc(user);
 }
 
 // listUserStatus 获取用户状态列表
@@ -172,11 +200,19 @@ export default {
       users.forEach(item => {
         if (item.id === id) {
           Object.assign(item, data);
-          updateUserRoleDesc(data);
-          updateUserGroupDesc(data);
+          updateUserDesc(item);
         }
       });
       state.list.data = users;
+    },
+    [mutationUserProfileProcessing](state, processing) {
+      state.processing = processing;
+    },
+    [mutationUserProfile](state, profile) {
+      state.profile = profile;
+    },
+    [mutationUserProfileUpdate](state, data) {
+      Object.assign(state.profile, data);
     }
   },
   actions: {
@@ -248,9 +284,15 @@ export default {
         commit(mutationUserProcessing, false);
       }
     },
-    // updateUser 更新用户信息，若无更新字段，则可刷新session有效期
-    async updateUser() {
-      await request.patch(USERS_ME, {});
+    // updateMe 更新用户信息，若无更新字段，则可刷新session有效期
+    async updateMe({ commit }, data = {}) {
+      commit(mutationUserProfileProcessing, true);
+      try {
+        await request.patch(USERS_ME, data);
+        commit(mutationUserProfileUpdate, data);
+      } finally {
+        commit(mutationUserProfileProcessing, false);
+      }
     },
     // listUser 获取用户
     async listUser({ commit }, params) {
@@ -262,19 +304,8 @@ export default {
         const { data } = await request.get(USERS, {
           params
         });
-        const { statuses } = state;
         data.users.forEach(item => {
-          updateUserRoleDesc(item);
-          updateUserGroupDesc(item);
-          item.updatedAtDesc = formatDate(item.updatedAt);
-          statuses.forEach(status => {
-            if (status.value === item.status) {
-              item.statusDesc = status.name;
-            }
-          });
-          if (!item.statusDesc) {
-            item.statusDesc = "未知";
-          }
+          updateUserDesc(item);
         });
         commit(mutationUserList, data);
       } finally {
@@ -284,6 +315,7 @@ export default {
     listUserRole,
     listUserStatus,
     listUserGroup,
+    // updateUserByID 更新用户信息
     async updateUserByID({ commit }, { id, data }) {
       commit(mutationUserUpdateProcessing, true);
       try {
@@ -294,6 +326,23 @@ export default {
         });
       } finally {
         commit(mutationUserUpdateProcessing, false);
+      }
+    },
+    // getUserProfile 获取用户详细信息
+    async getUserProfile({ commit }) {
+      if (state.profile) {
+        return;
+      }
+      commit(mutationUserProfileProcessing, true);
+      try {
+        await listUserRole({ commit });
+        await listUserStatus({ commit });
+        await listUserGroup({ commit });
+        const { data } = await request.get(USERS_ME_PROFILE);
+        updateUserDesc(data);
+        commit(mutationUserProfile, data);
+      } finally {
+        commit(mutationUserProfileProcessing, false);
       }
     }
   }

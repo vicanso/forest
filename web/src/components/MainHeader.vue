@@ -3,10 +3,10 @@
     <div class="userInfo">
       <span v-if="fetchingUserInfo">正在加载...</span>
       <div class="functions" v-else-if="userAccount">
-        <span class="account">
+        <router-link :to="{ name: profile }" class="account">
           <i class="el-icon-user" />
           <span>{{ userAccount }}</span>
-        </span>
+        </router-link>
         <span class="divided">|</span>
         <a class="logout" href="#" title="退出登录" @click="logout">
           <i class="el-icon-switch-button" />
@@ -28,7 +28,7 @@
 </template>
 <script>
 import { mapState, mapActions } from "vuex";
-import { LOGIN, REGISTER } from "@/constants/route";
+import { LOGIN, REGISTER, PROFILE } from "@/constants/route";
 export default {
   name: "MainHeader",
   computed: mapState({
@@ -38,7 +38,8 @@ export default {
   data() {
     return {
       login: LOGIN,
-      register: REGISTER
+      register: REGISTER,
+      profile: PROFILE
     };
   },
   methods: {

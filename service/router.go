@@ -78,7 +78,6 @@ func (l *RCLimiter) DecConcurrency(key string) {
 		return
 	}
 	atomic.AddUint32(&r.Current, ^uint32(0))
-	return
 }
 
 // GetConcurrency get concurrency

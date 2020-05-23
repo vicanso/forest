@@ -96,6 +96,10 @@ type (
 		Groups []string `json:"groups" validate:"omitempty,xUserGroups"`
 		Status int      `json:"status" validate:"omitempty,xUserStatus"`
 	}
+	updateMeParams struct {
+		Email  string `json:"email" validate:"omitempty,xUserEmail"`
+		Mobile string `json:"mobile" validate:"omitempty,xUserMobile"`
+	}
 	listUserLoginRecordParams struct {
 		Begin   time.Time `json:"begin"`
 		End     time.Time `json:"end"`
@@ -130,6 +134,7 @@ func init() {
 
 	// 获取用户信息
 	g.GET("/v1/me", ctrl.me)
+	g.GET("/v1/me/profile", shouldLogined, ctrl.profile)
 
 	// 用户注册
 	g.POST(
@@ -144,7 +149,7 @@ func init() {
 	// 刷新user session的ttl
 	g.PATCH(
 		"/v1/me",
-		ctrl.refresh,
+		ctrl.updateMe,
 	)
 
 	// 获取登录token
@@ -273,6 +278,16 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	return
 }
 
+func (ctrl userCtrl) profile(c *elton.Context) (err error) {
+	us := getUserSession(c)
+	user, err := userSrv.FindOneByAccount(us.GetAccount())
+	if err != nil {
+		return
+	}
+	c.Body = user
+	return
+}
+
 // 用户登录Token，用于客户登录密码加密
 // swagger:response usersLoginTokenResponse
 // nolint
@@ -330,8 +345,8 @@ type usersRegisterParams struct {
 // responses:
 // 	201: usersRegisterResponse
 func (ctrl userCtrl) register(c *elton.Context) (err error) {
-	params := &registerLoginUserParams{}
-	err = validate.Do(params, c.RequestBody)
+	params := registerLoginUserParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
@@ -363,8 +378,8 @@ type usersLoginResponse struct {
 // responses:
 // 	200: usersLoginResponse
 func (ctrl userCtrl) login(c *elton.Context) (err error) {
-	params := &registerLoginUserParams{}
-	err = validate.Do(params, c.RequestBody)
+	params := registerLoginUserParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
@@ -404,7 +419,6 @@ func (ctrl userCtrl) logout(c *elton.Context) (err error) {
 	return
 }
 
-// refresh user refresh
 func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	if us == nil {
@@ -440,10 +454,36 @@ func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
 	return
 }
 
+// refresh user refresh
+func (ctrl userCtrl) updateMe(c *elton.Context) (err error) {
+	if len(c.RequestBody) == 0 {
+		return ctrl.refresh(c)
+	}
+	us := getUserSession(c)
+	if us == nil {
+		c.NoContent()
+		return
+	}
+	params := updateMeParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	err = userSrv.UpdateByAccount(us.GetAccount(), &service.User{
+		Email:  params.Email,
+		Mobile: params.Mobile,
+	})
+	if err != nil {
+		return
+	}
+	c.NoContent()
+	return
+}
+
 // list user list
 func (ctrl userCtrl) list(c *elton.Context) (err error) {
-	params := &listUserParams{}
-	err = validate.Do(params, c.Query())
+	params := listUserParams{}
+	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return
 	}
