@@ -104,13 +104,20 @@ export default {
   methods: {
     ...mapActions(["getUserProfile", "updateMe", "logout"]),
     async onSubmit() {
-      const { email, mobile, profile, password, newPassword } = this;
+      const {
+        email,
+        mobile,
+        profile,
+        password,
+        newPassword,
+        enableUpdatePassword
+      } = this;
       if ((profile.mobile && !mobile) || (profile.email && !email)) {
         this.$message.warning("手机号码与邮箱不能删除");
         return;
       }
       const update = {};
-      if (newPassword) {
+      if (enableUpdatePassword) {
         if (!password) {
           this.$message.warning("请输入旧密码");
           return;
@@ -128,7 +135,7 @@ export default {
       if (profile.email != email) {
         update.email = email;
       }
-      if (Object.keys(update) === 0) {
+      if (Object.keys(update).length === 0) {
         this.$message.warning("请修改信息后再更新");
         return;
       }
