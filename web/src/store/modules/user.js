@@ -288,6 +288,10 @@ export default {
     async updateMe({ commit }, data = {}) {
       commit(mutationUserProfileProcessing, true);
       try {
+        if (data.newPassword) {
+          data.password = generatePassword(data.password);
+          data.newPassword = generatePassword(data.newPassword);
+        }
         await request.patch(USERS_ME, data);
         commit(mutationUserProfileUpdate, data);
       } finally {

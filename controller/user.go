@@ -97,8 +97,10 @@ type (
 		Status int      `json:"status" validate:"omitempty,xUserStatus"`
 	}
 	updateMeParams struct {
-		Email  string `json:"email" validate:"omitempty,xUserEmail"`
-		Mobile string `json:"mobile" validate:"omitempty,xUserMobile"`
+		Email       string `json:"email" validate:"omitempty,xUserEmail"`
+		Mobile      string `json:"mobile" validate:"omitempty,xUserMobile"`
+		Password    string `json:"password" validate:"omitempty,xUserPassword"`
+		NewPassword string `json:"newPassword" validate:"omitempty,xUserPassword"`
 	}
 	listUserLoginRecordParams struct {
 		Begin   time.Time `json:"begin"`
@@ -469,9 +471,26 @@ func (ctrl userCtrl) updateMe(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	err = userSrv.UpdateByAccount(us.GetAccount(), &service.User{
-		Email:  params.Email,
-		Mobile: params.Mobile,
+	account := us.GetAccount()
+	isUpdatedPassword := params.NewPassword != ""
+	// 如果要更新密码，先校验旧密码是否一致
+	if isUpdatedPassword {
+		user, e := userSrv.FindOneByAccount(account)
+		if e != nil {
+			err = e
+			return
+		}
+		// 如果密码不一致
+		if user.Password != params.Password {
+			err = hes.New("password is incorrect")
+			return
+		}
+	}
+
+	err = userSrv.UpdateByAccount(account, &service.User{
+		Email:    params.Email,
+		Mobile:   params.Mobile,
+		Password: params.NewPassword,
 	})
 	if err != nil {
 		return
