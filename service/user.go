@@ -166,6 +166,14 @@ func (srv *UserSrv) createLoginRecordByID(id uint) *UserLoginRecord {
 
 // Add add user
 func (srv *UserSrv) Add(u *User) (err error) {
+	if u.Status == 0 {
+		u.Status = cs.AccountStatusEnabled
+	}
+	if len(u.Roles) == 0 {
+		u.Roles = pq.StringArray([]string{
+			cs.UserRoleNormal,
+		})
+	}
 	err = pgCreate(u)
 	// 首次创建账号，设置su权限
 	if u.ID == 1 {
@@ -274,19 +282,6 @@ func (srv *UserSrv) AddTrackRecord(r *UserTrackRecord, c *elton.Context) (err er
 func (srv *UserSrv) List(params helper.PGQueryParams, args ...interface{}) (result []*User, err error) {
 	result = make([]*User, 0)
 	err = pgQuery(params, args...).Find(&result).Error
-	// db := pgGetClient()
-	// if params.Limit <= 0 {
-	// 	db = db.Limit(defaultUserLimit)
-	// } else {
-	// 	db = db.Limit(params.Limit)
-	// }
-	// if params.Role != "" {
-	// 	db = db.Where("? = ANY(roles)", params.Role)
-	// }
-	// if params.Keyword != "" {
-	// 	db = db.Where("account LIKE ?", "%"+params.Keyword+"%")
-	// }
-	// err = db.Find(&result).Error
 	return
 }
 

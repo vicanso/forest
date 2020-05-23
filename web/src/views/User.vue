@@ -1,5 +1,6 @@
 <template>
   <div class="user">
+    <!-- 用户信息修改 -->
     <el-card v-if="mode === modifyMode">
       <div slot="header">
         <i class="el-icon-user" />
@@ -65,12 +66,63 @@
         </el-row>
       </el-form>
     </el-card>
+
+    <!-- 用户列表 -->
     <el-card v-else>
       <div slot="header">
         <i class="el-icon-user-solid" />
         <span>用户列表</span>
       </div>
-      <div class="pagination" v-loading="processing">
+      <!-- 搜索条件 -->
+      <el-form label-width="90px">
+        <el-row :gutter="15">
+          <el-col :span="6">
+            <el-form-item label="用户角色：">
+              <el-select class="selector" v-model="query.role">
+                <el-option key="all" label="所有" value=""></el-option>
+                <el-option
+                  v-for="role in userRoles"
+                  :key="role.value"
+                  :label="role.name"
+                  :value="role.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="用户状态：">
+              <el-select class="selector" v-model="query.status">
+                <el-option key="all" label="所有" value=""></el-option>
+                <el-option
+                  v-for="status in userStatuses"
+                  :key="status.value"
+                  :label="status.name"
+                  :value="status.value"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="关键字：">
+              <el-input
+                placeholder="请输入关键字"
+                v-model="query.keyword"
+                clearable
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item>
+              <el-button class="submit" type="primary" @click="submit"
+                >查询</el-button
+              >
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div v-loading="processing">
         <el-table
           :data="users"
           row-key="id"
@@ -150,7 +202,10 @@ export default {
       query: {
         offset: 0,
         limit: pageSizes[0],
-        order: "-updatedAt"
+        order: "-updatedAt",
+        role: "",
+        keyword: "",
+        status: ""
       }
     };
   },
@@ -182,6 +237,10 @@ export default {
       } catch (err) {
         this.$message.error(err.message);
       }
+    },
+    submit() {
+      this.query.offset = 0;
+      this.fetch();
     },
     handleCurrentChange(page) {
       this.query.offset = (page - 1) * this.query.limit;

@@ -16,6 +16,7 @@ package validate
 
 import (
 	"reflect"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 
@@ -34,10 +35,17 @@ func init() {
 			cs.AccountStatusForbidden,
 		})
 	})
+	Add("xUserStatusString", func(fl validator.FieldLevel) bool {
+		return isInString(fl, []string{
+			strconv.Itoa(cs.AccountStatusEnabled),
+			strconv.Itoa(cs.AccountStatusForbidden),
+		})
+	})
 	Add("xUserRole", func(fl validator.FieldLevel) bool {
 		return isInString(fl, []string{
 			cs.UserRoleSu,
 			cs.UserRoleAdmin,
+			cs.UserRoleNormal,
 		})
 	})
 	Add("xUserRoles", func(fl validator.FieldLevel) bool {

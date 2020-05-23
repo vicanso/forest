@@ -17,6 +17,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -81,11 +82,12 @@ type (
 	}
 
 	listUserParams struct {
-		Limit   string `json:"limit" validate:"omitempty,xLimit"`
+		Limit   string `json:"limit" validate:"xLimit"`
 		Offset  string `json:"offset" validate:"omitempty,xOffset"`
 		Order   string `json:"order" validate:"omitempty,xOrder"`
 		Keyword string `json:"keyword" validate:"omitempty,xUserAccountKeyword"`
 		Role    string `json:"role" validate:"omitempty,xUserRole"`
+		Status  string `json:"status" validate:"omitempty,xUserStatusString"`
 	}
 
 	updateUserParams struct {
@@ -183,6 +185,29 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listLoginRecord,
 	)
+}
+
+func (params *listUserParams) toConditions() (conditions []interface{}) {
+	queryList := make([]string, 0)
+	args := make([]interface{}, 0)
+	if params.Role != "" {
+		queryList = append(queryList, "? = ANY(roles)")
+		args = append(args, params.Role)
+	}
+	if params.Keyword != "" {
+		queryList = append(queryList, "account LIKE ?")
+		args = append(args, "%"+params.Keyword+"%")
+	}
+	if params.Status != "" {
+		queryList = append(queryList, "status = ?")
+		args = append(args, params.Status)
+	}
+	conditions = make([]interface{}, 0)
+	if len(queryList) != 0 {
+		conditions = append(conditions, strings.Join(queryList, " AND "))
+		conditions = append(conditions, args...)
+	}
+	return
 }
 
 // get user info from session
@@ -306,7 +331,7 @@ func (ctrl userCtrl) register(c *elton.Context) (err error) {
 	u := &service.User{
 		Account:  params.Account,
 		Password: params.Password,
-		Status:   cs.AccountStatusEnabled,
+		// Status:   cs.AccountStatusEnabled,
 	}
 	err = userSrv.Add(u)
 	if err != nil {
@@ -420,7 +445,7 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 	offset, _ := strconv.Atoi(params.Offset)
 	count := -1
 	if offset == 0 {
-		count, err = userSrv.Count()
+		count, err = userSrv.Count(params.toConditions()...)
 		if err != nil {
 			return
 		}
@@ -429,7 +454,7 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 		Order:  params.Order,
 		Offset: offset,
 		Limit:  limit,
-	})
+	}, params.toConditions()...)
 	if err != nil {
 		return
 	}
