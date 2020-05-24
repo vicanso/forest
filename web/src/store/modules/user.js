@@ -7,9 +7,10 @@ import {
   USERS_ME_PROFILE,
   COMMONS_LIST_USER_ROLE,
   COMMONS_LIST_USER_STATUS,
-  COMMONS_LIST_USER_GROUPS
+  COMMONS_LIST_USER_GROUPS,
+  USERS_LOGINS
 } from "@/constants/url";
-import { generatePassword, formatDate } from "@/helpers/util";
+import { generatePassword, formatDate, queryOmitEmpty } from "@/helpers/util";
 import { sha256 } from "@/helpers/crypto";
 
 const mutationUserProcessing = "user.processing";
@@ -34,11 +35,17 @@ const mutationUserProfileProcessing = "user.profile.processing";
 const mutationUserProfile = "user.profile";
 const mutationUserProfileUpdate = "user.profile.update";
 
+const mutationUserListLoginProcessing = "user.list.login.processing";
+const mutationUserListLogin = "user.list.loign";
+
 const state = {
+  // 用户角色
   roleListProcessing: false,
   roles: null,
+  // 用户状态
   statusListProcessing: false,
   statuses: null,
+  // 用户分组
   groupListProcessing: false,
   groups: null,
 
@@ -53,13 +60,21 @@ const state = {
   // 用户详情信息
   profileProcessing: false,
   profile: null,
-
-  userListProcessing: false,
+  // 用户列表
+  listProcessing: false,
   list: {
     data: null,
     count: -1
   },
-  updateProcessing: false
+  // 更新信息
+  updateProcessing: false,
+
+  // 用户登录
+  loginListProcessing: false,
+  loginList: {
+    data: null,
+    count: -1
+  }
 };
 
 function commitUserInfo(commit, data) {
@@ -163,12 +178,15 @@ export default {
       Object.assign(state.info, value);
     },
     [mutationUserListProcessing](state, processing) {
-      state.userListProcessing = processing;
+      state.listProcessing = processing;
     },
-    [mutationUserList](state, { users, count }) {
+    [mutationUserList](state, { users = [], count }) {
       if (count >= 0) {
         state.list.count = count;
       }
+      users.forEach(item => {
+        updateUserDesc(item);
+      });
       state.list.data = users;
     },
     [mutationUserListRoleProcessing](state, processing) {
@@ -209,10 +227,30 @@ export default {
       state.processing = processing;
     },
     [mutationUserProfile](state, profile) {
+      updateUserDesc(profile);
       state.profile = profile;
     },
     [mutationUserProfileUpdate](state, data) {
       Object.assign(state.profile, data);
+    },
+    [mutationUserListLoginProcessing](state, processing) {
+      state.loginListProcessing = processing;
+    },
+    [mutationUserListLogin](state, { logins = [], count }) {
+      if (count >= 0) {
+        state.loginList.count = count;
+      }
+      logins.forEach(item => {
+        item.createdAtDesc = formatDate(item.createdAt);
+        const locations = [];
+        ["country", "province", "city"].forEach(key => {
+          if (item[key]) {
+            locations.push(item[key]);
+          }
+        });
+        item.location = locations.join(" ") || "--";
+      });
+      state.loginList.data = logins;
     }
   },
   actions: {
@@ -308,9 +346,6 @@ export default {
         const { data } = await request.get(USERS, {
           params
         });
-        data.users.forEach(item => {
-          updateUserDesc(item);
-        });
         commit(mutationUserList, data);
       } finally {
         commit(mutationUserListProcessing, false);
@@ -343,10 +378,21 @@ export default {
         await listUserStatus({ commit });
         await listUserGroup({ commit });
         const { data } = await request.get(USERS_ME_PROFILE);
-        updateUserDesc(data);
         commit(mutationUserProfile, data);
       } finally {
         commit(mutationUserProfileProcessing, false);
+      }
+    },
+    // listUserLogins 获取用户登录记录
+    async listUserLogins({ commit }, params) {
+      commit(mutationUserListLoginProcessing, true);
+      try {
+        const { data } = await request.get(USERS_LOGINS, {
+          params: queryOmitEmpty(params)
+        });
+        commit(mutationUserListLogin, data);
+      } finally {
+        commit(mutationUserListLoginProcessing, false);
       }
     }
   }

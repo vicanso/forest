@@ -46,7 +46,8 @@ import {
   CONFIG_SIGNED_KEY,
   CONFIG_ROUTER,
   CONFIG_ROUTER_CONCURRENCY,
-  USER
+  USERS,
+  LOGINS
 } from "@/constants/route";
 import { USER_ADMIN, USER_SU } from "@/constants/user";
 import { mapState } from "vuex";
@@ -87,7 +88,11 @@ const navs = [
     children: [
       {
         name: "用户列表",
-        route: USER
+        route: USERS
+      },
+      {
+        name: "登录记录",
+        route: LOGINS
       }
     ]
   }

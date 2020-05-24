@@ -3,6 +3,7 @@ export const USERS_LOGIN = "/users/v1/me/login";
 export const USERS = "/users/v1";
 export const USERS_ID = "/users/v1/:id";
 export const USERS_ME_PROFILE = "/users/v1/me/profile";
+export const USERS_LOGINS = "/users/v1/login-records";
 
 export const CONFIGS = "/configurations/v1";
 export const CONFIGS_ID = "/configurations/v1/:id";

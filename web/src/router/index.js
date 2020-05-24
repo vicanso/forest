@@ -10,8 +10,9 @@ import {
   CONFIG_SIGNED_KEY,
   CONFIG_ROUTER,
   CONFIG_ROUTER_CONCURRENCY,
-  USER,
-  PROFILE
+  USERS,
+  PROFILE,
+  LOGINS
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -21,7 +22,8 @@ import BlockIP from "@/views/configs/BlockIP.vue";
 import SignedKey from "@/views/configs/SignedKey.vue";
 import Router from "@/views/configs/Router.vue";
 import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
-import User from "@/views/User.vue";
+import Users from "@/views/Users.vue";
+import Logins from "@/views/Logins.vue";
 
 Vue.use(VueRouter);
 
@@ -83,8 +85,16 @@ const routes = [
   },
   {
     path: "/users",
-    name: USER,
-    component: User,
+    name: USERS,
+    component: Users,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/logins",
+    name: LOGINS,
+    component: Logins,
     meta: {
       requiresAuth: true
     }

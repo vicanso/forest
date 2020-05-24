@@ -253,7 +253,7 @@ import { diff } from "@/helpers/util";
 const modifyMode = "modify";
 
 export default {
-  name: "User",
+  name: "Users",
   data() {
     const pageSizes = [10, 20, 30, 50];
     return {
@@ -284,7 +284,7 @@ export default {
       userRoles: state => state.user.roles || [],
       userStatuses: state => state.user.statuses || [],
       userGroups: state => state.user.groups || [],
-      processing: state => state.user.userListProcessing,
+      processing: state => state.user.listProcessing,
       updateProcessing: state => state.user.updateProcessing
     })
   },

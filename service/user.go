@@ -106,14 +106,14 @@ type (
 		City      string `json:"city" gorm:"type:varchar(64)"`
 		ISP       string `json:"isp" gorm:"type:varchar(64)"`
 	}
-	// UserLoginRecordQueryParams user login record query params
-	UserLoginRecordQueryParams struct {
-		Begin   string
-		End     string
-		Account string
-		Limit   int
-		Offset  int
-	}
+	// // UserLoginRecordQueryParams user login record query params
+	// UserLoginRecordQueryParams struct {
+	// 	Begin   string
+	// 	End     string
+	// 	Account string
+	// 	Limit   int
+	// 	Offset  int
+	// }
 	// UserSrv user service
 	UserSrv struct {
 	}
@@ -318,42 +318,40 @@ func (srv *UserSrv) Count(args ...interface{}) (count int, err error) {
 	return pgCount(&User{}, args...)
 }
 
-func newUserLoginRecordQuery(params UserLoginRecordQueryParams) *gorm.DB {
-	db := pgGetClient()
-	if params.Account != "" {
-		db = db.Where("account = ?", params.Account)
-	}
-	if params.Limit <= 0 {
-		db = db.Limit(defaultUserLoginRecordLimit)
-	} else {
-		db = db.Limit(params.Limit)
-	}
-	if params.Begin != "" {
-		db = db.Where("created_at > ?", params.Begin)
-	}
-	if params.End != "" {
-		db = db.Where("created_at < ?", params.End)
-	}
-	return db
-}
+// func newUserLoginRecordQuery(params UserLoginRecordQueryParams) *gorm.DB {
+// 	db := pgGetClient()
+// 	if params.Account != "" {
+// 		db = db.Where("account = ?", params.Account)
+// 	}
+// 	if params.Limit <= 0 {
+// 		db = db.Limit(defaultUserLoginRecordLimit)
+// 	} else {
+// 		db = db.Limit(params.Limit)
+// 	}
+// 	if params.Begin != "" {
+// 		db = db.Where("created_at > ?", params.Begin)
+// 	}
+// 	if params.End != "" {
+// 		db = db.Where("created_at < ?", params.End)
+// 	}
+// 	return db
+// }
 
 // ListLoginRecord list login record
-func (srv *UserSrv) ListLoginRecord(params UserLoginRecordQueryParams) (result []*UserLoginRecord, err error) {
+func (srv *UserSrv) ListLoginRecord(params helper.PGQueryParams, args ...interface{}) (result []*UserLoginRecord, err error) {
 	result = make([]*UserLoginRecord, 0)
-	db := newUserLoginRecordQuery(params)
-	if params.Offset > 0 {
-		db = db.Offset(params.Offset)
-	}
-	err = db.Find(&result).Error
+	err = pgQuery(params, args...).Find(&result).Error
+	// db := newUserLoginRecordQuery(params)
+	// if params.Offset > 0 {
+	// 	db = db.Offset(params.Offset)
+	// }
+	// err = db.Find(&result).Error
 	return
 }
 
 // CountLoginRecord count login record
-func (srv *UserSrv) CountLoginRecord(params UserLoginRecordQueryParams) (count int, err error) {
-	count = 0
-	db := newUserLoginRecordQuery(params)
-	err = db.Model(&UserLoginRecord{}).Count(&count).Error
-	return
+func (srv *UserSrv) CountLoginRecord(args ...interface{}) (count int, err error) {
+	return pgCount(&UserLoginRecord{}, args...)
 }
 
 // GetAccount get the account

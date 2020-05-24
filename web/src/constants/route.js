@@ -12,4 +12,5 @@ export const CONFIG_ROUTER_CONCURRENCY = "RouterConcurrency";
 export const CONFIG_EDITE_MODE = "edit";
 export const CONFIG_LIST_MODE = "list";
 
-export const USER = "User";
+export const USERS = "Users";
+export const LOGINS = "Logins";

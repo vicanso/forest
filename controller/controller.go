@@ -16,6 +16,10 @@ package controller
 
 import (
 	"net/http"
+	"regexp"
+	"strconv"
+
+	"github.com/vicanso/forest/helper"
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
@@ -78,6 +82,16 @@ var (
 	captchaValidate elton.Handler
 )
 
+type (
+	// listParams list params
+	listParams struct {
+		Limit  string `json:"limit" validate:"xLimit"`
+		Offset string `json:"offset" validate:"omitempty,xOffset"`
+		Fields string `json:"fields" validate:"omitempty,xFields"`
+		Order  string `json:"order" validate:"omitempty,xOrder"`
+	}
+)
+
 func init() {
 	magicalValue := ""
 	if !util.IsProduction() {
@@ -88,6 +102,7 @@ func init() {
 
 func newTracker(action string) elton.Handler {
 	return M.NewTracker(M.TrackerConfig{
+		Mask: regexp.MustCompile(`(?i)password`),
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			us := service.NewUserSession(c)
@@ -159,5 +174,17 @@ func newCheckRoles(validRoles []string) elton.Handler {
 		}
 		err = errForbidden
 		return
+	}
+}
+
+// toPGQueryParams to pg query params
+func (params *listParams) toPGQueryParams() helper.PGQueryParams {
+	limit, _ := strconv.Atoi(params.Limit)
+	offset, _ := strconv.Atoi(params.Offset)
+	return helper.PGQueryParams{
+		Limit:  limit,
+		Offset: offset,
+		Order:  params.Order,
+		Fields: params.Fields,
 	}
 }

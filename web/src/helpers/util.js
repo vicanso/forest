@@ -1,6 +1,7 @@
 import { sha256 } from "@/helpers/crypto";
 
 const hash = "JT";
+const oneDayMS = 24 * 3600 * 1000;
 
 export function generatePassword(pass) {
   return sha256(pass + hash);
@@ -66,4 +67,30 @@ export function isAllowedUser(allowedRoles, userRoles) {
     });
   });
   return allowed;
+}
+
+// queryOmitEmpty 删除query中的空值
+export function queryOmitEmpty(query) {
+  const params = {};
+  Object.keys(query).forEach(key => {
+    if (query[key]) {
+      params[key] = query[key];
+    }
+  });
+  return params;
+}
+
+// today 获取当天0点时间
+export function today() {
+  return new Date(new Date(new Date().toLocaleDateString()).getTime());
+}
+
+// tomorrow 获取明天0点时间
+export function tomorrow() {
+  return new Date(today().getTime() + oneDayMS);
+}
+
+// today 获取当天0点时间
+export function yesterday() {
+  return new Date(today().getTime() - oneDayMS);
 }

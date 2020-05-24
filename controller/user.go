@@ -22,7 +22,6 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/tidwall/gjson"
-	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
@@ -82,9 +81,7 @@ type (
 	}
 
 	listUserParams struct {
-		Limit   string `json:"limit" validate:"xLimit"`
-		Offset  string `json:"offset" validate:"omitempty,xOffset"`
-		Order   string `json:"order" validate:"omitempty,xOrder"`
+		listParams
 		Keyword string `json:"keyword" validate:"omitempty,xUserAccountKeyword"`
 		Role    string `json:"role" validate:"omitempty,xUserRole"`
 		Group   string `json:"group" validate:"omitempty,xUserGroup"`
@@ -103,11 +100,10 @@ type (
 		NewPassword string `json:"newPassword" validate:"omitempty,xUserPassword"`
 	}
 	listUserLoginRecordParams struct {
+		listParams
 		Begin   time.Time `json:"begin"`
 		End     time.Time `json:"end"`
-		Account string    `json:"account" validate:"xUserAccount"`
-		Limit   string    `json:"limit" validate:"xLimit"`
-		Offset  string    `json:"offset" validate:"omitempty,xOffset"`
+		Account string    `json:"account" validate:"omitempty,xUserAccount"`
 	}
 )
 
@@ -151,6 +147,7 @@ func init() {
 	// 刷新user session的ttl
 	g.PATCH(
 		"/v1/me",
+		newTracker(cs.ActionUserMeUpdate),
 		ctrl.updateMe,
 	)
 
@@ -197,6 +194,7 @@ func init() {
 	)
 }
 
+// toConditions get conditions of list user
 func (params *listUserParams) toConditions() (conditions []interface{}) {
 	queryList := make([]string, 0)
 	args := make([]interface{}, 0)
@@ -215,6 +213,30 @@ func (params *listUserParams) toConditions() (conditions []interface{}) {
 	if params.Status != "" {
 		queryList = append(queryList, "status = ?")
 		args = append(args, params.Status)
+	}
+	conditions = make([]interface{}, 0)
+	if len(queryList) != 0 {
+		conditions = append(conditions, strings.Join(queryList, " AND "))
+		conditions = append(conditions, args...)
+	}
+	return
+}
+
+// toConditions get conditions of list user login
+func (params *listUserLoginRecordParams) toConditions() (conditions []interface{}) {
+	queryList := make([]string, 0)
+	args := make([]interface{}, 0)
+	if params.Account != "" {
+		queryList = append(queryList, "account = ?")
+		args = append(args, params.Account)
+	}
+	if !params.Begin.IsZero() {
+		queryList = append(queryList, "created_at >= ?")
+		args = append(args, util.FormatTime(params.Begin))
+	}
+	if !params.End.IsZero() {
+		queryList = append(queryList, "created_at <= ?")
+		args = append(args, util.FormatTime(params.End))
 	}
 	conditions = make([]interface{}, 0)
 	if len(queryList) != 0 {
@@ -506,20 +528,16 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	limit, _ := strconv.Atoi(params.Limit)
-	offset, _ := strconv.Atoi(params.Offset)
 	count := -1
-	if offset == 0 {
-		count, err = userSrv.Count(params.toConditions()...)
+	args := params.toConditions()
+	queryParams := params.listParams.toPGQueryParams()
+	if queryParams.Offset == 0 {
+		count, err = userSrv.Count(args...)
 		if err != nil {
 			return
 		}
 	}
-	users, err := userSrv.List(helper.PGQueryParams{
-		Order:  params.Order,
-		Offset: offset,
-		Limit:  limit,
-	}, params.toConditions()...)
+	users, err := userSrv.List(queryParams, args...)
 	if err != nil {
 		return
 	}
@@ -577,27 +595,20 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	offset, _ := strconv.Atoi(params.Offset)
-	limit, _ := strconv.Atoi(params.Limit)
-	query := service.UserLoginRecordQueryParams{
-		Account: params.Account,
-		Limit:   limit,
-		Offset:  offset,
+	queryParams := params.listParams.toPGQueryParams()
+	count := -1
+	args := params.toConditions()
+	if queryParams.Offset == 0 {
+		count, err = userSrv.CountLoginRecord(args...)
+		if err != nil {
+			return
+		}
 	}
-	if !params.Begin.IsZero() {
-		query.Begin = util.FormatTime(params.Begin)
-	}
-	if !params.End.IsZero() {
-		query.End = util.FormatTime(params.End)
-	}
-	result, err := userSrv.ListLoginRecord(query)
+	result, err := userSrv.ListLoginRecord(queryParams, args...)
 	if err != nil {
 		return
 	}
-	count := -1
-	if offset == 0 {
-		count, err = userSrv.CountLoginRecord(query)
-	}
+
 	c.Body = struct {
 		Logins []*service.UserLoginRecord `json:"logins"`
 		Count  int                        `json:"count"`
