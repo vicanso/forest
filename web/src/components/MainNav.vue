@@ -122,7 +122,17 @@ export default {
         if (item.roles && !isAllowedUser(item.roles, roles)) {
           return;
         }
-        filterNavs.push(item);
+        const clone = Object.assign({}, item);
+        const children = item.children.map(subItem =>
+          Object.assign({}, subItem)
+        );
+        clone.children = children.filter(subItem => {
+          if (!subItem.roles || isAllowedUser(subItem.roles, roles)) {
+            return true;
+          }
+          return false;
+        });
+        filterNavs.push(clone);
       });
       return filterNavs;
     }
