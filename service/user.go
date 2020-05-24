@@ -38,10 +38,6 @@ const (
 	UserLoginToken = "loginToken"
 )
 
-const (
-	defaultUserLoginRecordLimit = 10
-)
-
 var (
 	errAccountOrPasswordInvalid = hes.New("account or password is invalid")
 )
@@ -106,14 +102,6 @@ type (
 		City      string `json:"city" gorm:"type:varchar(64)"`
 		ISP       string `json:"isp" gorm:"type:varchar(64)"`
 	}
-	// // UserLoginRecordQueryParams user login record query params
-	// UserLoginRecordQueryParams struct {
-	// 	Begin   string
-	// 	End     string
-	// 	Account string
-	// 	Limit   int
-	// 	Offset  int
-	// }
 	// UserSrv user service
 	UserSrv struct {
 	}
@@ -318,34 +306,10 @@ func (srv *UserSrv) Count(args ...interface{}) (count int, err error) {
 	return pgCount(&User{}, args...)
 }
 
-// func newUserLoginRecordQuery(params UserLoginRecordQueryParams) *gorm.DB {
-// 	db := pgGetClient()
-// 	if params.Account != "" {
-// 		db = db.Where("account = ?", params.Account)
-// 	}
-// 	if params.Limit <= 0 {
-// 		db = db.Limit(defaultUserLoginRecordLimit)
-// 	} else {
-// 		db = db.Limit(params.Limit)
-// 	}
-// 	if params.Begin != "" {
-// 		db = db.Where("created_at > ?", params.Begin)
-// 	}
-// 	if params.End != "" {
-// 		db = db.Where("created_at < ?", params.End)
-// 	}
-// 	return db
-// }
-
 // ListLoginRecord list login record
 func (srv *UserSrv) ListLoginRecord(params helper.PGQueryParams, args ...interface{}) (result []*UserLoginRecord, err error) {
 	result = make([]*UserLoginRecord, 0)
 	err = pgQuery(params, args...).Find(&result).Error
-	// db := newUserLoginRecordQuery(params)
-	// if params.Offset > 0 {
-	// 	db = db.Offset(params.Offset)
-	// }
-	// err = db.Find(&result).Error
 	return
 }
 
