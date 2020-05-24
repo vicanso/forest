@@ -36,7 +36,7 @@ type (
 )
 
 var (
-	box = packr.New("asset", "../web/build")
+	box = packr.New("asset", "../web/dist")
 )
 
 func (sf *staticFile) Exists(file string) bool {
@@ -66,7 +66,6 @@ func init() {
 		box: box,
 	}
 	g.GET("/static/*", M.NewStaticServe(sf, M.StaticServeConfig{
-		Path: "/static",
 		// 客户端缓存一年
 		MaxAge: 365 * 24 * 3600,
 		// 缓存服务器缓存一个小时
