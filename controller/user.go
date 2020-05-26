@@ -46,6 +46,9 @@ type (
 		// 角色
 		// Example: ["su", "admin"]
 		Roles []string `json:"roles"`
+		// 分组
+		// Example: ["it", "finance"]
+		Groups []string `json:"groups"`
 		// 系统时间
 		// Example: 2019-10-26T10:11:25+08:00
 		Date string `json:"date"`
@@ -82,7 +85,7 @@ type (
 
 	listUserParams struct {
 		listParams
-		Keyword string `json:"keyword" validate:"omitempty,xUserAccountKeyword"`
+		Keyword string `json:"keyword" validate:"omitempty,xKeyword"`
 		Role    string `json:"role" validate:"omitempty,xUserRole"`
 		Group   string `json:"group" validate:"omitempty,xUserGroup"`
 		Status  string `json:"status" validate:"omitempty,xUserStatusString"`
@@ -124,10 +127,10 @@ func init() {
 
 	// 更新用户信息
 	g.PATCH(
-		"/v1/{userID}",
+		"/v1/{id}",
 		shouldBeAdmin,
 		newTracker(cs.ActionUserInfoUpdate),
-		ctrl.update,
+		ctrl.updateByID,
 	)
 
 	// 获取用户信息
@@ -207,7 +210,7 @@ func (params *listUserParams) toConditions() (conditions []interface{}) {
 		args = append(args, params.Group)
 	}
 	if params.Keyword != "" {
-		queryList = append(queryList, "account LIKE ?")
+		queryList = append(queryList, "account ILIKE ?")
 		args = append(args, "%"+params.Keyword+"%")
 	}
 	if params.Status != "" {
@@ -259,6 +262,7 @@ func pickUserInfo(c *elton.Context) (userInfo *userInfoResp) {
 	if account != "" {
 		userInfo.Account = account
 		userInfo.Roles = us.GetRoles()
+		userInfo.Groups = us.GetGroups()
 		userInfo.Anonymous = false
 	}
 	return
@@ -429,6 +433,7 @@ func (ctrl userCtrl) login(c *elton.Context) (err error) {
 	omitUserInfo(u)
 	_ = us.SetAccount(u.Account)
 	_ = us.SetRoles(u.Roles)
+	_ = us.SetGroups(u.Groups)
 	c.Body = u
 	return
 }
@@ -480,7 +485,8 @@ func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
 
 // refresh user refresh
 func (ctrl userCtrl) updateMe(c *elton.Context) (err error) {
-	if len(c.RequestBody) == 0 {
+	// 如果没有数据要更新，如{}
+	if len(c.RequestBody) <= 2 {
 		return ctrl.refresh(c)
 	}
 	us := getUserSession(c)
@@ -552,13 +558,13 @@ func (ctrl userCtrl) list(c *elton.Context) (err error) {
 }
 
 // update user update
-func (ctrl userCtrl) update(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("userID"))
+func (ctrl userCtrl) updateByID(c *elton.Context) (err error) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return
 	}
-	params := &updateUserParams{}
-	err = validate.Do(params, c.RequestBody)
+	params := updateUserParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
@@ -590,8 +596,8 @@ func (ctrl userCtrl) update(c *elton.Context) (err error) {
 
 // listLoginRecord list login record
 func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
-	params := &listUserLoginRecordParams{}
-	err = validate.Do(params, c.Query())
+	params := listUserLoginRecordParams{}
+	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return
 	}

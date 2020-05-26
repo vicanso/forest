@@ -94,3 +94,14 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 		return c.Next()
 	}
 }
+
+// NewNoCacheWithCondition create a nocache middleware
+func NewNoCacheWithCondition(key, value string) elton.Handler {
+	return func(c *elton.Context) (err error) {
+		err = c.Next()
+		if c.QueryParam(key) == value {
+			c.NoCache()
+		}
+		return
+	}
+}

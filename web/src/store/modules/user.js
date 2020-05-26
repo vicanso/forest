@@ -10,7 +10,12 @@ import {
   COMMONS_LIST_USER_GROUPS,
   USERS_LOGINS
 } from "@/constants/url";
-import { generatePassword, formatDate, queryOmitEmpty } from "@/helpers/util";
+import {
+  generatePassword,
+  formatDate,
+  queryOmitEmpty,
+  addNoCacheQueryParam
+} from "@/helpers/util";
 import { sha256 } from "@/helpers/crypto";
 
 const mutationUserProcessing = "user.processing";
@@ -133,7 +138,9 @@ async function listUserStatus({ commit }) {
   }
   commit(mutationUserListStatusProcessing, true);
   try {
-    const { data } = await request.get(COMMONS_LIST_USER_STATUS);
+    const { data } = await request.get(COMMONS_LIST_USER_STATUS, {
+      params: addNoCacheQueryParam()
+    });
     commit(mutationuserListStatus, data);
   } finally {
     commit(mutationUserListStatusProcessing, false);
@@ -147,7 +154,9 @@ async function listUserRole({ commit }) {
   }
   commit(mutationUserListRoleProcessing, true);
   try {
-    const { data } = await request.get(COMMONS_LIST_USER_ROLE);
+    const { data } = await request.get(COMMONS_LIST_USER_ROLE, {
+      params: addNoCacheQueryParam()
+    });
     commit(mutationUserListRole, data);
   } finally {
     commit(mutationUserListRoleProcessing, false);
@@ -161,7 +170,9 @@ async function listUserGroup({ commit }) {
   }
   commit(mutationUserListGroupProcessing, true);
   try {
-    const { data } = await request.get(COMMONS_LIST_USER_GROUPS);
+    const { data } = await request.get(COMMONS_LIST_USER_GROUPS, {
+      params: addNoCacheQueryParam()
+    });
     commit(mutationuserListGroup, data);
   } finally {
     commit(mutationUserListGroupProcessing, false);

@@ -69,7 +69,7 @@ func init() {
 	g.PATCH(
 		"/v1/{id}",
 		newTracker(cs.ActionConfigurationUpdate),
-		ctrl.update,
+		ctrl.updateByID,
 	)
 	g.DELETE(
 		"/v1/{id}",
@@ -80,8 +80,8 @@ func init() {
 
 // list configuration
 func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
-	params := &listConfigurationParmas{}
-	err = validate.Do(params, c.Query())
+	params := listConfigurationParmas{}
+	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return
 	}
@@ -100,8 +100,8 @@ func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
 
 // add configuration
 func (ctrl configurationCtrl) add(c *elton.Context) (err error) {
-	params := &addConfigurationParams{}
-	err = validate.Do(params, c.RequestBody)
+	params := addConfigurationParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
@@ -123,14 +123,14 @@ func (ctrl configurationCtrl) add(c *elton.Context) (err error) {
 	return
 }
 
-// update configuration
-func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
+// updateByID configuration
+func (ctrl configurationCtrl) updateByID(c *elton.Context) (err error) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return
 	}
-	params := &updateConfigurationParams{}
-	err = validate.Do(params, c.RequestBody)
+	params := updateConfigurationParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}

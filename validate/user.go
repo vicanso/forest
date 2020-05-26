@@ -25,7 +25,6 @@ func init() {
 	AddAlias("xUserAccount", "ascii,min=2,max=10")
 
 	AddAlias("xUserPassword", "ascii,len=44")
-	AddAlias("xUserAccountKeyword", "ascii,min=1,max=10")
 	Add("xUserStatus", func(fl validator.FieldLevel) bool {
 		return isInInt(fl, cs.AccountStatuses)
 	})

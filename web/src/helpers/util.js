@@ -94,3 +94,9 @@ export function tomorrow() {
 export function yesterday() {
   return new Date(today().getTime() - oneDayMS);
 }
+
+// addNoCacheQueryParam 添加不缓存query参数
+export function addNoCacheQueryParam(params = {}) {
+  params["cacheControl"] = "no-cache";
+  return params;
+}

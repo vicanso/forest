@@ -34,6 +34,8 @@ const (
 	UserLoginAt = "loginAt"
 	// UserRoles user roles
 	UserRoles = "roles"
+	// UserGroups user groups
+	UserGroups = "groups"
 	// UserLoginToken user login token
 	UserLoginToken = "loginToken"
 )
@@ -375,6 +377,27 @@ func (u *UserSession) GetRoles() []string {
 		}
 	}
 	return roles
+}
+
+// SetGroups set user groups
+func (u *UserSession) SetGroups(groups []string) error {
+	return u.se.Set(UserGroups, groups)
+}
+
+// GetGroups get user groups
+func (u *UserSession) GetGroups() []string {
+	result, ok := u.se.Get(UserGroups).([]interface{})
+	if !ok {
+		return nil
+	}
+	groups := []string{}
+	for _, item := range result {
+		group, _ := item.(string)
+		if group != "" {
+			groups = append(groups, group)
+		}
+	}
+	return groups
 }
 
 // Destroy destroy user session

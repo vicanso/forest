@@ -45,9 +45,21 @@ func init() {
 
 	g.GET("/commons/performance", ctrl.getPerformance)
 
-	g.GET("/commons/user-roles", ctrl.listUserRoles)
-	g.GET("/commons/user-statuses", ctrl.listUserStatuses)
-	g.GET("/commons/user-groups", ctrl.listUserGroups)
+	g.GET(
+		"/commons/user-roles",
+		noCacheIfSetNoCache,
+		ctrl.listUserRoles,
+	)
+	g.GET(
+		"/commons/user-statuses",
+		noCacheIfSetNoCache,
+		ctrl.listUserStatuses,
+	)
+	g.GET(
+		"/commons/user-groups",
+		noCacheIfSetNoCache,
+		ctrl.listUserGroups,
+	)
 }
 
 // 服务检测ping的响应

@@ -77,6 +77,8 @@ var (
 	shouldBeSu = newCheckRoles([]string{
 		cs.UserRoleSu,
 	})
+	// noCacheIfSetNoCache 如果query指定了no cache，则设置不缓存
+	noCacheIfSetNoCache = middleware.NewNoCacheWithCondition("cacheControl", "no-cache")
 
 	// 图形验证码校验
 	captchaValidate elton.Handler
