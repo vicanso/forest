@@ -45,21 +45,7 @@ func init() {
 
 	g.GET("/commons/performance", ctrl.getPerformance)
 
-	g.GET(
-		"/commons/user-roles",
-		noCacheIfSetNoCache,
-		ctrl.listUserRoles,
-	)
-	g.GET(
-		"/commons/user-statuses",
-		noCacheIfSetNoCache,
-		ctrl.listUserStatuses,
-	)
-	g.GET(
-		"/commons/user-groups",
-		noCacheIfSetNoCache,
-		ctrl.listUserGroups,
-	)
+
 }
 
 // 服务检测ping的响应
@@ -156,32 +142,5 @@ func (ctrl commonCtrl) captcha(c *elton.Context) (err error) {
 
 func (ctrl commonCtrl) getPerformance(c *elton.Context) (err error) {
 	c.Body = service.GetPerformance()
-	return
-}
-
-// listUserRoles list user roles
-func (ctrl commonCtrl) listUserRoles(c *elton.Context) (err error) {
-	c.CacheMaxAge("5m")
-	c.Body = map[string][]*service.UserRole{
-		"roles": userSrv.ListRoles(),
-	}
-	return
-}
-
-// listUserStatuses list user status
-func (ctrl commonCtrl) listUserStatuses(c *elton.Context) (err error) {
-	c.CacheMaxAge("5m")
-	c.Body = map[string][]*service.UserStatus{
-		"statuses": userSrv.ListStatuses(),
-	}
-	return
-}
-
-// listUserGroups list user group
-func (ctrl commonCtrl) listUserGroups(c *elton.Context) (err error) {
-	c.CacheMaxAge("5m")
-	c.Body = map[string][]*service.UserGroup{
-		"groups": userSrv.ListGroups(),
-	}
 	return
 }

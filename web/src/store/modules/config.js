@@ -81,7 +81,12 @@ export default {
       }
       try {
         const { data } = await request.get(CONFIGS, {
-          params
+          params: Object.assign(
+            {
+              limit: 50
+            },
+            params
+          )
         });
         data.configs.forEach(item => {
           item.isJSON = false;

@@ -28,21 +28,21 @@ import (
 type (
 	// RouterConfig route config
 	RouterConfig struct {
-		Route      string `json:"route"`
-		Method     string `json:"method"`
-		Status     int    `json:"status"`
-		CotentType string `json:"cotentType"`
-		Response   string `json:"response"`
+		Route      string `json:"route,omitempty"`
+		Method     string `json:"method,omitempty"`
+		Status     int    `json:"status,omitempty"`
+		CotentType string `json:"cotentType,omitempty"`
+		Response   string `json:"response,omitempty"`
 		// Delay 延时，单位秒
-		Delay int    `json:"delay"`
-		URL   string `json:"url"`
+		Delay int    `json:"delay,omitempty"`
+		URL   string `json:"url,omitempty"`
 	}
 	// RouterConcurrency router concurrency
 	RouterConcurrency struct {
-		Route   string `json:"route"`
-		Method  string `json:"method"`
-		Max     uint32 `json:"max"`
-		Current uint32 `json:"current"`
+		Route   string `json:"route,omitempty"`
+		Method  string `json:"method,omitempty"`
+		Max     uint32 `json:"max,omitempty"`
+		Current uint32 `json:"current,omitempty"`
 	}
 	// RCLimiter
 	RCLimiter struct {

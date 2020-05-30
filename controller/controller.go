@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/vicanso/forest/helper"
 
@@ -87,10 +88,16 @@ var (
 type (
 	// listParams list params
 	listParams struct {
-		Limit  string `json:"limit" validate:"xLimit"`
-		Offset string `json:"offset" validate:"omitempty,xOffset"`
-		Fields string `json:"fields" validate:"omitempty,xFields"`
-		Order  string `json:"order" validate:"omitempty,xOrder"`
+		Limit  string `json:"limit,omitempty" validate:"xLimit"`
+		Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
+		Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
+		Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
+	}
+
+	// queryConditions 公共的query conditions
+	queryConditions struct {
+		queryList []string
+		args      []interface{}
 	}
 )
 
@@ -100,6 +107,34 @@ func init() {
 		magicalValue = cs.MagicalCaptcha
 	}
 	captchaValidate = middleware.ValidateCaptcha(magicalValue)
+}
+
+func (conditions *queryConditions) add(query string, arg interface{}) {
+	conditions.addQuery(query)
+	conditions.addArgs(arg)
+}
+
+func (conditions *queryConditions) addQuery(arr ...string) {
+	if len(conditions.queryList) == 0 {
+		conditions.queryList = make([]string, 0)
+	}
+	conditions.queryList = append(conditions.queryList, arr...)
+}
+
+func (conditions *queryConditions) addArgs(args ...interface{}) {
+	if len(conditions.args) == 0 {
+		conditions.args = make([]interface{}, 0)
+	}
+	conditions.args = append(conditions.args, args...)
+}
+
+func (conditions *queryConditions) toArray() []interface{} {
+	arr := make([]interface{}, 0)
+	if len(conditions.queryList) != 0 {
+		arr = append(arr, strings.Join(conditions.queryList, " AND "))
+		arr = append(arr, conditions.args...)
+	}
+	return arr
 }
 
 func newTracker(action string) elton.Handler {
@@ -180,7 +215,7 @@ func newCheckRoles(validRoles []string) elton.Handler {
 }
 
 // toPGQueryParams to pg query params
-func (params *listParams) toPGQueryParams() helper.PGQueryParams {
+func (params listParams) toPGQueryParams() helper.PGQueryParams {
 	limit, _ := strconv.Atoi(params.Limit)
 	offset, _ := strconv.Atoi(params.Offset)
 	return helper.PGQueryParams{

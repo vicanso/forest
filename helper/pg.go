@@ -71,10 +71,10 @@ type (
 	}
 
 	Model struct {
-		ID        uint       `gorm:"primary_key" json:"id"`
-		CreatedAt time.Time  `json:"createdAt"`
-		UpdatedAt time.Time  `json:"updatedAt"`
-		DeletedAt *time.Time `sql:"index" json:"deletedAt"`
+		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 	}
 )
 
@@ -229,7 +229,11 @@ func PGQuery(params PGQueryParams, args ...interface{}) *gorm.DB {
 		db = db.Offset(params.Offset)
 	}
 	if params.Fields != "" {
-		db = db.Select(PGFormatSelect(params.Fields))
+		if params.Fields[0] == '-' {
+			db = db.Omit(PGFormatSelect(params.Fields[1:]))
+		} else {
+			db = db.Select(PGFormatSelect(params.Fields))
+		}
 	}
 	if params.Order != "" {
 		db = db.Order(PGFormatOrder(params.Order))

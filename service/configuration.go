@@ -45,24 +45,18 @@ type (
 		helper.Model
 
 		// 配置名称，唯一
-		Name string `json:"name" gorm:"type:varchar(30);not null;unique"`
+		Name string `json:"name,omitempty" gorm:"type:varchar(30);not null;unique"`
 		// 配置分类
-		Category string `json:"category" gorm:"type:varchar(20)"`
+		Category string `json:"category,omitempty" gorm:"type:varchar(20)"`
 		// 配置由谁创建
-		Owner string `json:"owner" gorm:"type:varchar(20);not null"`
+		Owner string `json:"owner,omitempty" gorm:"type:varchar(20);not null"`
 		// 配置状态
-		Status int    `json:"status"`
-		Data   string `json:"data"`
+		Status int    `json:"status,omitempty"`
+		Data   string `json:"data,omitempty"`
 		// 启用开始时间
-		BeginDate *time.Time `json:"beginDate"`
+		BeginDate *time.Time `json:"beginDate,omitempty"`
 		// 启用结束时间
-		EndDate *time.Time `json:"endDate"`
-	}
-	// ConfigurationQueryParmas configuration query params
-	ConfigurationQueryParmas struct {
-		Name     string
-		Category string
-		Limit    int
+		EndDate *time.Time `json:"endDate,omitempty"`
 	}
 	// ConfigurationSrv configuration service
 	ConfigurationSrv struct {
@@ -190,34 +184,9 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 }
 
 // List list configurations
-func (srv *ConfigurationSrv) List(params ConfigurationQueryParmas) (result []*Configuration, err error) {
+func (srv *ConfigurationSrv) List(params helper.PGQueryParams, args ...interface{}) (result []*Configuration, err error) {
 	result = make([]*Configuration, 0)
-	db := pgGetClient()
-
-	if params.Limit <= 0 {
-		db = db.Limit(defaultConfigurationLimit)
-	} else {
-		db = db.Limit(params.Limit)
-	}
-
-	if params.Name != "" {
-		names := strings.Split(params.Name, ",")
-		if len(names) > 1 {
-			db = db.Where("name in (?)", names)
-		} else {
-			db = db.Where("name = (?)", names[0])
-		}
-	}
-
-	if params.Category != "" {
-		categories := strings.Split(params.Category, ",")
-		if len(categories) > 1 {
-			db = db.Where("category in (?)", categories)
-		} else {
-			db = db.Where("category = ?", categories[0])
-		}
-	}
-	err = db.Find(&result).Error
+	err = pgQuery(params, args...).Find(&result).Error
 	return
 }
 

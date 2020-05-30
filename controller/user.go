@@ -39,36 +39,36 @@ type (
 	userInfoResp struct {
 		// 是否匿名
 		// Example: true
-		Anonymous bool `json:"anonymous"`
+		Anonymous bool `json:"anonymous,omitempty"`
 		// 账号
 		// Example: vicanso
-		Account string `json:"account"`
+		Account string `json:"account,omitempty"`
 		// 角色
 		// Example: ["su", "admin"]
-		Roles []string `json:"roles"`
+		Roles []string `json:"roles,omitempty"`
 		// 分组
 		// Example: ["it", "finance"]
-		Groups []string `json:"groups"`
+		Groups []string `json:"groups,omitempty"`
 		// 系统时间
 		// Example: 2019-10-26T10:11:25+08:00
-		Date string `json:"date"`
+		Date string `json:"date,omitempty"`
 		// 信息更新时间
 		// Example: 2019-10-26T10:11:25+08:00
-		UpdatedAt string `json:"updatedAt"`
+		UpdatedAt string `json:"updatedAt,omitempty"`
 		// IP地址
 		// Example: 1.1.1.1
-		IP string `json:"ip"`
+		IP string `json:"ip,omitempty"`
 		// rack id
 		// Example: 01DPNPDXH4MQJHBF4QX1EFD6Y3
-		TrackID string `json:"trackId"`
+		TrackID string `json:"trackId,omitempty"`
 		// 登录时间
 		// Example: 2019-10-26T10:11:25+08:00
-		LoginAt string `json:"loginAt"`
+		LoginAt string `json:"loginAt,omitempty"`
 	}
 	loginTokenResp struct {
 		// 登录Token
 		// Example: IaHnYepm
-		Token string `json:"token"`
+		Token string `json:"token,omitempty"`
 	}
 )
 
@@ -77,36 +77,36 @@ type (
 	registerLoginUserParams struct {
 		// 账户
 		// Example: vicanso
-		Account string `json:"account" validate:"xUserAccount"`
+		Account string `json:"account,omitempty" validate:"xUserAccount"`
 		// 密码，密码为sha256后的加密串
 		// Example: JgX9742WqzaNHVP+YiPy/RXP0eoX29k00hEF3BdghGU=
-		Password string `json:"password" validate:"xUserPassword"`
+		Password string `json:"password,omitempty" validate:"xUserPassword"`
 	}
 
 	listUserParams struct {
 		listParams
-		Keyword string `json:"keyword" validate:"omitempty,xKeyword"`
-		Role    string `json:"role" validate:"omitempty,xUserRole"`
-		Group   string `json:"group" validate:"omitempty,xUserGroup"`
-		Status  string `json:"status" validate:"omitempty,xUserStatusString"`
+		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		Role    string `json:"role,omitempty" validate:"omitempty,xUserRole"`
+		Group   string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
+		Status  string `json:"status,omitempty" validate:"omitempty,xUserStatusString"`
 	}
 
 	updateUserParams struct {
-		Roles  []string `json:"roles" validate:"omitempty,xUserRoles"`
-		Groups []string `json:"groups" validate:"omitempty,xUserGroups"`
-		Status int      `json:"status" validate:"omitempty,xUserStatus"`
+		Roles  []string `json:"roles,omitempty" validate:"omitempty,xUserRoles"`
+		Groups []string `json:"groups,omitempty" validate:"omitempty,xUserGroups"`
+		Status int      `json:"status,omitempty" validate:"omitempty,xUserStatus"`
 	}
 	updateMeParams struct {
-		Email       string `json:"email" validate:"omitempty,xUserEmail"`
-		Mobile      string `json:"mobile" validate:"omitempty,xUserMobile"`
-		Password    string `json:"password" validate:"omitempty,xUserPassword"`
-		NewPassword string `json:"newPassword" validate:"omitempty,xUserPassword"`
+		Email       string `json:"email,omitempty" validate:"omitempty,xUserEmail"`
+		Mobile      string `json:"mobile,omitempty" validate:"omitempty,xUserMobile"`
+		Password    string `json:"password,omitempty" validate:"omitempty,xUserPassword"`
+		NewPassword string `json:"newPassword,omitempty" validate:"omitempty,xUserPassword"`
 	}
 	listUserLoginRecordParams struct {
 		listParams
-		Begin   time.Time `json:"begin"`
-		End     time.Time `json:"end"`
-		Account string    `json:"account" validate:"omitempty,xUserAccount"`
+		Begin   time.Time `json:"begin,omitempty"`
+		End     time.Time `json:"end,omitempty"`
+		Account string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
 	}
 )
 
@@ -115,8 +115,9 @@ var (
 )
 
 func init() {
-
-	g := router.NewGroup("/users", loadUserSession)
+	prefix := "/users"
+	g := router.NewGroup(prefix, loadUserSession)
+	gNoneSession := router.NewGroup(prefix)
 	ctrl := userCtrl{}
 	// 获取用户列表
 	g.GET(
@@ -195,38 +196,41 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listLoginRecord,
 	)
+
+	gNoneSession.GET(
+		"/v1/roles",
+		ctrl.listRoles,
+	)
+	gNoneSession.GET(
+		"/v1/statuses",
+		ctrl.listStatuses,
+	)
+	gNoneSession.GET(
+		"/v1/groups",
+		ctrl.listGroups,
+	)
 }
 
 // toConditions get conditions of list user
-func (params *listUserParams) toConditions() (conditions []interface{}) {
-	queryList := make([]string, 0)
-	args := make([]interface{}, 0)
+func (params listUserParams) toConditions() []interface{} {
+	conds := queryConditions{}
 	if params.Role != "" {
-		queryList = append(queryList, "? = ANY(roles)")
-		args = append(args, params.Role)
+		conds.add("? = ANY(roles)", params.Role)
 	}
 	if params.Group != "" {
-		queryList = append(queryList, "? = ANY(groups)")
-		args = append(args, params.Group)
+		conds.add("? = ANY(groups)", params.Group)
 	}
 	if params.Keyword != "" {
-		queryList = append(queryList, "account ILIKE ?")
-		args = append(args, "%"+params.Keyword+"%")
+		conds.add("account ILIKE ?", "%"+params.Keyword+"%")
 	}
 	if params.Status != "" {
-		queryList = append(queryList, "status = ?")
-		args = append(args, params.Status)
+		conds.add("status = ?", params.Status)
 	}
-	conditions = make([]interface{}, 0)
-	if len(queryList) != 0 {
-		conditions = append(conditions, strings.Join(queryList, " AND "))
-		conditions = append(conditions, args...)
-	}
-	return
+	return conds.toArray()
 }
 
 // toConditions get conditions of list user login
-func (params *listUserLoginRecordParams) toConditions() (conditions []interface{}) {
+func (params listUserLoginRecordParams) toConditions() (conditions []interface{}) {
 	queryList := make([]string, 0)
 	args := make([]interface{}, 0)
 	if params.Account != "" {
@@ -621,6 +625,33 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 	}{
 		result,
 		count,
+	}
+	return
+}
+
+// listRoles list user roles
+func (ctrl userCtrl) listRoles(c *elton.Context) (err error) {
+	c.CacheMaxAge("5m")
+	c.Body = map[string][]*service.UserRole{
+		"roles": userSrv.ListRoles(),
+	}
+	return
+}
+
+// listStatuses list user status
+func (ctrl userCtrl) listStatuses(c *elton.Context) (err error) {
+	c.CacheMaxAge("5m")
+	c.Body = map[string][]*service.UserStatus{
+		"statuses": userSrv.ListStatuses(),
+	}
+	return
+}
+
+// listGroups list user group
+func (ctrl userCtrl) listGroups(c *elton.Context) (err error) {
+	c.CacheMaxAge("5m")
+	c.Body = map[string][]*service.UserGroup{
+		"groups": userSrv.ListGroups(),
 	}
 	return
 }

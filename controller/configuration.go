@@ -16,6 +16,7 @@ package controller
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/vicanso/elton"
@@ -28,23 +29,25 @@ import (
 type (
 	configurationCtrl      struct{}
 	addConfigurationParams struct {
-		Name      string     `json:"name" validate:"xConfigName"`
-		Category  string     `json:"category" validate:"xConfigCategory"`
-		Status    int        `json:"status" validate:"xConfigStatus"`
-		Data      string     `json:"data" validate:"xConfigData"`
-		BeginDate *time.Time `json:"beginDate"`
-		EndDate   *time.Time `json:"endDate"`
+		Name      string     `json:"name,omitempty" validate:"xConfigName"`
+		Category  string     `json:"category,omitempty" validate:"xConfigCategory"`
+		Status    int        `json:"status,omitempty" validate:"xConfigStatus"`
+		Data      string     `json:"data,omitempty" validate:"xConfigData"`
+		BeginDate *time.Time `json:"beginDate,omitempty"`
+		EndDate   *time.Time `json:"endDate,omitempty"`
 	}
 	updateConfigurationParams struct {
-		Status    int    `json:"status" validate:"omitempty,xConfigStatus"`
-		Category  string `json:"category" validate:"omitempty,xConfigCategory"`
-		Data      string `json:"data" validate:"omitempty,xConfigData"`
-		BeginDate *time.Time
-		EndDate   *time.Time
+		Status    int        `json:"status,omitempty" validate:"omitempty,xConfigStatus"`
+		Category  string     `json:"category,omitempty" validate:"omitempty,xConfigCategory"`
+		Data      string     `json:"data,omitempty" validate:"omitempty,xConfigData"`
+		BeginDate *time.Time `json:"beginDate,omitempty"`
+		EndDate   *time.Time `json:"endDate,omitempty"`
 	}
 	listConfigurationParmas struct {
-		Name     string `json:"name" validate:"omitempty,xConfigName"`
-		Category string `json:"category" validate:"omitempty,xConfigCategory"`
+		listParams
+
+		Name     string `json:"name,omitempty" validate:"omitempty,xConfigName"`
+		Category string `json:"category,omitempty" validate:"omitempty,xConfigCategory"`
 	}
 )
 
@@ -78,6 +81,28 @@ func init() {
 	)
 }
 
+func (params listConfigurationParmas) toConditions() []interface{} {
+	conds := queryConditions{}
+	if params.Name != "" {
+		names := strings.Split(params.Name, ",")
+		if len(names) > 1 {
+			conds.add("name in (?)", names)
+		} else {
+			conds.add("name = (?)", names[0])
+		}
+	}
+
+	if params.Category != "" {
+		categories := strings.Split(params.Category, ",")
+		if len(categories) > 1 {
+			conds.add("category in (?)", categories)
+		} else {
+			conds.add("category = ?", categories[0])
+		}
+	}
+	return conds.toArray()
+}
+
 // list configuration
 func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
 	params := listConfigurationParmas{}
@@ -85,10 +110,7 @@ func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	result, err := configSrv.List(service.ConfigurationQueryParmas{
-		Name:     params.Name,
-		Category: params.Category,
-	})
+	result, err := configSrv.List(params.toPGQueryParams(), params.toConditions()...)
 	if err != nil {
 		return
 	}

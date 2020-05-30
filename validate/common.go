@@ -21,8 +21,8 @@ import (
 )
 
 func init() {
-	AddAlias("xLimit", "number,min=1,max=100")
-	AddAlias("xOffset", "number,min=0,max=10000")
+	AddAlias("xLimit", "number,min=1,max=2")
+	AddAlias("xOffset", "number,min=0,max=5")
 	AddAlias("xOrder", "ascii,min=0,max=100")
 	AddAlias("xFields", "ascii,min=0,max=100")
 	AddAlias("xKeyword", "ascii,min=1,max=10")
