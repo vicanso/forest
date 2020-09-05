@@ -89,12 +89,14 @@ func main() {
 		})
 	}
 	defer closeDeps()
+	basicConfig := config.GetBasicConfig()
 
 	e := elton.New()
 	// 启用耗时跟踪
 	if util.IsDevelopment() {
 		e.EnableTrace = true
 	}
+	e.SignedKeys = service.GetSignedKeys()
 	e.OnTrace(func(c *elton.Context, infos elton.TraceInfos) {
 		// 设置server timing
 		c.ServerTiming(infos, "forest-")
@@ -118,7 +120,6 @@ func main() {
 	e.UseWithName(middleware.NewError(), "error")
 
 	// 限制最大请求量
-	basicConfig := config.GetBasicConfig()
 	if basicConfig.RequestLimit != 0 {
 		e.UseWithName(M.NewGlobalConcurrentLimiter(M.GlobalConcurrentLimiterConfig{
 			Max: uint32(basicConfig.RequestLimit),

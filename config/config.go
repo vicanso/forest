@@ -39,8 +39,10 @@ var (
 	applicationStatus = ApplicationStatusStopped
 
 	// 应用名称
-	appName   string
-	version   string
+	appName string
+	// 应用版本
+	version string
+	// 应用构建时间
 	buildedAt string
 )
 
@@ -65,9 +67,12 @@ const (
 type (
 	// BasicConfig 应用基本配置信息
 	BasicConfig struct {
-		Listen       string `validate:"ascii,required"`
-		RequestLimit uint   `validate:"required"`
-		Name         string `validate:"ascii"`
+		// 监听地址
+		Listen string `validate:"ascii,required"`
+		// 最大处理请求数
+		RequestLimit uint `validate:"required"`
+		// 应用名称
+		Name string `validate:"ascii"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
@@ -104,13 +109,20 @@ type (
 	}
 	// Influxdb influxdb配置
 	InfluxdbConfig struct {
-		Bucket        string        `validate:"min=1,max=50"`
-		Org           string        `validate:"min=1,max=100"`
-		URI           string        `validate:"url,required"`
-		Token         string        `validate:"ascii,required"`
-		BatchSize     uint          `validate:"min=1,max=5000"`
+		// 存储的bucket
+		Bucket string `validate:"min=1,max=50"`
+		// 配置的组织名称
+		Org string `validate:"min=1,max=100"`
+		// 连接地址
+		URI string `validate:"url,required"`
+		// 认证的token
+		Token string `validate:"ascii,required"`
+		// 批量提交大小
+		BatchSize uint `validate:"min=1,max=5000"`
+		// 间隔提交时长
 		FlushInterval time.Duration `validate:"required"`
-		Disabled      bool
+		// 是否禁用
+		Disabled bool
 	}
 )
 
@@ -282,6 +294,7 @@ func SetBuildedAt(v string) {
 	buildedAt = v
 }
 
+// GetBasicConfig 获取基本配置信息
 func GetBasicConfig() BasicConfig {
 	prefix := "basic."
 	basicConfig := BasicConfig{

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// 公共的处理函数，包括程序基本信息、性能指标等
+
 package controller
 
 import (
@@ -23,6 +25,7 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/router"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 )
 
@@ -31,9 +34,10 @@ type (
 )
 
 var (
-	// 应用启动时间
+	// applicationStartedAt 应用启动时间
 	applicationStartedAt = time.Now()
 
+	// errAppIsNotRunning 应用非运行状态
 	errAppIsNotRunning = &hes.Error{
 		StatusCode: http.StatusServiceUnavailable,
 		Message:    "应用服务不可用",
@@ -46,6 +50,9 @@ func init() {
 	g := router.NewGroup("/commons")
 
 	g.GET("/application", ctrl.getApplicationInfo)
+	g.GET("/routers", ctrl.routers)
+	g.GET("/captcha", ctrl.captcha)
+	g.GET("/performance", ctrl.getPerformance)
 }
 
 // ping 用于检测服务是否可用
@@ -77,5 +84,41 @@ func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 		runtime.GOARCH,
 		config.GetENV(),
 	}
+	return
+}
+
+// routers 获取系统的路由
+func (commonCtrl) routers(c *elton.Context) (err error) {
+	c.CacheMaxAge("1m")
+	c.Body = map[string]interface{}{
+		"routers": c.Elton().Routers,
+	}
+	return
+}
+
+// captcha 获取图形验证码
+func (commonCtrl) captcha(c *elton.Context) (err error) {
+	bgColor := c.QueryParam("bg")
+	fontColor := c.QueryParam("color")
+	if bgColor == "" {
+		bgColor = "255,255,255"
+	}
+	if fontColor == "" {
+		fontColor = "102,102,102"
+	}
+	info, err := service.GetCaptcha(fontColor, bgColor)
+	if err != nil {
+		return
+	}
+	// c.SetContentTypeByExt(".jpeg")
+	// c.Body = info.Data
+	c.NoStore()
+	c.Body = info
+	return
+}
+
+// getPerformance 获取应用性能指标
+func (commonCtrl) getPerformance(c *elton.Context) (err error) {
+	c.Body = service.GetPerformance()
 	return
 }
