@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,11 @@ import (
 	"sync/atomic"
 
 	"github.com/vicanso/elton"
-
 	"go.uber.org/zap"
 )
 
 type (
-	// RouterConfig route config
+	// RouterConfig 路由配置信息
 	RouterConfig struct {
 		Route      string `json:"route,omitempty"`
 		Method     string `json:"method,omitempty"`
@@ -37,14 +36,14 @@ type (
 		Delay int    `json:"delay,omitempty"`
 		URL   string `json:"url,omitempty"`
 	}
-	// RouterConcurrency router concurrency
+	// RouterConcurrency 路由并发配置
 	RouterConcurrency struct {
 		Route   string `json:"route,omitempty"`
 		Method  string `json:"method,omitempty"`
 		Max     uint32 `json:"max,omitempty"`
 		Current uint32 `json:"current,omitempty"`
 	}
-	// RCLimiter
+	// RCLimiter 路由请求限制
 	RCLimiter struct {
 		m map[string]*RouterConcurrency
 	}
@@ -60,7 +59,7 @@ func init() {
 	rcLimiter = &RCLimiter{}
 }
 
-// IncConcurrency inc concurrency
+// IncConcurrency 当前路由处理数+1
 func (l *RCLimiter) IncConcurrency(key string) (current uint32, max uint32) {
 	r, ok := l.m[key]
 	if !ok {
@@ -71,7 +70,7 @@ func (l *RCLimiter) IncConcurrency(key string) (current uint32, max uint32) {
 	return
 }
 
-// DecConcurrency dec concurrency
+// DecConcurrency 当前路由处理数-1
 func (l *RCLimiter) DecConcurrency(key string) {
 	r, ok := l.m[key]
 	if !ok {
@@ -80,7 +79,7 @@ func (l *RCLimiter) DecConcurrency(key string) {
 	atomic.AddUint32(&r.Current, ^uint32(0))
 }
 
-// GetConcurrency get concurrency
+// GetConcurrency 获取当前路由处理数
 func (l *RCLimiter) GetConcurrency(key string) uint32 {
 	r, ok := l.m[key]
 	if !ok {
@@ -89,38 +88,38 @@ func (l *RCLimiter) GetConcurrency(key string) uint32 {
 	return atomic.LoadUint32(&r.Current)
 }
 
-// 更新router config配置
-func updateRouterConfigs(configs []*Configuration) {
-	result := make(map[string]*RouterConfig)
-	for _, item := range configs {
-		v := &RouterConfig{}
-		err := json.Unmarshal([]byte(item.Data), v)
-		if err != nil {
-			logger.Error("router config is invalid",
-				zap.Error(err),
-			)
-			AlarmError("router config is invalid:" + err.Error())
-			continue
-		}
-		// 如果未配置Route或者method的则忽略
-		if v.Route == "" || v.Method == "" {
-			continue
-		}
-		result[v.Method+v.Route] = v
-	}
-	routerMutex.Lock()
-	defer routerMutex.Unlock()
-	currentRouterConfigs = result
-}
+// // 更新router config配置
+// func updateRouterConfigs(configs []*Configuration) {
+// 	result := make(map[string]*RouterConfig)
+// 	for _, item := range configs {
+// 		v := &RouterConfig{}
+// 		err := json.Unmarshal([]byte(item.Data), v)
+// 		if err != nil {
+// 			logger.Error("router config is invalid",
+// 				zap.Error(err),
+// 			)
+// 			AlarmError("router config is invalid:" + err.Error())
+// 			continue
+// 		}
+// 		// 如果未配置Route或者method的则忽略
+// 		if v.Route == "" || v.Method == "" {
+// 			continue
+// 		}
+// 		result[v.Method+v.Route] = v
+// 	}
+// 	routerMutex.Lock()
+// 	defer routerMutex.Unlock()
+// 	currentRouterConfigs = result
+// }
 
-// RouterGetConfig get router config
+// RouterGetConfig 获取路由配置
 func RouterGetConfig(method, route string) *RouterConfig {
 	routerMutex.RLock()
 	defer routerMutex.RUnlock()
 	return currentRouterConfigs[method+route]
 }
 
-// InitRouterConcurrencyLimiter init router concurrency limiter
+// InitRouterConcurrencyLimiter 初始路由并发限制
 func InitRouterConcurrencyLimiter(routers []*elton.RouterInfo) {
 	m := make(map[string]*RouterConcurrency)
 	for _, item := range routers {
@@ -129,12 +128,12 @@ func InitRouterConcurrencyLimiter(routers []*elton.RouterInfo) {
 	rcLimiter.m = m
 }
 
-// GetRouterConcurrencyLimiter get router concurrency limiter
+// GetRouterConcurrencyLimiter 获取路由并发限制器
 func GetRouterConcurrencyLimiter() *RCLimiter {
 	return rcLimiter
 }
 
-// ResetRouterConcurrency reset router councurrency
+// ResetRouterConcurrency 重置路由并发数
 func ResetRouterConcurrency(arr []string) {
 	concurrencyList := make([]*RouterConcurrency, 0)
 	for _, str := range arr {

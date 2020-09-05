@@ -20,12 +20,10 @@ import (
 	"time"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/helper"
-	"github.com/vicanso/forest/log"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
-
-	"github.com/vicanso/elton/middleware"
 )
 
 const (
@@ -59,7 +57,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			done = func() {
 				err := redisDone()
 				if err != nil {
-					log.Default().Error("redis done fail",
+					logger.Error("redis done fail",
 						zap.String("key", k),
 						zap.Error(err),
 					)
@@ -75,8 +73,18 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 // NewConcurrentLimit create a concurrent limit
 func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) elton.Handler {
 	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
-		Lock: createConcurrentLimitLock(prefix, ttl, false),
-		Keys: keys,
+		NotAllowEmpty: true,
+		Lock:          createConcurrentLimitLock(prefix, ttl, false),
+		Keys:          keys,
+	})
+}
+
+// NewConcurrentLimitWithDone create a concurrent limit and with done
+func NewConcurrentLimitWithDone(keys []string, ttl time.Duration, prefix string) elton.Handler {
+	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
+		NotAllowEmpty: true,
+		Lock:          createConcurrentLimitLock(prefix, ttl, true),
+		Keys:          keys,
 	})
 }
 

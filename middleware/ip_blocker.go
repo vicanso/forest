@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ var (
 	}
 )
 
-// NewIPBlock create a new block ip middleware
-func NewIPBlock() elton.Handler {
+// NewIPBlocker create a new block ip middleware
+func NewIPBlocker() elton.Handler {
 	return func(c *elton.Context) (err error) {
 		if service.IsBlockIP(c.RealIP()) {
 			err = errIPNotAllow

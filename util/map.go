@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package validate
+package util
 
-import (
-	"regexp"
-
-	"github.com/go-playground/validator/v10"
-)
-
-func init() {
-	AddAlias("xLimit", "number,min=1,max=2")
-	AddAlias("xOffset", "number,min=0,max=5")
-	AddAlias("xOrder", "ascii,min=0,max=100")
-	AddAlias("xFields", "ascii,min=0,max=100")
-	AddAlias("xKeyword", "ascii,min=1,max=10")
-
-	durationRegexp := regexp.MustCompile("^[1-9][0-9]*(ms|[smh])$")
-	Add("xDuration", func(fl validator.FieldLevel) bool {
-		value, ok := toString(fl)
-		if !ok {
-			return false
+// MergeMapStringInterface 合并map[string]interface{}
+func MergeMapStringInterface(target map[string]interface{}, sources ...map[string]interface{}) map[string]interface{} {
+	for _, source := range sources {
+		for key, value := range source {
+			if value != nil {
+				target[key] = value
+			}
 		}
-		return durationRegexp.MatchString(value)
-	})
+	}
+	return target
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,12 @@ var (
 	mailSender string
 
 	sendingMailMutex = new(sync.Mutex)
+
+	basicInfo config.BasicConfig
 )
 
 func init() {
+	basicInfo = config.GetBasicConfig()
 	mailConfig := config.GetMailConfig()
 	if mailConfig.Host != "" {
 		mailSender = mailConfig.User
@@ -39,18 +42,19 @@ func init() {
 	}
 }
 
-// AlarmError alarm error message
+// AlarmError 发送出错警告
 func AlarmError(message string) {
 	logger.Error(message,
-		zap.String("app", config.GetAppName()),
+		zap.String("app", basicInfo.Name),
 		zap.String("category", "alarm-error"),
 	)
 	if mailDialer != nil {
 		m := gomail.NewMessage()
+		// TODO 修改为从config中直接获取配置的方式
 		receivers := config.GetStringSlice("alarm.receiver")
 		m.SetHeader("From", mailSender)
 		m.SetHeader("To", receivers...)
-		m.SetHeader("Subject", "Alarm-"+config.GetAppName())
+		m.SetHeader("Subject", "Alarm-"+basicInfo.Name)
 		m.SetBody("text/plain", message)
 		// 避免发送邮件时太慢影响现有流程
 		go func() {

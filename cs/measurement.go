@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,8 @@
 package cs
 
 const (
-	MeasurementHTTPRequest = "http-request"
-	MeasurementPG          = "pg-stats"
-	MeasurementRedis       = "redis-stats"
-	MeasurementHTTP        = "http-stats"
-	MeasurementRedisStats  = "redis-stats"
-	MeasurementPGStats     = "pg-stats"
+	// MeasurementRedisStats redis性能统计
+	MeasurementRedisStats = "redisStats"
+	// MeasurementHTTPStats http性能统计
+	MeasurementHTTPStats = "httpStats"
 )

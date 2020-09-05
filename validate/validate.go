@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-// !!!important!!!
-// common custom tag should allow empty
-// !!!important!!!
 
 package validate
 
@@ -29,10 +25,13 @@ import (
 var (
 	defaultValidator = validator.New()
 
-	errCategory          = "validate"
+	// validate默认的出错类别
+	errCategory = "validate"
+	// json parse失败时的出错类别
 	errJSONParseCategory = "json-parse"
 )
 
+// toString 转换为string
 func toString(fl validator.FieldLevel) (string, bool) {
 	value := fl.Field()
 	if value.Kind() != reflect.String {
@@ -40,6 +39,14 @@ func toString(fl validator.FieldLevel) (string, bool) {
 	}
 	return value.String(), true
 }
+
+// isInt 判断是否int
+func isInt(fl validator.FieldLevel) bool {
+	value := fl.Field()
+	return value.Kind() == reflect.Int
+}
+
+// toInt 转换为int
 func toInt(fl validator.FieldLevel) (int, bool) {
 	value := fl.Field()
 	if value.Kind() != reflect.Int {
@@ -47,6 +54,8 @@ func toInt(fl validator.FieldLevel) (int, bool) {
 	}
 	return int(value.Int()), true
 }
+
+// isInInt 判断是否在int数组中
 func isInInt(fl validator.FieldLevel, values []int) bool {
 	value, ok := toInt(fl)
 	if !ok {
@@ -60,6 +69,8 @@ func isInInt(fl validator.FieldLevel, values []int) bool {
 	}
 	return exists
 }
+
+// isInString 判断是否在string数组中
 func isInString(fl validator.FieldLevel, values []string) bool {
 	value, ok := toString(fl)
 	if !ok {
@@ -74,6 +85,7 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 	return exists
 }
 
+// isAllInString 判断是否所有都在string数组中
 func isAllInString(fl validator.FieldLevel, values []string) bool {
 	if fl.Field().Kind() != reflect.Slice {
 		return false
@@ -93,6 +105,7 @@ func isAllInString(fl validator.FieldLevel, values []string) bool {
 	return valid
 }
 
+// containsString 是否包含此string
 func containsString(arr []string, str string) (found bool) {
 	for _, v := range arr {
 		if found {
@@ -105,6 +118,7 @@ func containsString(arr []string, str string) (found bool) {
 	return
 }
 
+// doValidate 校验struct
 func doValidate(s interface{}, data interface{}) (err error) {
 	// statusCode := http.StatusBadRequest
 	if data != nil {
@@ -132,7 +146,7 @@ func doValidate(s interface{}, data interface{}) (err error) {
 	return
 }
 
-// Do do validate
+// Do 执行校验
 func Do(s interface{}, data interface{}) (err error) {
 	err = doValidate(s, data)
 	if err != nil {
@@ -145,7 +159,7 @@ func Do(s interface{}, data interface{}) (err error) {
 	return
 }
 
-// Add add validate
+// Add 添加一个校验函数
 func Add(tag string, fn validator.Func, args ...bool) {
 	err := defaultValidator.RegisterValidation(tag, fn, args...)
 	if err != nil {

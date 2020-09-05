@@ -1,65 +1,37 @@
-app: forest
-requestLimit: 1024
-# apiPrefix: /api
-listen: ":7001"
+# 系统基本配置
+basic:
+  name: forest
+  # 系统并发限制
+  requestLimit: 1000
+  listen: :7001
 
-# cookie track key
-track: jt
+# 用户session的配置
+session:
+  path: /
+  key: forest
+  ttl: 240h
+  # 用于加密session cookie 
+  keys:
+  - cuttlefish
+  - secret
+  trackKey: jt
 
-
-# redis 配置(pass从env中获取pass这个配置为密码，如果未配置则为空)
+# redis 配置
 redis:
   # 可以配置为下面的形式，则从env中获取REDIS_URI对应的字符串来当redis连接串
   # uri: REDIS_URI
-  # 配置redis连接串，如果有配置此参数，则忽略addr等参数
   # uri: redis://:pass@127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
-  addr: 127.0.0.1:6379
-  db: 0
-  slow: 200ms
-  maxProcessing: 1000
-
-# postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
-postgres:
-  # 如果配置了uri连接串，直接使用
-  # uri: host=127.0.0.1 port=5432 user=vicanso dbname=forest password=A123456 sslmode=disable
-  host: 127.0.0.1
-  port: 5432
-  user: vicanso 
-  dbname: forest
-  password: A123456
-  sslmode: disable
-  slow: 1s
-  maxQueryProcessing: 1000
-  maxUpdateProcessing: 500
+  uri: redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
 
 # influxdb 配置
 influxdb:
   uri: http://127.0.0.1:9999
-  bucket: forest
-  org: bigtree
-  token: YecVRjkFWQHQCq-Qs9NH7XZy8ApyAp9QfwVjqwQC_8bWmjsYRAfYTNveCswl1NPHS8reFoXELQBWKO27maa9tw==
+  bucket: origin
+  org: bigTree
+  token: vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==
   batchSize: 100
   flushInterval: 10s
-  disabled: false
-
-# session的相关配置
-session:
-  path: /
-  key: forest
-  ttl: 24h
-
-# key for sign cookie
-keys:
-  - cuttlefish
-  - secret
-
-location:
-  baseURL: https://ip.npmtrend.com/
-
-# router limit
-routerLimit:
-  # 限制路由访问并发数
-  GET /users/v1/me/login: 50
+  disabled: false 
 
 # mail相关配置
 mail:
