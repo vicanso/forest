@@ -18,6 +18,7 @@ package config
 
 import (
 	"bytes"
+	"io"
 	"net/url"
 	"os"
 	"strconv"
@@ -25,15 +26,15 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/spf13/viper"
 	"github.com/vicanso/forest/validate"
+	"github.com/vicanso/viperx"
 )
 
 var (
 	box = packr.New("config", "../configs")
 	env = os.Getenv("GO_ENV")
 
-	defaultViper = viper.New()
+	defaultViperX *viperx.ViperX
 
 	// 应用状态
 	applicationStatus = ApplicationStatusStopped
@@ -124,43 +125,37 @@ type (
 		// 是否禁用
 		Disabled bool
 	}
+	// AlarmConfig alarm配置
+	AlarmConfig struct {
+		// 接收人列表
+		Receivers []string `validate:"required"`
+	}
 )
 
 func init() {
+
 	configType := "yml"
-	v := viper.New()
-	defaultViper.SetConfigType(configType)
-	v.SetConfigType(configType)
+	defaultViperX = viperx.New(configType)
 
 	configExt := "." + configType
-	// 加载默认配置
-	data, err := box.Find("default" + configExt)
-	if err != nil {
-		panic(err)
-	}
-	// 读取默认配置中的所有配置
-	err = v.ReadConfig(bytes.NewReader(data))
-	if err != nil {
-		panic(err)
-	}
-	configs := v.AllSettings()
-	// 将default中的配置全部以默认配置写入
-	for k, v := range configs {
-		defaultViper.SetDefault(k, v)
+	readers := make([]io.Reader, 0)
+	for _, name := range []string{
+		"default",
+		GetENV(),
+	} {
+		data, err := box.Find(name + configExt)
+		if err != nil {
+			panic(err)
+		}
+		readers = append(readers, bytes.NewReader(data))
 	}
 
-	// 根据当前运行环境配置读取
-	envConfigFile := GetENV() + configExt
-	data, err = box.Find(envConfigFile)
+	err := defaultViperX.ReadConfig(readers...)
 	if err != nil {
 		panic(err)
 	}
-	// 读取当前运行环境对应的配置
-	err = defaultViper.ReadConfig(bytes.NewReader(data))
-	if err != nil {
-		panic(err)
-	}
-	appName = GetString("app")
+
+	// appName = GetString("app")
 }
 
 func validatePanic(v interface{}) {
@@ -176,92 +171,6 @@ func GetENV() string {
 		return Dev
 	}
 	return env
-}
-
-// GetBool 获取bool配置
-func GetBool(key string) bool {
-	return defaultViper.GetBool(key)
-}
-
-// GetInt 获取int配置
-func GetInt(key string) int {
-	return defaultViper.GetInt(key)
-}
-
-// GetUint 获取uint配置
-func GetUint(key string) uint {
-	return defaultViper.GetUint(key)
-}
-
-// GetUint32 获取uint32配置
-func GetUint32(key string) uint32 {
-	return defaultViper.GetUint32(key)
-}
-
-// GetIntDefault 获取int配置，如果为0则返回默认值
-func GetIntDefault(key string, defaultValue int) int {
-	v := GetInt(key)
-	if v != 0 {
-		return v
-	}
-	return defaultValue
-}
-
-// GetUint32Default 获取uint32配置，如果为0则返回默认值
-func GetUint32Default(key string, defaultValue uint32) uint32 {
-	v := GetUint32(key)
-	if v != 0 {
-		return v
-	}
-	return defaultValue
-}
-
-// GetString 获取string配置
-func GetString(key string) string {
-	return defaultViper.GetString(key)
-}
-
-// GetStringFromENV 根据配置的值，以此为key从环境变量中获取配置的值，如果环境变量中未配置，则返回当前配置中的值
-func GetStringFromENV(key string) string {
-	value := GetString(key)
-	v := os.Getenv(value)
-	if v != "" {
-		return v
-	}
-	return value
-}
-
-// GetStringDefault 获取string配置，如果未配置则返回默认值
-func GetStringDefault(key, defaultValue string) string {
-	v := GetString(key)
-	if v != "" {
-		return v
-	}
-	return defaultValue
-}
-
-// GetDuration 获取duration配置
-func GetDuration(key string) time.Duration {
-	return defaultViper.GetDuration(key)
-}
-
-// GetDurationDefault 获取duration配置，如果为0则返回默认值
-func GetDurationDefault(key string, defaultValue time.Duration) time.Duration {
-	v := GetDuration(key)
-	if v != 0 {
-		return v
-	}
-	return defaultValue
-}
-
-// GetStringSlice 获取string slice配置
-func GetStringSlice(key string) []string {
-	return defaultViper.GetStringSlice(key)
-}
-
-// GetStringMap 配置string map配置
-func GetStringMap(key string) map[string]interface{} {
-	return defaultViper.GetStringMap(key)
 }
 
 // SetApplicationStatus 设置应用运行状态
@@ -298,9 +207,9 @@ func SetBuildedAt(v string) {
 func GetBasicConfig() BasicConfig {
 	prefix := "basic."
 	basicConfig := BasicConfig{
-		Name:         GetString(prefix + "name"),
-		RequestLimit: GetUint(prefix + "requestLimit"),
-		Listen:       GetStringFromENV(prefix + "listen"),
+		Name:         defaultViperX.GetString(prefix + "name"),
+		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
+		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 	}
 	validatePanic(&basicConfig)
 	return basicConfig
@@ -310,11 +219,11 @@ func GetBasicConfig() BasicConfig {
 func GetSessionConfig() SessionConfig {
 	prefix := "session."
 	sessConfig := SessionConfig{
-		TTL:        GetDuration(prefix + "ttl"),
-		Key:        GetString(prefix + "key"),
-		CookiePath: GetString(prefix + "path"),
-		Keys:       GetStringSlice(prefix + "keys"),
-		TrackKey:   GetString(prefix + "trackKey"),
+		TTL:        defaultViperX.GetDuration(prefix + "ttl"),
+		Key:        defaultViperX.GetString(prefix + "key"),
+		CookiePath: defaultViperX.GetString(prefix + "path"),
+		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
+		TrackKey:   defaultViperX.GetString(prefix + "trackKey"),
 	}
 	validatePanic(&sessConfig)
 	return sessConfig
@@ -323,7 +232,7 @@ func GetSessionConfig() SessionConfig {
 // GetRedisConfig 获取redis的配置
 func GetRedisConfig() RedisConfig {
 	prefix := "redis."
-	uri := GetStringFromENV(prefix + "uri")
+	uri := defaultViperX.GetStringFromENV(prefix + "uri")
 	uriInfo, err := url.Parse(uri)
 	if err != nil {
 		panic(err)
@@ -377,10 +286,10 @@ func GetRedisConfig() RedisConfig {
 func GetMailConfig() MailConfig {
 	prefix := "mail."
 	mailConfig := MailConfig{
-		Host:     GetString(prefix + "host"),
-		Port:     GetInt(prefix + "port"),
-		User:     GetStringFromENV(prefix + "user"),
-		Password: GetStringFromENV(prefix + "password"),
+		Host:     defaultViperX.GetString(prefix + "host"),
+		Port:     defaultViperX.GetInt(prefix + "port"),
+		User:     defaultViperX.GetStringFromENV(prefix + "user"),
+		Password: defaultViperX.GetStringFromENV(prefix + "password"),
 	}
 	validatePanic(&mailConfig)
 	return mailConfig
@@ -390,14 +299,24 @@ func GetMailConfig() MailConfig {
 func GetInfluxdbConfig() InfluxdbConfig {
 	prefix := "influxdb."
 	influxdbConfig := InfluxdbConfig{
-		URI:           GetStringFromENV(prefix + "uri"),
-		Bucket:        GetString(prefix + "bucket"),
-		Org:           GetString(prefix + "org"),
-		Token:         GetStringFromENV(prefix + "token"),
-		BatchSize:     GetUint(prefix + "batchSize"),
-		FlushInterval: GetDuration(prefix + "flushInterval"),
-		Disabled:      GetBool(prefix + "disabled"),
+		URI:           defaultViperX.GetStringFromENV(prefix + "uri"),
+		Bucket:        defaultViperX.GetString(prefix + "bucket"),
+		Org:           defaultViperX.GetString(prefix + "org"),
+		Token:         defaultViperX.GetStringFromENV(prefix + "token"),
+		BatchSize:     defaultViperX.GetUint(prefix + "batchSize"),
+		FlushInterval: defaultViperX.GetDuration(prefix + "flushInterval"),
+		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig
+}
+
+// GetAlarmConfig get alarm config
+func GetAlarmConfig() AlarmConfig {
+	prefix := "alarm."
+	alarmConfig := AlarmConfig{
+		Receivers: defaultViperX.GetStringSlice(prefix + "receivers"),
+	}
+	validatePanic(&alarmConfig)
+	return alarmConfig
 }

@@ -29,11 +29,13 @@ var (
 
 	sendingMailMutex = new(sync.Mutex)
 
-	basicInfo config.BasicConfig
+	basicInfo   config.BasicConfig
+	alarmConfig config.AlarmConfig
 )
 
 func init() {
 	basicInfo = config.GetBasicConfig()
+	alarmConfig = config.GetAlarmConfig()
 	mailConfig := config.GetMailConfig()
 	if mailConfig.Host != "" {
 		mailSender = mailConfig.User
@@ -51,7 +53,7 @@ func AlarmError(message string) {
 	if mailDialer != nil {
 		m := gomail.NewMessage()
 		// TODO 修改为从config中直接获取配置的方式
-		receivers := config.GetStringSlice("alarm.receiver")
+		receivers := alarmConfig.Receivers
 		m.SetHeader("From", mailSender)
 		m.SetHeader("To", receivers...)
 		m.SetHeader("Subject", "Alarm-"+basicInfo.Name)
