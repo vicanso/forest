@@ -50,6 +50,7 @@ type (
 // GetUesrInfo 获取用户信息
 func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 	if us.unmarshalDone {
+		info = us.info
 		return
 	}
 	data := us.se.GetString(UserSessionInfoKey)
@@ -90,6 +91,8 @@ func (us *UserSession) SetInfo(info UserSessionInfo) (err error) {
 		info.LoginedAt = util.NowString()
 	}
 	info.UpdatedAt = util.NowString()
+	us.info = info
+	us.unmarshalDone = true
 	buf, err := json.Marshal(&info)
 	if err != nil {
 		return

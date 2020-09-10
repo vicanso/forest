@@ -80,6 +80,7 @@ func dependServiceCheck() (err error) {
 
 func main() {
 	// TODO defer panic
+
 	logger := log.Default()
 	closeOnce := sync.Once{}
 	closeDeps := func() {
@@ -157,7 +158,7 @@ func main() {
 	e.UseWithName(M.NewDefaultResponder(), "responder")
 
 	// 读取读取body的数的，转换为json bytes
-	e.UseWithName(M.NewDefaultBodyParser(), "body-parser")
+	e.UseWithName(M.NewDefaultBodyParser(), "bodyParser")
 
 	// 初始化路由
 	for _, g := range router.GetGroups() {

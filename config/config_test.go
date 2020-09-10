@@ -16,8 +16,114 @@ package config
 
 import (
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestConfigGet(t *testing.T) {
+func TestConfigENV(t *testing.T) {
+	assert := assert.New(t)
+	originENV := env
+	defer func() {
+		env = originENV
+	}()
 
+	env = "test"
+	assert.Equal(env, GetENV())
+}
+
+func TestApplicationStatus(t *testing.T) {
+	assert := assert.New(t)
+	originalApplicationStatus := applicationStatus
+	defer SetApplicationStatus(originalApplicationStatus)
+
+	assert.Equal(originalApplicationStatus, GetApplicationStatus())
+
+	SetApplicationStatus(ApplicationStatusStopped)
+	assert.False(ApplicationIsRunning())
+	SetApplicationStatus(ApplicationStatusStopping)
+	assert.False(ApplicationIsRunning())
+	SetApplicationStatus(ApplicationStatusRunning)
+	assert.True(ApplicationIsRunning())
+}
+
+func TestApplicationVersion(t *testing.T) {
+	assert := assert.New(t)
+	originalVersion := applicationVersion
+	defer SetApplicationVersion(originalVersion)
+
+	v := "2020"
+	SetApplicationVersion(v)
+	assert.Equal(v, GetApplicationVersion())
+}
+
+func TestApplicationBuildedAt(t *testing.T) {
+	assert := assert.New(t)
+	originalBuildedAt := applicationBuildedAt
+	defer SetApplicationBuildedAt(originalBuildedAt)
+
+	buildedAt := "2020"
+	SetApplicationBuildedAt(buildedAt)
+	assert.Equal(buildedAt, GetApplicationBuildedAt())
+}
+
+func TestBasicConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	basicConfig := GetBasicConfig()
+	assert.Equal("forest", basicConfig.Name)
+	assert.Equal(uint(1000), basicConfig.RequestLimit)
+	assert.Equal(":7001", basicConfig.Listen)
+}
+
+func TestSessionConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	sessionConfig := GetSessionConfig()
+	assert.Equal(240*time.Hour, sessionConfig.TTL)
+	assert.Equal("forest", sessionConfig.Key)
+	assert.Equal("/", sessionConfig.CookiePath)
+	assert.Equal([]string{"cuttlefish", "secret"}, sessionConfig.Keys)
+	assert.Equal("jt", sessionConfig.TrackKey)
+}
+
+func TestRedisConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	redisConfig := GetRedisConfig()
+	assert.Equal("127.0.0.1:6379", redisConfig.Addr)
+	assert.Equal("", redisConfig.Password)
+	assert.Equal(0, redisConfig.DB)
+	assert.Equal(200*time.Millisecond, redisConfig.Slow)
+	assert.Equal(uint32(1000), redisConfig.MaxProcessing)
+}
+
+func TestMailConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	mailConfig := GetMailConfig()
+	assert.Equal("smtp.office365.com", mailConfig.Host)
+	assert.Equal(587, mailConfig.Port)
+	assert.Equal("tree.xie@outlook.com", mailConfig.User)
+	assert.Equal("EMAIL_PASS", mailConfig.Password)
+}
+
+func TestInfluxdbConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	influxdbConfig := GetInfluxdbConfig()
+	assert.Equal("http://127.0.0.1:9999", influxdbConfig.URI)
+	assert.Equal("forest", influxdbConfig.Bucket)
+	assert.Equal("bigTree", influxdbConfig.Org)
+	assert.Equal("vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==", influxdbConfig.Token)
+	assert.Equal(uint(100), influxdbConfig.BatchSize)
+	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
+	assert.False(influxdbConfig.Disabled)
+}
+
+func TestAlarmConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	alarmConfig := GetAlarmConfig()
+	assert.Equal([]string{"tree.xie@outlook.com"}, alarmConfig.Receivers)
 }

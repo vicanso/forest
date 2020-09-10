@@ -31,6 +31,27 @@ import (
 
 type (
 	commonCtrl struct{}
+
+	applicationInfoResp struct {
+		// 版本号
+		Version string `json:"version,omitempty"`
+		// 构建时间
+		BuildedAt string `json:"buildedAt,omitempty"`
+		// 运行时长
+		Uptime string `json:"uptime,omitempty"`
+		// os类型
+		OS string `json:"os,omitempty"`
+		// go版本
+		GO string `json:"go,omitempty"`
+		// 架构类型
+		ARCH string `json:"arch,omitempty"`
+		// 运行环境配置
+		ENV string `json:"env,omitempty"`
+	}
+	routersResp struct {
+		// 路由信息
+		Routers []*elton.RouterInfo `json:"routers,omitempty"`
+	}
 )
 
 var (
@@ -67,17 +88,9 @@ func (commonCtrl) ping(c *elton.Context) error {
 // getApplicationInfo 获取应用信息
 func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
-	c.Body = &struct {
-		Version   string `json:"version,omitempty"`
-		BuildedAt string `json:"buildedAt,omitempty"`
-		Uptime    string `json:"uptime,omitempty"`
-		OS        string `json:"os,omitempty"`
-		GO        string `json:"go,omitempty"`
-		ARCH      string `json:"arch,omitempty"`
-		ENV       string `json:"env,omitempty"`
-	}{
-		config.GetVersion(),
-		config.GetBuildedAt(),
+	c.Body = &applicationInfoResp{
+		config.GetApplicationVersion(),
+		config.GetApplicationBuildedAt(),
 		time.Since(applicationStartedAt).String(),
 		runtime.GOOS,
 		runtime.Version(),
@@ -90,8 +103,8 @@ func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 // routers 获取系统的路由
 func (commonCtrl) routers(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
-	c.Body = map[string]interface{}{
-		"routers": c.Elton().Routers,
+	c.Body = &routersResp{
+		Routers: c.Elton().Routers,
 	}
 	return
 }
@@ -119,6 +132,7 @@ func (commonCtrl) captcha(c *elton.Context) (err error) {
 
 // getPerformance 获取应用性能指标
 func (commonCtrl) getPerformance(c *elton.Context) (err error) {
-	c.Body = service.GetPerformance()
+	p := service.GetPerformance()
+	c.Body = &p
 	return
 }

@@ -89,7 +89,7 @@ func (userCtrl) getLoginToken(c *elton.Context) (err error) {
 }
 
 // me 获取用户信息
-func (userCtrl) me(c *elton.Context) (err error) {
+func (ctrl userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {

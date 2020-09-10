@@ -15,12 +15,13 @@ require (
 	github.com/mmcloughlin/avo v0.0.0-20200803215136-443f81d77104 // indirect
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
-	github.com/vicanso/count-warner v1.0.0
+	github.com/stretchr/testify v1.6.1
+	github.com/vicanso/count-warner v1.0.1
 	github.com/vicanso/elton v1.0.7
 	github.com/vicanso/elton-compress v1.0.0
 	github.com/vicanso/elton-session v1.0.1
-	github.com/vicanso/hes v0.2.2
-	github.com/vicanso/ips v1.0.0
+	github.com/vicanso/hes v0.2.3
+	github.com/vicanso/ips v1.0.1
 	github.com/vicanso/viperx v0.1.2
 	go.uber.org/zap v1.16.0
 	golang.org/x/image v0.0.0-20200801110659-972c09e46d76

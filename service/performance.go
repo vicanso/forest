@@ -36,11 +36,11 @@ var (
 )
 
 // GetPerformance 获取应用性能指标
-func GetPerformance() *Performance {
+func GetPerformance() Performance {
 	var mb uint64 = 1024 * 1024
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
-	return &Performance{
+	return Performance{
 		GoMaxProcs:   runtime.GOMAXPROCS(0),
 		Concurrency:  GetConcurrency(),
 		Sys:          int(m.Sys / mb),

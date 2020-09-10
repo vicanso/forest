@@ -26,7 +26,7 @@ redis:
 # influxdb 配置
 influxdb:
   uri: http://127.0.0.1:9999
-  bucket: origin
+  bucket: forest 
   org: bigTree
   token: vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==
   batchSize: 100

@@ -52,7 +52,6 @@ func AlarmError(message string) {
 	)
 	if mailDialer != nil {
 		m := gomail.NewMessage()
-		// TODO 修改为从config中直接获取配置的方式
 		receivers := alarmConfig.Receivers
 		m.SetHeader("From", mailSender)
 		m.SetHeader("To", receivers...)

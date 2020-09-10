@@ -17,6 +17,7 @@ package middleware
 import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 )
 
 const (
@@ -29,6 +30,10 @@ func NewEntry() elton.Handler {
 		service.IncreaseConcurrency()
 		defer service.DecreaseConcurrency()
 		c.SetHeader(xResponseID, c.ID)
+		// 非测试环境返回x-forwarded-for，方便确认链路
+		if !util.IsProduction() {
+			c.SetHeader(elton.HeaderXForwardedFor, c.GetRequestHeader(elton.HeaderXForwardedFor))
+		}
 
 		// 设置所有的请求响应默认都为no cache
 		c.NoCache()

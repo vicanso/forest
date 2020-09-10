@@ -39,12 +39,10 @@ var (
 	// 应用状态
 	applicationStatus = ApplicationStatusStopped
 
-	// 应用名称
-	appName string
 	// 应用版本
-	version string
+	applicationVersion string
 	// 应用构建时间
-	buildedAt string
+	applicationBuildedAt string
 )
 
 const (
@@ -69,29 +67,29 @@ type (
 	// BasicConfig 应用基本配置信息
 	BasicConfig struct {
 		// 监听地址
-		Listen string `validate:"ascii,required"`
+		Listen string `validate:"required,ascii"`
 		// 最大处理请求数
 		RequestLimit uint `validate:"required"`
 		// 应用名称
-		Name string `validate:"ascii"`
+		Name string `validate:"required,ascii"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
 		// cookie的保存路径
-		CookiePath string `validate:"ascii,required"`
+		CookiePath string `validate:"required,ascii"`
 		// cookie的key
-		Key string `validate:"ascii,required"`
+		Key string `validate:"required,ascii"`
 		// cookie的有效期
 		TTL time.Duration `validate:"required"`
 		// 用于加密cookie的key
 		Keys []string `validate:"required"`
 		// 用于跟踪用户的cookie
-		TrackKey string `validate:"ascii,required"`
+		TrackKey string `validate:"required,ascii"`
 	}
 	// RedisConfig redis配置
 	RedisConfig struct {
 		// 连接地址
-		Addr string `validate:"hostname_port,required"`
+		Addr string `validate:"required,hostname_port"`
 		// 密码
 		Password string
 		// db(0,1,2等)
@@ -103,23 +101,23 @@ type (
 	}
 	// MailConfig email的配置
 	MailConfig struct {
-		Host     string `validate:"hostname,required"`
-		Port     int    `validate:"number,required"`
-		User     string `validate:"email,required"`
-		Password string `validate:"min=1,max=100"`
+		Host     string `validate:"required,hostname"`
+		Port     int    `validate:"required,number"`
+		User     string `validate:"required,email"`
+		Password string `validate:"required,min=1,max=100"`
 	}
 	// Influxdb influxdb配置
 	InfluxdbConfig struct {
 		// 存储的bucket
-		Bucket string `validate:"min=1,max=50"`
+		Bucket string `validate:"required,min=1,max=50"`
 		// 配置的组织名称
-		Org string `validate:"min=1,max=100"`
+		Org string `validate:"required,min=1,max=100"`
 		// 连接地址
-		URI string `validate:"url,required"`
+		URI string `validate:"required,url"`
 		// 认证的token
-		Token string `validate:"ascii,required"`
+		Token string `validate:"required,ascii"`
 		// 批量提交大小
-		BatchSize uint `validate:"min=1,max=5000"`
+		BatchSize uint `validate:"required,min=1,max=5000"`
 		// 间隔提交时长
 		FlushInterval time.Duration `validate:"required"`
 		// 是否禁用
@@ -137,13 +135,12 @@ func init() {
 	configType := "yml"
 	defaultViperX = viperx.New(configType)
 
-	configExt := "." + configType
 	readers := make([]io.Reader, 0)
 	for _, name := range []string{
 		"default",
 		GetENV(),
 	} {
-		data, err := box.Find(name + configExt)
+		data, err := box.Find(name + "." + configType)
 		if err != nil {
 			panic(err)
 		}
@@ -154,8 +151,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	// appName = GetString("app")
 }
 
 func validatePanic(v interface{}) {
@@ -178,29 +173,34 @@ func SetApplicationStatus(status int32) {
 	atomic.StoreInt32(&applicationStatus, status)
 }
 
+// GetApplicationStatus 获取应用运行状态
+func GetApplicationStatus() int32 {
+	return atomic.LoadInt32(&applicationStatus)
+}
+
 // ApplicationIsRunning 判断应用是否正在运行
 func ApplicationIsRunning() bool {
 	return atomic.LoadInt32(&applicationStatus) == ApplicationStatusRunning
 }
 
-// GetVersion 获取应用版本号
-func GetVersion() string {
-	return version
+// GetApplicationVersion 获取应用版本号
+func GetApplicationVersion() string {
+	return applicationVersion
 }
 
-// SetVersion 设置应用版本号
-func SetVersion(v string) {
-	version = v
+// SetApplicationVersion 设置应用版本号
+func SetApplicationVersion(v string) {
+	applicationVersion = v
 }
 
-// GetBuildedAt 获取应用构建时间
-func GetBuildedAt() string {
-	return buildedAt
+// GetApplicationBuildedAt 获取应用构建时间
+func GetApplicationBuildedAt() string {
+	return applicationBuildedAt
 }
 
-// SetBuildedAt 设置应用构建时间
-func SetBuildedAt(v string) {
-	buildedAt = v
+// SetApplicationBuildedAt 设置应用构建时间
+func SetApplicationBuildedAt(v string) {
+	applicationBuildedAt = v
 }
 
 // GetBasicConfig 获取基本配置信息
