@@ -1,4 +1,4 @@
-.PHONY: default test test-cover dev
+.PHONY: default test test-cover dev generate
 
 # for dev
 dev:
@@ -9,6 +9,12 @@ doc:
 
 test:
 	go test -cover ./...
+
+generate: 
+	go generate ./ent
+
+describe:
+	entc describe ./ent/schema
 
 test-cover:
 	go test -race -coverprofile=test.out ./... && go tool cover --html=test.out

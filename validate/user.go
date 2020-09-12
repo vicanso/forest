@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cs
+package validate
 
-const (
-	// MeasurementRedisStats redis性能统计
-	MeasurementRedisStats = "redisStats"
-	// MeasurementHTTPStats http性能统计
-	MeasurementHTTPStats = "httpStats"
-	// MeasurementUserTracker 用户行为记录
-	MeasurementUserTracker = "userTracker"
-)
+func init() {
+	// 用户账号
+	AddAlias("xUserAccount", "ascii,min=2,max=10")
+	// 用户密码
+	AddAlias("xUserPassword", "ascii,len=44")
+	// 用户名称
+	AddAlias("xUserName", "min=1,max=20")
+}

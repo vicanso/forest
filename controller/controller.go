@@ -16,14 +16,19 @@ package controller
 
 import (
 	"net/http"
+	"regexp"
+	"strconv"
 
 	"github.com/vicanso/elton"
+	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 var (
@@ -47,9 +52,10 @@ var (
 )
 
 var (
-	logger     = log.Default()
-	now        = util.NowString
-	getTrackID = util.GetTrackID
+	logger       = log.Default()
+	now          = util.NowString
+	getTrackID   = util.GetTrackID
+	getEntClient = helper.GetEntClient
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
@@ -67,7 +73,23 @@ var (
 	shouldBeSu = newCheckRolesMiddleware([]string{
 		cs.UserRoleSu,
 	})
+
+	// 创建IP限制中间件
+	newIPLimit = middleware.NewIPLimit
+
+	// 图形验证码校验
+	captchaValidate = newMagicalCaptchaValidate()
+	// 获取influx service
+	getInfluxSrv = helper.GetInfluxSrv
 )
+
+func newMagicalCaptchaValidate() elton.Handler {
+	magicValue := ""
+	if !util.IsProduction() {
+		magicValue = "0145"
+	}
+	return middleware.ValidateCaptcha(magicValue)
+}
 
 // isLogined 判断是否登录状态
 func isLogined(c *elton.Context) bool {
@@ -112,4 +134,52 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 		err = errForbidden
 		return
 	}
+}
+
+// newTracker 初始化用户行为跟踪中间件
+func newTracker(action string) elton.Handler {
+	return M.NewTracker(M.TrackerConfig{
+		Mask: regexp.MustCompile(`(?i)password`),
+		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
+			account := ""
+			us := service.NewUserSession(c)
+			if us != nil && us.IsLogined() {
+				account = us.MustGetInfo().Account
+			}
+			ip := c.RealIP()
+			sid := util.GetSessionID(c)
+			fields := make([]zap.Field, 0, 10)
+			fields = append(
+				fields,
+				zap.String("action", action),
+				zap.String("cid", info.CID),
+				zap.String("account", account),
+				zap.String("ip", ip),
+				zap.String("sid", sid),
+				zap.Int("result", info.Result),
+			)
+			if info.Query != nil {
+				fields = append(fields, zap.Any("query", info.Query))
+			}
+			if info.Params != nil {
+				fields = append(fields, zap.Any("params", info.Params))
+			}
+			if info.Form != nil {
+				fields = append(fields, zap.Any("form", info.Form))
+			}
+			if info.Err != nil {
+				fields = append(fields, zap.Error(info.Err))
+			}
+			logger.Info("tracker", fields...)
+			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]interface{}{
+				"cid":     info.CID,
+				"account": account,
+				"ip":      ip,
+				"sid":     sid,
+			}, map[string]string{
+				"action": action,
+				"result": strconv.Itoa(info.Result),
+			})
+		},
+	})
 }

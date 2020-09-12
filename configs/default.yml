@@ -23,6 +23,10 @@ redis:
   # uri: redis://:pass@127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
   uri: redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
 
+# postgres postgres配置
+postgres:
+  uri: postgresql://vicanso:A123456@127.0.0.1:5432/forest
+
 # influxdb 配置
 influxdb:
   uri: http://127.0.0.1:9999

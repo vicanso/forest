@@ -99,6 +99,10 @@ type (
 		// 最大的正在处理请求量
 		MaxProcessing uint32 `validate:"required"`
 	}
+	// PostgresConfig postgres配置
+	PostgresConfig struct {
+		URI string `validate:"required,uri"`
+	}
 	// MailConfig email的配置
 	MailConfig struct {
 		Host     string `validate:"required,hostname"`
@@ -280,6 +284,15 @@ func GetRedisConfig() RedisConfig {
 
 	validatePanic(&redisConfig)
 	return redisConfig
+}
+
+// GetPostgresConfig 获取postgres配置
+func GetPostgresConfig() PostgresConfig {
+	prefix := "postgres."
+	postgresConfig := PostgresConfig{
+		URI: defaultViperX.GetString(prefix + "uri"),
+	}
+	return postgresConfig
 }
 
 // GetMailConfig 获取邮件配置

@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/dustin/go-humanize v1.0.0
+	github.com/facebook/ent v0.4.2
 	github.com/fogleman/gg v1.3.0
 	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/go-playground/validator/v10 v10.3.0
@@ -11,6 +12,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/influxdata/influxdb-client-go v1.4.0
+	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jinzhu/now v1.1.1
 	github.com/mmcloughlin/avo v0.0.0-20200803215136-443f81d77104 // indirect
 	github.com/mozillazg/go-pinyin v0.18.0

@@ -18,12 +18,15 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/forest/validate"
 )
 
 type (
@@ -32,6 +35,14 @@ type (
 	userInfoResp struct {
 		Date string `json:"date,omitempty"`
 		service.UserSessionInfo
+	}
+
+	// 注册与登录参数
+	registerLoginUserParams struct {
+		// 账户
+		Account string `json:"account,omitempty" validate:"xUserAccount"`
+		// 密码，密码为sha256后的加密串
+		Password string `json:"password,omitempty" validate:"xUserPassword"`
 	}
 )
 
@@ -55,6 +66,17 @@ func init() {
 	g.GET(
 		"/v1/me",
 		ctrl.me,
+	)
+
+	// 用户注册
+	g.POST(
+		"/v1/me",
+		newTracker(cs.ActionRegister),
+		captchaValidate,
+		// 限制相同IP在60秒之内只能调用5次
+		newIPLimit(5, 60*time.Second, cs.ActionRegister),
+		shouldBeAnonymous,
+		ctrl.register,
 	)
 }
 
@@ -92,7 +114,7 @@ func (userCtrl) getLoginToken(c *elton.Context) (err error) {
 }
 
 // me 获取用户信息
-func (ctrl userCtrl) me(c *elton.Context) (err error) {
+func (userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
@@ -116,5 +138,23 @@ func (ctrl userCtrl) me(c *elton.Context) (err error) {
 		return
 	}
 	c.Body = &resp
+	return
+}
+
+// register 用户注册
+func (userCtrl) register(c *elton.Context) (err error) {
+	params := registerLoginUserParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	user, err := getEntClient().User.Create().
+		SetAccount(params.Account).
+		SetPassword(params.Password).
+		Save(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = user
 	return
 }

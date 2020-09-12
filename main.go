@@ -70,6 +70,11 @@ func dependServiceCheck() (err error) {
 	if err != nil {
 		return
 	}
+	// 初始化所有schema
+	err = helper.InitSchemaAndHook()
+	if err != nil {
+		return
+	}
 	// configSrv := new(service.ConfigurationSrv)
 	// err = configSrv.Refresh()
 	// if err != nil {
@@ -87,6 +92,7 @@ func main() {
 		closeOnce.Do(func() {
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
+			helper.GetEntClient().Close()
 		})
 	}
 	defer closeDeps()

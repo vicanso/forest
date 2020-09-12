@@ -11,14 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package cs
 
 const (
-	// MeasurementRedisStats redis性能统计
-	MeasurementRedisStats = "redisStats"
-	// MeasurementHTTPStats http性能统计
-	MeasurementHTTPStats = "httpStats"
-	// MeasurementUserTracker 用户行为记录
-	MeasurementUserTracker = "userTracker"
+	// ActionLogin login
+	ActionLogin = "login"
+	// ActionRegister register
+	ActionRegister = "register"
+	// ActionLogout logout
+	ActionLogout = "logout"
+
+	// ActionUserInfoUpdate update user info
+	ActionUserInfoUpdate = "update-user-info"
+	// ActionUserMeUpdate update minie info
+	ActionUserMeUpdate = "update-user-me"
+	// ActionUserTrackAdd add user track
+	ActionUserTrackAdd = "add-user-track"
 )
