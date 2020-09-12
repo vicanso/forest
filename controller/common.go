@@ -126,7 +126,7 @@ func (commonCtrl) captcha(c *elton.Context) (err error) {
 	// c.SetContentTypeByExt(".jpeg")
 	// c.Body = info.Data
 	c.NoStore()
-	c.Body = info
+	c.Body = &info
 	return
 }
 

@@ -106,14 +106,14 @@ func ChinaYesterday() (time.Time, error) {
 }
 
 // IsBetween 判断当前时间是否在开始与结束时间之间
-func IsBetween(begin *time.Time, end *time.Time) bool {
+func IsBetween(begin, end time.Time) bool {
 	now := Now().Unix()
 	// 如果开始时间大于当前时间，未开始
-	if begin != nil && begin.Unix() > now {
+	if !begin.IsZero() && begin.Unix() > now {
 		return false
 	}
 	// 如果结束时间少于当前时间，已结束
-	if end != nil && end.Unix() < now {
+	if !end.IsZero() && end.Unix() < now {
 		return false
 	}
 	return true

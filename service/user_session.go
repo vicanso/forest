@@ -67,7 +67,7 @@ func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 	return
 }
 
-// MustGetInfo 获取用户信息，如果信息不存在则触发panic
+// MustGetInfo 获取用户信息，如果信息获取失败则触发panic
 func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
 	info, err := us.GetInfo()
 	if err != nil {
@@ -114,23 +114,17 @@ func (us *UserSession) Refresh() error {
 	return us.se.Refresh()
 }
 
-// ClearSessionID 清除用户session id
-func (us *UserSession) ClearSessionID() {
-	us.se.ID = ""
-}
-
 // NewUserSession 创建新的用户session对象
 func NewUserSession(c *elton.Context) *UserSession {
-	v, ok := c.Get(session.Key)
-	if !ok {
-		return nil
-	}
-	data, ok := c.Get(cs.UserSession)
-	if ok {
+	if data, ok := c.Get(cs.UserSession); ok {
 		us, ok := data.(*UserSession)
 		if ok {
 			return us
 		}
+	}
+	v, ok := c.Get(session.Key)
+	if !ok {
+		return nil
 	}
 	us := &UserSession{
 		se: v.(*session.Session),

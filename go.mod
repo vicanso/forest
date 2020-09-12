@@ -19,7 +19,7 @@ require (
 	github.com/vicanso/count-warner v1.0.1
 	github.com/vicanso/elton v1.0.7
 	github.com/vicanso/elton-compress v1.0.0
-	github.com/vicanso/elton-session v1.0.1
+	github.com/vicanso/elton-session v1.0.2
 	github.com/vicanso/hes v0.2.3
 	github.com/vicanso/ips v1.0.1
 	github.com/vicanso/viperx v0.1.2

@@ -126,7 +126,7 @@ func parseColor(s string) (c color.RGBA, err error) {
 }
 
 // GetCaptcha 获取图形验证码
-func GetCaptcha(fontColor, bgColor string) (info *CaptchaInfo, err error) {
+func GetCaptcha(fontColor, bgColor string) (info CaptchaInfo, err error) {
 	value := util.RandomDigit(4)
 	fc, err := parseColor(fontColor)
 	if err != nil {
@@ -152,7 +152,7 @@ func GetCaptcha(fontColor, bgColor string) (info *CaptchaInfo, err error) {
 	if err != nil {
 		return
 	}
-	info = &CaptchaInfo{
+	info = CaptchaInfo{
 		ExpiredAt: time.Now().Add(ttl),
 		Data:      buffer.Bytes(),
 		Value:     value,

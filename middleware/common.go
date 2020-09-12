@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	xCaptchHeader     = "X-Captcha"
+	xCaptchaHeader    = "X-Captcha"
 	errCommonCategory = "common-validate"
 )
 
@@ -76,7 +76,7 @@ func WaitFor(d time.Duration, args ...bool) elton.Handler {
 // ValidateCaptcha 图形难码校验
 func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		value := c.GetRequestHeader(xCaptchHeader)
+		value := c.GetRequestHeader(xCaptchaHeader)
 		if value == "" {
 			err = errCaptchaIsInvalid
 			return

@@ -76,7 +76,10 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 func (userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
-	us.ClearSessionID()
+	err = us.Destroy()
+	if err != nil {
+		return
+	}
 	userInfo := service.UserSessionInfo{
 		Token: util.RandomString(8),
 	}
