@@ -17,7 +17,7 @@ var (
 		{Name: "password", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "roles", Type: field.TypeJSON, Nullable: true},
-		{Name: "status", Type: field.TypeInt, Default: 1},
+		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "email", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.

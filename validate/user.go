@@ -21,4 +21,6 @@ func init() {
 	AddAlias("xUserPassword", "ascii,len=44")
 	// 用户名称
 	AddAlias("xUserName", "min=1,max=20")
+	// 用户邮箱
+	AddAlias("xUserEmail", "email")
 }

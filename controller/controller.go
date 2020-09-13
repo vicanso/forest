@@ -74,8 +74,12 @@ var (
 		cs.UserRoleSu,
 	})
 
+	// 创建新的并发控制中间件
+	newConcurrentLimit = middleware.NewConcurrentLimit
 	// 创建IP限制中间件
 	newIPLimit = middleware.NewIPLimit
+	// 创建出错限制中间件
+	newErrorLimit = middleware.NewErrorLimit
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()

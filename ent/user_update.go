@@ -28,20 +28,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetCreatedAt sets the created_at field.
-func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetCreatedAt(t)
-	return uu
-}
-
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
-func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetCreatedAt(*t)
-	}
-	return uu
-}
-
 // SetUpdatedAt sets the updated_at field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetUpdatedAt(t)
@@ -87,14 +73,14 @@ func (uu *UserUpdate) ClearRoles() *UserUpdate {
 }
 
 // SetStatus sets the status field.
-func (uu *UserUpdate) SetStatus(i int) *UserUpdate {
+func (uu *UserUpdate) SetStatus(i int8) *UserUpdate {
 	uu.mutation.ResetStatus()
 	uu.mutation.SetStatus(i)
 	return uu
 }
 
 // SetNillableStatus sets the status field if the given value is not nil.
-func (uu *UserUpdate) SetNillableStatus(i *int) *UserUpdate {
+func (uu *UserUpdate) SetNillableStatus(i *int8) *UserUpdate {
 	if i != nil {
 		uu.SetStatus(*i)
 	}
@@ -102,7 +88,7 @@ func (uu *UserUpdate) SetNillableStatus(i *int) *UserUpdate {
 }
 
 // AddStatus adds i to status.
-func (uu *UserUpdate) AddStatus(i int) *UserUpdate {
+func (uu *UserUpdate) AddStatus(i int8) *UserUpdate {
 	uu.mutation.AddStatus(i)
 	return uu
 }
@@ -215,13 +201,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreatedAt,
-		})
-	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -264,14 +243,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt8,
 			Value:  value,
 			Column: user.FieldStatus,
 		})
 	}
 	if value, ok := uu.mutation.AddedStatus(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt8,
 			Value:  value,
 			Column: user.FieldStatus,
 		})
@@ -305,20 +284,6 @@ type UserUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *UserMutation
-}
-
-// SetCreatedAt sets the created_at field.
-func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetCreatedAt(t)
-	return uuo
-}
-
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetCreatedAt(*t)
-	}
-	return uuo
 }
 
 // SetUpdatedAt sets the updated_at field.
@@ -366,14 +331,14 @@ func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
 }
 
 // SetStatus sets the status field.
-func (uuo *UserUpdateOne) SetStatus(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetStatus(i int8) *UserUpdateOne {
 	uuo.mutation.ResetStatus()
 	uuo.mutation.SetStatus(i)
 	return uuo
 }
 
 // SetNillableStatus sets the status field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableStatus(i *int) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableStatus(i *int8) *UserUpdateOne {
 	if i != nil {
 		uuo.SetStatus(*i)
 	}
@@ -381,7 +346,7 @@ func (uuo *UserUpdateOne) SetNillableStatus(i *int) *UserUpdateOne {
 }
 
 // AddStatus adds i to status.
-func (uuo *UserUpdateOne) AddStatus(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddStatus(i int8) *UserUpdateOne {
 	uuo.mutation.AddStatus(i)
 	return uuo
 }
@@ -492,13 +457,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if value, ok := uuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreatedAt,
-		})
-	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -541,14 +499,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 	}
 	if value, ok := uuo.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt8,
 			Value:  value,
 			Column: user.FieldStatus,
 		})
 	}
 	if value, ok := uuo.mutation.AddedStatus(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt8,
 			Value:  value,
 			Column: user.FieldStatus,
 		})

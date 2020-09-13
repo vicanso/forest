@@ -52,7 +52,7 @@ func init() {
 	// userDescStatus is the schema descriptor for status field.
 	userDescStatus := userFields[4].Descriptor()
 	// user.DefaultStatus holds the default value on creation for the status field.
-	user.DefaultStatus = userDescStatus.Default.(int)
+	user.DefaultStatus = userDescStatus.Default.(int8)
 	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	user.StatusValidator = userDescStatus.Validators[0].(func(int) error)
+	user.StatusValidator = userDescStatus.Validators[0].(func(int8) error)
 }

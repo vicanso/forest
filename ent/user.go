@@ -30,7 +30,7 @@ type User struct {
 	// Roles holds the value of the "roles" field.
 	Roles []string `json:"roles,omitempty"`
 	// Status holds the value of the "status" field.
-	Status int `json:"status,omitempty"`
+	Status int8 `json:"status,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 }
@@ -98,7 +98,7 @@ func (u *User) assignValues(values ...interface{}) error {
 	if value, ok := values[6].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field status", values[6])
 	} else if value.Valid {
-		u.Status = int(value.Int64)
+		u.Status = int8(value.Int64)
 	}
 	if value, ok := values[7].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field email", values[7])

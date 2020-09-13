@@ -32,6 +32,7 @@ func (TimeMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
 			StructTag(`json:"createdAt,omitempty"`).
+			Immutable().
 			Default(time.Now).
 			Comment("创建时间，添加记录时由程序自动生成"),
 		field.Time("updated_at").

@@ -33,7 +33,7 @@ type (
 	UserSessionInfo struct {
 		Token     string   `json:"token,omitempty"`
 		Account   string   `json:"account,omitempty"`
-		ID        uint     `json:"id,omitempty"`
+		ID        int      `json:"id,omitempty"`
 		Roles     []string `json:"roles,omitempty"`
 		Groups    []string `json:"groups,omitempty"`
 		UpdatedAt string   `json:"updatedAt,omitempty"`

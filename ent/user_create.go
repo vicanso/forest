@@ -81,13 +81,13 @@ func (uc *UserCreate) SetRoles(s []string) *UserCreate {
 }
 
 // SetStatus sets the status field.
-func (uc *UserCreate) SetStatus(i int) *UserCreate {
+func (uc *UserCreate) SetStatus(i int8) *UserCreate {
 	uc.mutation.SetStatus(i)
 	return uc
 }
 
 // SetNillableStatus sets the status field if the given value is not nil.
-func (uc *UserCreate) SetNillableStatus(i *int) *UserCreate {
+func (uc *UserCreate) SetNillableStatus(i *int8) *UserCreate {
 	if i != nil {
 		uc.SetStatus(*i)
 	}
@@ -265,7 +265,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt8,
 			Value:  value,
 			Column: user.FieldStatus,
 		})

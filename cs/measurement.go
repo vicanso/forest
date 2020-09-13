@@ -21,4 +21,6 @@ const (
 	MeasurementHTTPStats = "httpStats"
 	// MeasurementUserTracker 用户行为记录
 	MeasurementUserTracker = "userTracker"
+	// MeasurementUserLogin 用户登录
+	MeasurementUserLogin = "userLogin"
 )

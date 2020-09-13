@@ -57,7 +57,7 @@ var (
 	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	PasswordValidator func(string) error
 	// DefaultStatus holds the default value on creation for the status field.
-	DefaultStatus int
+	DefaultStatus int8
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(int) error
+	StatusValidator func(int8) error
 )

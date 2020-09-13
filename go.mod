@@ -18,6 +18,7 @@ require (
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/stretchr/testify v1.6.1
+	github.com/tidwall/gjson v1.6.1
 	github.com/vicanso/count-warner v1.0.1
 	github.com/vicanso/elton v1.0.7
 	github.com/vicanso/elton-compress v1.0.0

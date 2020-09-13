@@ -38,8 +38,8 @@ type UserMutation struct {
 	password      *string
 	name          *string
 	roles         *[]string
-	status        *int
-	addstatus     *int
+	status        *int8
+	addstatus     *int8
 	email         *string
 	clearedFields map[string]struct{}
 	done          bool
@@ -374,13 +374,13 @@ func (m *UserMutation) ResetRoles() {
 }
 
 // SetStatus sets the status field.
-func (m *UserMutation) SetStatus(i int) {
+func (m *UserMutation) SetStatus(i int8) {
 	m.status = &i
 	m.addstatus = nil
 }
 
 // Status returns the status value in the mutation.
-func (m *UserMutation) Status() (r int, exists bool) {
+func (m *UserMutation) Status() (r int8, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -392,7 +392,7 @@ func (m *UserMutation) Status() (r int, exists bool) {
 // If the User object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldStatus(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldStatus(ctx context.Context) (v int8, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
 	}
@@ -407,7 +407,7 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v int, err error) {
 }
 
 // AddStatus adds i to status.
-func (m *UserMutation) AddStatus(i int) {
+func (m *UserMutation) AddStatus(i int8) {
 	if m.addstatus != nil {
 		*m.addstatus += i
 	} else {
@@ -416,7 +416,7 @@ func (m *UserMutation) AddStatus(i int) {
 }
 
 // AddedStatus returns the value that was added to the status field in this mutation.
-func (m *UserMutation) AddedStatus() (r int, exists bool) {
+func (m *UserMutation) AddedStatus() (r int8, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -620,7 +620,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetRoles(v)
 		return nil
 	case user.FieldStatus:
-		v, ok := value.(int)
+		v, ok := value.(int8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -664,7 +664,7 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldStatus:
-		v, ok := value.(int)
+		v, ok := value.(int8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

@@ -60,7 +60,7 @@ func (User) Fields() []ent.Field {
 		field.Strings("roles").
 			Optional().
 			Comment("用户角色，由管理员分配"),
-		field.Int("status").
+		field.Int8("status").
 			Range(UserStatusEnabled, UserStatusDisabled).
 			Default(UserStatusEnabled).
 			Comment("用户状态，默认为启用状态"),
