@@ -6,5 +6,8 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
+// Configuration is the predicate function for configuration builders.
+type Configuration func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

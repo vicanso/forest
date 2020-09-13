@@ -8,6 +8,26 @@ import (
 )
 
 var (
+	// ConfigurationsColumns holds the columns for the "configurations" table.
+	ConfigurationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "category", Type: field.TypeString},
+		{Name: "owner", Type: field.TypeString},
+		{Name: "status", Type: field.TypeInt8, Default: 1},
+		{Name: "data", Type: field.TypeString},
+		{Name: "started_at", Type: field.TypeTime},
+		{Name: "ended_at", Type: field.TypeTime},
+	}
+	// ConfigurationsTable holds the schema information for the "configurations" table.
+	ConfigurationsTable = &schema.Table{
+		Name:        "configurations",
+		Columns:     ConfigurationsColumns,
+		PrimaryKey:  []*schema.Column{ConfigurationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -17,6 +37,7 @@ var (
 		{Name: "password", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "roles", Type: field.TypeJSON, Nullable: true},
+		{Name: "groups", Type: field.TypeJSON, Nullable: true},
 		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "email", Type: field.TypeString, Nullable: true},
 	}
@@ -36,6 +57,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ConfigurationsTable,
 		UsersTable,
 	}
 )

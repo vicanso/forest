@@ -654,6 +654,20 @@ func RolesNotNil() predicate.User {
 	})
 }
 
+// GroupsIsNil applies the IsNil predicate on the "groups" field.
+func GroupsIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldGroups)))
+	})
+}
+
+// GroupsNotNil applies the NotNil predicate on the "groups" field.
+func GroupsNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldGroups)))
+	})
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v int8) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

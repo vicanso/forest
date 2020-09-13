@@ -9,6 +9,7 @@ import (
 
 	"github.com/vicanso/forest/ent/migrate"
 
+	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/user"
 
 	"github.com/facebook/ent/dialect"
@@ -20,6 +21,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Configuration is the client for interacting with the Configuration builders.
+	Configuration *ConfigurationClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -35,6 +38,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Configuration = NewConfigurationClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -66,9 +70,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Configuration: NewConfigurationClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -83,15 +88,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		config: cfg,
-		User:   NewUserClient(cfg),
+		config:        cfg,
+		Configuration: NewConfigurationClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		Configuration.
 //		Query().
 //		Count(ctx)
 //
@@ -113,7 +119,96 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Configuration.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// ConfigurationClient is a client for the Configuration schema.
+type ConfigurationClient struct {
+	config
+}
+
+// NewConfigurationClient returns a client for the Configuration from the given config.
+func NewConfigurationClient(c config) *ConfigurationClient {
+	return &ConfigurationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `configuration.Hooks(f(g(h())))`.
+func (c *ConfigurationClient) Use(hooks ...Hook) {
+	c.hooks.Configuration = append(c.hooks.Configuration, hooks...)
+}
+
+// Create returns a create builder for Configuration.
+func (c *ConfigurationClient) Create() *ConfigurationCreate {
+	mutation := newConfigurationMutation(c.config, OpCreate)
+	return &ConfigurationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Configuration entities.
+func (c *ConfigurationClient) CreateBulk(builders ...*ConfigurationCreate) *ConfigurationCreateBulk {
+	return &ConfigurationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Configuration.
+func (c *ConfigurationClient) Update() *ConfigurationUpdate {
+	mutation := newConfigurationMutation(c.config, OpUpdate)
+	return &ConfigurationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConfigurationClient) UpdateOne(co *Configuration) *ConfigurationUpdateOne {
+	mutation := newConfigurationMutation(c.config, OpUpdateOne, withConfiguration(co))
+	return &ConfigurationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConfigurationClient) UpdateOneID(id int) *ConfigurationUpdateOne {
+	mutation := newConfigurationMutation(c.config, OpUpdateOne, withConfigurationID(id))
+	return &ConfigurationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Configuration.
+func (c *ConfigurationClient) Delete() *ConfigurationDelete {
+	mutation := newConfigurationMutation(c.config, OpDelete)
+	return &ConfigurationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ConfigurationClient) DeleteOne(co *Configuration) *ConfigurationDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ConfigurationClient) DeleteOneID(id int) *ConfigurationDeleteOne {
+	builder := c.Delete().Where(configuration.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConfigurationDeleteOne{builder}
+}
+
+// Query returns a query builder for Configuration.
+func (c *ConfigurationClient) Query() *ConfigurationQuery {
+	return &ConfigurationQuery{config: c.config}
+}
+
+// Get returns a Configuration entity by its id.
+func (c *ConfigurationClient) Get(ctx context.Context, id int) (*Configuration, error) {
+	return c.Query().Where(configuration.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConfigurationClient) GetX(ctx context.Context, id int) *Configuration {
+	co, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return co
+}
+
+// Hooks returns the client hooks.
+func (c *ConfigurationClient) Hooks() []Hook {
+	return c.hooks.Configuration
 }
 
 // UserClient is a client for the User schema.

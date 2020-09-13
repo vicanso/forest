@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -256,6 +257,16 @@ func (params *listUserParams) queryAll(ctx context.Context) (users []*ent.User, 
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
 		Order(params.GetOrders()...)
+	if params.Keyword != "" {
+		query = query.Where(user.AccountContains(params.Keyword))
+	}
+	// TODO role的查询
+	if params.Role != "" {
+	}
+	if params.Status != "" {
+		v, _ := strconv.Atoi(params.Status)
+		query = query.Where(user.Status(int8(v)))
+	}
 
 	return query.All(ctx)
 }

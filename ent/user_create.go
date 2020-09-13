@@ -80,6 +80,12 @@ func (uc *UserCreate) SetRoles(s []string) *UserCreate {
 	return uc
 }
 
+// SetGroups sets the groups field.
+func (uc *UserCreate) SetGroups(s []string) *UserCreate {
+	uc.mutation.SetGroups(s)
+	return uc
+}
+
 // SetStatus sets the status field.
 func (uc *UserCreate) SetStatus(i int8) *UserCreate {
 	uc.mutation.SetStatus(i)
@@ -262,6 +268,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldRoles,
 		})
 		u.Roles = value
+	}
+	if value, ok := uc.mutation.Groups(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldGroups,
+		})
+		u.Groups = value
 	}
 	if value, ok := uc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

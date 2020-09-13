@@ -23,6 +23,8 @@ const (
 	FieldName = "name"
 	// FieldRoles holds the string denoting the roles field in the database.
 	FieldRoles = "roles"
+	// FieldGroups holds the string denoting the groups field in the database.
+	FieldGroups = "groups"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldEmail holds the string denoting the email field in the database.
@@ -41,6 +43,7 @@ var Columns = []string{
 	FieldPassword,
 	FieldName,
 	FieldRoles,
+	FieldGroups,
 	FieldStatus,
 	FieldEmail,
 }

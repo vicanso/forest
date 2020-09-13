@@ -29,6 +29,8 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Roles holds the value of the "roles" field.
 	Roles []string `json:"roles,omitempty"`
+	// Groups holds the value of the "groups" field.
+	Groups []string `json:"groups,omitempty"`
 	// Status holds the value of the "status" field.
 	Status int8 `json:"status,omitempty"`
 	// Email holds the value of the "email" field.
@@ -45,6 +47,7 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // password
 		&sql.NullString{}, // name
 		&[]byte{},         // roles
+		&[]byte{},         // groups
 		&sql.NullInt64{},  // status
 		&sql.NullString{}, // email
 	}
@@ -95,13 +98,21 @@ func (u *User) assignValues(values ...interface{}) error {
 			return fmt.Errorf("unmarshal field roles: %v", err)
 		}
 	}
-	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[6])
+
+	if value, ok := values[6].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field groups", values[6])
+	} else if value != nil && len(*value) > 0 {
+		if err := json.Unmarshal(*value, &u.Groups); err != nil {
+			return fmt.Errorf("unmarshal field groups: %v", err)
+		}
+	}
+	if value, ok := values[7].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field status", values[7])
 	} else if value.Valid {
 		u.Status = int8(value.Int64)
 	}
-	if value, ok := values[7].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field email", values[7])
+	if value, ok := values[8].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field email", values[8])
 	} else if value.Valid {
 		u.Email = value.String
 	}
@@ -137,12 +148,13 @@ func (u *User) String() string {
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", account=")
 	builder.WriteString(u.Account)
-	builder.WriteString(", password=")
-	builder.WriteString(u.Password)
+	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
 	builder.WriteString(", roles=")
 	builder.WriteString(fmt.Sprintf("%v", u.Roles))
+	builder.WriteString(", groups=")
+	builder.WriteString(fmt.Sprintf("%v", u.Groups))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", email=")

@@ -61,7 +61,7 @@ func (User) Fields() []ent.Field {
 			Unique().
 			Comment("用户账户信息"),
 		field.String("password").
-			StructTag(`json:"-"`).
+			Sensitive().
 			NotEmpty().
 			Comment("用户密码，保存hash之后的值"),
 		field.String("name").
@@ -70,6 +70,9 @@ func (User) Fields() []ent.Field {
 		field.Strings("roles").
 			Optional().
 			Comment("用户角色，由管理员分配"),
+		field.Strings("groups").
+			Optional().
+			Comment("用户分组，按用户职能分配至不同的分组"),
 		field.Int8("status").
 			Range(UserStatusEnabled, UserStatusDisabled).
 			Default(UserStatusEnabled).

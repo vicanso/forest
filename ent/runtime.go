@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 )
@@ -13,6 +14,42 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	configurationMixin := schema.Configuration{}.Mixin()
+	configurationMixinFields0 := configurationMixin[0].Fields()
+	configurationFields := schema.Configuration{}.Fields()
+	_ = configurationFields
+	// configurationDescCreatedAt is the schema descriptor for created_at field.
+	configurationDescCreatedAt := configurationMixinFields0[0].Descriptor()
+	// configuration.DefaultCreatedAt holds the default value on creation for the created_at field.
+	configuration.DefaultCreatedAt = configurationDescCreatedAt.Default.(func() time.Time)
+	// configurationDescUpdatedAt is the schema descriptor for updated_at field.
+	configurationDescUpdatedAt := configurationMixinFields0[1].Descriptor()
+	// configuration.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	configuration.DefaultUpdatedAt = configurationDescUpdatedAt.Default.(func() time.Time)
+	// configuration.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	configuration.UpdateDefaultUpdatedAt = configurationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// configurationDescName is the schema descriptor for name field.
+	configurationDescName := configurationFields[0].Descriptor()
+	// configuration.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	configuration.NameValidator = configurationDescName.Validators[0].(func(string) error)
+	// configurationDescCategory is the schema descriptor for category field.
+	configurationDescCategory := configurationFields[1].Descriptor()
+	// configuration.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	configuration.CategoryValidator = configurationDescCategory.Validators[0].(func(string) error)
+	// configurationDescOwner is the schema descriptor for owner field.
+	configurationDescOwner := configurationFields[2].Descriptor()
+	// configuration.OwnerValidator is a validator for the "owner" field. It is called by the builders before save.
+	configuration.OwnerValidator = configurationDescOwner.Validators[0].(func(string) error)
+	// configurationDescStatus is the schema descriptor for status field.
+	configurationDescStatus := configurationFields[3].Descriptor()
+	// configuration.DefaultStatus holds the default value on creation for the status field.
+	configuration.DefaultStatus = configurationDescStatus.Default.(int8)
+	// configuration.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	configuration.StatusValidator = configurationDescStatus.Validators[0].(func(int8) error)
+	// configurationDescData is the schema descriptor for data field.
+	configurationDescData := configurationFields[4].Descriptor()
+	// configuration.DataValidator is a validator for the "data" field. It is called by the builders before save.
+	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()
@@ -50,7 +87,7 @@ func init() {
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescStatus is the schema descriptor for status field.
-	userDescStatus := userFields[4].Descriptor()
+	userDescStatus := userFields[5].Descriptor()
 	// user.DefaultStatus holds the default value on creation for the status field.
 	user.DefaultStatus = userDescStatus.Default.(int8)
 	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.

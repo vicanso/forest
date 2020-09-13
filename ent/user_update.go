@@ -72,6 +72,18 @@ func (uu *UserUpdate) ClearRoles() *UserUpdate {
 	return uu
 }
 
+// SetGroups sets the groups field.
+func (uu *UserUpdate) SetGroups(s []string) *UserUpdate {
+	uu.mutation.SetGroups(s)
+	return uu
+}
+
+// ClearGroups clears the value of groups.
+func (uu *UserUpdate) ClearGroups() *UserUpdate {
+	uu.mutation.ClearGroups()
+	return uu
+}
+
 // SetStatus sets the status field.
 func (uu *UserUpdate) SetStatus(i int8) *UserUpdate {
 	uu.mutation.ResetStatus()
@@ -241,6 +253,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldRoles,
 		})
 	}
+	if value, ok := uu.mutation.Groups(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldGroups,
+		})
+	}
+	if uu.mutation.GroupsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldGroups,
+		})
+	}
 	if value, ok := uu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -327,6 +352,18 @@ func (uuo *UserUpdateOne) SetRoles(s []string) *UserUpdateOne {
 // ClearRoles clears the value of roles.
 func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
 	uuo.mutation.ClearRoles()
+	return uuo
+}
+
+// SetGroups sets the groups field.
+func (uuo *UserUpdateOne) SetGroups(s []string) *UserUpdateOne {
+	uuo.mutation.SetGroups(s)
+	return uuo
+}
+
+// ClearGroups clears the value of groups.
+func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
+	uuo.mutation.ClearGroups()
 	return uuo
 }
 
@@ -495,6 +532,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldRoles,
+		})
+	}
+	if value, ok := uuo.mutation.Groups(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldGroups,
+		})
+	}
+	if uuo.mutation.GroupsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldGroups,
 		})
 	}
 	if value, ok := uuo.mutation.Status(); ok {
