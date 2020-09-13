@@ -12,6 +12,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/iancoleman/strcase v0.1.1
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jinzhu/now v1.1.1

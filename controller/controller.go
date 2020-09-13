@@ -18,10 +18,13 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
+	"github.com/iancoleman/strcase"
 	"github.com/vicanso/elton"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
@@ -95,6 +98,35 @@ var (
 	// 获取influx service
 	getInfluxSrv = helper.GetInfluxSrv
 )
+
+// GetLimit 获取limit的值
+func (params *listParams) GetLimit() int {
+	limit, _ := strconv.Atoi(params.Limit)
+	return limit
+}
+
+// GetOffset 获取offset的值
+func (params *listParams) GetOffset() int {
+	offset, _ := strconv.Atoi(params.Offset)
+	return offset
+}
+
+// GetOrders 获取排序的函数列表
+func (params *listParams) GetOrders() []ent.OrderFunc {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]ent.OrderFunc, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = ent.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = ent.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
+}
 
 func newMagicalCaptchaValidate() elton.Handler {
 	magicValue := ""

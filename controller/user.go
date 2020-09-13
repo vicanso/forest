@@ -19,7 +19,6 @@ package controller
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -253,12 +252,10 @@ func (params *updateMeParams) update(ctx context.Context, account string) (u *en
 // queryAll 查询用户列表
 func (params *listUserParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
 	query := getEntClient().User.Query()
-	limit, _ := strconv.Atoi(params.Limit)
-	offset, _ := strconv.Atoi(params.Offset)
 
-	query = query.Limit(limit).
-		Offset(offset)
-		// Order(params.Order)
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
 
 	return query.All(ctx)
 }
