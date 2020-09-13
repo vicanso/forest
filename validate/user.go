@@ -23,4 +23,8 @@ func init() {
 	AddAlias("xUserName", "min=1,max=20")
 	// 用户邮箱
 	AddAlias("xUserEmail", "email")
+	// 用户角色
+	AddAlias("xUserRole", "ascii,min=1,max=10")
+	// 用户分组
+	AddAlias("xUserGroup", "ascii,min=1,max=10")
 }

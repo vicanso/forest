@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cs
+package validate
 
-const (
-	// MeasurementRedisStats redis性能统计
-	MeasurementRedisStats = "redisStats"
-	// MeasurementHTTPStats http性能统计
-	MeasurementHTTPStats = "httpStats"
-	// MeasurementUserTracker 用户行为记录
-	MeasurementUserTracker = "userTracker"
-	// MeasurementUserLogin 用户登录
-	MeasurementUserLogin = "userLogin"
-	// MeasurementException 异常
-	MeasurementException = "exception"
-)
+func init() {
+	// 字符串，max表示字符串长度
+	AddAlias("xLimit", "number,min=1,max=2")
+	AddAlias("xOffset", "number,min=0,max=5")
+	AddAlias("xOrder", "ascii,min=0,max=100")
+	AddAlias("xFields", "ascii,min=0,max=100")
+	AddAlias("xKeyword", "min=1,max=10")
+	// 状态：启用、禁用
+	AddAlias("xStatus", "numeric,min=1,max=2")
+}

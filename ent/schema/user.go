@@ -29,6 +29,16 @@ const (
 	UserStatusDisabled
 )
 
+// 用户角色
+const (
+	// UserRoleNormal normal user
+	UserRoleNormal = "normal"
+	// UserRoleSu super user
+	UserRoleSu = "su"
+	// UserRoleAdmin admin user
+	UserRoleAdmin = "admin"
+)
+
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
@@ -45,7 +55,7 @@ func (User) Mixin() []ent.Mixin {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("account").
-			Match(regexp.MustCompile("[a-zA-Z_]+$")).
+			Match(regexp.MustCompile("[a-zA-Z_0-9]+$")).
 			NotEmpty().
 			Immutable().
 			Unique().

@@ -157,7 +157,8 @@ func (rh *redisHook) Allow() error {
 
 // ReportResult 记录结果
 func (*redisHook) ReportResult(result error) {
-	if result != nil {
+	// TODO 对于nil error另外统计
+	if result != nil && !IsRedisNilError(result) {
 		logger.Error("redis process fail",
 			zap.Error(result),
 		)

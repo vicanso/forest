@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -26,6 +27,7 @@ import (
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
@@ -38,9 +40,25 @@ import (
 type (
 	userCtrl struct{}
 
+	// userInfoResp 用户信息响应
 	userInfoResp struct {
 		Date string `json:"date,omitempty"`
 		service.UserSessionInfo
+	}
+
+	// userListResp 用户列表响应
+	userListResp struct {
+		Users []*ent.User `json:"users,omitempty"`
+	}
+
+	// listUserParams 用户查询参数
+	listUserParams struct {
+		listParams
+
+		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		Role    string `json:"role,omitempty" validate:"omitempty,xUserRole"`
+		Group   string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
+		Status  string `json:"status,omitempty" validate:"omitempty,xStatus"`
 	}
 
 	// registerLoginUserParams 注册与登录参数
@@ -106,6 +124,13 @@ func init() {
 	g := router.NewGroup("/users", loadUserSession)
 
 	ctrl := userCtrl{}
+
+	// 获取用户列表
+	g.GET(
+		"/v1",
+		shouldBeAdmin,
+		ctrl.list,
+	)
 
 	// 获取登录token
 	g.GET(
@@ -223,7 +248,19 @@ func (params *updateMeParams) update(ctx context.Context, account string) (u *en
 		updateOne = updateOne.SetPassword(params.NewPassword)
 	}
 	return updateOne.Save(ctx)
+}
 
+// queryAll 查询用户列表
+func (params *listUserParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
+	query := getEntClient().User.Query()
+	limit, _ := strconv.Atoi(params.Limit)
+	offset, _ := strconv.Atoi(params.Offset)
+
+	query = query.Limit(limit).
+		Offset(offset)
+		// Order(params.Order)
+
+	return query.All(ctx)
 }
 
 // pickUserInfo 获取用户信息
@@ -237,6 +274,24 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 		Date: util.NowString(),
 	}
 	resp.UserSessionInfo = userInfo
+	return
+}
+
+// list 获取用户列表
+func (userCtrl) list(c *elton.Context) (err error) {
+	params := listUserParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	users, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = &userListResp{
+		Users: users,
+	}
+
 	return
 }
 
@@ -297,6 +352,15 @@ func (userCtrl) register(c *elton.Context) (err error) {
 	user, err := params.save(c.Context())
 	if err != nil {
 		return
+	}
+	// 第一个创建的用户添加su权限
+	if user.ID == 1 {
+		go func() {
+			_, _ = getEntClient().User.UpdateOneID(user.ID).
+				SetRoles([]string{
+					schema.UserRoleSu,
+				}).Save(context.Background())
+		}()
 	}
 	c.Body = user
 	return

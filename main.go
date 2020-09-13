@@ -22,17 +22,20 @@ import (
 	"syscall"
 	"time"
 
+	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
 	compress "github.com/vicanso/elton-compress"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/config"
 	_ "github.com/vicanso/forest/controller"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -83,6 +86,44 @@ func dependServiceCheck() (err error) {
 	return
 }
 
+func newOnErrorHandler(e *elton.Elton) {
+	// 未处理的error才会触发
+	// 如果1分钟出现超过5次未处理异常
+	// exception的warner只有一个key，因此无需定时清除
+	warnerException := warner.NewWarner(60*time.Second, 5)
+	warnerException.ResetOnWarn = true
+	warnerException.On(func(_ string, _ warner.Count) {
+		// TODO 发送告警
+		// service.AlarmError("too many uncaught exception")
+	})
+	e.OnError(func(c *elton.Context, err error) {
+		he := hes.Wrap(err)
+		if !util.IsProduction() {
+			if he.Extra == nil {
+				he.Extra = make(map[string]interface{})
+			}
+			he.Extra["stack"] = util.GetStack(5)
+		}
+		ip := c.RealIP()
+		uri := c.Request.RequestURI
+
+		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]interface{}{
+			"ip":  ip,
+			"uri": uri,
+		}, map[string]string{
+			"category": "routeError",
+		})
+
+		// 可以针对实际场景输出更多的日志信息
+		log.Default().Error("exception",
+			zap.String("ip", ip),
+			zap.String("uri", uri),
+			zap.Error(he.Err),
+		)
+		warnerException.Inc("exception", 1)
+	})
+}
+
 func main() {
 	// TODO defer panic
 
@@ -99,6 +140,7 @@ func main() {
 	basicConfig := config.GetBasicConfig()
 
 	e := elton.New()
+	newOnErrorHandler(e)
 	// 启用耗时跟踪
 	if util.IsDevelopment() {
 		e.EnableTrace = true

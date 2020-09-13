@@ -31,6 +31,15 @@ import (
 	"go.uber.org/zap"
 )
 
+type ( // listParams 公共的列表查询参数
+	listParams struct {
+		Limit  string `json:"limit,omitempty" validate:"xLimit"`
+		Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
+		Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
+		Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
+	}
+)
+
 var (
 	errCategoryCtrl = "controller"
 
