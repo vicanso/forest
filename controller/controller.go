@@ -129,6 +129,19 @@ func (params *listParams) GetOrders() []ent.OrderFunc {
 	return funcs
 }
 
+// GetFields 获取选择的字段
+func (params *listParams) GetFields() []string {
+	if params.Fields == "" {
+		return nil
+	}
+	arr := strings.Split(params.Fields, ",")
+	result := make([]string, len(arr))
+	for index, item := range arr {
+		result[index] = strcase.ToSnake(item)
+	}
+	return result
+}
+
 func newMagicalCaptchaValidate() elton.Handler {
 	magicValue := ""
 	if !util.IsProduction() {

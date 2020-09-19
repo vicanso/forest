@@ -24,6 +24,23 @@ import (
 	"github.com/vicanso/forest/service"
 )
 
+func TestListParams(t *testing.T) {
+	assert := assert.New(t)
+	params := listParams{
+		Limit:  "10",
+		Offset: "100",
+		Order:  "-id,name",
+		Fields: "id,updatedAt",
+	}
+	assert.Equal(10, params.GetLimit())
+	assert.Equal(100, params.GetOffset())
+	assert.Equal([]string{
+		"id",
+		"updated_at",
+	}, params.GetFields())
+	assert.Equal(2, len(params.GetOrders()))
+}
+
 func newContextAndUserSession() (*elton.Context, *service.UserSession) {
 	s := session.Session{}
 	_, _ = s.Fetch()
@@ -116,4 +133,14 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	err = fn(c)
 	assert.Nil(err)
 	assert.True(done)
+}
+
+func TestGetIDFromParams(t *testing.T) {
+	assert := assert.New(t)
+	c := elton.NewContext(nil, nil)
+	c.Params = new(elton.RouteParams)
+	c.Params.Add("id", "1")
+	id, err := getIDFromParams(c)
+	assert.Nil(err)
+	assert.Equal(1, id)
 }
