@@ -52,6 +52,7 @@ func (sf *staticFile) Get(file string) ([]byte, error) {
 
 // Stat 获取文件stat信息
 func (sf *staticFile) Stat(file string) os.FileInfo {
+	// 文件打包至程序中，因此无file info
 	return nil
 }
 
@@ -68,7 +69,7 @@ func init() {
 	g := router.NewGroup("")
 	ctrl := assetCtrl{}
 	g.GET("/", ctrl.getIndex)
-	g.GET("/favicon.ico", ctrl.getFavIcon)
+	g.GET("/favicon.{ext}", ctrl.getFavIcon)
 
 	sf := &staticFile{
 		box: assetBox,
@@ -110,7 +111,7 @@ func (assetCtrl) getIndex(c *elton.Context) (err error) {
 
 // getFavIcon 图标
 func (assetCtrl) getFavIcon(c *elton.Context) (err error) {
-	err = sendFile(c, "favicon.ico")
+	err = sendFile(c, "favicon.png")
 	if err != nil {
 		return
 	}

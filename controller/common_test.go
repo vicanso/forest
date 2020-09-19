@@ -55,7 +55,7 @@ func TestCommonCtrl(t *testing.T) {
 
 	t.Run("captcha", func(t *testing.T) {
 		c := elton.NewContext(httptest.NewRecorder(), httptest.NewRequest("GET", "/", nil))
-		err := ctrl.captcha(c)
+		err := ctrl.getCaptcha(c)
 		assert.Nil(err)
 		assert.Equal("no-store", c.Header().Get(elton.HeaderCacheControl))
 		_, ok := c.Body.(*service.CaptchaInfo)

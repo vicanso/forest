@@ -55,6 +55,8 @@ func TestNewConcurrentLimitWithDone(t *testing.T) {
 	}, 20*time.Millisecond, "TestNewConcurrentLimitWithDone")
 	req := httptest.NewRequest("GET", "/?key=1", nil)
 	c := elton.NewContext(nil, req)
+	// 由于后续有另外的goroutine读取，因此直接先获取一次query
+	_ = c.Query()
 	c.Next = func() error {
 		// 延时响应，方便测试并发访问
 		time.Sleep(10 * time.Millisecond)

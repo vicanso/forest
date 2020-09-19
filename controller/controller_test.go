@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
 	session "github.com/vicanso/elton-session"
-	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/service"
 )
 
@@ -85,7 +85,7 @@ func TestCheckAnonymous(t *testing.T) {
 func TestNewCheckRolesMiddleware(t *testing.T) {
 	assert := assert.New(t)
 	fn := newCheckRolesMiddleware([]string{
-		cs.UserRoleAdmin,
+		schema.UserRoleAdmin,
 	})
 	c, us := newContextAndUserSession()
 	// 未登录
@@ -104,7 +104,7 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	err = us.SetInfo(service.UserSessionInfo{
 		Account: "trexie",
 		Roles: []string{
-			cs.UserRoleAdmin,
+			schema.UserRoleAdmin,
 		},
 	})
 	assert.Nil(err)

@@ -127,3 +127,29 @@ func TestAlarmConfig(t *testing.T) {
 	alarmConfig := GetAlarmConfig()
 	assert.Equal([]string{"tree.xie@outlook.com"}, alarmConfig.Receivers)
 }
+
+func TestGetPostgresConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	postgresConfig := GetPostgresConfig()
+	assert.Equal("postgresql://vicanso:A123456@127.0.0.1:5432/forest", postgresConfig.URI)
+}
+
+func TestGetLocationConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	locationConfig := GetLocationConfig()
+	assert.Equal("https://ip.npmtrend.com", locationConfig.BaseURL)
+	assert.Equal("location", locationConfig.Name)
+	assert.Equal(3*time.Second, locationConfig.Timeout)
+}
+
+func TestGetMinioConfig(t *testing.T) {
+	assert := assert.New(t)
+
+	minioConfig := GetMinioConfig()
+	assert.Equal("127.0.0.1:9000", minioConfig.Endpoint)
+	assert.Equal("origin", minioConfig.AccessKeyID)
+	assert.Equal("test123456", minioConfig.SecretAccessKey)
+	assert.False(minioConfig.SSL)
+}

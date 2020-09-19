@@ -8,7 +8,7 @@ doc:
 	swagger generate spec -o ./api.yml && swagger validate ./api.yml 
 
 test:
-	go test -cover ./...
+	go test -race -cover ./...
 
 generate: 
 	go generate ./ent
