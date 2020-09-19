@@ -448,8 +448,8 @@ github.com/vicanso/elton-session v1.0.2/go.mod h1:N10TffTm0eIOWFQegwPOmf7+dm/D8E
 github.com/vicanso/fresh v0.1.1/go.mod h1:gr1RKSFxQ1OnQHzUMBHCigifni7KrXveJjWCTlPjICA=
 github.com/vicanso/fresh v1.0.0 h1:u3ykbW6SYW5CbI6rx1lZCVfWKVIptvL6/2KOnrTKsTY=
 github.com/vicanso/fresh v1.0.0/go.mod h1:gr1RKSFxQ1OnQHzUMBHCigifni7KrXveJjWCTlPjICA=
-github.com/vicanso/go-axios v0.1.12 h1:ifMNzQyUK45+xDo/67u4JGnLrP/+/zqrES9WcRlx07o=
-github.com/vicanso/go-axios v0.1.12/go.mod h1:lpHiSYWTjvpohP12AeSCRoYDThfXlUoVVnOAVx+IWm8=
+github.com/vicanso/go-axios v0.1.13 h1:q+KQ4JfZO33iDCo978I20yekxmTNfM6pYwfQ+hjs984=
+github.com/vicanso/go-axios v0.1.13/go.mod h1:lpHiSYWTjvpohP12AeSCRoYDThfXlUoVVnOAVx+IWm8=
 github.com/vicanso/hes v0.2.1/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
 github.com/vicanso/hes v0.2.2/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
 github.com/vicanso/hes v0.2.3 h1:q99u/6veXCJPfNEPUpRB0LpmwUbcvNjNcorZmt9Ciwk=
