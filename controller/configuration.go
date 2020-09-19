@@ -199,7 +199,7 @@ func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int
 }
 
 // add 添加配置
-func (configurationCtrl) add(c *elton.Context) (err error) {
+func (*configurationCtrl) add(c *elton.Context) (err error) {
 	params := configurationAddParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -215,7 +215,7 @@ func (configurationCtrl) add(c *elton.Context) (err error) {
 }
 
 // list 查询配置列表
-func (configurationCtrl) list(c *elton.Context) (err error) {
+func (*configurationCtrl) list(c *elton.Context) (err error) {
 	params := configurationListParmas{}
 	err = validate.Do(&params, c.Query())
 	if err != nil {
@@ -240,7 +240,7 @@ func (configurationCtrl) list(c *elton.Context) (err error) {
 }
 
 // update 更新配置信息
-func (configurationCtrl) update(c *elton.Context) (err error) {
+func (*configurationCtrl) update(c *elton.Context) (err error) {
 	id, err := getIDFromParams(c)
 	if err != nil {
 		return
@@ -260,7 +260,7 @@ func (configurationCtrl) update(c *elton.Context) (err error) {
 }
 
 // findByID 通过id查询
-func (configurationCtrl) findByID(c *elton.Context) (err error) {
+func (*configurationCtrl) findByID(c *elton.Context) (err error) {
 	id, err := getIDFromParams(c)
 	if err != nil {
 		return

@@ -97,7 +97,7 @@ func init() {
 }
 
 // ping 用于检测服务是否可用
-func (commonCtrl) ping(c *elton.Context) error {
+func (*commonCtrl) ping(c *elton.Context) error {
 	if !config.ApplicationIsRunning() {
 		return errAppIsNotRunning
 	}
@@ -106,7 +106,7 @@ func (commonCtrl) ping(c *elton.Context) error {
 }
 
 // getApplicationInfo 获取应用信息
-func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
+func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
 	c.Body = &applicationInfoResp{
 		config.GetApplicationVersion(),
@@ -121,7 +121,7 @@ func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 }
 
 // getRouters 获取系统的路由
-func (commonCtrl) getRouters(c *elton.Context) (err error) {
+func (*commonCtrl) getRouters(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
 	c.Body = &routersResp{
 		Routers: c.Elton().Routers,
@@ -130,7 +130,7 @@ func (commonCtrl) getRouters(c *elton.Context) (err error) {
 }
 
 // getCaptcha 获取图形验证码
-func (commonCtrl) getCaptcha(c *elton.Context) (err error) {
+func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	bgColor := c.QueryParam("bg")
 	fontColor := c.QueryParam("color")
 	if bgColor == "" {
@@ -151,14 +151,14 @@ func (commonCtrl) getCaptcha(c *elton.Context) (err error) {
 }
 
 // getPerformance 获取应用性能指标
-func (commonCtrl) getPerformance(c *elton.Context) (err error) {
+func (*commonCtrl) getPerformance(c *elton.Context) (err error) {
 	p := service.GetPerformance()
 	c.Body = &p
 	return
 }
 
 // listStatus 获取状态列表
-func (commonCtrl) listStatus(c *elton.Context) (err error) {
+func (*commonCtrl) listStatus(c *elton.Context) (err error) {
 	c.CacheMaxAge("5m")
 	c.Body = &statusListResp{
 		Statuses: schema.GetStatusList(),
@@ -167,7 +167,7 @@ func (commonCtrl) listStatus(c *elton.Context) (err error) {
 }
 
 // getRandomKeys 获取随机字符串
-func (commonCtrl) getRandomKeys(c *elton.Context) (err error) {
+func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
 	n, _ := strconv.Atoi(c.QueryParam("n"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 	if size < 1 {

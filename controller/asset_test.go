@@ -67,25 +67,23 @@ func TestSendFile(t *testing.T) {
 	assert.Equal("image/png", c.GetHeader(elton.HeaderContentType))
 }
 
-func TestGetIndex(t *testing.T) {
-	assert := assert.New(t)
-
-	ctrl := assetCtrl{}
-	c := elton.NewContext(httptest.NewRecorder(), nil)
-	err := ctrl.getIndex(c)
-	assert.Nil(err)
-	assert.Equal(testHTMLContent, c.BodyBuffer.String())
-	assert.Equal("text/html; charset=utf-8", c.GetHeader(elton.HeaderContentType))
-	assert.Equal("public, max-age=10", c.GetHeader(elton.HeaderCacheControl))
-}
-
-func TestGetFavIcon(t *testing.T) {
+func TestAassetCtrl(t *testing.T) {
 	assert := assert.New(t)
 	ctrl := assetCtrl{}
-	c := elton.NewContext(httptest.NewRecorder(), nil)
-	err := ctrl.getFavIcon(c)
-	assert.Nil(err)
-	assert.Equal(958, c.BodyBuffer.Len())
-	assert.Equal("image/png", c.GetHeader(elton.HeaderContentType))
-	assert.Equal("public, max-age=3600, s-maxage=600", c.GetHeader(elton.HeaderCacheControl))
+	t.Run("get index", func(t *testing.T) {
+		c := elton.NewContext(httptest.NewRecorder(), nil)
+		err := ctrl.getIndex(c)
+		assert.Nil(err)
+		assert.Equal(testHTMLContent, c.BodyBuffer.String())
+		assert.Equal("text/html; charset=utf-8", c.GetHeader(elton.HeaderContentType))
+		assert.Equal("public, max-age=10", c.GetHeader(elton.HeaderCacheControl))
+	})
+	t.Run("get favicon", func(t *testing.T) {
+		c := elton.NewContext(httptest.NewRecorder(), nil)
+		err := ctrl.getFavIcon(c)
+		assert.Nil(err)
+		assert.Equal(958, c.BodyBuffer.Len())
+		assert.Equal("image/png", c.GetHeader(elton.HeaderContentType))
+		assert.Equal("public, max-age=3600, s-maxage=600", c.GetHeader(elton.HeaderCacheControl))
+	})
 }

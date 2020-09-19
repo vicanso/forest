@@ -54,7 +54,7 @@ func init() {
 }
 
 // upload 上传文件
-func (fileCtrl) upload(c *elton.Context) (err error) {
+func (*fileCtrl) upload(c *elton.Context) (err error) {
 	params := fileUploadParams{}
 	err = validate.Do(&params, c.Query())
 	if err != nil {

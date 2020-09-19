@@ -329,7 +329,7 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 }
 
 // list 获取用户列表
-func (userCtrl) list(c *elton.Context) (err error) {
+func (*userCtrl) list(c *elton.Context) (err error) {
 	params := userListParams{}
 	err = validate.Do(&params, c.Query())
 	if err != nil {
@@ -355,7 +355,7 @@ func (userCtrl) list(c *elton.Context) (err error) {
 }
 
 // getLoginToken 获取登录的token
-func (userCtrl) getLoginToken(c *elton.Context) (err error) {
+func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
 	err = us.Destroy()
@@ -374,7 +374,7 @@ func (userCtrl) getLoginToken(c *elton.Context) (err error) {
 }
 
 // me 获取用户信息
-func (userCtrl) me(c *elton.Context) (err error) {
+func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
@@ -415,7 +415,7 @@ func (userCtrl) me(c *elton.Context) (err error) {
 }
 
 // register 用户注册
-func (userCtrl) register(c *elton.Context) (err error) {
+func (*userCtrl) register(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -441,7 +441,7 @@ func (userCtrl) register(c *elton.Context) (err error) {
 }
 
 // login 用户登录
-func (userCtrl) login(c *elton.Context) (err error) {
+func (*userCtrl) login(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -538,7 +538,7 @@ func (userCtrl) login(c *elton.Context) (err error) {
 }
 
 // logout 退出登录
-func (userCtrl) logout(c *elton.Context) (err error) {
+func (*userCtrl) logout(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除session
 	err = us.Destroy()
@@ -550,7 +550,7 @@ func (userCtrl) logout(c *elton.Context) (err error) {
 }
 
 // refresh 刷新用户session
-func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
+func (*userCtrl) refresh(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	if us == nil {
 		c.NoContent()
@@ -583,7 +583,7 @@ func (ctrl userCtrl) refresh(c *elton.Context) (err error) {
 }
 
 // updateMe 更新用户信息
-func (ctrl userCtrl) updateMe(c *elton.Context) (err error) {
+func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
 	// 如果没有数据要更新，如{}
 	if len(c.RequestBody) <= 2 {
 		return ctrl.refresh(c)

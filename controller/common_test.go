@@ -53,7 +53,7 @@ func TestCommonCtrl(t *testing.T) {
 		assert.Equal("public, max-age=60", c.Header().Get(elton.HeaderCacheControl))
 	})
 
-	t.Run("captcha", func(t *testing.T) {
+	t.Run("getCaptcha", func(t *testing.T) {
 		c := elton.NewContext(httptest.NewRecorder(), httptest.NewRequest("GET", "/", nil))
 		err := ctrl.getCaptcha(c)
 		assert.Nil(err)
@@ -68,5 +68,25 @@ func TestCommonCtrl(t *testing.T) {
 		assert.Nil(err)
 		_, ok := c.Body.(*service.Performance)
 		assert.True(ok)
+	})
+
+	t.Run("listStatus", func(t *testing.T) {
+		c := elton.NewContext(httptest.NewRecorder(), nil)
+		err := ctrl.listStatus(c)
+		assert.Nil(err)
+		data, ok := c.Body.(*statusListResp)
+		assert.True(ok)
+		assert.NotEmpty(data.Statuses)
+		assert.Equal("public, max-age=300", c.GetHeader(elton.HeaderCacheControl))
+	})
+
+	t.Run("getRandomKeys", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/", nil)
+		c := elton.NewContext(nil, req)
+		err := ctrl.getRandomKeys(c)
+		assert.Nil(err)
+		data, ok := c.Body.(*randomKeysResp)
+		assert.True(ok)
+		assert.Equal(1, len(data.Keys))
 	})
 }

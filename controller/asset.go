@@ -100,7 +100,7 @@ func sendFile(c *elton.Context, file string) (err error) {
 }
 
 // getIndex 首页
-func (assetCtrl) getIndex(c *elton.Context) (err error) {
+func (*assetCtrl) getIndex(c *elton.Context) (err error) {
 	err = sendFile(c, "index.html")
 	if err != nil {
 		return
@@ -110,7 +110,7 @@ func (assetCtrl) getIndex(c *elton.Context) (err error) {
 }
 
 // getFavIcon 图标
-func (assetCtrl) getFavIcon(c *elton.Context) (err error) {
+func (*assetCtrl) getFavIcon(c *elton.Context) (err error) {
 	err = sendFile(c, "favicon.png")
 	if err != nil {
 		return
