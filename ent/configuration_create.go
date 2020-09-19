@@ -11,6 +11,7 @@ import (
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/vicanso/forest/ent/configuration"
+	"github.com/vicanso/forest/ent/schema"
 )
 
 // ConfigurationCreate is the builder for creating a Configuration entity.
@@ -48,6 +49,20 @@ func (cc *ConfigurationCreate) SetNillableUpdatedAt(t *time.Time) *Configuration
 	return cc
 }
 
+// SetStatus sets the status field.
+func (cc *ConfigurationCreate) SetStatus(s schema.Status) *ConfigurationCreate {
+	cc.mutation.SetStatus(s)
+	return cc
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (cc *ConfigurationCreate) SetNillableStatus(s *schema.Status) *ConfigurationCreate {
+	if s != nil {
+		cc.SetStatus(*s)
+	}
+	return cc
+}
+
 // SetName sets the name field.
 func (cc *ConfigurationCreate) SetName(s string) *ConfigurationCreate {
 	cc.mutation.SetName(s)
@@ -55,28 +70,14 @@ func (cc *ConfigurationCreate) SetName(s string) *ConfigurationCreate {
 }
 
 // SetCategory sets the category field.
-func (cc *ConfigurationCreate) SetCategory(s string) *ConfigurationCreate {
-	cc.mutation.SetCategory(s)
+func (cc *ConfigurationCreate) SetCategory(c configuration.Category) *ConfigurationCreate {
+	cc.mutation.SetCategory(c)
 	return cc
 }
 
 // SetOwner sets the owner field.
 func (cc *ConfigurationCreate) SetOwner(s string) *ConfigurationCreate {
 	cc.mutation.SetOwner(s)
-	return cc
-}
-
-// SetStatus sets the status field.
-func (cc *ConfigurationCreate) SetStatus(i int8) *ConfigurationCreate {
-	cc.mutation.SetStatus(i)
-	return cc
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (cc *ConfigurationCreate) SetNillableStatus(i *int8) *ConfigurationCreate {
-	if i != nil {
-		cc.SetStatus(*i)
-	}
 	return cc
 }
 
@@ -153,6 +154,15 @@ func (cc *ConfigurationCreate) preSave() error {
 		v := configuration.DefaultUpdatedAt()
 		cc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := cc.mutation.Status(); !ok {
+		v := configuration.DefaultStatus
+		cc.mutation.SetStatus(v)
+	}
+	if v, ok := cc.mutation.Status(); ok {
+		if err := configuration.StatusValidator(int8(v)); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
@@ -175,15 +185,6 @@ func (cc *ConfigurationCreate) preSave() error {
 	if v, ok := cc.mutation.Owner(); ok {
 		if err := configuration.OwnerValidator(v); err != nil {
 			return &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
-		}
-	}
-	if _, ok := cc.mutation.Status(); !ok {
-		v := configuration.DefaultStatus
-		cc.mutation.SetStatus(v)
-	}
-	if v, ok := cc.mutation.Status(); ok {
-		if err := configuration.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	if _, ok := cc.mutation.Data(); !ok {
@@ -243,6 +244,14 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 		})
 		c.UpdatedAt = value
 	}
+	if value, ok := cc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: configuration.FieldStatus,
+		})
+		c.Status = value
+	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -253,7 +262,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 	}
 	if value, ok := cc.mutation.Category(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: configuration.FieldCategory,
 		})
@@ -266,14 +275,6 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Column: configuration.FieldOwner,
 		})
 		c.Owner = value
-	}
-	if value, ok := cc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: configuration.FieldStatus,
-		})
-		c.Status = value
 	}
 	if value, ok := cc.mutation.Data(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

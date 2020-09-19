@@ -14,8 +14,6 @@
 
 package cs
 
-import "strconv"
-
 const (
 	// CID context id
 	CID = "cid"
@@ -26,44 +24,4 @@ const (
 const (
 	// MagicalCaptcha magical captcha(for test only)
 	MagicalCaptcha = "0145"
-)
-
-const (
-	// 状态启用
-	StatusEnabled = iota + 1
-	// 状态禁用
-	StatusDisabled
-)
-
-var (
-	// 状态列表
-	Statuses = []int{
-		// 启用
-		StatusEnabled,
-		// 禁用
-		StatusDisabled,
-	}
-	// 状态列表（字符串）
-	StatusesString = []string{
-		strconv.Itoa(StatusEnabled),
-		strconv.Itoa(StatusDisabled),
-	}
-)
-
-// 用户角色
-const (
-	// UserRoleNormal normal user
-	UserRoleNormal = "normal"
-	// UserRoleSu super user
-	UserRoleSu = "su"
-	// UserRoleAdmin admin user
-	UserRoleAdmin = "admin"
-)
-
-var (
-	UserRoles = []string{
-		UserRoleNormal,
-		UserRoleSu,
-		UserRoleAdmin,
-	}
 )

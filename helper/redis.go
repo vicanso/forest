@@ -82,7 +82,7 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 			"cmd": cmd,
 		}
 		fields := map[string]interface{}{
-			"use":   d.Milliseconds(),
+			"use":   int(d.Milliseconds()),
 			"error": err,
 		}
 		GetInfluxSrv().Write(cs.MeasurementRedisStats, fields, tags)

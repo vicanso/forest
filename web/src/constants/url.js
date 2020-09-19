@@ -13,7 +13,7 @@ export const CONFIGS_ID = "/configurations/v1/:id";
 
 export const COMMONS_CAPTCHA = "/commons/captcha";
 export const COMMONS_ROUTERS = "/commons/routers";
-export const COMMONS_STATUSES = "/commons/statuses";
+export const COMMONS_STATUSES = "/commons/schema-statuses";
 
 export const BRANDS = "/brands/v1";
 export const BRANDS_ID = "/brands/v1/:id";

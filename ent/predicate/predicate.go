@@ -11,3 +11,6 @@ type Configuration func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserLogin is the predicate function for userlogin builders.
+type UserLogin func(*sql.Selector)

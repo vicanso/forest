@@ -13,10 +13,10 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "category", Type: field.TypeString},
-		{Name: "owner", Type: field.TypeString},
 		{Name: "status", Type: field.TypeInt8, Default: 1},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"mockTime", "blockIP", "signedKey", "routerConcurrency", "router", "sessionInterceptor"}},
+		{Name: "owner", Type: field.TypeString},
 		{Name: "data", Type: field.TypeString},
 		{Name: "started_at", Type: field.TypeTime},
 		{Name: "ended_at", Type: field.TypeTime},
@@ -27,18 +27,30 @@ var (
 		Columns:     ConfigurationsColumns,
 		PrimaryKey:  []*schema.Column{ConfigurationsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "configuration_name",
+				Unique:  true,
+				Columns: []*schema.Column{ConfigurationsColumns[4]},
+			},
+			{
+				Name:    "configuration_status",
+				Unique:  false,
+				Columns: []*schema.Column{ConfigurationsColumns[3]},
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "account", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "roles", Type: field.TypeJSON, Nullable: true},
 		{Name: "groups", Type: field.TypeJSON, Nullable: true},
-		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "email", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -51,7 +63,42 @@ var (
 			{
 				Name:    "user_account",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[4]},
+			},
+		},
+	}
+	// UserLoginsColumns holds the columns for the "user_logins" table.
+	UserLoginsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "account", Type: field.TypeString},
+		{Name: "user_agent", Type: field.TypeString, Nullable: true},
+		{Name: "ip", Type: field.TypeString, Nullable: true},
+		{Name: "track_id", Type: field.TypeString, Nullable: true},
+		{Name: "session_id", Type: field.TypeString, Nullable: true},
+		{Name: "x_forwarded_for", Type: field.TypeString, Nullable: true},
+		{Name: "country", Type: field.TypeString, Nullable: true},
+		{Name: "province", Type: field.TypeString, Nullable: true},
+		{Name: "city", Type: field.TypeString, Nullable: true},
+		{Name: "isp", Type: field.TypeString, Nullable: true},
+	}
+	// UserLoginsTable holds the schema information for the "user_logins" table.
+	UserLoginsTable = &schema.Table{
+		Name:        "user_logins",
+		Columns:     UserLoginsColumns,
+		PrimaryKey:  []*schema.Column{UserLoginsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userlogin_account",
+				Unique:  false,
+				Columns: []*schema.Column{UserLoginsColumns[3]},
+			},
+			{
+				Name:    "userlogin_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserLoginsColumns[1]},
 			},
 		},
 	}
@@ -59,6 +106,7 @@ var (
 	Tables = []*schema.Table{
 		ConfigurationsTable,
 		UsersTable,
+		UserLoginsTable,
 	}
 )
 

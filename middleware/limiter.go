@@ -27,10 +27,10 @@ import (
 )
 
 const (
-	concurrentLimitKeyPrefix = "mid-concurrent-limit"
-	ipLimitKeyPrefix         = "mid-ip-limit"
-	errorLimitKeyPrefix      = "mid-error-limit"
-	errLimitCategory         = "request-limit"
+	concurrentLimitKeyPrefix = "midConcurrentLimit"
+	ipLimitKeyPrefix         = "midIPLimit"
+	errorLimitKeyPrefix      = "midErrorLimit"
+	errLimitCategory         = "requestLimit"
 )
 
 var (

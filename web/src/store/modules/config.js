@@ -45,8 +45,8 @@ export default {
       state.items = null;
     },
     // 设置列表数据
-    [mutationConfigList](state, { configs }) {
-      state.items = configs;
+    [mutationConfigList](state, { configurations }) {
+      state.items = configurations;
     },
     // 删除该id对应数据
     [mutationConfigListDelete](state, id) {
@@ -86,20 +86,20 @@ export default {
         const { data } = await request.get(CONFIGS, {
           params
         });
-        if (!data.configs) {
-          data.configs = [];
+        if (!data.configurations) {
+          data.configurations = [];
         }
-        data.configs.forEach(item => {
+        data.configurations.forEach(item => {
           item.isJSON = false;
           if (item.data[0] === "{") {
             item.isJSON = true;
             item.data = formatJSON(item.data);
           }
-          if (item.beginDate) {
-            item.beginDateDesc = formatDate(item.beginDate);
+          if (item.startedAt) {
+            item.startedAtDesc = formatDate(item.startedAt);
           }
-          if (item.endDate) {
-            item.endDateDesc = formatDate(item.endDate);
+          if (item.endedAt) {
+            item.endedAtDesc = formatDate(item.endedAt);
           }
           item.updatedAtDesc = formatDate(item.updatedAt);
           statusList.forEach(status => {

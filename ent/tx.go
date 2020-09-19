@@ -16,6 +16,8 @@ type Tx struct {
 	Configuration *ConfigurationClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserLogin is the client for interacting with the UserLogin builders.
+	UserLogin *UserLoginClient
 
 	// lazily loaded.
 	client     *Client
@@ -153,6 +155,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Configuration = NewConfigurationClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserLogin = NewUserLoginClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

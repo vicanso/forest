@@ -48,3 +48,16 @@ mail:
 alarm:
   receivers:
   - tree.xie@outlook.com
+
+# 定位相关配置
+location:
+  name: location
+  timeout: 3s
+  baseURL: https://ip.npmtrend.com
+
+# minio配置
+minio:
+  endpoint: 127.0.0.1:9000
+  accessKeyID: origin 
+  secretAccessKey: test123456
+  ssl: false

@@ -11,6 +11,7 @@ import (
 
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/user"
+	"github.com/vicanso/forest/ent/userlogin"
 
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
@@ -25,6 +26,8 @@ type Client struct {
 	Configuration *ConfigurationClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserLogin is the client for interacting with the UserLogin builders.
+	UserLogin *UserLoginClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,6 +43,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Configuration = NewConfigurationClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserLogin = NewUserLoginClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -74,6 +78,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
 		User:          NewUserClient(cfg),
+		UserLogin:     NewUserLoginClient(cfg),
 	}, nil
 }
 
@@ -91,6 +96,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
 		User:          NewUserClient(cfg),
+		UserLogin:     NewUserLoginClient(cfg),
 	}, nil
 }
 
@@ -121,6 +127,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Configuration.Use(hooks...)
 	c.User.Use(hooks...)
+	c.UserLogin.Use(hooks...)
 }
 
 // ConfigurationClient is a client for the Configuration schema.
@@ -297,4 +304,92 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// UserLoginClient is a client for the UserLogin schema.
+type UserLoginClient struct {
+	config
+}
+
+// NewUserLoginClient returns a client for the UserLogin from the given config.
+func NewUserLoginClient(c config) *UserLoginClient {
+	return &UserLoginClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userlogin.Hooks(f(g(h())))`.
+func (c *UserLoginClient) Use(hooks ...Hook) {
+	c.hooks.UserLogin = append(c.hooks.UserLogin, hooks...)
+}
+
+// Create returns a create builder for UserLogin.
+func (c *UserLoginClient) Create() *UserLoginCreate {
+	mutation := newUserLoginMutation(c.config, OpCreate)
+	return &UserLoginCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of UserLogin entities.
+func (c *UserLoginClient) CreateBulk(builders ...*UserLoginCreate) *UserLoginCreateBulk {
+	return &UserLoginCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserLogin.
+func (c *UserLoginClient) Update() *UserLoginUpdate {
+	mutation := newUserLoginMutation(c.config, OpUpdate)
+	return &UserLoginUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserLoginClient) UpdateOne(ul *UserLogin) *UserLoginUpdateOne {
+	mutation := newUserLoginMutation(c.config, OpUpdateOne, withUserLogin(ul))
+	return &UserLoginUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserLoginClient) UpdateOneID(id int) *UserLoginUpdateOne {
+	mutation := newUserLoginMutation(c.config, OpUpdateOne, withUserLoginID(id))
+	return &UserLoginUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserLogin.
+func (c *UserLoginClient) Delete() *UserLoginDelete {
+	mutation := newUserLoginMutation(c.config, OpDelete)
+	return &UserLoginDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *UserLoginClient) DeleteOne(ul *UserLogin) *UserLoginDeleteOne {
+	return c.DeleteOneID(ul.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *UserLoginClient) DeleteOneID(id int) *UserLoginDeleteOne {
+	builder := c.Delete().Where(userlogin.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserLoginDeleteOne{builder}
+}
+
+// Query returns a query builder for UserLogin.
+func (c *UserLoginClient) Query() *UserLoginQuery {
+	return &UserLoginQuery{config: c.config}
+}
+
+// Get returns a UserLogin entity by its id.
+func (c *UserLoginClient) Get(ctx context.Context, id int) (*UserLogin, error) {
+	return c.Query().Where(userlogin.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserLoginClient) GetX(ctx context.Context, id int) *UserLogin {
+	ul, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return ul
+}
+
+// Hooks returns the client hooks.
+func (c *UserLoginClient) Hooks() []Hook {
+	return c.hooks.UserLogin
 }

@@ -3,7 +3,10 @@
 package configuration
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/vicanso/forest/ent/schema"
 )
 
 const (
@@ -15,14 +18,14 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldCategory holds the string denoting the category field in the database.
 	FieldCategory = "category"
 	// FieldOwner holds the string denoting the owner field in the database.
 	FieldOwner = "owner"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
 	// FieldStartedAt holds the string denoting the started_at field in the database.
@@ -39,10 +42,10 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldStatus,
 	FieldName,
 	FieldCategory,
 	FieldOwner,
-	FieldStatus,
 	FieldData,
 	FieldStartedAt,
 	FieldEndedAt,
@@ -55,16 +58,41 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
-	// CategoryValidator is a validator for the "category" field. It is called by the builders before save.
-	CategoryValidator func(string) error
-	// OwnerValidator is a validator for the "owner" field. It is called by the builders before save.
-	OwnerValidator func(string) error
 	// DefaultStatus holds the default value on creation for the status field.
-	DefaultStatus int8
+	DefaultStatus schema.Status
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int8) error
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
+	// OwnerValidator is a validator for the "owner" field. It is called by the builders before save.
+	OwnerValidator func(string) error
 	// DataValidator is a validator for the "data" field. It is called by the builders before save.
 	DataValidator func(string) error
 )
+
+// Category defines the type for the category enum field.
+type Category string
+
+// Category values.
+const (
+	CategoryMockTime           Category = "mockTime"
+	CategoryBlockIP            Category = "blockIP"
+	CategorySignedKey          Category = "signedKey"
+	CategoryRouterConcurrency  Category = "routerConcurrency"
+	CategoryRouter             Category = "router"
+	CategorySessionInterceptor Category = "sessionInterceptor"
+)
+
+func (c Category) String() string {
+	return string(c)
+}
+
+// CategoryValidator is a validator for the "category" field enum values. It is called by the builders before save.
+func CategoryValidator(c Category) error {
+	switch c {
+	case CategoryMockTime, CategoryBlockIP, CategorySignedKey, CategoryRouterConcurrency, CategoryRouter, CategorySessionInterceptor:
+		return nil
+	default:
+		return fmt.Errorf("configuration: invalid enum value for category field: %q", c)
+	}
+}

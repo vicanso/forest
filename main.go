@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,13 +34,31 @@ import (
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
+	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
+
+var (
+	// Version 应用版本号
+	Version string
+	// BuildAt 构建时间
+	BuildedAt string
+)
+
+func init() {
+	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
+		value := fmt.Sprintf(format, args...)
+		log.Default().Info(value)
+	}))
+	config.SetApplicationVersion(Version)
+	config.SetApplicationBuildedAt(BuildedAt)
+}
 
 // 是否用户主动关闭
 var closedByUser = false
@@ -73,16 +92,20 @@ func dependServiceCheck() (err error) {
 	if err != nil {
 		return
 	}
+	err = helper.EntPing()
+	if err != nil {
+		return
+	}
 	// 初始化所有schema
 	err = helper.InitSchemaAndHook()
 	if err != nil {
 		return
 	}
-	// configSrv := new(service.ConfigurationSrv)
-	// err = configSrv.Refresh()
-	// if err != nil {
-	// 	return
-	// }
+	configSrv := new(service.ConfigurationSrv)
+	err = configSrv.Refresh()
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -93,8 +116,7 @@ func newOnErrorHandler(e *elton.Elton) {
 	warnerException := warner.NewWarner(60*time.Second, 5)
 	warnerException.ResetOnWarn = true
 	warnerException.On(func(_ string, _ warner.Count) {
-		// TODO 发送告警
-		// service.AlarmError("too many uncaught exception")
+		service.AlarmError("too many uncaught exception")
 	})
 	e.OnError(func(c *elton.Context, err error) {
 		he := hes.Wrap(err)
@@ -125,9 +147,15 @@ func newOnErrorHandler(e *elton.Elton) {
 }
 
 func main() {
-	// TODO defer panic
-
 	logger := log.Default()
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic error",
+				zap.Any("error", r),
+			)
+		}
+	}()
+
 	closeOnce := sync.Once{}
 	closeDeps := func() {
 		closeOnce.Do(func() {
@@ -219,7 +247,7 @@ func main() {
 	err := dependServiceCheck()
 	if err != nil {
 		service.AlarmError("check depend service fail, " + err.Error())
-		logger.DPanic("exception",
+		logger.Error("exception",
 			zap.Error(err),
 		)
 		return
@@ -236,7 +264,7 @@ func main() {
 	// 如果出错而且非用户关闭，则发送告警
 	if err != nil && !closedByUser {
 		service.AlarmError("listen and serve fail, " + err.Error())
-		logger.DPanic("exception",
+		logger.Error("exception",
 			zap.Error(err),
 		)
 	}

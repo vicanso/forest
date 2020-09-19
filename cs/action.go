@@ -22,9 +22,14 @@ const (
 	ActionLogout = "logout"
 
 	// ActionUserInfoUpdate update user info
-	ActionUserInfoUpdate = "update-user-info"
+	ActionUserInfoUpdate = "updateUserInfo"
 	// ActionUserMeUpdate update minie info
-	ActionUserMeUpdate = "update-user-me"
+	ActionUserMeUpdate = "updateUserMe"
 	// ActionUserTrackAdd add user track
-	ActionUserTrackAdd = "add-user-track"
+	ActionUserTrackAdd = "addUserTrack"
+
+	// ActionConfigurationAdd add configuration
+	ActionConfigurationAdd = "addConfiguration"
+	// ActionConfigurationUpdate update configuration
+	ActionConfigurationUpdate = "updateConfiguration"
 )

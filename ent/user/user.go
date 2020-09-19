@@ -4,6 +4,8 @@ package user
 
 import (
 	"time"
+
+	"github.com/vicanso/forest/ent/schema"
 )
 
 const (
@@ -15,6 +17,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldAccount holds the string denoting the account field in the database.
 	FieldAccount = "account"
 	// FieldPassword holds the string denoting the password field in the database.
@@ -25,8 +29,6 @@ const (
 	FieldRoles = "roles"
 	// FieldGroups holds the string denoting the groups field in the database.
 	FieldGroups = "groups"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 
@@ -39,12 +41,12 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldStatus,
 	FieldAccount,
 	FieldPassword,
 	FieldName,
 	FieldRoles,
 	FieldGroups,
-	FieldStatus,
 	FieldEmail,
 }
 
@@ -55,12 +57,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultStatus holds the default value on creation for the status field.
+	DefaultStatus schema.Status
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int8) error
 	// AccountValidator is a validator for the "account" field. It is called by the builders before save.
 	AccountValidator func(string) error
 	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	PasswordValidator func(string) error
-	// DefaultStatus holds the default value on creation for the status field.
-	DefaultStatus int8
-	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(int8) error
 )

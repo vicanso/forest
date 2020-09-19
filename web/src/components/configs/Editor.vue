@@ -52,7 +52,7 @@
             <el-form-item label="开始时间：">
               <el-date-picker
                 class="datePicker"
-                v-model="form.beginDate"
+                v-model="form.startedAt"
                 type="datetime"
                 placeholder="选择日期时间"
               >
@@ -63,7 +63,7 @@
             <el-form-item label="结束时间：">
               <el-date-picker
                 class="datePicker"
-                v-model="form.endDate"
+                v-model="form.endedAt"
                 type="datetime"
                 placeholder="选择日期时间"
               >
@@ -106,7 +106,9 @@ export default {
       required: true
     },
     name: String,
-    summary: String
+    summary: String,
+    // 返回函数
+    back: Function
   },
   computed: {
     ...mapState({
@@ -133,8 +135,8 @@ export default {
         name: defaultValue.name || "",
         category: defaultValue.category || "",
         status: null,
-        beginDate: "",
-        endDate: "",
+        startedAt: "",
+        endedAt: "",
         data: ""
       }
     };
@@ -142,8 +144,8 @@ export default {
   methods: {
     ...mapActions(["addConfig", "getConfigByID", "updateConfigByID"]),
     async submit() {
-      const { name, category, status, beginDate, endDate, data } = this.form;
-      if (!name || !status || !beginDate || !endDate || !data) {
+      const { name, category, status, startedAt, endedAt, data } = this.form;
+      if (!name || !status || !startedAt || !endedAt || !data) {
         this.$message.warning("名称、状态、开始结束日期以及配置数据均不能为空");
         return;
       }
@@ -153,15 +155,15 @@ export default {
           name,
           status,
           category,
-          beginDate,
-          endDate,
+          startedAt,
+          endedAt,
           data
         };
-        if (beginDate.toISOString) {
-          config.beginDate = beginDate.toISOString();
+        if (startedAt.toISOString) {
+          config.startedAt = startedAt.toISOString();
         }
-        if (endDate.toISOString) {
-          config.endDate = endDate.toISOString();
+        if (endedAt.toISOString) {
+          config.endedAt = endedAt.toISOString();
         }
         // 更新
         if (id) {
@@ -185,6 +187,10 @@ export default {
       }
     },
     goBack() {
+      if (this.$props.back) {
+        this.$props.back();
+        return;
+      }
       this.$router.back();
     }
   },

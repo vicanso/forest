@@ -10,6 +10,7 @@ import {
   CONFIG_SIGNED_KEY,
   CONFIG_ROUTER,
   CONFIG_ROUTER_CONCURRENCY,
+  CONFIG_SESSION_INTERCEPTOR,
   USERS,
   PROFILE,
   LOGINS
@@ -22,6 +23,7 @@ import BlockIP from "@/views/configs/BlockIP.vue";
 import SignedKey from "@/views/configs/SignedKey.vue";
 import Router from "@/views/configs/Router.vue";
 import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
+import SessionInterceptor from "@/views/configs/SessionInterceptor.vue";
 import Users from "@/views/Users.vue";
 import Logins from "@/views/Logins.vue";
 
@@ -79,6 +81,14 @@ const routes = [
     path: "/configs/router-concurrency",
     name: CONFIG_ROUTER_CONCURRENCY,
     component: RouterConcurrency,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/configs/session-interceptor",
+    name: CONFIG_SESSION_INTERCEPTOR,
+    component: SessionInterceptor,
     meta: {
       requiresAuth: true
     }

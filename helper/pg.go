@@ -17,6 +17,9 @@ package helper
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"log"
+	"time"
 
 	"github.com/facebook/ent/dialect"
 	entsql "github.com/facebook/ent/dialect/sql"
@@ -27,6 +30,7 @@ import (
 
 var (
 	client *ent.Client
+	driver *entsql.Driver
 )
 
 func init() {
@@ -48,16 +52,22 @@ func open(databaseUrl string) (*ent.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	// defer db.Close()
 
 	// Create an ent.Driver from `db`.
-	drv := entsql.OpenDB(dialect.Postgres, db)
-	return ent.NewClient(ent.Driver(drv)), nil
+	driver = entsql.OpenDB(dialect.Postgres, db)
+	return ent.NewClient(ent.Driver(driver)), nil
 }
 
 // GetEntClient get ent client
 func GetEntClient() *ent.Client {
 	return client
+}
+
+// EntPing ent driver ping
+func EntPing() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	return driver.DB().PingContext(ctx)
 }
 
 // InitSchemaAndHook 初始化schema与hook函数
@@ -68,10 +78,13 @@ func InitSchemaAndHook() (err error) {
 	}
 	client.Use(func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			// start := time.Now()
-			// defer func() {
-			// 	log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
-			// }()
+			start := time.Now()
+			defer func() {
+				for _, name := range m.Fields() {
+					fmt.Println(m.Field(name))
+				}
+				log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
+			}()
 			return next.Mutate(ctx, m)
 		})
 	})

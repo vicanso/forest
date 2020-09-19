@@ -88,29 +88,29 @@ func (l *RCLimiter) GetConcurrency(key string) uint32 {
 	return atomic.LoadUint32(&r.Current)
 }
 
-// // 更新router config配置
-// func updateRouterConfigs(configs []*Configuration) {
-// 	result := make(map[string]*RouterConfig)
-// 	for _, item := range configs {
-// 		v := &RouterConfig{}
-// 		err := json.Unmarshal([]byte(item.Data), v)
-// 		if err != nil {
-// 			logger.Error("router config is invalid",
-// 				zap.Error(err),
-// 			)
-// 			AlarmError("router config is invalid:" + err.Error())
-// 			continue
-// 		}
-// 		// 如果未配置Route或者method的则忽略
-// 		if v.Route == "" || v.Method == "" {
-// 			continue
-// 		}
-// 		result[v.Method+v.Route] = v
-// 	}
-// 	routerMutex.Lock()
-// 	defer routerMutex.Unlock()
-// 	currentRouterConfigs = result
-// }
+// 更新router config配置
+func updateRouterConfigs(configs []string) {
+	result := make(map[string]*RouterConfig)
+	for _, item := range configs {
+		v := &RouterConfig{}
+		err := json.Unmarshal([]byte(item), v)
+		if err != nil {
+			logger.Error("router config is invalid",
+				zap.Error(err),
+			)
+			AlarmError("router config is invalid:" + err.Error())
+			continue
+		}
+		// 如果未配置Route或者method的则忽略
+		if v.Route == "" || v.Method == "" {
+			continue
+		}
+		result[v.Method+v.Route] = v
+	}
+	routerMutex.Lock()
+	defer routerMutex.Unlock()
+	currentRouterConfigs = result
+}
 
 // RouterGetConfig 获取路由配置
 func RouterGetConfig(method, route string) *RouterConfig {

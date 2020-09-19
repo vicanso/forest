@@ -19,6 +19,8 @@ import (
 	"net/http"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -30,12 +32,14 @@ func NewError() elton.Handler {
 		if err == nil {
 			return nil
 		}
+		uri := c.Request.RequestURI
 		he, ok := err.(*hes.Error)
 		if !ok {
 			// 如果不是以http error的形式返回的error则为非主动抛出错误
-			logger.Warn("unexpected error",
+			logger.Error("unexpected error",
+				zap.String("method", c.Request.Method),
 				zap.String("route", c.Route),
-				zap.String("uri", c.Request.RequestURI),
+				zap.String("uri", uri),
 				zap.Error(err),
 			)
 			he = hes.NewWithError(err)
@@ -49,6 +53,19 @@ func NewError() elton.Handler {
 			he.Extra = make(map[string]interface{})
 		}
 		he.Extra["route"] = c.Route
+		fields := map[string]interface{}{
+			"statusCode": he.StatusCode,
+			"error":      he.Error(),
+			"uri":        uri,
+			"exception":  he.Exception,
+		}
+		tags := map[string]string{
+			"method":   c.Request.Method,
+			"route":    c.Route,
+			"category": he.Category,
+		}
+
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, fields, tags)
 		c.StatusCode = he.StatusCode
 		c.BodyBuffer = bytes.NewBuffer(he.ToJSON())
 		return nil

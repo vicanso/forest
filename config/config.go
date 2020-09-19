@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// 应用中的所有配置获取，拉取配置信息使用default配置中的值为默认值，再根据GO_ENV配置的环境变量获取对应的环境配置
+// 应用中的所有配置获取，拉取配置信息使用default配置中的值为默认值，再根据GO_ENV配置的环境变量获取对应的环境配置，
+// 需要注意，尽可能按单个key的形式来获取对应的配置，这样的方式可以保证针对单个key优先获取GO_ENV对应配置，
+// 再获取默认配置，如果一次获取map的形式，如果当前配置对应的map的所有key不全，不会再获取default的配置
 
 package config
 
@@ -131,6 +133,20 @@ type (
 	AlarmConfig struct {
 		// 接收人列表
 		Receivers []string `validate:"required"`
+	}
+	// LocationConfig 定位配置
+	LocationConfig struct {
+		Name    string        `validate:"required"`
+		Timeout time.Duration `validate:"required"`
+		BaseURL string        `validate:"required,url"`
+	}
+
+	// MinioConfig minio的配置信息
+	MinioConfig struct {
+		Endpoint        string `validate:"required,hostname_port"`
+		AccessKeyID     string `validate:"required,min=3"`
+		SecretAccessKey string `validate:"required,min=6"`
+		SSL             bool
 	}
 )
 
@@ -292,6 +308,7 @@ func GetPostgresConfig() PostgresConfig {
 	postgresConfig := PostgresConfig{
 		URI: defaultViperX.GetString(prefix + "uri"),
 	}
+	validatePanic(&postgresConfig)
 	return postgresConfig
 }
 
@@ -324,7 +341,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 	return influxdbConfig
 }
 
-// GetAlarmConfig get alarm config
+// GetAlarmConfig 获取告警配置
 func GetAlarmConfig() AlarmConfig {
 	prefix := "alarm."
 	alarmConfig := AlarmConfig{
@@ -332,4 +349,29 @@ func GetAlarmConfig() AlarmConfig {
 	}
 	validatePanic(&alarmConfig)
 	return alarmConfig
+}
+
+// GetLocationConfig 获取定位的配置
+func GetLocationConfig() LocationConfig {
+	prefix := "location."
+	locationConfig := LocationConfig{
+		Name:    defaultViperX.GetString(prefix + "name"),
+		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
+		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
+	}
+	validatePanic(&locationConfig)
+	return locationConfig
+}
+
+// GetMinioConfig 获取minio的配置
+func GetMinioConfig() MinioConfig {
+	prefix := "minio."
+	minioConfig := MinioConfig{
+		Endpoint:        defaultViperX.GetString(prefix + "endpoint"),
+		AccessKeyID:     defaultViperX.GetStringFromENV(prefix + "accessKeyID"),
+		SecretAccessKey: defaultViperX.GetStringFromENV(prefix + "secretAccessKey"),
+		SSL:             defaultViperX.GetBool(prefix + "ssl"),
+	}
+	validatePanic(&minioConfig)
+	return minioConfig
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 )
 
@@ -44,6 +45,20 @@ func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetUpdatedAt(*t)
+	}
+	return uc
+}
+
+// SetStatus sets the status field.
+func (uc *UserCreate) SetStatus(s schema.Status) *UserCreate {
+	uc.mutation.SetStatus(s)
+	return uc
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uc *UserCreate) SetNillableStatus(s *schema.Status) *UserCreate {
+	if s != nil {
+		uc.SetStatus(*s)
 	}
 	return uc
 }
@@ -83,20 +98,6 @@ func (uc *UserCreate) SetRoles(s []string) *UserCreate {
 // SetGroups sets the groups field.
 func (uc *UserCreate) SetGroups(s []string) *UserCreate {
 	uc.mutation.SetGroups(s)
-	return uc
-}
-
-// SetStatus sets the status field.
-func (uc *UserCreate) SetStatus(i int8) *UserCreate {
-	uc.mutation.SetStatus(i)
-	return uc
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (uc *UserCreate) SetNillableStatus(i *int8) *UserCreate {
-	if i != nil {
-		uc.SetStatus(*i)
-	}
 	return uc
 }
 
@@ -169,6 +170,15 @@ func (uc *UserCreate) preSave() error {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := uc.mutation.Status(); !ok {
+		v := user.DefaultStatus
+		uc.mutation.SetStatus(v)
+	}
+	if v, ok := uc.mutation.Status(); ok {
+		if err := user.StatusValidator(int8(v)); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if _, ok := uc.mutation.Account(); !ok {
 		return &ValidationError{Name: "account", err: errors.New("ent: missing required field \"account\"")}
 	}
@@ -183,15 +193,6 @@ func (uc *UserCreate) preSave() error {
 	if v, ok := uc.mutation.Password(); ok {
 		if err := user.PasswordValidator(v); err != nil {
 			return &ValidationError{Name: "password", err: fmt.Errorf("ent: validator failed for field \"password\": %w", err)}
-		}
-	}
-	if _, ok := uc.mutation.Status(); !ok {
-		v := user.DefaultStatus
-		uc.mutation.SetStatus(v)
-	}
-	if v, ok := uc.mutation.Status(); ok {
-		if err := user.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	return nil
@@ -237,6 +238,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		u.UpdatedAt = value
 	}
+	if value, ok := uc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+		u.Status = value
+	}
 	if value, ok := uc.mutation.Account(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -276,14 +285,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldGroups,
 		})
 		u.Groups = value
-	}
-	if value, ok := uc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
-		u.Status = value
 	}
 	if value, ok := uc.mutation.Email(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -6,6 +6,7 @@
     :defaultValue="defaultValue"
     v-if="!processing"
     :id="currentID"
+    :back="back"
   >
     <template v-slot:data="configProps">
       <MockTimeData
@@ -39,20 +40,27 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["listConfig"])
+    ...mapActions(["listConfig"]),
+    back() {}
   },
   async beforeMount() {
     this.processing = true;
     try {
-      const { configs } = await this.listConfig({
+      const { configurations } = await this.listConfig({
         name: MOCK_TIME
       });
-      if (configs.length !== 0) {
-        this.$router.replace({
-          query: {
-            id: configs[0].id
-          }
-        });
+      if (configurations.length !== 0) {
+        let currentID = null;
+        if (this.$route.query.id) {
+          currentID = Number(this.$route.query.id);
+        }
+        if (currentID !== configurations[0].id) {
+          this.$router.replace({
+            query: {
+              id: configurations[0].id
+            }
+          });
+        }
       }
     } catch (err) {
       this.$message.error(err.message);

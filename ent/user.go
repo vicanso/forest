@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 )
 
@@ -21,6 +22,8 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// Status holds the value of the "status" field.
+	Status schema.Status `json:"status,omitempty"`
 	// Account holds the value of the "account" field.
 	Account string `json:"account,omitempty"`
 	// Password holds the value of the "password" field.
@@ -31,8 +34,6 @@ type User struct {
 	Roles []string `json:"roles,omitempty"`
 	// Groups holds the value of the "groups" field.
 	Groups []string `json:"groups,omitempty"`
-	// Status holds the value of the "status" field.
-	Status int8 `json:"status,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 }
@@ -43,12 +44,12 @@ func (*User) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullTime{},   // created_at
 		&sql.NullTime{},   // updated_at
+		&sql.NullInt64{},  // status
 		&sql.NullString{}, // account
 		&sql.NullString{}, // password
 		&sql.NullString{}, // name
 		&[]byte{},         // roles
 		&[]byte{},         // groups
-		&sql.NullInt64{},  // status
 		&sql.NullString{}, // email
 	}
 }
@@ -75,41 +76,41 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.UpdatedAt = value.Time
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field account", values[2])
+	if value, ok := values[2].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field status", values[2])
+	} else if value.Valid {
+		u.Status = schema.Status(value.Int64)
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field account", values[3])
 	} else if value.Valid {
 		u.Account = value.String
 	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field password", values[3])
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field password", values[4])
 	} else if value.Valid {
 		u.Password = value.String
 	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[4])
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[5])
 	} else if value.Valid {
 		u.Name = value.String
 	}
 
-	if value, ok := values[5].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field roles", values[5])
+	if value, ok := values[6].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field roles", values[6])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Roles); err != nil {
 			return fmt.Errorf("unmarshal field roles: %v", err)
 		}
 	}
 
-	if value, ok := values[6].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field groups", values[6])
+	if value, ok := values[7].(*[]byte); !ok {
+		return fmt.Errorf("unexpected type %T for field groups", values[7])
 	} else if value != nil && len(*value) > 0 {
 		if err := json.Unmarshal(*value, &u.Groups); err != nil {
 			return fmt.Errorf("unmarshal field groups: %v", err)
 		}
-	}
-	if value, ok := values[7].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[7])
-	} else if value.Valid {
-		u.Status = int8(value.Int64)
 	}
 	if value, ok := values[8].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field email", values[8])
@@ -146,6 +147,8 @@ func (u *User) String() string {
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", status=")
+	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", account=")
 	builder.WriteString(u.Account)
 	builder.WriteString(", password=<sensitive>")
@@ -155,8 +158,6 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Roles))
 	builder.WriteString(", groups=")
 	builder.WriteString(fmt.Sprintf("%v", u.Groups))
-	builder.WriteString(", status=")
-	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", email=")
 	builder.WriteString(u.Email)
 	builder.WriteByte(')')

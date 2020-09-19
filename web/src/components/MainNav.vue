@@ -46,8 +46,7 @@ import {
   CONFIG_SIGNED_KEY,
   CONFIG_ROUTER,
   CONFIG_ROUTER_CONCURRENCY,
-  CONFIG_ORDER_COMMISSION,
-  CONFIG_MARKETING_GROUP,
+  CONFIG_SESSION_INTERCEPTOR,
   USERS,
   LOGINS,
   BRANDS,
@@ -138,14 +137,9 @@ const navs = [
         name: "路由并发配置",
         route: CONFIG_ROUTER_CONCURRENCY
       },
-
       {
-        name: "销售分组配置",
-        route: CONFIG_MARKETING_GROUP
-      },
-      {
-        name: "订单佣金配置",
-        route: CONFIG_ORDER_COMMISSION
+        name: "Session拦截信息配置",
+        route: CONFIG_SESSION_INTERCEPTOR
       }
     ]
   }

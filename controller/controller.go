@@ -25,6 +25,7 @@ import (
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
@@ -34,7 +35,8 @@ import (
 	"go.uber.org/zap"
 )
 
-type ( // listParams 公共的列表查询参数
+type (
+	// listParams 公共的列表查询参数
 	listParams struct {
 		Limit  string `json:"limit,omitempty" validate:"xLimit"`
 		Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
@@ -44,46 +46,43 @@ type ( // listParams 公共的列表查询参数
 )
 
 var (
-	errCategoryCtrl = "controller"
-
 	errShouldLogin = &hes.Error{
 		Message:    "请先登录",
 		StatusCode: http.StatusBadRequest,
-		Category:   errCategoryCtrl,
+		Category:   errUserCategory,
 	}
 	errLoginAlready = &hes.Error{
 		Message:    "已是登录状态，请先退出登录",
 		StatusCode: http.StatusBadRequest,
-		Category:   errCategoryCtrl,
+		Category:   errUserCategory,
 	}
 	errForbidden = &hes.Error{
 		StatusCode: http.StatusForbidden,
 		Message:    "禁止使用该功能",
-		Category:   errCategoryCtrl,
+		Category:   errUserCategory,
 	}
 )
 
 var (
 	logger       = log.Default()
-	now          = util.NowString
-	getTrackID   = util.GetTrackID
 	getEntClient = helper.GetEntClient
+	now          = util.NowString
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
-	loadUserSession = middleware.NewSession()
+	loadUserSession = elton.Compose(sessionInterceptor, middleware.NewSession())
 	// 判断用户是否登录
 	shouldBeLogined = checkLogin
 	// 判断用户是否未登录
 	shouldBeAnonymous = checkAnonymous
 	// 判断用户是否admin权限
 	shouldBeAdmin = newCheckRolesMiddleware([]string{
-		cs.UserRoleSu,
-		cs.UserRoleAdmin,
+		schema.UserRoleSu,
+		schema.UserRoleAdmin,
 	})
 	// shouldBeSu 判断用户是否su权限
 	shouldBeSu = newCheckRolesMiddleware([]string{
-		cs.UserRoleSu,
+		schema.UserRoleSu,
 	})
 
 	// 创建新的并发控制中间件
@@ -97,6 +96,8 @@ var (
 	captchaValidate = newMagicalCaptchaValidate()
 	// 获取influx service
 	getInfluxSrv = helper.GetInfluxSrv
+	// 文件服务
+	fileSrv = new(service.FileSrv)
 )
 
 // GetLimit 获取limit的值
@@ -227,4 +228,28 @@ func newTracker(action string) elton.Handler {
 			})
 		},
 	})
+}
+
+// getIDFromParams get id form context params
+func getIDFromParams(c *elton.Context) (id int, err error) {
+	id, err = strconv.Atoi(c.Param("id"))
+	if err != nil {
+		he := hes.Wrap(err)
+		he.Category = "parseInt"
+		err = he
+		return
+	}
+	return
+}
+
+// sessionInterceptor session的拦截
+func sessionInterceptor(c *elton.Context) error {
+	message, ok := service.GetSessionInterceptorMessage()
+	// 如果有配置拦截信息，则以出错返回
+	if ok {
+		he := hes.New(message)
+		he.Category = "sessionInterceptor"
+		return he
+	}
+	return c.Next()
 }

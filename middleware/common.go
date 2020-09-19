@@ -33,11 +33,6 @@ const (
 )
 
 var (
-	errQueryNotAllow = &hes.Error{
-		StatusCode: http.StatusBadRequest,
-		Message:    "query is not allowed",
-		Category:   errCommonCategory,
-	}
 	errCaptchaIsInvalid = &hes.Error{
 		StatusCode: http.StatusBadRequest,
 		Message:    "图形验证码错误",
@@ -51,11 +46,11 @@ var (
 )
 
 // WaitFor 延时响应中间件，设置最少等待多久再响应
-func WaitFor(d time.Duration, args ...bool) elton.Handler {
+func WaitFor(d time.Duration, onlyErrOccurreds ...bool) elton.Handler {
 	ns := d.Nanoseconds()
 	onlyErrOccurred := false
-	if len(args) != 0 {
-		onlyErrOccurred = args[0]
+	if len(onlyErrOccurreds) != 0 {
+		onlyErrOccurred = onlyErrOccurreds[0]
 	}
 	return func(c *elton.Context) (err error) {
 		start := time.Now()

@@ -69,10 +69,9 @@ func RandomDigit(n int) string {
 	return randomString(digitBytes, n)
 }
 
-var entropy = rand.New(rand.NewSource(time.Unix(0, 0).UnixNano()))
-
 // GenUlid 生成ulid
 func GenUlid() string {
+	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
 	t := time.Now()
 	return ulid.MustNew(ulid.Timestamp(t), entropy).String()
 }

@@ -40,35 +40,35 @@ func toString(fl validator.FieldLevel) (string, bool) {
 	return value.String(), true
 }
 
-// isInt 判断是否int
-func isInt(fl validator.FieldLevel) bool {
-	value := fl.Field()
-	return value.Kind() == reflect.Int
-}
+// // isInt 判断是否int
+// func isInt(fl validator.FieldLevel) bool {
+// 	value := fl.Field()
+// 	return value.Kind() == reflect.Int
+// }
 
-// toInt 转换为int
-func toInt(fl validator.FieldLevel) (int, bool) {
-	value := fl.Field()
-	if value.Kind() != reflect.Int {
-		return 0, false
-	}
-	return int(value.Int()), true
-}
+// // toInt 转换为int
+// func toInt(fl validator.FieldLevel) (int, bool) {
+// 	value := fl.Field()
+// 	if value.Kind() != reflect.Int {
+// 		return 0, false
+// 	}
+// 	return int(value.Int()), true
+// }
 
-// isInInt 判断是否在int数组中
-func isInInt(fl validator.FieldLevel, values []int) bool {
-	value, ok := toInt(fl)
-	if !ok {
-		return false
-	}
-	exists := false
-	for _, v := range values {
-		if v == value {
-			exists = true
-		}
-	}
-	return exists
-}
+// // isInInt 判断是否在int数组中
+// func isInInt(fl validator.FieldLevel, values []int) bool {
+// 	value, ok := toInt(fl)
+// 	if !ok {
+// 		return false
+// 	}
+// 	exists := false
+// 	for _, v := range values {
+// 		if v == value {
+// 			exists = true
+// 		}
+// 	}
+// 	return exists
+// }
 
 // isInString 判断是否在string数组中
 func isInString(fl validator.FieldLevel, values []string) bool {
@@ -85,38 +85,38 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 	return exists
 }
 
-// isAllInString 判断是否所有都在string数组中
-func isAllInString(fl validator.FieldLevel, values []string) bool {
-	if fl.Field().Kind() != reflect.Slice {
-		return false
-	}
-	v := fl.Field().Interface()
-	value, ok := v.([]string)
-	if !ok || len(value) == 0 {
-		return false
-	}
-	valid := true
-	for _, item := range value {
-		exists := containsString(values, item)
-		if !exists {
-			valid = false
-		}
-	}
-	return valid
-}
+// // isAllInString 判断是否所有都在string数组中
+// func isAllInString(fl validator.FieldLevel, values []string) bool {
+// 	if fl.Field().Kind() != reflect.Slice {
+// 		return false
+// 	}
+// 	v := fl.Field().Interface()
+// 	value, ok := v.([]string)
+// 	if !ok || len(value) == 0 {
+// 		return false
+// 	}
+// 	valid := true
+// 	for _, item := range value {
+// 		exists := containsString(values, item)
+// 		if !exists {
+// 			valid = false
+// 		}
+// 	}
+// 	return valid
+// }
 
-// containsString 是否包含此string
-func containsString(arr []string, str string) (found bool) {
-	for _, v := range arr {
-		if found {
-			break
-		}
-		if v == str {
-			found = true
-		}
-	}
-	return
-}
+// // containsString 是否包含此string
+// func containsString(arr []string, str string) (found bool) {
+// 	for _, v := range arr {
+// 		if found {
+// 			break
+// 		}
+// 		if v == str {
+// 			found = true
+// 		}
+// 	}
+// 	return
+// }
 
 // doValidate 校验struct
 func doValidate(s interface{}, data interface{}) (err error) {

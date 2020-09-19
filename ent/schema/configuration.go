@@ -1,15 +1,38 @@
+// Copyright 2020 tree xie
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package schema
 
 import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 )
 
 const (
-	// 状态启用
-	ConfigurationStatusEnabled = iota + 1
-	// 状态禁用
-	ConfigurationStatusDisabled
+	// ConfigurationCategoryMockTime mock time分类
+	ConfigurationCategoryMockTime = "mockTime"
+	// ConfigurationCategoryBlockIP block ip分类
+	ConfigurationCategoryBlockIP = "blockIP"
+	// ConfigurationCategorySignedKey signed key分类
+	ConfigurationCategorySignedKey = "signedKey"
+	// ConfigurationCategoryRouterConcurrency router concurrency分类
+	ConfigurationCategoryRouterConcurrency = "routerConcurrency"
+	// ConfigurationCategoryRouter router分类
+	ConfigurationCategoryRouter = "router"
+	// ConfigurationCategorySessionInterceptor session interceptor分类
+	ConfigurationCategorySessionInterceptor = "sessionInterceptor"
 )
 
 // Configuration holds the schema definition for the Configuration entity.
@@ -21,6 +44,7 @@ type Configuration struct {
 func (Configuration) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		StatusMixin{},
 	}
 }
 
@@ -32,16 +56,19 @@ func (Configuration) Fields() []ent.Field {
 			Unique().
 			Immutable().
 			Comment("配置名称"),
-		field.String("category").
-			NotEmpty().
+		field.Enum("category").
+			Values(
+				ConfigurationCategoryMockTime,
+				ConfigurationCategoryBlockIP,
+				ConfigurationCategorySignedKey,
+				ConfigurationCategoryRouterConcurrency,
+				ConfigurationCategoryRouter,
+				ConfigurationCategorySessionInterceptor,
+			).
 			Comment("配置分类"),
 		field.String("owner").
 			NotEmpty().
 			Comment("创建者"),
-		field.Int8("status").
-			Range(ConfigurationStatusEnabled, ConfigurationStatusDisabled).
-			Default(ConfigurationStatusEnabled).
-			Comment("配置状态，默认为启用状态"),
 		field.String("data").
 			NotEmpty().
 			Comment("配置信息"),
@@ -57,4 +84,13 @@ func (Configuration) Fields() []ent.Field {
 // Edges of the Configuration.
 func (Configuration) Edges() []ent.Edge {
 	return nil
+}
+
+// Indexes 配置表索引
+func (Configuration) Indexes() []ent.Index {
+	return []ent.Index{
+		// 配置名称，唯一索引
+		index.Fields("name").Unique(),
+		index.Fields("status"),
+	}
 }

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// 通过packr2将静态文件打包，此controller提供各静态文件的响应处理
+// 通过packr2将静态文件打包，此controller提供各静态文件的响应处理，
+// 主要是管理系统的前端代码，对于资源等（如图片）尽可能不要打包进入程序
 
 package controller
 
@@ -66,8 +67,8 @@ func (sf *staticFile) NewReader(file string) (io.Reader, error) {
 func init() {
 	g := router.NewGroup("")
 	ctrl := assetCtrl{}
-	g.GET("/", ctrl.index)
-	g.GET("/favicon.ico", ctrl.favIcon)
+	g.GET("/", ctrl.getIndex)
+	g.GET("/favicon.ico", ctrl.getFavIcon)
 
 	sf := &staticFile{
 		box: assetBox,
@@ -86,7 +87,7 @@ func init() {
 
 // 静态文件响应
 func sendFile(c *elton.Context, file string) (err error) {
-	// 因为静态文件打包至程序中，因为直接读取
+	// 因为静态文件打包至程序中，直接读取
 	buf, err := assetBox.Find(file)
 	if err != nil {
 		return
@@ -97,14 +98,22 @@ func sendFile(c *elton.Context, file string) (err error) {
 	return
 }
 
-// 首页
-func (assetCtrl) index(c *elton.Context) (err error) {
+// getIndex 首页
+func (assetCtrl) getIndex(c *elton.Context) (err error) {
+	err = sendFile(c, "index.html")
+	if err != nil {
+		return
+	}
 	c.CacheMaxAge("10s")
-	return sendFile(c, "index.html")
+	return
 }
 
-// 图标
-func (assetCtrl) favIcon(c *elton.Context) (err error) {
-	c.SetHeader(elton.HeaderAcceptEncoding, "public, max-age=3600, s-maxage=600")
-	return sendFile(c, "favicon.ico")
+// getFavIcon 图标
+func (assetCtrl) getFavIcon(c *elton.Context) (err error) {
+	err = sendFile(c, "favicon.ico")
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("1h", "10m")
+	return
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
+	"github.com/vicanso/forest/ent/userlogin"
 )
 
 // The init function reads all schema descriptors with runtime
@@ -16,6 +17,7 @@ import (
 func init() {
 	configurationMixin := schema.Configuration{}.Mixin()
 	configurationMixinFields0 := configurationMixin[0].Fields()
+	configurationMixinFields1 := configurationMixin[1].Fields()
 	configurationFields := schema.Configuration{}.Fields()
 	_ = configurationFields
 	// configurationDescCreatedAt is the schema descriptor for created_at field.
@@ -28,30 +30,27 @@ func init() {
 	configuration.DefaultUpdatedAt = configurationDescUpdatedAt.Default.(func() time.Time)
 	// configuration.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	configuration.UpdateDefaultUpdatedAt = configurationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// configurationDescStatus is the schema descriptor for status field.
+	configurationDescStatus := configurationMixinFields1[0].Descriptor()
+	// configuration.DefaultStatus holds the default value on creation for the status field.
+	configuration.DefaultStatus = schema.Status(configurationDescStatus.Default.(int8))
+	// configuration.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	configuration.StatusValidator = configurationDescStatus.Validators[0].(func(int8) error)
 	// configurationDescName is the schema descriptor for name field.
 	configurationDescName := configurationFields[0].Descriptor()
 	// configuration.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	configuration.NameValidator = configurationDescName.Validators[0].(func(string) error)
-	// configurationDescCategory is the schema descriptor for category field.
-	configurationDescCategory := configurationFields[1].Descriptor()
-	// configuration.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
-	configuration.CategoryValidator = configurationDescCategory.Validators[0].(func(string) error)
 	// configurationDescOwner is the schema descriptor for owner field.
 	configurationDescOwner := configurationFields[2].Descriptor()
 	// configuration.OwnerValidator is a validator for the "owner" field. It is called by the builders before save.
 	configuration.OwnerValidator = configurationDescOwner.Validators[0].(func(string) error)
-	// configurationDescStatus is the schema descriptor for status field.
-	configurationDescStatus := configurationFields[3].Descriptor()
-	// configuration.DefaultStatus holds the default value on creation for the status field.
-	configuration.DefaultStatus = configurationDescStatus.Default.(int8)
-	// configuration.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	configuration.StatusValidator = configurationDescStatus.Validators[0].(func(int8) error)
 	// configurationDescData is the schema descriptor for data field.
-	configurationDescData := configurationFields[4].Descriptor()
+	configurationDescData := configurationFields[3].Descriptor()
 	// configuration.DataValidator is a validator for the "data" field. It is called by the builders before save.
 	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
+	userMixinFields1 := userMixin[1].Fields()
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -64,6 +63,12 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescStatus is the schema descriptor for status field.
+	userDescStatus := userMixinFields1[0].Descriptor()
+	// user.DefaultStatus holds the default value on creation for the status field.
+	user.DefaultStatus = schema.Status(userDescStatus.Default.(int8))
+	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	user.StatusValidator = userDescStatus.Validators[0].(func(int8) error)
 	// userDescAccount is the schema descriptor for account field.
 	userDescAccount := userFields[0].Descriptor()
 	// user.AccountValidator is a validator for the "account" field. It is called by the builders before save.
@@ -86,10 +91,22 @@ func init() {
 	userDescPassword := userFields[1].Descriptor()
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
-	// userDescStatus is the schema descriptor for status field.
-	userDescStatus := userFields[5].Descriptor()
-	// user.DefaultStatus holds the default value on creation for the status field.
-	user.DefaultStatus = userDescStatus.Default.(int8)
-	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	user.StatusValidator = userDescStatus.Validators[0].(func(int8) error)
+	userloginMixin := schema.UserLogin{}.Mixin()
+	userloginMixinFields0 := userloginMixin[0].Fields()
+	userloginFields := schema.UserLogin{}.Fields()
+	_ = userloginFields
+	// userloginDescCreatedAt is the schema descriptor for created_at field.
+	userloginDescCreatedAt := userloginMixinFields0[0].Descriptor()
+	// userlogin.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userlogin.DefaultCreatedAt = userloginDescCreatedAt.Default.(func() time.Time)
+	// userloginDescUpdatedAt is the schema descriptor for updated_at field.
+	userloginDescUpdatedAt := userloginMixinFields0[1].Descriptor()
+	// userlogin.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userlogin.DefaultUpdatedAt = userloginDescUpdatedAt.Default.(func() time.Time)
+	// userlogin.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	userlogin.UpdateDefaultUpdatedAt = userloginDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userloginDescAccount is the schema descriptor for account field.
+	userloginDescAccount := userloginFields[0].Descriptor()
+	// userlogin.AccountValidator is a validator for the "account" field. It is called by the builders before save.
+	userlogin.AccountValidator = userloginDescAccount.Validators[0].(func(string) error)
 }

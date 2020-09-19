@@ -36,15 +36,15 @@
       />
       <el-table-column
         sortable
-        prop="beginDateDesc"
-        key="beginDateDesc"
+        prop="startedAtDesc"
+        key="startedAtDesc"
         label="开始时间"
         width="180"
       />
       <el-table-column
         sortable
-        prop="endDateDesc"
-        key="endDateDesc"
+        prop="endedAtDesc"
+        key="endedAtDesc"
         label="结束时间"
         width="180"
       />
@@ -55,9 +55,9 @@
         :width="configWidth"
       >
         <template slot-scope="scope">
-          <pre v-if="expanded">
-            {{ scope.row.isJSON ? `\n${scope.row.data}` : scope.row.data }}
-          </pre>
+          <pre v-if="expanded">{{
+            scope.row.isJSON ? `\n${scope.row.data}` : scope.row.data
+          }}</pre>
           <el-tooltip placement="bottom" v-else-if="scope.row.isJSON">
             <pre slot="content">{{ scope.row.data }}</pre>
             <i class="el-icon-info" />

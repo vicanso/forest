@@ -12,6 +12,7 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/predicate"
+	"github.com/vicanso/forest/ent/schema"
 )
 
 // ConfigurationUpdate is the builder for updating Configuration entities.
@@ -28,42 +29,36 @@ func (cu *ConfigurationUpdate) Where(ps ...predicate.Configuration) *Configurati
 	return cu
 }
 
-// SetUpdatedAt sets the updated_at field.
-func (cu *ConfigurationUpdate) SetUpdatedAt(t time.Time) *ConfigurationUpdate {
-	cu.mutation.SetUpdatedAt(t)
+// SetStatus sets the status field.
+func (cu *ConfigurationUpdate) SetStatus(s schema.Status) *ConfigurationUpdate {
+	cu.mutation.ResetStatus()
+	cu.mutation.SetStatus(s)
+	return cu
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (cu *ConfigurationUpdate) SetNillableStatus(s *schema.Status) *ConfigurationUpdate {
+	if s != nil {
+		cu.SetStatus(*s)
+	}
+	return cu
+}
+
+// AddStatus adds s to status.
+func (cu *ConfigurationUpdate) AddStatus(s schema.Status) *ConfigurationUpdate {
+	cu.mutation.AddStatus(s)
 	return cu
 }
 
 // SetCategory sets the category field.
-func (cu *ConfigurationUpdate) SetCategory(s string) *ConfigurationUpdate {
-	cu.mutation.SetCategory(s)
+func (cu *ConfigurationUpdate) SetCategory(c configuration.Category) *ConfigurationUpdate {
+	cu.mutation.SetCategory(c)
 	return cu
 }
 
 // SetOwner sets the owner field.
 func (cu *ConfigurationUpdate) SetOwner(s string) *ConfigurationUpdate {
 	cu.mutation.SetOwner(s)
-	return cu
-}
-
-// SetStatus sets the status field.
-func (cu *ConfigurationUpdate) SetStatus(i int8) *ConfigurationUpdate {
-	cu.mutation.ResetStatus()
-	cu.mutation.SetStatus(i)
-	return cu
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (cu *ConfigurationUpdate) SetNillableStatus(i *int8) *ConfigurationUpdate {
-	if i != nil {
-		cu.SetStatus(*i)
-	}
-	return cu
-}
-
-// AddStatus adds i to status.
-func (cu *ConfigurationUpdate) AddStatus(i int8) *ConfigurationUpdate {
-	cu.mutation.AddStatus(i)
 	return cu
 }
 
@@ -96,6 +91,11 @@ func (cu *ConfigurationUpdate) Save(ctx context.Context) (int, error) {
 		v := configuration.UpdateDefaultUpdatedAt()
 		cu.mutation.SetUpdatedAt(v)
 	}
+	if v, ok := cu.mutation.Status(); ok {
+		if err := configuration.StatusValidator(int8(v)); err != nil {
+			return 0, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if v, ok := cu.mutation.Category(); ok {
 		if err := configuration.CategoryValidator(v); err != nil {
 			return 0, &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
@@ -104,11 +104,6 @@ func (cu *ConfigurationUpdate) Save(ctx context.Context) (int, error) {
 	if v, ok := cu.mutation.Owner(); ok {
 		if err := configuration.OwnerValidator(v); err != nil {
 			return 0, &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Status(); ok {
-		if err := configuration.StatusValidator(v); err != nil {
-			return 0, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	if v, ok := cu.mutation.Data(); ok {
@@ -190,20 +185,6 @@ func (cu *ConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: configuration.FieldUpdatedAt,
 		})
 	}
-	if value, ok := cu.mutation.Category(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: configuration.FieldCategory,
-		})
-	}
-	if value, ok := cu.mutation.Owner(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: configuration.FieldOwner,
-		})
-	}
 	if value, ok := cu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -216,6 +197,20 @@ func (cu *ConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeInt8,
 			Value:  value,
 			Column: configuration.FieldStatus,
+		})
+	}
+	if value, ok := cu.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: configuration.FieldCategory,
+		})
+	}
+	if value, ok := cu.mutation.Owner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: configuration.FieldOwner,
 		})
 	}
 	if value, ok := cu.mutation.Data(); ok {
@@ -257,42 +252,36 @@ type ConfigurationUpdateOne struct {
 	mutation *ConfigurationMutation
 }
 
-// SetUpdatedAt sets the updated_at field.
-func (cuo *ConfigurationUpdateOne) SetUpdatedAt(t time.Time) *ConfigurationUpdateOne {
-	cuo.mutation.SetUpdatedAt(t)
+// SetStatus sets the status field.
+func (cuo *ConfigurationUpdateOne) SetStatus(s schema.Status) *ConfigurationUpdateOne {
+	cuo.mutation.ResetStatus()
+	cuo.mutation.SetStatus(s)
+	return cuo
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (cuo *ConfigurationUpdateOne) SetNillableStatus(s *schema.Status) *ConfigurationUpdateOne {
+	if s != nil {
+		cuo.SetStatus(*s)
+	}
+	return cuo
+}
+
+// AddStatus adds s to status.
+func (cuo *ConfigurationUpdateOne) AddStatus(s schema.Status) *ConfigurationUpdateOne {
+	cuo.mutation.AddStatus(s)
 	return cuo
 }
 
 // SetCategory sets the category field.
-func (cuo *ConfigurationUpdateOne) SetCategory(s string) *ConfigurationUpdateOne {
-	cuo.mutation.SetCategory(s)
+func (cuo *ConfigurationUpdateOne) SetCategory(c configuration.Category) *ConfigurationUpdateOne {
+	cuo.mutation.SetCategory(c)
 	return cuo
 }
 
 // SetOwner sets the owner field.
 func (cuo *ConfigurationUpdateOne) SetOwner(s string) *ConfigurationUpdateOne {
 	cuo.mutation.SetOwner(s)
-	return cuo
-}
-
-// SetStatus sets the status field.
-func (cuo *ConfigurationUpdateOne) SetStatus(i int8) *ConfigurationUpdateOne {
-	cuo.mutation.ResetStatus()
-	cuo.mutation.SetStatus(i)
-	return cuo
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (cuo *ConfigurationUpdateOne) SetNillableStatus(i *int8) *ConfigurationUpdateOne {
-	if i != nil {
-		cuo.SetStatus(*i)
-	}
-	return cuo
-}
-
-// AddStatus adds i to status.
-func (cuo *ConfigurationUpdateOne) AddStatus(i int8) *ConfigurationUpdateOne {
-	cuo.mutation.AddStatus(i)
 	return cuo
 }
 
@@ -325,6 +314,11 @@ func (cuo *ConfigurationUpdateOne) Save(ctx context.Context) (*Configuration, er
 		v := configuration.UpdateDefaultUpdatedAt()
 		cuo.mutation.SetUpdatedAt(v)
 	}
+	if v, ok := cuo.mutation.Status(); ok {
+		if err := configuration.StatusValidator(int8(v)); err != nil {
+			return nil, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if v, ok := cuo.mutation.Category(); ok {
 		if err := configuration.CategoryValidator(v); err != nil {
 			return nil, &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
@@ -333,11 +327,6 @@ func (cuo *ConfigurationUpdateOne) Save(ctx context.Context) (*Configuration, er
 	if v, ok := cuo.mutation.Owner(); ok {
 		if err := configuration.OwnerValidator(v); err != nil {
 			return nil, &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Status(); ok {
-		if err := configuration.StatusValidator(v); err != nil {
-			return nil, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	if v, ok := cuo.mutation.Data(); ok {
@@ -417,20 +406,6 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (c *Configuratio
 			Column: configuration.FieldUpdatedAt,
 		})
 	}
-	if value, ok := cuo.mutation.Category(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: configuration.FieldCategory,
-		})
-	}
-	if value, ok := cuo.mutation.Owner(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: configuration.FieldOwner,
-		})
-	}
 	if value, ok := cuo.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -443,6 +418,20 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (c *Configuratio
 			Type:   field.TypeInt8,
 			Value:  value,
 			Column: configuration.FieldStatus,
+		})
+	}
+	if value, ok := cuo.mutation.Category(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: configuration.FieldCategory,
+		})
+	}
+	if value, ok := cuo.mutation.Owner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: configuration.FieldOwner,
 		})
 	}
 	if value, ok := cuo.mutation.Data(); ok {

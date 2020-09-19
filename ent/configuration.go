@@ -9,6 +9,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/vicanso/forest/ent/configuration"
+	"github.com/vicanso/forest/ent/schema"
 )
 
 // Configuration is the model entity for the Configuration schema.
@@ -20,14 +21,14 @@ type Configuration struct {
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// Status holds the value of the "status" field.
+	Status schema.Status `json:"status,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Category holds the value of the "category" field.
-	Category string `json:"category,omitempty"`
+	Category configuration.Category `json:"category,omitempty"`
 	// Owner holds the value of the "owner" field.
 	Owner string `json:"owner,omitempty"`
-	// Status holds the value of the "status" field.
-	Status int8 `json:"status,omitempty"`
 	// Data holds the value of the "data" field.
 	Data string `json:"data,omitempty"`
 	// StartedAt holds the value of the "started_at" field.
@@ -42,10 +43,10 @@ func (*Configuration) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullTime{},   // created_at
 		&sql.NullTime{},   // updated_at
+		&sql.NullInt64{},  // status
 		&sql.NullString{}, // name
 		&sql.NullString{}, // category
 		&sql.NullString{}, // owner
-		&sql.NullInt64{},  // status
 		&sql.NullString{}, // data
 		&sql.NullTime{},   // started_at
 		&sql.NullTime{},   // ended_at
@@ -74,25 +75,25 @@ func (c *Configuration) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		c.UpdatedAt = value.Time
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[2])
+	if value, ok := values[2].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field status", values[2])
+	} else if value.Valid {
+		c.Status = schema.Status(value.Int64)
+	}
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field name", values[3])
 	} else if value.Valid {
 		c.Name = value.String
 	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field category", values[3])
-	} else if value.Valid {
-		c.Category = value.String
-	}
 	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field owner", values[4])
+		return fmt.Errorf("unexpected type %T for field category", values[4])
+	} else if value.Valid {
+		c.Category = configuration.Category(value.String)
+	}
+	if value, ok := values[5].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field owner", values[5])
 	} else if value.Valid {
 		c.Owner = value.String
-	}
-	if value, ok := values[5].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[5])
-	} else if value.Valid {
-		c.Status = int8(value.Int64)
 	}
 	if value, ok := values[6].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field data", values[6])
@@ -139,14 +140,14 @@ func (c *Configuration) String() string {
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
 	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", status=")
+	builder.WriteString(fmt.Sprintf("%v", c.Status))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
 	builder.WriteString(", category=")
-	builder.WriteString(c.Category)
+	builder.WriteString(fmt.Sprintf("%v", c.Category))
 	builder.WriteString(", owner=")
 	builder.WriteString(c.Owner)
-	builder.WriteString(", status=")
-	builder.WriteString(fmt.Sprintf("%v", c.Status))
 	builder.WriteString(", data=")
 	builder.WriteString(c.Data)
 	builder.WriteString(", started_at=")

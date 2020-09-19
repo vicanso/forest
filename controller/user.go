@@ -35,6 +35,7 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 type (
@@ -49,10 +50,11 @@ type (
 	// userListResp 用户列表响应
 	userListResp struct {
 		Users []*ent.User `json:"users,omitempty"`
+		Count int         `json:"count,omitempty"`
 	}
 
-	// listUserParams 用户查询参数
-	listUserParams struct {
+	// userListParams 用户查询参数
+	userListParams struct {
 		listParams
 
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
@@ -61,16 +63,16 @@ type (
 		Status  string `json:"status,omitempty" validate:"omitempty,xStatus"`
 	}
 
-	// registerLoginUserParams 注册与登录参数
-	registerLoginUserParams struct {
+	// userRegisterLoginParams 注册与登录参数
+	userRegisterLoginParams struct {
 		// 账户
-		Account string `json:"account,omitempty" validate:"xUserAccount"`
+		Account string `json:"account,omitempty" validate:"required,xUserAccount"`
 		// 密码，密码为sha256后的加密串
-		Password string `json:"password,omitempty" validate:"xUserPassword"`
+		Password string `json:"password,omitempty" validate:"required,xUserPassword"`
 	}
 
-	// updateMeParams 用户信息更新参数
-	updateMeParams struct {
+	// userUpdateMeParams 用户信息更新参数
+	userUpdateMeParams struct {
 		Name        string `json:"name,omitempty" validate:"omitempty,xUserName"`
 		Email       string `json:"email,omitempty" validate:"omitempty,xUserEmail"`
 		Password    string `json:"password,omitempty" validate:"omitempty,xUserPassword"`
@@ -79,6 +81,7 @@ type (
 )
 
 var (
+	// session配置信息
 	sessionConfig config.SessionConfig
 )
 
@@ -109,11 +112,6 @@ var (
 	}
 	errUserAccountExists = &hes.Error{
 		Message:    "该账户已注册",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errUserRcmderNotExists = &hes.Error{
-		Message:    "推荐人编号不存在，请重新填写",
 		StatusCode: http.StatusBadRequest,
 		Category:   errUserCategory,
 	}
@@ -148,6 +146,7 @@ func init() {
 	// 用户注册
 	g.POST(
 		"/v1/me",
+		middleware.WaitFor(time.Second, true),
 		newTracker(cs.ActionRegister),
 		captchaValidate,
 		// 限制相同IP在60秒之内只能调用5次
@@ -157,17 +156,16 @@ func init() {
 	)
 
 	// 用户登录
-	// 限制3秒只能登录一次（无论成功还是失败）
-	loginLimit := newConcurrentLimit([]string{
-		"account",
-	}, 3*time.Second, cs.ActionLogin)
 	g.POST(
 		"/v1/me/login",
 		middleware.WaitFor(time.Second, true),
 		newTracker(cs.ActionLogin),
 		captchaValidate,
 		shouldBeAnonymous,
-		loginLimit,
+		// 限制3秒只能登录一次（无论成功还是失败）
+		newConcurrentLimit([]string{
+			"account",
+		}, 3*time.Second, cs.ActionLogin),
 		// 限制相同IP在60秒之内只能调用10次
 		newIPLimit(10, 60*time.Second, cs.ActionLogin),
 		// 限制10分钟内，相同的账号只允许出错5次
@@ -193,8 +191,29 @@ func init() {
 	)
 }
 
+// validateBeforeSave 保存前校验
+func (params *userRegisterLoginParams) validateBeforeSave(ctx context.Context) (err error) {
+	// 判断该账户是否已注册
+	exists, err := getEntClient().User.Query().
+		Where(user.Account(params.Account)).
+		Exist(ctx)
+	if err != nil {
+		return
+	}
+	if exists {
+		err = errUserAccountExists
+		return
+	}
+
+	return
+}
+
 // save 创建用户
-func (params *registerLoginUserParams) save(ctx context.Context) (*ent.User, error) {
+func (params *userRegisterLoginParams) save(ctx context.Context) (*ent.User, error) {
+	err := params.validateBeforeSave(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return getEntClient().User.Create().
 		SetAccount(params.Account).
 		SetPassword(params.Password).
@@ -202,11 +221,15 @@ func (params *registerLoginUserParams) save(ctx context.Context) (*ent.User, err
 }
 
 // login 登录
-func (params *registerLoginUserParams) login(ctx context.Context, token string) (u *ent.User, err error) {
+func (params *userRegisterLoginParams) login(ctx context.Context, token string) (u *ent.User, err error) {
 	u, err = getEntClient().User.Query().
 		Where(user.Account(params.Account)).
 		First(ctx)
 	if err != nil {
+		// 如果登录时账号不存在
+		if ent.IsNotFound(err) {
+			err = errAccountOrPasswordInvalid
+		}
 		return
 	}
 	pwd := util.Sha256(u.Password + token)
@@ -218,11 +241,16 @@ func (params *registerLoginUserParams) login(ctx context.Context, token string) 
 		err = errAccountOrPasswordInvalid
 		return
 	}
+	// 禁止非正常状态用户登录
+	if u.Status != schema.StatusEnabled {
+		err = errUserStatusInvalid
+		return
+	}
 	return
 }
 
 // update 更新用户信息
-func (params *updateMeParams) update(ctx context.Context, account string) (u *ent.User, err error) {
+func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account string) (u *ent.User, err error) {
 
 	u, err = getEntClient().User.Query().
 		Where(user.Account(account)).
@@ -250,25 +278,40 @@ func (params *updateMeParams) update(ctx context.Context, account string) (u *en
 	return updateOne.Save(ctx)
 }
 
+// where 将查询条件中的参数转换为对应的where条件
+func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
+	if params.Keyword != "" {
+		query = query.Where(user.AccountContains(params.Keyword))
+	}
+	// TODO role的查询
+	// if params.Role != "" {
+	// }
+	if params.Status != "" {
+		v, _ := strconv.Atoi(params.Status)
+		query = query.Where(user.Status(schema.Status(v)))
+	}
+	return query
+}
+
 // queryAll 查询用户列表
-func (params *listUserParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
+func (params *userListParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
 	query := getEntClient().User.Query()
 
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
 		Order(params.GetOrders()...)
-	if params.Keyword != "" {
-		query = query.Where(user.AccountContains(params.Keyword))
-	}
-	// TODO role的查询
-	if params.Role != "" {
-	}
-	if params.Status != "" {
-		v, _ := strconv.Atoi(params.Status)
-		query = query.Where(user.Status(int8(v)))
-	}
+	query = params.where(query)
 
 	return query.All(ctx)
+}
+
+// count 计算总数
+func (params *userListParams) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().User.Query()
+
+	query = params.where(query)
+
+	return query.Count(ctx)
 }
 
 // pickUserInfo 获取用户信息
@@ -279,7 +322,7 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 		return
 	}
 	resp = userInfoResp{
-		Date: util.NowString(),
+		Date: now(),
 	}
 	resp.UserSessionInfo = userInfo
 	return
@@ -287,16 +330,24 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 
 // list 获取用户列表
 func (userCtrl) list(c *elton.Context) (err error) {
-	params := listUserParams{}
+	params := userListParams{}
 	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return
+	}
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
 	}
 	users, err := params.queryAll(c.Context())
 	if err != nil {
 		return
 	}
 	c.Body = &userListResp{
+		Count: count,
 		Users: users,
 	}
 
@@ -335,12 +386,25 @@ func (userCtrl) me(c *elton.Context) (err error) {
 			HttpOnly: true,
 			MaxAge:   365 * 24 * 3600,
 		})
-		// trackRecord := &service.UserTrackRecord{
-		// 	UserAgent: c.GetRequestHeader("User-Agent"),
-		// 	IP:        c.RealIP(),
-		// 	TrackID:   util.GetTrackID(c),
-		// }
-		// _ = userSrv.AddTrackRecord(trackRecord, c)
+
+		ip := c.RealIP()
+		fields := map[string]interface{}{
+			"userAgent": c.GetRequestHeader("User-Agent"),
+			"trackID":   uid,
+			"ip":        ip,
+		}
+
+		// 记录创建user track
+		go func() {
+			location, _ := service.GetLocationByIP(ip, nil)
+			if location.IP != "" {
+				fields["country"] = location.Country
+				fields["province"] = location.Province
+				fields["city"] = location.City
+				fields["isp"] = location.ISP
+			}
+			getInfluxSrv().Write(cs.MeasurementUserAddTrack, fields, nil)
+		}()
 	}
 	resp, err := pickUserInfo(c)
 	if err != nil {
@@ -352,11 +416,12 @@ func (userCtrl) me(c *elton.Context) (err error) {
 
 // register 用户注册
 func (userCtrl) register(c *elton.Context) (err error) {
-	params := registerLoginUserParams{}
+	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
+
 	user, err := params.save(c.Context())
 	if err != nil {
 		return
@@ -364,18 +429,20 @@ func (userCtrl) register(c *elton.Context) (err error) {
 	// 第一个创建的用户添加su权限
 	if user.ID == 1 {
 		go func() {
-			_, _ = getEntClient().User.UpdateOneID(user.ID).
+			_, _ = user.Update().
 				SetRoles([]string{
 					schema.UserRoleSu,
-				}).Save(context.Background())
+				}).
+				Save(context.Background())
 		}()
 	}
 	c.Body = user
 	return
 }
 
+// login 用户登录
 func (userCtrl) login(c *elton.Context) (err error) {
-	params := registerLoginUserParams{}
+	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
@@ -395,10 +462,11 @@ func (userCtrl) login(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
+	account := u.Account
 
 	// 设置session
 	err = us.SetInfo(service.UserSessionInfo{
-		Account: u.Account,
+		Account: account,
 		ID:      u.ID,
 		Roles:   u.Roles,
 		// Groups: u.,
@@ -412,34 +480,53 @@ func (userCtrl) login(c *elton.Context) (err error) {
 	sessionID := util.GetSessionID(c)
 	userAgent := c.GetRequestHeader("User-Agent")
 
-	// 记录至数据库
-	// loginRecord := &service.UserLoginRecord{
-	// 	Account:       params.Account,
-	// 	UserAgent:     userAgent,
-	// 	IP:            c.RealIP(),
-	// 	TrackID:       trackID,
-	// 	SessionID:     sessionID,
-	// 	XForwardedFor: c.GetRequestHeader("X-Forwarded-For"),
-
-	// 	Width:         deviceInfo.Width,
-	// 	Height:        deviceInfo.Height,
-	// 	PixelRatio:    deviceInfo.PixelRatio,
-	// 	Platform:      deviceInfo.Platform,
-	// 	UUID:          deviceInfo.UUID,
-	// 	SystemVersion: deviceInfo.SystemVersion,
-	// 	Brand:         deviceInfo.Brand,
-	// 	Version:       deviceInfo.Version,
-	// 	BuildNumber:   deviceInfo.BuildNumber,
-	// }
-
-	// 记录用户登录行为
-	getInfluxSrv().Write(cs.MeasurementUserLogin, map[string]interface{}{
-		"account":   params.Account,
-		"userAgent": userAgent,
-		"ip":        ip,
-		"trackID":   trackID,
-		"sessionID": sessionID,
-	}, map[string]string{})
+	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
+	go func() {
+		fields := map[string]interface{}{
+			"account":   account,
+			"userAgent": userAgent,
+			"ip":        ip,
+			"trackID":   trackID,
+			"sessionID": sessionID,
+		}
+		location, _ := service.GetLocationByIP(ip, nil)
+		country := ""
+		province := ""
+		city := ""
+		isp := ""
+		if location.IP != "" {
+			country = location.Country
+			province = location.Province
+			city = location.City
+			isp = location.ISP
+			fields["country"] = country
+			fields["province"] = province
+			fields["city"] = city
+			fields["isp"] = isp
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		// 记录至数据库
+		_, err := getEntClient().UserLogin.Create().
+			SetAccount(account).
+			SetUserAgent(userAgent).
+			SetIP(ip).
+			SetTrackID(trackID).
+			SetSessionID(sessionID).
+			SetXForwardedFor(xForwardedFor).
+			SetCountry(country).
+			SetProvince(province).
+			SetCity(city).
+			SetIsp(isp).
+			Save(ctx)
+		if err != nil {
+			logger.Error("save user login fail",
+				zap.Error(err),
+			)
+		}
+		// 记录用户登录行为
+		getInfluxSrv().Write(cs.MeasurementUserLogin, fields, nil)
+	}()
 
 	// 返回用户信息
 	resp, err := pickUserInfo(c)
@@ -512,14 +599,14 @@ func (ctrl userCtrl) updateMe(c *elton.Context) (err error) {
 		err = errShouldLogin
 		return
 	}
-	params := updateMeParams{}
+	params := userUpdateMeParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
 
 	// 更新用户信息
-	_, err = params.update(c.Context(), us.MustGetInfo().Account)
+	_, err = params.updateOneAccount(c.Context(), us.MustGetInfo().Account)
 	if err != nil {
 		return
 	}

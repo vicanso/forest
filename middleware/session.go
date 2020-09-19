@@ -24,10 +24,6 @@ import (
 
 // NewSession new session middleware
 func NewSession() elton.Handler {
-	client := helper.RedisGetClient()
-	if client == nil {
-		panic("session store need redis client")
-	}
 	store := &helper.RedisSessionStore{
 		Prefix: "ss-",
 	}

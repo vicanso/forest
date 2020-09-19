@@ -5,12 +5,12 @@ package ent
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
 	"github.com/vicanso/forest/ent/predicate"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 )
 
@@ -28,9 +28,24 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetUpdatedAt sets the updated_at field.
-func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedAt(t)
+// SetStatus sets the status field.
+func (uu *UserUpdate) SetStatus(s schema.Status) *UserUpdate {
+	uu.mutation.ResetStatus()
+	uu.mutation.SetStatus(s)
+	return uu
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStatus(s *schema.Status) *UserUpdate {
+	if s != nil {
+		uu.SetStatus(*s)
+	}
+	return uu
+}
+
+// AddStatus adds s to status.
+func (uu *UserUpdate) AddStatus(s schema.Status) *UserUpdate {
+	uu.mutation.AddStatus(s)
 	return uu
 }
 
@@ -84,27 +99,6 @@ func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	return uu
 }
 
-// SetStatus sets the status field.
-func (uu *UserUpdate) SetStatus(i int8) *UserUpdate {
-	uu.mutation.ResetStatus()
-	uu.mutation.SetStatus(i)
-	return uu
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (uu *UserUpdate) SetNillableStatus(i *int8) *UserUpdate {
-	if i != nil {
-		uu.SetStatus(*i)
-	}
-	return uu
-}
-
-// AddStatus adds i to status.
-func (uu *UserUpdate) AddStatus(i int8) *UserUpdate {
-	uu.mutation.AddStatus(i)
-	return uu
-}
-
 // SetEmail sets the email field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	uu.mutation.SetEmail(s)
@@ -136,14 +130,14 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		v := user.UpdateDefaultUpdatedAt()
 		uu.mutation.SetUpdatedAt(v)
 	}
+	if v, ok := uu.mutation.Status(); ok {
+		if err := user.StatusValidator(int8(v)); err != nil {
+			return 0, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if v, ok := uu.mutation.Password(); ok {
 		if err := user.PasswordValidator(v); err != nil {
 			return 0, &ValidationError{Name: "password", err: fmt.Errorf("ent: validator failed for field \"password\": %w", err)}
-		}
-	}
-	if v, ok := uu.mutation.Status(); ok {
-		if err := user.StatusValidator(v); err != nil {
-			return 0, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	var (
@@ -220,6 +214,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUpdatedAt,
 		})
 	}
+	if value, ok := uu.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if value, ok := uu.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
 	if value, ok := uu.mutation.Password(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -266,20 +274,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldGroups,
 		})
 	}
-	if value, ok := uu.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
-	}
-	if value, ok := uu.mutation.AddedStatus(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
-	}
 	if value, ok := uu.mutation.Email(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -311,9 +305,24 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetUpdatedAt sets the updated_at field.
-func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedAt(t)
+// SetStatus sets the status field.
+func (uuo *UserUpdateOne) SetStatus(s schema.Status) *UserUpdateOne {
+	uuo.mutation.ResetStatus()
+	uuo.mutation.SetStatus(s)
+	return uuo
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStatus(s *schema.Status) *UserUpdateOne {
+	if s != nil {
+		uuo.SetStatus(*s)
+	}
+	return uuo
+}
+
+// AddStatus adds s to status.
+func (uuo *UserUpdateOne) AddStatus(s schema.Status) *UserUpdateOne {
+	uuo.mutation.AddStatus(s)
 	return uuo
 }
 
@@ -367,27 +376,6 @@ func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	return uuo
 }
 
-// SetStatus sets the status field.
-func (uuo *UserUpdateOne) SetStatus(i int8) *UserUpdateOne {
-	uuo.mutation.ResetStatus()
-	uuo.mutation.SetStatus(i)
-	return uuo
-}
-
-// SetNillableStatus sets the status field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableStatus(i *int8) *UserUpdateOne {
-	if i != nil {
-		uuo.SetStatus(*i)
-	}
-	return uuo
-}
-
-// AddStatus adds i to status.
-func (uuo *UserUpdateOne) AddStatus(i int8) *UserUpdateOne {
-	uuo.mutation.AddStatus(i)
-	return uuo
-}
-
 // SetEmail sets the email field.
 func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 	uuo.mutation.SetEmail(s)
@@ -419,14 +407,14 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		v := user.UpdateDefaultUpdatedAt()
 		uuo.mutation.SetUpdatedAt(v)
 	}
+	if v, ok := uuo.mutation.Status(); ok {
+		if err := user.StatusValidator(int8(v)); err != nil {
+			return nil, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
 	if v, ok := uuo.mutation.Password(); ok {
 		if err := user.PasswordValidator(v); err != nil {
 			return nil, &ValidationError{Name: "password", err: fmt.Errorf("ent: validator failed for field \"password\": %w", err)}
-		}
-	}
-	if v, ok := uuo.mutation.Status(); ok {
-		if err := user.StatusValidator(v); err != nil {
-			return nil, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	var (
@@ -501,6 +489,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 			Column: user.FieldUpdatedAt,
 		})
 	}
+	if value, ok := uuo.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
+	if value, ok := uuo.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: user.FieldStatus,
+		})
+	}
 	if value, ok := uuo.mutation.Password(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -545,20 +547,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (u *User, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Column: user.FieldGroups,
-		})
-	}
-	if value, ok := uuo.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: user.FieldStatus,
-		})
-	}
-	if value, ok := uuo.mutation.AddedStatus(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: user.FieldStatus,
 		})
 	}
 	if value, ok := uuo.mutation.Email(); ok {

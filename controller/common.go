@@ -20,18 +20,22 @@ import (
 	"bytes"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )
 
 type (
 	commonCtrl struct{}
 
+	// applicationInfoResp 应用信息响应
 	applicationInfoResp struct {
 		// 版本号
 		Version string `json:"version,omitempty"`
@@ -48,10 +52,23 @@ type (
 		// 运行环境配置
 		ENV string `json:"env,omitempty"`
 	}
+	// routersResp 路由列表响应
 	routersResp struct {
 		// 路由信息
 		Routers []*elton.RouterInfo `json:"routers,omitempty"`
 	}
+	// statusListResp 状态列表响应
+	statusListResp struct {
+		Statuses []*schema.StatusInfo `json:"statuses,omitempty"`
+	}
+	// randomKeysResp 随机字符
+	randomKeysResp struct {
+		Keys []string `json:"keys,omitempty"`
+	}
+)
+
+const (
+	errCommonCategory = "common"
 )
 
 var (
@@ -62,6 +79,7 @@ var (
 	errAppIsNotRunning = &hes.Error{
 		StatusCode: http.StatusServiceUnavailable,
 		Message:    "应用服务不可用",
+		Category:   errCommonCategory,
 	}
 )
 
@@ -71,9 +89,11 @@ func init() {
 	g := router.NewGroup("/commons")
 
 	g.GET("/application", ctrl.getApplicationInfo)
-	g.GET("/routers", ctrl.routers)
-	g.GET("/captcha", ctrl.captcha)
+	g.GET("/routers", ctrl.getRouters)
+	g.GET("/captcha", ctrl.getCaptcha)
 	g.GET("/performance", ctrl.getPerformance)
+	g.GET("/schema-statuses", ctrl.listStatus)
+	g.GET("/random-keys", ctrl.getRandomKeys)
 }
 
 // ping 用于检测服务是否可用
@@ -100,8 +120,8 @@ func (commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	return
 }
 
-// routers 获取系统的路由
-func (commonCtrl) routers(c *elton.Context) (err error) {
+// getRouters 获取系统的路由
+func (commonCtrl) getRouters(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
 	c.Body = &routersResp{
 		Routers: c.Elton().Routers,
@@ -109,8 +129,8 @@ func (commonCtrl) routers(c *elton.Context) (err error) {
 	return
 }
 
-// captcha 获取图形验证码
-func (commonCtrl) captcha(c *elton.Context) (err error) {
+// getCaptcha 获取图形验证码
+func (commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	bgColor := c.QueryParam("bg")
 	fontColor := c.QueryParam("color")
 	if bgColor == "" {
@@ -134,5 +154,34 @@ func (commonCtrl) captcha(c *elton.Context) (err error) {
 func (commonCtrl) getPerformance(c *elton.Context) (err error) {
 	p := service.GetPerformance()
 	c.Body = &p
+	return
+}
+
+// listStatus 获取状态列表
+func (commonCtrl) listStatus(c *elton.Context) (err error) {
+	c.CacheMaxAge("5m")
+	c.Body = &statusListResp{
+		Statuses: schema.GetStatusList(),
+	}
+	return
+}
+
+// getRandomKeys 获取随机字符串
+func (commonCtrl) getRandomKeys(c *elton.Context) (err error) {
+	n, _ := strconv.Atoi(c.QueryParam("n"))
+	size, _ := strconv.Atoi(c.QueryParam("size"))
+	if size < 1 {
+		size = 1
+	}
+	if n < 1 {
+		n = 10
+	}
+	result := make([]string, size)
+	for index := 0; index < size; index++ {
+		result[index] = util.RandomString(n)
+	}
+	c.Body = &randomKeysResp{
+		Keys: result,
+	}
 	return
 }

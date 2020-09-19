@@ -7,6 +7,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/vicanso/forest/ent/predicate"
+	"github.com/vicanso/forest/ent/schema"
 )
 
 // ID filters vertices based on their identifier.
@@ -106,6 +107,14 @@ func UpdatedAt(v time.Time) predicate.Configuration {
 	})
 }
 
+// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
+func Status(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStatus), vc))
+	})
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
@@ -113,24 +122,10 @@ func Name(v string) predicate.Configuration {
 	})
 }
 
-// Category applies equality check predicate on the "category" field. It's identical to CategoryEQ.
-func Category(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCategory), v))
-	})
-}
-
 // Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
 func Owner(v string) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOwner), v))
-	})
-}
-
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStatus), v))
 	})
 }
 
@@ -307,6 +302,88 @@ func UpdatedAtLTE(v time.Time) predicate.Configuration {
 	})
 }
 
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStatus), vc))
+	})
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStatus), vc))
+	})
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...schema.Status) predicate.Configuration {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.Configuration(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStatus), v...))
+	})
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...schema.Status) predicate.Configuration {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.Configuration(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStatus), v...))
+	})
+}
+
+// StatusGT applies the GT predicate on the "status" field.
+func StatusGT(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStatus), vc))
+	})
+}
+
+// StatusGTE applies the GTE predicate on the "status" field.
+func StatusGTE(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStatus), vc))
+	})
+}
+
+// StatusLT applies the LT predicate on the "status" field.
+func StatusLT(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStatus), vc))
+	})
+}
+
+// StatusLTE applies the LTE predicate on the "status" field.
+func StatusLTE(v schema.Status) predicate.Configuration {
+	vc := int8(v)
+	return predicate.Configuration(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStatus), vc))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
@@ -419,21 +496,21 @@ func NameContainsFold(v string) predicate.Configuration {
 }
 
 // CategoryEQ applies the EQ predicate on the "category" field.
-func CategoryEQ(v string) predicate.Configuration {
+func CategoryEQ(v Category) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCategory), v))
 	})
 }
 
 // CategoryNEQ applies the NEQ predicate on the "category" field.
-func CategoryNEQ(v string) predicate.Configuration {
+func CategoryNEQ(v Category) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCategory), v))
 	})
 }
 
 // CategoryIn applies the In predicate on the "category" field.
-func CategoryIn(vs ...string) predicate.Configuration {
+func CategoryIn(vs ...Category) predicate.Configuration {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -450,7 +527,7 @@ func CategoryIn(vs ...string) predicate.Configuration {
 }
 
 // CategoryNotIn applies the NotIn predicate on the "category" field.
-func CategoryNotIn(vs ...string) predicate.Configuration {
+func CategoryNotIn(vs ...Category) predicate.Configuration {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -463,69 +540,6 @@ func CategoryNotIn(vs ...string) predicate.Configuration {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldCategory), v...))
-	})
-}
-
-// CategoryGT applies the GT predicate on the "category" field.
-func CategoryGT(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryGTE applies the GTE predicate on the "category" field.
-func CategoryGTE(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryLT applies the LT predicate on the "category" field.
-func CategoryLT(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryLTE applies the LTE predicate on the "category" field.
-func CategoryLTE(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryContains applies the Contains predicate on the "category" field.
-func CategoryContains(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryHasPrefix applies the HasPrefix predicate on the "category" field.
-func CategoryHasPrefix(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryHasSuffix applies the HasSuffix predicate on the "category" field.
-func CategoryHasSuffix(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryEqualFold applies the EqualFold predicate on the "category" field.
-func CategoryEqualFold(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCategory), v))
-	})
-}
-
-// CategoryContainsFold applies the ContainsFold predicate on the "category" field.
-func CategoryContainsFold(v string) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCategory), v))
 	})
 }
 
@@ -637,82 +651,6 @@ func OwnerEqualFold(v string) predicate.Configuration {
 func OwnerContainsFold(v string) predicate.Configuration {
 	return predicate.Configuration(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldOwner), v))
-	})
-}
-
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStatus), v))
-	})
-}
-
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldStatus), v))
-	})
-}
-
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...int8) predicate.Configuration {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Configuration(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldStatus), v...))
-	})
-}
-
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...int8) predicate.Configuration {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Configuration(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldStatus), v...))
-	})
-}
-
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldStatus), v))
-	})
-}
-
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldStatus), v))
-	})
-}
-
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldStatus), v))
-	})
-}
-
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v int8) predicate.Configuration {
-	return predicate.Configuration(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldStatus), v))
 	})
 }
 

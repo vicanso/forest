@@ -22,13 +22,6 @@ import (
 	"github.com/facebook/ent/schema/index"
 )
 
-const (
-	// 状态启用
-	UserStatusEnabled = iota + 1
-	// 状态禁用
-	UserStatusDisabled
-)
-
 // 用户角色
 const (
 	// UserRoleNormal normal user
@@ -48,6 +41,7 @@ type User struct {
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		StatusMixin{},
 	}
 }
 
@@ -73,10 +67,6 @@ func (User) Fields() []ent.Field {
 		field.Strings("groups").
 			Optional().
 			Comment("用户分组，按用户职能分配至不同的分组"),
-		field.Int8("status").
-			Range(UserStatusEnabled, UserStatusDisabled).
-			Default(UserStatusEnabled).
-			Comment("用户状态，默认为启用状态"),
 		field.String("email").
 			Optional().
 			Comment("用户邮箱"),
