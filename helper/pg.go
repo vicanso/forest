@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/facebook/ent/dialect"
@@ -31,6 +32,8 @@ import (
 var (
 	client *ent.Client
 	driver *entsql.Driver
+
+	initSchemaAndHookOnce sync.Once
 )
 
 func init() {
@@ -72,20 +75,23 @@ func EntPing() error {
 
 // InitSchemaAndHook 初始化schema与hook函数
 func InitSchemaAndHook() (err error) {
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		return
-	}
-	client.Use(func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			start := time.Now()
-			defer func() {
-				for _, name := range m.Fields() {
-					fmt.Println(m.Field(name))
-				}
-				log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
-			}()
-			return next.Mutate(ctx, m)
+	// 只执行一次shcema初始化以及hook
+	initSchemaAndHookOnce.Do(func() {
+		err = client.Schema.Create(context.Background())
+		if err != nil {
+			return
+		}
+		client.Use(func(next ent.Mutator) ent.Mutator {
+			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+				start := time.Now()
+				defer func() {
+					for _, name := range m.Fields() {
+						fmt.Println(m.Field(name))
+					}
+					log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
+				}()
+				return next.Mutate(ctx, m)
+			})
 		})
 	})
 	return
