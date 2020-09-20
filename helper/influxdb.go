@@ -30,7 +30,7 @@ var (
 type (
 	InfluxSrv struct {
 		client influxdb.Client
-		writer influxdbAPI.WriteApi
+		writer influxdbAPI.WriteAPI
 	}
 )
 
@@ -57,7 +57,14 @@ func init() {
 		zap.Duration("interval", influxdbConfig.FlushInterval),
 	)
 	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
-	writer := c.WriteApi(influxdbConfig.Org, influxdbConfig.Bucket)
+	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
+	go func() {
+		for err := range writer.Errors() {
+			logger.Error("influxdb write fail",
+				zap.Error(err),
+			)
+		}
+	}()
 	defaultInfluxSrv = &InfluxSrv{
 		client: c,
 		writer: writer,
@@ -82,14 +89,6 @@ func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, t
 	}
 
 	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, now))
-}
-
-// Flush 将缓存中的数据刷新至influxdb
-func (srv *InfluxSrv) Flush() {
-	if srv.writer == nil {
-		return
-	}
-	srv.writer.Flush()
 }
 
 // Close 关闭当前client
