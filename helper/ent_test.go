@@ -23,7 +23,7 @@ import (
 func TestEnt(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.NotNil(GetEntClient())
+	assert.NotNil(EntGetClient())
 
 	err := InitSchemaAndHook()
 	assert.Nil(err)

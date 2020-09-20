@@ -87,7 +87,7 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 		}
 		valid, err := service.ValidateCaptcha(arr[0], arr[1])
 		if err != nil {
-			if helper.IsRedisNilError(err) {
+			if helper.RedisIsNilError(err) {
 				err = errCaptchaExpired
 			}
 			return err

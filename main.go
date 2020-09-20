@@ -161,7 +161,7 @@ func main() {
 		closeOnce.Do(func() {
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
-			helper.GetEntClient().Close()
+			helper.EntGetClient().Close()
 		})
 	}
 	defer closeDeps()

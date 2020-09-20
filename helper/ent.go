@@ -61,8 +61,8 @@ func open(databaseUrl string) (*ent.Client, error) {
 	return ent.NewClient(ent.Driver(driver)), nil
 }
 
-// GetEntClient get ent client
-func GetEntClient() *ent.Client {
+// EntGetClient get ent client
+func EntGetClient() *ent.Client {
 	return client
 }
 

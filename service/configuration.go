@@ -74,7 +74,7 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	now := util.Now()
-	return helper.GetEntClient().Configuration.Query().
+	return helper.EntGetClient().Configuration.Query().
 		Where(configuration.Status(schema.StatusEnabled)).
 		Where(configuration.StartedAtLT(now)).
 		Where(configuration.EndedAtGT(now)).

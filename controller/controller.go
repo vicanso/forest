@@ -65,7 +65,7 @@ var (
 
 var (
 	logger       = log.Default()
-	getEntClient = helper.GetEntClient
+	getEntClient = helper.EntGetClient
 	now          = util.NowString
 
 	getUserSession = service.NewUserSession

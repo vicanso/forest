@@ -158,7 +158,7 @@ func (rh *redisHook) Allow() error {
 // ReportResult 记录结果
 func (*redisHook) ReportResult(result error) {
 	// TODO 对于nil error另外统计
-	if result != nil && !IsRedisNilError(result) {
+	if result != nil && !RedisIsNilError(result) {
 		logger.Error("redis process fail",
 			zap.Error(result),
 		)
@@ -189,8 +189,8 @@ func RedisGetClient() *redis.Client {
 	return redisClient
 }
 
-// IsRedisNilError 判断是否redis的nil error
-func IsRedisNilError(err error) bool {
+// RedisIsNilError 判断是否redis的nil error
+func RedisIsNilError(err error) bool {
 	return err == errRedisNil || err == redis.Nil
 }
 
@@ -273,7 +273,7 @@ func (srv *Redis) Get(key string) (result string, err error) {
 // GetIgnoreNilErr 获取key的值并忽略nil error
 func (srv *Redis) GetIgnoreNilErr(key string) (result string, err error) {
 	result, err = srv.Get(key)
-	if IsRedisNilError(err) {
+	if RedisIsNilError(err) {
 		err = nil
 	}
 	return
@@ -327,7 +327,7 @@ func (rs *RedisSessionStore) getKey(key string) string {
 // Get 从redis中获取缓存的session
 func (rs *RedisSessionStore) Get(key string) ([]byte, error) {
 	result, err := redisSrv.Get(rs.getKey(key))
-	if IsRedisNilError(err) {
+	if RedisIsNilError(err) {
 		return nil, nil
 	}
 	return []byte(result), err
