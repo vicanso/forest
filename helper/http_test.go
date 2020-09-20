@@ -15,10 +15,13 @@
 package helper
 
 import (
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
 )
@@ -74,11 +77,35 @@ func TestOnError(t *testing.T) {
 		Status: 400,
 		Data:   data,
 	})
-	defer done()
 	resp, err := ins.Request(&axios.Config{
 		Route: "/",
 	})
+	done()
 	he := hes.Wrap(err)
 	assert.Equal(`{"statusCode":400,"message":"error message","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
+
+	data = []byte("abc")
+	done = ins.Mock(&axios.Response{
+		Status: 400,
+		Data:   data,
+	})
+	resp, err = ins.Request(&axios.Config{
+		Route: "/",
+	})
+	done()
+	he = hes.Wrap(err)
+	assert.Equal(`{"statusCode":400,"message":"abc","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
+	assert.Equal("/", resp.Config.Route)
+}
+
+func TestAttachWithContext(t *testing.T) {
+	assert := assert.New(t)
+	config := &axios.Config{}
+	req := httptest.NewRequest("GET", "/", nil)
+	c := elton.NewContext(nil, req)
+	c.ID = "abcd"
+	AttachWithContext(config, c)
+	assert.Equal(c.ID, config.GetString(cs.CID))
+	assert.Equal(c.Context(), config.Context)
 }
