@@ -43,8 +43,8 @@ type (
 		Max     uint32 `json:"max,omitempty"`
 		Current uint32 `json:"current,omitempty"`
 	}
-	// RCLimiter 路由请求限制
-	RCLimiter struct {
+	// rcLimiter 路由请求限制
+	rcLimiter struct {
 		m map[string]*RouterConcurrency
 	}
 )
@@ -52,15 +52,15 @@ type (
 var (
 	routerMutex          = new(sync.RWMutex)
 	currentRouterConfigs map[string]*RouterConfig
-	rcLimiter            *RCLimiter
+	currentRCLimiter     *rcLimiter
 )
 
 func init() {
-	rcLimiter = &RCLimiter{}
+	currentRCLimiter = &rcLimiter{}
 }
 
 // IncConcurrency 当前路由处理数+1
-func (l *RCLimiter) IncConcurrency(key string) (current uint32, max uint32) {
+func (l *rcLimiter) IncConcurrency(key string) (current uint32, max uint32) {
 	r, ok := l.m[key]
 	if !ok {
 		return
@@ -71,7 +71,7 @@ func (l *RCLimiter) IncConcurrency(key string) (current uint32, max uint32) {
 }
 
 // DecConcurrency 当前路由处理数-1
-func (l *RCLimiter) DecConcurrency(key string) {
+func (l *rcLimiter) DecConcurrency(key string) {
 	r, ok := l.m[key]
 	if !ok {
 		return
@@ -80,7 +80,7 @@ func (l *RCLimiter) DecConcurrency(key string) {
 }
 
 // GetConcurrency 获取当前路由处理数
-func (l *RCLimiter) GetConcurrency(key string) uint32 {
+func (l *rcLimiter) GetConcurrency(key string) uint32 {
 	r, ok := l.m[key]
 	if !ok {
 		return 0
@@ -125,12 +125,12 @@ func InitRouterConcurrencyLimiter(routers []*elton.RouterInfo) {
 	for _, item := range routers {
 		m[item.Method+" "+item.Path] = &RouterConcurrency{}
 	}
-	rcLimiter.m = m
+	currentRCLimiter.m = m
 }
 
 // GetRouterConcurrencyLimiter 获取路由并发限制器
-func GetRouterConcurrencyLimiter() *RCLimiter {
-	return rcLimiter
+func GetRouterConcurrencyLimiter() *rcLimiter {
+	return currentRCLimiter
 }
 
 // ResetRouterConcurrency 重置路由并发数
@@ -148,7 +148,7 @@ func ResetRouterConcurrency(arr []string) {
 		}
 		concurrencyList = append(concurrencyList, v)
 	}
-	for key, r := range rcLimiter.m {
+	for key, r := range currentRCLimiter.m {
 		keys := strings.Split(key, " ")
 		if len(keys) != 2 {
 			continue

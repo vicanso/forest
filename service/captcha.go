@@ -20,6 +20,7 @@ import (
 	"image/color"
 	"image/jpeg"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -33,6 +34,16 @@ import (
 
 const (
 	captchaKeyPrefix = "captcha-"
+
+	errCaptchaCategory = "captcha"
+)
+
+var (
+	errColorInvalid = &hes.Error{
+		Category:   errCaptchaCategory,
+		Message:    "非法颜色值",
+		StatusCode: http.StatusBadRequest,
+	}
 )
 
 type (
@@ -99,18 +110,18 @@ func createCaptcha(fontColor, bgColor color.Color, width, height int, text strin
 func parseColor(s string) (c color.RGBA, err error) {
 	arr := strings.Split(s, ",")
 	if len(arr) != 3 {
-		err = hes.New("color is invalid")
+		err = errColorInvalid
 		return
 	}
 	c.A = 0xff
 	for index, v := range arr {
-		value, e := strconv.Atoi(v)
+		value, e := strconv.Atoi(strings.TrimSpace(v))
 		if e != nil {
 			err = hes.Wrap(e)
 			return
 		}
 		if value > 255 || value < 0 {
-			err = hes.New("color value is invalid")
+			err = errColorInvalid
 			return
 		}
 		switch index {
