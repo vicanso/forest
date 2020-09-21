@@ -37,21 +37,6 @@
               </ul>
             </template>
           </el-table-column>
-          <el-table-column label="用户组">
-            <template slot-scope="scope">
-              <ul>
-                <li v-for="group in scope.row.groupsDesc" :key="group">
-                  {{ group }}
-                </li>
-              </ul>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="marketingGroup"
-            key="marketingGroup"
-            label="销售组"
-            width="100"
-          />
           <el-table-column
             prop="updatedAtDesc"
             key="updatedAtDesc"
@@ -92,7 +77,6 @@ import User from "@/components/User.vue";
 import BaseFilter from "@/components/base/Filter.vue";
 
 const userRoles = [];
-const userGroups = [];
 const userStatuses = [];
 const filterFields = [
   {
@@ -100,21 +84,14 @@ const filterFields = [
     key: "role",
     type: "select",
     options: userRoles,
-    span: 5
+    span: 6
   },
   {
     label: "用户状态：",
     key: "status",
     type: "select",
     options: userStatuses,
-    span: 5
-  },
-  {
-    label: "用户组：",
-    key: "group",
-    type: "select",
-    options: userGroups,
-    span: 5
+    span: 6
   },
   {
     label: "关键字：",
@@ -126,7 +103,7 @@ const filterFields = [
   {
     label: "",
     type: "filter",
-    span: 3,
+    span: 6,
     labelWidth: "0px"
   }
 ];
@@ -157,18 +134,12 @@ export default {
       users: state => state.user.list.data || [],
       userRoles: state => state.user.roles || [],
       userStatuses: state => state.user.statuses || [],
-      userGroups: state => state.user.groups || [],
       processing: state => state.user.listProcessing,
       updateProcessing: state => state.user.updateProcessing
     })
   },
   methods: {
-    ...mapActions([
-      "listUser",
-      "listUserRole",
-      "listUserGroup",
-      "listUserStatus"
-    ]),
+    ...mapActions(["listUser", "listUserRole", "listUserStatus"]),
     async fetch() {
       const { query, processing } = this;
       if (processing) {
@@ -183,22 +154,14 @@ export default {
   },
   async beforeMount() {
     try {
-      const { roles } = await this.listUserRole();
-      const { groups } = await this.listUserGroup();
+      const { userRoles } = await this.listUserRole();
       const { statuses } = await this.listUserStatus();
       userRoles.length = 0;
       userRoles.push({
         name: "所有",
         value: ""
       });
-      userRoles.push(...roles);
-
-      userGroups.length = 0;
-      userGroups.push({
-        name: "所有",
-        value: ""
-      });
-      userGroups.push(...groups);
+      userRoles.push(...userRoles);
 
       userStatuses.length = 0;
       userStatuses.push({
@@ -208,6 +171,7 @@ export default {
       userStatuses.push(...statuses);
       this.filterFields = filterFields;
     } catch (err) {
+      console.dir(err.stack);
       this.$message.error(err.message);
     } finally {
       this.inited = true;

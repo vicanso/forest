@@ -17,16 +17,19 @@ package helper
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"log"
+	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/facebook/ent/dialect"
 	entsql "github.com/facebook/ent/dialect/sql"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	"github.com/vicanso/forest/ent/hook"
+	"go.uber.org/zap"
 )
 
 var (
@@ -34,6 +37,9 @@ var (
 	driver *entsql.Driver
 
 	initSchemaAndHookOnce sync.Once
+
+	// entProcessing ent中正在处理的请求
+	entProcessing uint32
 )
 
 func init() {
@@ -73,24 +79,68 @@ func EntPing() error {
 	return driver.DB().PingContext(ctx)
 }
 
-// InitSchemaAndHook 初始化schema与hook函数
-func InitSchemaAndHook() (err error) {
+// EntInitSchemaAndHook 初始化schema与hook函数
+func EntInitSchemaAndHook() (err error) {
 	// 只执行一次shcema初始化以及hook
 	initSchemaAndHookOnce.Do(func() {
 		err = client.Schema.Create(context.Background())
 		if err != nil {
 			return
 		}
+		// 禁止删除数据
+		client.Use(hook.Reject(ent.OpDelete | ent.OpDeleteOne))
+		// 数据库操作统计
 		client.Use(func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				start := time.Now()
-				defer func() {
-					for _, name := range m.Fields() {
-						fmt.Println(m.Field(name))
+				processing := atomic.AddUint32(&entProcessing, 1)
+				defer atomic.AddUint32(&entProcessing, ^uint32(0))
+				schemaType := m.Type()
+				op := m.Op().String()
+
+				startedAt := time.Now()
+				result := 0
+				message := ""
+				value, err := next.Mutate(ctx, m)
+				// 如果失败，则记录出错信息
+				if err != nil {
+					result = 1
+					message = err.Error()
+				}
+				data := make(map[string]interface{})
+				for _, name := range m.Fields() {
+					if name == "updated_at" {
+						continue
 					}
-					log.Printf("Op=%s\tType=%s\tTime=%s\tConcreteType=%T\n", m.Op(), m.Type(), time.Since(start), m)
-				}()
-				return next.Mutate(ctx, m)
+					value, ok := m.Field(name)
+					if !ok {
+						continue
+					}
+					data[name] = value
+				}
+
+				d := time.Since(startedAt)
+				logger.Info("ent stats",
+					zap.String("schema", schemaType),
+					zap.String("op", op),
+					zap.Int("result", result),
+					zap.Uint32("processing", processing),
+					zap.String("use", d.String()),
+					zap.Any("data", data),
+					zap.String("message", message),
+				)
+				fields := map[string]interface{}{
+					"processing": processing,
+					"use":        int(d.Milliseconds()),
+					"data":       data,
+					"message":    message,
+				}
+				tags := map[string]string{
+					"schema": schemaType,
+					"op":     op,
+					"result": strconv.Itoa(result),
+				}
+				GetInfluxSrv().Write(cs.MeasurementEntStats, fields, tags)
+				return value, err
 			})
 		})
 	})

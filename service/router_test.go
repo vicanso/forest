@@ -29,6 +29,10 @@ func TestRouterLimiter(t *testing.T) {
 			Method: "GET",
 			Path:   "/",
 		},
+		{
+			Method: "GET",
+			Path:   "/users/me",
+		},
 	})
 	rc := GetRouterConcurrencyLimiter()
 	key := "GET /"

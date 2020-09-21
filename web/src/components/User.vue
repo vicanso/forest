@@ -15,9 +15,7 @@
 import { mapActions } from "vuex";
 import BaseEditor from "@/components/base/Editor.vue";
 const userRoles = [];
-const userGroups = [];
 const userStatuses = [];
-const userMarketingGroups = [];
 const fields = [
   {
     label: "账号：",
@@ -39,20 +37,20 @@ const fields = [
       }
     ]
   },
-  {
-    label: "用户组：",
-    key: "groups",
-    type: "select",
-    placeholder: "请选择用户分组",
-    multiple: true,
-    options: userGroups
-    // rules: [
-    //   {
-    //     required: true,
-    //     message: "用户分组不能为空"
-    //   }
-    // ]
-  },
+  // {
+  //   label: "用户组：",
+  //   key: "groups",
+  //   type: "select",
+  //   placeholder: "请选择用户分组",
+  //   multiple: true,
+  //   options: userGroups
+  //   // rules: [
+  //   //   {
+  //   //     required: true,
+  //   //     message: "用户分组不能为空"
+  //   //   }
+  //   // ]
+  // },
   {
     label: "用户状态：",
     key: "status",
@@ -66,15 +64,6 @@ const fields = [
         message: "用户状态不能为空"
       }
     ]
-  },
-  {
-    label: "销售分组：",
-    key: "marketingGroup",
-    type: "select",
-    placeholder: "请选择用户销售分组",
-    // multiple: true,
-    labelWidth: "100px",
-    options: userMarketingGroups
   }
 ];
 
@@ -95,8 +84,6 @@ export default {
       "getUserByID",
       "listUserRole",
       "listUserStatus",
-      "listUserGroup",
-      "listUserMarketingGroup",
       "updateUserByID"
     ])
   },
@@ -108,21 +95,11 @@ export default {
     }
     try {
       const { roles } = await this.listUserRole();
-      const { groups } = await this.listUserGroup();
       const { statuses } = await this.listUserStatus();
-      const { marketingGroups } = await this.listUserMarketingGroup();
       userRoles.length = 0;
       userRoles.push(...roles);
-      userGroups.length = 0;
-      userGroups.push(...groups);
       userStatuses.length = 0;
       userStatuses.push(...statuses);
-      userMarketingGroups.length = 0;
-      userMarketingGroups.push({
-        name: "NULL",
-        value: "NULL"
-      });
-      userMarketingGroups.push(...marketingGroups);
       this.fields = fields;
     } catch (err) {
       this.$message.error(err.message);

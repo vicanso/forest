@@ -52,6 +52,10 @@ type (
 		Users []*ent.User `json:"users,omitempty"`
 		Count int         `json:"count,omitempty"`
 	}
+	// userRoleListResp 用户角色列表响应
+	userRoleListResp struct {
+		UserRoles []*schema.UserRoleInfo `json:"userRoles,omitempty"`
+	}
 
 	// userListParams 用户查询参数
 	userListParams struct {
@@ -119,7 +123,9 @@ var (
 
 func init() {
 	sessionConfig = config.GetSessionConfig()
-	g := router.NewGroup("/users", loadUserSession)
+	prefix := "/users"
+	g := router.NewGroup(prefix, loadUserSession)
+	noneSessionGroup := router.NewGroup(prefix)
 
 	ctrl := userCtrl{}
 
@@ -128,6 +134,13 @@ func init() {
 		"/v1",
 		shouldBeAdmin,
 		ctrl.list,
+	)
+
+	// 获取用户信息
+	g.GET(
+		"/v1/{id}",
+		shouldBeAdmin,
+		ctrl.findByID,
 	)
 
 	// 获取登录token
@@ -188,6 +201,12 @@ func init() {
 		newTracker(cs.ActionLogout),
 		shouldBeLogined,
 		ctrl.logout,
+	)
+
+	// 获取用户角色分组
+	noneSessionGroup.GET(
+		"/v1/roles",
+		ctrl.getRoleList,
 	)
 }
 
@@ -351,6 +370,22 @@ func (*userCtrl) list(c *elton.Context) (err error) {
 		Users: users,
 	}
 
+	return
+}
+
+// findByID 通过ID查询用户信息
+func (*userCtrl) findByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	data, err := getEntClient().User.Query().
+		Where(user.IDEQ(id)).
+		First(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = data
 	return
 }
 
@@ -611,5 +646,14 @@ func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
 		return
 	}
 	c.NoContent()
+	return
+}
+
+// getRoleList 获取用户角色列表
+func (*userCtrl) getRoleList(c *elton.Context) (err error) {
+	c.CacheMaxAge("1m")
+	c.Body = &userRoleListResp{
+		UserRoles: schema.GetUserRoleList(),
+	}
 	return
 }

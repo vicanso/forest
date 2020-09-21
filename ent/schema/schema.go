@@ -24,6 +24,7 @@ import (
 
 type Status int8
 
+// StatusInfo 状态信息
 type StatusInfo struct {
 	Name  string `json:"name,omitempty"`
 	Value Status `json:"value,omitempty"`

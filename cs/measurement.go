@@ -21,6 +21,8 @@ const (
 	MeasurementRedisStats = "redisStats"
 	// MeasurementHTTPStats http性能统计
 	MeasurementHTTPStats = "httpStats"
+	// MeasurementEntStats ent性能统计
+	MeasurementEntStats = "entStats"
 	// MeasurementHTTPError http响应出错统计
 	MeasurementHTTPError = "httpError"
 	// MeasurementUserTracker 用户行为记录

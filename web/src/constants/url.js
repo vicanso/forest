@@ -4,7 +4,7 @@ export const USERS = "/users/v1";
 export const USERS_ID = "/users/v1/:id";
 export const USERS_LOGINS = "/users/v1/login-records";
 
-export const USERS_ROLE = "/users/v1/roles";
+export const USERS_ROLES = "/users/v1/roles";
 export const USERS_GROUPS = "/users/v1/groups";
 export const USERS_MARKETING_GROUPS = "/users/v1/marketing-groups";
 

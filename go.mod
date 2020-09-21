@@ -6,6 +6,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
 	github.com/facebook/ent v0.4.2
+	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
 	github.com/frankban/quicktest v1.11.0 // indirect
 	github.com/go-playground/validator/v10 v10.3.0

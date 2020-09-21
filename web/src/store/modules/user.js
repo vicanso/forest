@@ -4,9 +4,7 @@ import {
   USERS_LOGIN,
   USERS,
   USERS_ID,
-  USERS_ROLE,
-  USERS_GROUPS,
-  USERS_MARKETING_GROUPS,
+  USERS_ROLES,
   USERS_LOGINS
 } from "@/constants/url";
 import {
@@ -118,9 +116,10 @@ async function listUserRole({ commit }) {
   }
   commit(mutationUserListRoleProcessing, true);
   try {
-    const { data } = await request.get(USERS_ROLE, {
+    const { data } = await request.get(USERS_ROLES, {
       params: addNoCacheQueryParam()
     });
+    data.roles = data.userRoles;
     commit(mutationUserListRole, data);
     return data;
   } finally {
@@ -129,48 +128,23 @@ async function listUserRole({ commit }) {
 }
 
 // listUserGroup 获取用户分组列表
-async function listUserGroup({ commit }) {
-  if (state.groups) {
-    return {
-      groups: state.groups
-    };
-  }
-  commit(mutationUserListGroupProcessing, true);
-  try {
-    const { data } = await request.get(USERS_GROUPS, {
-      params: addNoCacheQueryParam()
-    });
-    commit(mutationUserListGroup, data);
-    return data;
-  } finally {
-    commit(mutationUserListGroupProcessing, false);
-  }
-}
-
-// listUserMarketingGroup 获取用户市场分组
-async function listUserMarketingGroup({ commit }) {
-  if (state.marketingGroups) {
-    return {
-      marketingGroups: state.marketingGroups
-    };
-  }
-  commit(mutationUserListMarketingGroupProcessing, true);
-  try {
-    const { data } = await request.get(USERS_MARKETING_GROUPS, {
-      params: addNoCacheQueryParam()
-    });
-    if (!data.marketingGroups) {
-      data.marketingGroups = [];
-    }
-    data.marketingGroups.forEach(item => {
-      item.value = item.name;
-    });
-    commit(mutationUserListMarketingGroup, data);
-    return data;
-  } finally {
-    commit(mutationUserListMarketingGroupProcessing, false);
-  }
-}
+// async function listUserGroup({ commit }) {
+//   if (state.groups) {
+//     return {
+//       groups: state.groups
+//     };
+//   }
+//   commit(mutationUserListGroupProcessing, true);
+//   try {
+//     const { data } = await request.get(USERS_GROUPS, {
+//       params: addNoCacheQueryParam()
+//     });
+//     commit(mutationUserListGroup, data);
+//     return data;
+//   } finally {
+//     commit(mutationUserListGroupProcessing, false);
+//   }
+// }
 
 export default {
   state,
@@ -354,8 +328,7 @@ export default {
     },
     listUserRole,
     listUserStatus: listStatus,
-    listUserGroup,
-    listUserMarketingGroup,
+    // listUserGroup,
     // updateUserByID 更新用户信息
     async updateUserByID({ commit }, { id, data }) {
       commit(mutationUserUpdateProcessing, true);

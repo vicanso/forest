@@ -32,9 +32,33 @@ const (
 	UserRoleAdmin = "admin"
 )
 
+// UserRoleInfo 用户角色信息
+type UserRoleInfo struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+// GetUserRoleList 获取用户角色列表
+func GetUserRoleList() []*UserRoleInfo {
+	return []*UserRoleInfo{
+		{
+			Name:  "普通用户",
+			Value: UserRoleNormal,
+		},
+		{
+			Name:  "管理员用户",
+			Value: UserRoleAdmin,
+		},
+		{
+			Name:  "超级用户",
+			Value: UserRoleSu,
+		},
+	}
 }
 
 // Mixin 用户表的minxin

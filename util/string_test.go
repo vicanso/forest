@@ -78,3 +78,9 @@ func TestEncrypt(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(data, result)
 }
+
+func TestGetFirstLetter(t *testing.T) {
+	assert := assert.New(t)
+	value := GetFirstLetter("测试")
+	assert.Equal("C", value)
+}

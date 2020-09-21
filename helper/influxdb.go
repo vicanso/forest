@@ -58,6 +58,15 @@ func init() {
 	)
 	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
+	newInfluxdbErrorLogger(writer)
+	defaultInfluxSrv = &InfluxSrv{
+		client: c,
+		writer: writer,
+	}
+}
+
+// newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
+func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
 	go func() {
 		for err := range writer.Errors() {
 			logger.Error("influxdb write fail",
@@ -65,10 +74,6 @@ func init() {
 			)
 		}
 	}()
-	defaultInfluxSrv = &InfluxSrv{
-		client: c,
-		writer: writer,
-	}
 }
 
 // GetInfluxSrv 获取默认的influxdb服务
