@@ -18,7 +18,7 @@ addons:
 env:
   global:
   - PGVER=12
-  - PGPORT=5432
+  - PGPORT=5433
 
 before_script:
   - psql -c "CREATE DATABASE forest;" -U postgres
@@ -28,7 +28,7 @@ before_script:
 script:
   - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
   - make lint
-  - make test
+  - GO_ENV=test make test
 
 after_success:
   - docker build -t forest .

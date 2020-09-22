@@ -1,0 +1,3 @@
+# postgres postgres配置
+postgres:
+  uri: postgresql://vicanso:A123456@127.0.0.1:5433/forest
