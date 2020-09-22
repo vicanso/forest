@@ -15,6 +15,10 @@ addons:
     packages:
     - postgresql-12
     - postgresql-client-12
+env:
+  global:
+  - PGVER=12
+  - PGPORT=5433
 
 before_script:
   - psql -c "CREATE DATABASE forest;" -U postgres
