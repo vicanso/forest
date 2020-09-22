@@ -25,7 +25,7 @@ func TestEnt(t *testing.T) {
 
 	assert.NotNil(EntGetClient())
 
-	err := EntInitSchemaAndHook()
+	err := EntInitSchema()
 	assert.Nil(err)
 
 	err = EntPing()

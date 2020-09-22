@@ -100,7 +100,7 @@ func dependServiceCheck() (err error) {
 		return
 	}
 	// 初始化所有schema
-	err = helper.EntInitSchemaAndHook()
+	err = helper.EntInitSchema()
 	if err != nil {
 		return
 	}

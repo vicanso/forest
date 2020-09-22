@@ -24,11 +24,13 @@ import (
 
 	"github.com/facebook/ent/dialect"
 	entsql "github.com/facebook/ent/dialect/sql"
+	"github.com/iancoleman/strcase"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/hook"
+	"github.com/vicanso/forest/ent/migrate"
 	"go.uber.org/zap"
 )
 
@@ -36,11 +38,33 @@ var (
 	client *ent.Client
 	driver *entsql.Driver
 
-	initSchemaAndHookOnce sync.Once
-
-	// entProcessing ent中正在处理的请求
-	entProcessing uint32
+	initSchemaOnce sync.Once
 )
+
+// processingKeyAll 记录所有表的正在处理请求
+const processingKeyAll = "All"
+
+// entProcessingStats ent的处理请求统计
+type entProcessingStats struct {
+	data map[string]*uint32
+}
+
+var currentEntProcessingStats = new(entProcessingStats)
+
+// func initClientX() (*ent.Client, *entsql.Driver){
+// 	postgresConfig := config.GetPostgresConfig()
+// 	c, err := open(postgresConfig.URI)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	ctx := context.Background()
+// 	if err := c.Schema.Create(ctx); err != nil {
+// 		panic(err)
+// 	}
+// 	initSchemaHooks(c)
+// 	return c, driver
+// 	// client = c
+// }
 
 func init() {
 	postgresConfig := config.GetPostgresConfig()
@@ -52,7 +76,38 @@ func init() {
 	if err := c.Schema.Create(ctx); err != nil {
 		panic(err)
 	}
+	initSchemaHooks(c)
 	client = c
+}
+
+// init 初始化统计
+func (stats *entProcessingStats) init(schemas []string) {
+	data := make(map[string]*uint32)
+	data[processingKeyAll] = new(uint32)
+	for _, schema := range schemas {
+		data[schema] = new(uint32)
+	}
+	stats.data = data
+}
+
+// inc 处理数+1
+func (stats *entProcessingStats) inc(schema string) (uint32, uint32) {
+	total := atomic.AddUint32(stats.data[processingKeyAll], 1)
+	p, ok := stats.data[schema]
+	if !ok {
+		return total, 0
+	}
+	return total, atomic.AddUint32(p, 1)
+}
+
+// desc 处理数-1
+func (stats *entProcessingStats) dec(schema string) (uint32, uint32) {
+	total := atomic.AddUint32(stats.data[processingKeyAll], ^uint32(0))
+	p, ok := stats.data[schema]
+	if !ok {
+		return total, 0
+	}
+	return total, atomic.AddUint32(p, ^uint32(0))
 }
 
 // open new connection
@@ -67,6 +122,84 @@ func open(databaseUrl string) (*ent.Client, error) {
 	return ent.NewClient(ent.Driver(driver)), nil
 }
 
+func initSchemaHooks(c *ent.Client) {
+	schemas := make([]string, len(migrate.Tables))
+	for index, table := range migrate.Tables {
+		name := strcase.ToCamel(table.Name)
+		// 去除最后的复数s
+		schemas[index] = name[:len(name)-1]
+	}
+	currentEntProcessingStats.init(schemas)
+	// 禁止删除数据
+	c.Use(hook.Reject(ent.OpDelete | ent.OpDeleteOne))
+	// 数据库操作统计
+	c.Use(func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			schemaType := m.Type()
+			totalProcessing, processing := currentEntProcessingStats.inc(schemaType)
+			defer currentEntProcessingStats.dec(schemaType)
+			op := m.Op().String()
+
+			startedAt := time.Now()
+			result := 0
+			message := ""
+			value, err := next.Mutate(ctx, m)
+			// 如果失败，则记录出错信息
+			if err != nil {
+				result = 1
+				message = err.Error()
+			}
+			data := make(map[string]interface{})
+			for _, name := range m.Fields() {
+				// 更新时间字段忽略
+				if name == "updated_at" {
+					continue
+				}
+				value, ok := m.Field(name)
+				if !ok {
+					continue
+				}
+				data[name] = value
+			}
+
+			d := time.Since(startedAt)
+			logger.Info("ent stats",
+				zap.String("schema", schemaType),
+				zap.String("op", op),
+				zap.Int("result", result),
+				zap.Uint32("processing", processing),
+				zap.Uint32("totalProcessing", totalProcessing),
+				zap.String("use", d.String()),
+				zap.Any("data", data),
+				zap.String("message", message),
+			)
+			fields := map[string]interface{}{
+				"processing":      processing,
+				"totalProcessing": totalProcessing,
+				"use":             int(d.Milliseconds()),
+				"data":            data,
+				"message":         message,
+			}
+			tags := map[string]string{
+				"schema": schemaType,
+				"op":     op,
+				"result": strconv.Itoa(result),
+			}
+			GetInfluxSrv().Write(cs.MeasurementEntStats, fields, tags)
+			return value, err
+		})
+	})
+}
+
+// EntGetStats get ent stats
+func EntGetStats() map[string]uint32 {
+	stats := make(map[string]uint32)
+	for name, p := range currentEntProcessingStats.data {
+		stats[strcase.ToLowerCamel(name)] = atomic.LoadUint32(p)
+	}
+	return stats
+}
+
 // EntGetClient get ent client
 func EntGetClient() *ent.Client {
 	return client
@@ -79,70 +212,11 @@ func EntPing() error {
 	return driver.DB().PingContext(ctx)
 }
 
-// EntInitSchemaAndHook 初始化schema与hook函数
-func EntInitSchemaAndHook() (err error) {
+// EntInitSchema 初始化schema
+func EntInitSchema() (err error) {
 	// 只执行一次shcema初始化以及hook
-	initSchemaAndHookOnce.Do(func() {
+	initSchemaOnce.Do(func() {
 		err = client.Schema.Create(context.Background())
-		if err != nil {
-			return
-		}
-		// 禁止删除数据
-		client.Use(hook.Reject(ent.OpDelete | ent.OpDeleteOne))
-		// 数据库操作统计
-		client.Use(func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				processing := atomic.AddUint32(&entProcessing, 1)
-				defer atomic.AddUint32(&entProcessing, ^uint32(0))
-				schemaType := m.Type()
-				op := m.Op().String()
-
-				startedAt := time.Now()
-				result := 0
-				message := ""
-				value, err := next.Mutate(ctx, m)
-				// 如果失败，则记录出错信息
-				if err != nil {
-					result = 1
-					message = err.Error()
-				}
-				data := make(map[string]interface{})
-				for _, name := range m.Fields() {
-					if name == "updated_at" {
-						continue
-					}
-					value, ok := m.Field(name)
-					if !ok {
-						continue
-					}
-					data[name] = value
-				}
-
-				d := time.Since(startedAt)
-				logger.Info("ent stats",
-					zap.String("schema", schemaType),
-					zap.String("op", op),
-					zap.Int("result", result),
-					zap.Uint32("processing", processing),
-					zap.String("use", d.String()),
-					zap.Any("data", data),
-					zap.String("message", message),
-				)
-				fields := map[string]interface{}{
-					"processing": processing,
-					"use":        int(d.Milliseconds()),
-					"data":       data,
-					"message":    message,
-				}
-				tags := map[string]string{
-					"schema": schemaType,
-					"op":     op,
-					"result": strconv.Itoa(result),
-				}
-				GetInfluxSrv().Write(cs.MeasurementEntStats, fields, tags)
-				return value, err
-			})
-		})
 	})
 	return
 }

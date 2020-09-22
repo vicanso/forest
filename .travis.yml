@@ -9,6 +9,13 @@ services:
   - postgresql
   - redis
 
+addons:
+  postgresql: "12"
+  apt:
+    packages:
+    - postgresql-12
+    - postgresql-client-12
+
 before_script:
   - psql -c "CREATE DATABASE forest;" -U postgres
   - psql -c "CREATE USER vicanso WITH PASSWORD 'A123456';" -U postgres

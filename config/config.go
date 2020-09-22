@@ -36,7 +36,7 @@ var (
 	box = packr.New("config", "../configs")
 	env = os.Getenv("GO_ENV")
 
-	defaultViperX *viperx.ViperX
+	defaultViperX = loadConfigX()
 
 	// 应用状态
 	applicationStatus = ApplicationStatusStopped
@@ -58,7 +58,7 @@ const (
 
 const (
 	// ApplicationStatusStopped 应用停止
-	ApplicationStatusStopped int32 = iota
+	ApplicationStatusStopped int32 = iota + 1
 	// ApplicationStatusRunning 应用运行中
 	ApplicationStatusRunning
 	// ApplicationStatusStopping 应用正在停止
@@ -150,10 +150,10 @@ type (
 	}
 )
 
-func init() {
-
+// loadConfigX 加载配置，出错是则抛出panic
+func loadConfigX() *viperx.ViperX {
 	configType := "yml"
-	defaultViperX = viperx.New(configType)
+	defaultViperX := viperx.New(configType)
 
 	readers := make([]io.Reader, 0)
 	for _, name := range []string{
@@ -171,6 +171,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	return defaultViperX
 }
 
 func validatePanic(v interface{}) {

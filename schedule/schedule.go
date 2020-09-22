@@ -15,8 +15,6 @@
 package schedule
 
 import (
-	"time"
-
 	"github.com/robfig/cron/v3"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
@@ -57,12 +55,7 @@ func configRefresh() {
 }
 
 func redisStats() {
-	redisSrv := helper.Redis{}
-	// 保证只有一个实例获取锁
-	ok, _ := redisSrv.Lock("redis-stats-lock", 2*time.Minute)
-	if !ok {
-		return
-	}
+	// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 	stats := helper.RedisStats()
 	helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, stats, nil)
 }
