@@ -18,7 +18,7 @@ addons:
 env:
   global:
   - PGVER=12
-  - PGPORT=5433
+  - PGPORT=5432
 
 before_script:
   - psql -c "CREATE DATABASE forest;" -U postgres
