@@ -21,28 +21,27 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-var (
-	defaultLogger *zap.Logger
-)
+var defaultLogger = newLoggerX()
 
-func init() {
+// newLoggerX 初始化logger
+func newLoggerX() *zap.Logger {
+
 	if util.IsDevelopment() {
 		c := zap.NewDevelopmentConfig()
 		l, err := c.Build()
 		if err != nil {
 			panic(err)
 		}
-		defaultLogger = l
-	} else {
-		c := zap.NewProductionConfig()
-		c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-		// 只针对panic 以上的日志增加stack trace
-		l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
-		if err != nil {
-			panic(err)
-		}
-		defaultLogger = l
+		return l
 	}
+	c := zap.NewProductionConfig()
+	c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// 只针对panic 以上的日志增加stack trace
+	l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
+	if err != nil {
+		panic(err)
+	}
+	return l
 }
 
 // Default 获取默认的logger

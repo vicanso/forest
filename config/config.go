@@ -24,12 +24,12 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/viperx"
+	"go.uber.org/atomic"
 )
 
 var (
@@ -39,8 +39,7 @@ var (
 	defaultViperX = loadConfigX()
 
 	// 应用状态
-	applicationStatus = ApplicationStatusStopped
-
+	applicationStatusAtom = atomic.NewInt32(ApplicationStatusStopped)
 	// 应用版本
 	applicationVersion string
 	// 应用构建时间
@@ -174,7 +173,8 @@ func loadConfigX() *viperx.ViperX {
 	return defaultViperX
 }
 
-func validatePanic(v interface{}) {
+// validateX 对数据校验，如果出错则panic，仅用于初始化时的配置检查
+func validateX(v interface{}) {
 	err := validate.Do(v, nil)
 	if err != nil {
 		panic(err)
@@ -191,17 +191,17 @@ func GetENV() string {
 
 // SetApplicationStatus 设置应用运行状态
 func SetApplicationStatus(status int32) {
-	atomic.StoreInt32(&applicationStatus, status)
+	applicationStatusAtom.Store(status)
 }
 
 // GetApplicationStatus 获取应用运行状态
 func GetApplicationStatus() int32 {
-	return atomic.LoadInt32(&applicationStatus)
+	return applicationStatusAtom.Load()
 }
 
 // ApplicationIsRunning 判断应用是否正在运行
 func ApplicationIsRunning() bool {
-	return atomic.LoadInt32(&applicationStatus) == ApplicationStatusRunning
+	return applicationStatusAtom.Load() == ApplicationStatusRunning
 }
 
 // GetApplicationVersion 获取应用版本号
@@ -232,7 +232,7 @@ func GetBasicConfig() BasicConfig {
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 	}
-	validatePanic(&basicConfig)
+	validateX(&basicConfig)
 	return basicConfig
 }
 
@@ -246,7 +246,7 @@ func GetSessionConfig() SessionConfig {
 		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
 		TrackKey:   defaultViperX.GetString(prefix + "trackKey"),
 	}
-	validatePanic(&sessConfig)
+	validateX(&sessConfig)
 	return sessConfig
 }
 
@@ -299,7 +299,7 @@ func GetRedisConfig() RedisConfig {
 		MaxProcessing: uint32(maxProcessing),
 	}
 
-	validatePanic(&redisConfig)
+	validateX(&redisConfig)
 	return redisConfig
 }
 
@@ -309,7 +309,7 @@ func GetPostgresConfig() PostgresConfig {
 	postgresConfig := PostgresConfig{
 		URI: defaultViperX.GetString(prefix + "uri"),
 	}
-	validatePanic(&postgresConfig)
+	validateX(&postgresConfig)
 	return postgresConfig
 }
 
@@ -322,7 +322,7 @@ func GetMailConfig() MailConfig {
 		User:     defaultViperX.GetStringFromENV(prefix + "user"),
 		Password: defaultViperX.GetStringFromENV(prefix + "password"),
 	}
-	validatePanic(&mailConfig)
+	validateX(&mailConfig)
 	return mailConfig
 }
 
@@ -338,7 +338,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		FlushInterval: defaultViperX.GetDuration(prefix + "flushInterval"),
 		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
 	}
-	validatePanic(&influxdbConfig)
+	validateX(&influxdbConfig)
 	return influxdbConfig
 }
 
@@ -348,7 +348,7 @@ func GetAlarmConfig() AlarmConfig {
 	alarmConfig := AlarmConfig{
 		Receivers: defaultViperX.GetStringSlice(prefix + "receivers"),
 	}
-	validatePanic(&alarmConfig)
+	validateX(&alarmConfig)
 	return alarmConfig
 }
 
@@ -360,7 +360,7 @@ func GetLocationConfig() LocationConfig {
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
 		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
 	}
-	validatePanic(&locationConfig)
+	validateX(&locationConfig)
 	return locationConfig
 }
 
@@ -373,6 +373,6 @@ func GetMinioConfig() MinioConfig {
 		SecretAccessKey: defaultViperX.GetStringFromENV(prefix + "secretAccessKey"),
 		SSL:             defaultViperX.GetBool(prefix + "ssl"),
 	}
-	validatePanic(&minioConfig)
+	validateX(&minioConfig)
 	return minioConfig
 }

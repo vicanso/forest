@@ -21,16 +21,17 @@ import (
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns *axios.Instance
+var locationIns = newLocationInstance()
 
 // 相关的URL
 const (
 	locationURL = "/ip-locations/json/:ip"
 )
 
-func init() {
+// newLocationInstance 初始化location的实例
+func newLocationInstance() *axios.Instance {
 	locationConfig := config.GetLocationConfig()
-	locationIns = helper.NewInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
+	return helper.NewInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
 // Location location

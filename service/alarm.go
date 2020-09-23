@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	mailDialer *gomail.Dialer
+	mailDialer = newMailDialer()
 	mailSender string
 
 	sendingMailMutex = new(sync.Mutex)
@@ -33,15 +33,17 @@ var (
 	alarmConfig config.AlarmConfig
 )
 
-func init() {
+func newMailDialer() *gomail.Dialer {
 	basicInfo = config.GetBasicConfig()
 	alarmConfig = config.GetAlarmConfig()
 	mailConfig := config.GetMailConfig()
-	if mailConfig.Host != "" {
-		mailSender = mailConfig.User
-		mailDialer = gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
-		mailDialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	if mailConfig.Host == "" {
+		return nil
 	}
+	mailSender = mailConfig.User
+	d := gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	return d
 }
 
 // AlarmError 发送出错警告

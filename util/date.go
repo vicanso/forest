@@ -16,20 +16,18 @@ package util
 
 import (
 	"math/rand"
-	"sync/atomic"
 	"time"
 
 	"github.com/jinzhu/now"
+	"go.uber.org/atomic"
 )
 
-var (
-	mockTime int64
-)
+var mockTime atomic.Int64
 
 // SetMockTime 设置mock的时间
 func SetMockTime(v string) {
 	if v == "" {
-		atomic.StoreInt64(&mockTime, 0)
+		mockTime.Store(0)
 		return
 	}
 	t, _ := time.Parse(time.RFC3339, v)
@@ -38,7 +36,7 @@ func SetMockTime(v string) {
 	if seconds < 0 {
 		return
 	}
-	atomic.StoreInt64(&mockTime, seconds)
+	mockTime.Store(seconds)
 }
 
 // Now 获取当前时间（测试环境允许使用mock的时间)
@@ -47,7 +45,7 @@ func Now() time.Time {
 	if IsProduction() {
 		return time.Now()
 	}
-	v := atomic.LoadInt64(&mockTime)
+	v := mockTime.Load()
 	if v == 0 {
 		return time.Now()
 	}

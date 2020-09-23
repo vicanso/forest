@@ -23,6 +23,8 @@ const (
 	MeasurementHTTPStats = "httpStats"
 	// MeasurementEntStats ent性能统计
 	MeasurementEntStats = "entStats"
+	// MeasurementEntOP ent的操作记录
+	MeasurementEntOP = "entOP"
 	// MeasurementHTTPError http响应出错统计
 	MeasurementHTTPError = "httpError"
 	// MeasurementUserTracker 用户行为记录

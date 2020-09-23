@@ -23,10 +23,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	defaultInfluxSrv *InfluxSrv
-)
-
 type (
 	InfluxSrv struct {
 		client influxdb.Client
@@ -34,11 +30,14 @@ type (
 	}
 )
 
-func init() {
+var defaultInfluxSrv = newInfluxSrvX()
+
+// newInfluxSrvX 创建新的influx服务
+func newInfluxSrvX() *InfluxSrv {
 	influxdbConfig := config.GetInfluxdbConfig()
 	if influxdbConfig.Disabled {
-		defaultInfluxSrv = new(InfluxSrv)
-		return
+
+		return new(InfluxSrv)
 	}
 	opts := influxdb.DefaultOptions()
 	// 设置批量提交的大小
@@ -59,7 +58,7 @@ func init() {
 	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
 	newInfluxdbErrorLogger(writer)
-	defaultInfluxSrv = &InfluxSrv{
+	return &InfluxSrv{
 		client: c,
 		writer: writer,
 	}

@@ -30,6 +30,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", entCheck)
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 5m", redisStats)
+	_, _ = c.AddFunc("@every 10s", entStats)
 	c.Start()
 }
 
@@ -68,4 +69,10 @@ func entCheck() {
 		)
 		service.AlarmError("ent check fail, " + err.Error())
 	}
+}
+
+// entStats ent的性能统计
+func entStats() {
+	stats := helper.EntGetStats()
+	helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
 }

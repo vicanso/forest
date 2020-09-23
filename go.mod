@@ -14,7 +14,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/iancoleman/strcase v0.1.1
+	github.com/iancoleman/strcase v0.1.2
 	github.com/influxdata/influxdb-client-go v1.4.0
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jinzhu/now v1.1.1
@@ -35,9 +35,10 @@ require (
 	github.com/vicanso/hes v0.2.3
 	github.com/vicanso/ips v1.0.1
 	github.com/vicanso/viperx v0.1.3
+	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/image v0.0.0-20200801110659-972c09e46d76
+	golang.org/x/image v0.0.0-20200922025426-e59bae62ef32
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

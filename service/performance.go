@@ -16,7 +16,8 @@ package service
 
 import (
 	"runtime"
-	"sync/atomic"
+
+	"go.uber.org/atomic"
 )
 
 type (
@@ -32,7 +33,7 @@ type (
 )
 
 var (
-	concurrency uint32
+	concurrency atomic.Uint32
 )
 
 // GetPerformance 获取应用性能指标
@@ -52,15 +53,15 @@ func GetPerformance() Performance {
 
 // IncreaseConcurrency 当前并发请求+1
 func IncreaseConcurrency() uint32 {
-	return atomic.AddUint32(&concurrency, 1)
+	return concurrency.Inc()
 }
 
 // DecreaseConcurrency 当前并发请求-1
 func DecreaseConcurrency() uint32 {
-	return atomic.AddUint32(&concurrency, ^uint32(0))
+	return concurrency.Dec()
 }
 
 // GetConcurrency 获取当前并发请求
 func GetConcurrency() uint32 {
-	return atomic.LoadUint32(&concurrency)
+	return concurrency.Load()
 }

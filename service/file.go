@@ -47,11 +47,10 @@ type (
 	}
 )
 
-var (
-	minioClient *minio.Client
-)
+var defaultMinioClient = newMinioClientX()
 
-func init() {
+// newMinioClientX 初始化minio client
+func newMinioClientX() *minio.Client {
 	minioConfig := config.GetMinioConfig()
 	c, err := minio.New(minioConfig.Endpoint, &minio.Options{
 		Secure: minioConfig.SSL,
@@ -60,17 +59,17 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	minioClient = c
+	return c
 }
 
 // Upload 上传文件
 func (srv *FileSrv) Upload(ctx context.Context, params UploadParams) (info minio.UploadInfo, err error) {
-	return minioClient.PutObject(ctx, params.Bucket, params.Name, params.Reader, params.Size, params.Opts)
+	return defaultMinioClient.PutObject(ctx, params.Bucket, params.Name, params.Reader, params.Size, params.Opts)
 }
 
 // Get 获取文件
 func (srv *FileSrv) Get(ctx context.Context, bucket, filename string) (*minio.Object, error) {
-	return minioClient.GetObject(ctx, bucket, filename, minio.GetObjectOptions{})
+	return defaultMinioClient.GetObject(ctx, bucket, filename, minio.GetObjectOptions{})
 }
 
 // GetData 获取文件内容及对应的http头

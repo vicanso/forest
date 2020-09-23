@@ -19,13 +19,7 @@ import (
 	"github.com/vicanso/forest/config"
 )
 
-var (
-	sessionConfig config.SessionConfig
-)
-
-func init() {
-	sessionConfig = config.GetSessionConfig()
-}
+var sessionConfig = config.GetSessionConfig()
 
 // GetTrackID 获取track id
 func GetTrackID(c *elton.Context) string {

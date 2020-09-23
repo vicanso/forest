@@ -18,9 +18,9 @@ import (
 	"encoding/json"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/vicanso/elton"
+	"go.uber.org/atomic"
 	"go.uber.org/zap"
 )
 
@@ -36,12 +36,17 @@ type (
 		Delay int    `json:"delay,omitempty"`
 		URL   string `json:"url,omitempty"`
 	}
+	routerConcurrencyConfig struct {
+		Route  string `json:"route,omitempty"`
+		Method string `json:"method,omitempty"`
+		Max    uint32 `json:"max,omitempty"`
+	}
 	// RouterConcurrency 路由并发配置
 	RouterConcurrency struct {
-		Route   string `json:"route,omitempty"`
-		Method  string `json:"method,omitempty"`
-		Max     uint32 `json:"max,omitempty"`
-		Current uint32 `json:"current,omitempty"`
+		Route   string
+		Method  string
+		Current atomic.Uint32
+		Max     atomic.Uint32
 	}
 	// rcLimiter 路由请求限制
 	rcLimiter struct {
@@ -52,12 +57,8 @@ type (
 var (
 	routerMutex          = new(sync.RWMutex)
 	currentRouterConfigs map[string]*RouterConfig
-	currentRCLimiter     *rcLimiter
+	currentRCLimiter     = &rcLimiter{}
 )
-
-func init() {
-	currentRCLimiter = &rcLimiter{}
-}
 
 // IncConcurrency 当前路由处理数+1
 func (l *rcLimiter) IncConcurrency(key string) (current uint32, max uint32) {
@@ -65,8 +66,8 @@ func (l *rcLimiter) IncConcurrency(key string) (current uint32, max uint32) {
 	if !ok {
 		return
 	}
-	current = atomic.AddUint32(&r.Current, 1)
-	max = r.Max
+	current = r.Current.Inc()
+	max = r.Max.Load()
 	return
 }
 
@@ -76,7 +77,7 @@ func (l *rcLimiter) DecConcurrency(key string) {
 	if !ok {
 		return
 	}
-	atomic.AddUint32(&r.Current, ^uint32(0))
+	r.Current.Dec()
 }
 
 // GetConcurrency 获取当前路由处理数
@@ -85,7 +86,7 @@ func (l *rcLimiter) GetConcurrency(key string) uint32 {
 	if !ok {
 		return 0
 	}
-	return atomic.LoadUint32(&r.Current)
+	return r.Current.Load()
 }
 
 // 更新router config配置
@@ -135,9 +136,9 @@ func GetRouterConcurrencyLimiter() *rcLimiter {
 
 // ResetRouterConcurrency 重置路由并发数
 func ResetRouterConcurrency(arr []string) {
-	concurrencyList := make([]*RouterConcurrency, 0)
+	concurrencyConfigList := make([]*routerConcurrencyConfig, 0)
 	for _, str := range arr {
-		v := &RouterConcurrency{}
+		v := &routerConcurrencyConfig{}
 		err := json.Unmarshal([]byte(str), v)
 		if err != nil {
 			logger.Error("router concurrency config is invalid",
@@ -146,7 +147,7 @@ func ResetRouterConcurrency(arr []string) {
 			AlarmError("router concurrency config is invalid:" + err.Error())
 			continue
 		}
-		concurrencyList = append(concurrencyList, v)
+		concurrencyConfigList = append(concurrencyConfigList, v)
 	}
 	for key, r := range currentRCLimiter.m {
 		keys := strings.Split(key, " ")
@@ -154,16 +155,16 @@ func ResetRouterConcurrency(arr []string) {
 			continue
 		}
 		found := false
-		for _, item := range concurrencyList {
+		for _, item := range concurrencyConfigList {
 			if item.Method == keys[0] && item.Route == keys[1] {
 				found = true
 				// 设置并发请求量
-				atomic.StoreUint32(&r.Max, item.Max)
+				r.Max.Store(item.Max)
 			}
 		}
 		// 如果未配置，则设置为限制0（无限制）
 		if !found {
-			atomic.StoreUint32(&r.Max, 0)
+			r.Max.Store(0)
 		}
 	}
 }
