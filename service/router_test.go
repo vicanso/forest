@@ -24,7 +24,7 @@ import (
 func TestRouterLimiter(t *testing.T) {
 	assert := assert.New(t)
 
-	InitRouterConcurrencyLimiter([]*elton.RouterInfo{
+	InitRouterConcurrencyLimiter([]elton.RouterInfo{
 		{
 			Method: "GET",
 			Path:   "/",
