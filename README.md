@@ -27,6 +27,7 @@ chore：构建过程或辅助工具的变动
 docker pull postgres:alpine
 
 docker run -d --restart=always \
+  -v $PWD/forest:/var/lib/postgresql/data \
   -e POSTGRES_PASSWORD=A123456 \
   -p 5432:5432 \
   --name=forest \
@@ -34,7 +35,19 @@ docker run -d --restart=always \
 
 docker exec -it forest sh
 
-psql -c "CREATE DATABASE forest;" -U postgres
-psql -c "CREATE USER vicanso WITH PASSWORD 'A123456';" -U postgres
-psql -c "GRANT ALL PRIVILEGES ON DATABASE forest to vicanso;" -U postgres
+psql -U postgres
+CREATE DATABASE forest
+CREATE USER vicanso WITH PASSWORD 'A123456'
+GRANT ALL PRIVILEGES ON DATABASE forest to vicanso
+```
+
+## redis
+
+```
+docker pull redis:alpine
+
+docker run -d --restart=always \
+  -p 6379:6379 \
+  -name=redis \
+  redis:alpine
 ```
