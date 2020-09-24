@@ -92,7 +92,7 @@ func TestConfigurationParams(t *testing.T) {
 		params := configurationListParmas{}
 		count, err := params.count(context.Background())
 		assert.Nil(err)
-		assert.True(count > 1)
+		assert.True(count >= 1)
 	})
 
 	t.Run("update", func(t *testing.T) {
