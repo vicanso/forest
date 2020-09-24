@@ -28,7 +28,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.1
 	github.com/vicanso/count-warner v1.0.1
-	github.com/vicanso/elton v1.0.8
+	github.com/vicanso/elton v1.1.0
 	github.com/vicanso/elton-compress v1.0.0
 	github.com/vicanso/elton-session v1.0.2
 	github.com/vicanso/go-axios v0.1.13
@@ -38,9 +38,9 @@ require (
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/image v0.0.0-20200922025426-e59bae62ef32
+	golang.org/x/image v0.0.0-20200924062109-4578eab98f00
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200904194848-62affa334b73
+	golang.org/x/net v0.0.0-20200923182212-328152dc79b1
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

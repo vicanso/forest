@@ -31,3 +31,9 @@ func TestEnt(t *testing.T) {
 	err = EntPing()
 	assert.Nil(err)
 }
+
+func TestEntGetStats(t *testing.T) {
+	assert := assert.New(t)
+	stats := EntGetStats()
+	assert.NotNil(stats)
+}

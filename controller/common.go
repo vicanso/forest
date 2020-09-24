@@ -55,7 +55,7 @@ type (
 	// routersResp 路由列表响应
 	routersResp struct {
 		// 路由信息
-		Routers []*elton.RouterInfo `json:"routers,omitempty"`
+		Routers []elton.RouterInfo `json:"routers,omitempty"`
 	}
 	// statusListResp 状态列表响应
 	statusListResp struct {
@@ -124,7 +124,7 @@ func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 func (*commonCtrl) getRouters(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
 	c.Body = &routersResp{
-		Routers: c.Elton().Routers,
+		Routers: c.Elton().GetRouters(),
 	}
 	return
 }

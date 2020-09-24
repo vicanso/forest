@@ -32,9 +32,9 @@ type (
 		Status     int    `json:"status,omitempty"`
 		CotentType string `json:"cotentType,omitempty"`
 		Response   string `json:"response,omitempty"`
-		// Delay 延时，单位秒
-		Delay int    `json:"delay,omitempty"`
-		URL   string `json:"url,omitempty"`
+		// DelaySeconds 延时，单位秒
+		DelaySeconds int    `json:"delaySeconds,omitempty"`
+		URL          string `json:"url,omitempty"`
 	}
 	routerConcurrencyConfig struct {
 		Route  string `json:"route,omitempty"`
@@ -121,7 +121,7 @@ func RouterGetConfig(method, route string) *RouterConfig {
 }
 
 // InitRouterConcurrencyLimiter 初始路由并发限制
-func InitRouterConcurrencyLimiter(routers []*elton.RouterInfo) {
+func InitRouterConcurrencyLimiter(routers []elton.RouterInfo) {
 	m := make(map[string]*RouterConcurrency)
 	for _, item := range routers {
 		m[item.Method+" "+item.Path] = &RouterConcurrency{}

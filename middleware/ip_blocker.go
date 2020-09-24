@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 )
 
@@ -30,10 +29,12 @@ var (
 	}
 )
 
+type IPBlockFunc func(string) bool
+
 // NewIPBlocker create a new block ip middleware
-func NewIPBlocker() elton.Handler {
+func NewIPBlocker(fn IPBlockFunc) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		if service.IsBlockIP(c.RealIP()) {
+		if fn(c.RealIP()) {
 			err = errIPNotAllow
 			return
 		}

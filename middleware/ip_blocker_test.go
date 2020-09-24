@@ -22,31 +22,28 @@ import (
 	"github.com/vicanso/elton"
 )
 
-func TestNewEntry(t *testing.T) {
+func TestNewIPBlocker(t *testing.T) {
 	assert := assert.New(t)
+	blockFn := func(ip string) bool {
+		return ip == "1.1.1.1"
+	}
+	fn := NewIPBlocker(blockFn)
+
 	req := httptest.NewRequest("GET", "/", nil)
-	c := elton.NewContext(httptest.NewRecorder(), req)
-	c.ID = "abc"
+	req.Header.Set(elton.HeaderXForwardedFor, "1.1.1.1")
+	c := elton.NewContext(nil, req)
+	err := fn(c)
+	assert.Equal(errIPNotAllow, err)
+
+	req.Header.Del(elton.HeaderXForwardedFor)
+	// 由于context的ip会缓存，因此重新创建
+	c = elton.NewContext(nil, req)
 	done := false
 	c.Next = func() error {
 		done = true
 		return nil
 	}
-	doneEntry := false
-	doneExit := false
-
-	fn := NewEntry(func() uint32 {
-		doneEntry = true
-		return 0
-	}, func() uint32 {
-		doneExit = true
-		return 0
-	})
-	err := fn(c)
+	err = fn(c)
 	assert.Nil(err)
 	assert.True(done)
-	assert.True(doneEntry)
-	assert.True(doneExit)
-	assert.Equal("abc", c.GetHeader(xResponseID))
-	assert.Equal("no-cache", c.GetHeader("Cache-Control"))
 }

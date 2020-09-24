@@ -44,7 +44,7 @@
       <el-form-item label="延时响应：">
         <el-input
           type="number"
-          v-model="form.delay"
+          v-model="form.delaySeconds"
           placeholder="请输入延时时长，可选"
         >
           <template slot="append">秒</template>
@@ -92,7 +92,7 @@ export default {
       status: null,
       contentType: "",
       response: "",
-      delay: null,
+      delaySeconds: null,
       path: ""
     };
     if (this.$props.data) {
@@ -122,7 +122,7 @@ export default {
     "form.response": function() {
       this.handleChange();
     },
-    "form.delay": function() {
+    "form.delaySeconds": function() {
       this.handleChange();
     },
     "form.url": function() {
@@ -135,7 +135,7 @@ export default {
       this.handleChange();
     },
     handleChange() {
-      const { router, status, contentType, response, delay, url } = this.form;
+      const { router, status, contentType, response, delaySeconds, url } = this.form;
       let value = "";
       if (router && status && contentType && response) {
         const [method, route] = router.split(" ");
@@ -146,9 +146,9 @@ export default {
           contentType,
           response: response.trim()
         };
-        if (delay) {
-          data.delay = Number(delay);
-          if (data.delay < 0) {
+        if (delaySeconds) {
+          data.delaySeconds = Number(delaySeconds);
+          if (data.delaySeconds < 0) {
             this.$message.error("延时时长不能小于0");
             return;
           }

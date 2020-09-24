@@ -211,7 +211,7 @@ func main() {
 	e.UseWithName(M.NewRecover(), "recover")
 
 	// 入口设置
-	e.UseWithName(middleware.NewEntry(), "entry")
+	e.UseWithName(middleware.NewEntry(service.IncreaseConcurrency, service.DecreaseConcurrency), "entry")
 
 	// 接口相关统计信息
 	e.UseWithName(middleware.NewStats(), "stats")
@@ -239,10 +239,10 @@ func main() {
 	e.UseWithName(M.NewCompress(compressConfig), "compress")
 
 	// IP限制
-	e.UseWithName(middleware.NewIPBlocker(), "ipBlocker")
+	e.UseWithName(middleware.NewIPBlocker(service.IsBlockIP), "ipBlocker")
 
 	// 根据配置对路由mock返回
-	e.UseWithName(middleware.NewRouterMocker(), "routerMocker")
+	e.UseWithName(middleware.NewRouterMocker(service.RouterGetConfig), "routerMocker")
 
 	// 路由并发限制
 	e.UseWithName(M.NewRCL(M.RCLConfig{
@@ -265,7 +265,7 @@ func main() {
 	}
 
 	// 初始化路由并发限制配置
-	service.InitRouterConcurrencyLimiter(e.Routers)
+	service.InitRouterConcurrencyLimiter(e.GetRouters())
 
 	err := dependServiceCheck()
 	if err != nil {

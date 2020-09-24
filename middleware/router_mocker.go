@@ -22,22 +22,24 @@ import (
 	"github.com/vicanso/forest/service"
 )
 
+type GetConfigFunc func(method, route string) *service.RouterConfig
+
 // NewRouterMocker create a router mocker
-func NewRouterMocker() elton.Handler {
+func NewRouterMocker(fn GetConfigFunc) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		routerConfig := service.RouterGetConfig(c.Request.Method, c.Route)
+		routerConfig := fn(c.Request.Method, c.Route)
 		if routerConfig == nil {
 			return c.Next()
 		}
 
-		// 如果有配置Path，则还要判断path是否相等
+		// 如果有配置url，则还要判断url是否相等
 		if routerConfig.URL != "" && c.Request.URL.RequestURI() != routerConfig.URL {
 			return c.Next()
 		}
 
 		// 如果delay大于0，则延时
-		if routerConfig.Delay > 0 {
-			time.Sleep(time.Second * time.Duration(routerConfig.Delay))
+		if routerConfig.DelaySeconds > 0 {
+			time.Sleep(time.Second * time.Duration(routerConfig.DelaySeconds))
 		}
 
 		c.StatusCode = routerConfig.Status

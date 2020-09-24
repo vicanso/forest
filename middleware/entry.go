@@ -16,7 +16,6 @@ package middleware
 
 import (
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
 
@@ -24,11 +23,14 @@ const (
 	xResponseID = "X-Response-Id"
 )
 
+type EntryFunc func() uint32
+type ExitFunc func() uint32
+
 // NewEntry create an entry middleware
-func NewEntry() elton.Handler {
+func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		service.IncreaseConcurrency()
-		defer service.DecreaseConcurrency()
+		entryFn()
+		defer exitFn()
 		c.SetHeader(xResponseID, c.ID)
 		// 非测试环境返回x-forwarded-for，方便确认链路
 		if !util.IsProduction() {

@@ -34,7 +34,7 @@ func TestConfigENV(t *testing.T) {
 
 func TestApplicationStatus(t *testing.T) {
 	assert := assert.New(t)
-	originalApplicationStatus := applicationStatus
+	originalApplicationStatus := applicationStatusAtom.Load()
 	defer SetApplicationStatus(originalApplicationStatus)
 
 	assert.Equal(originalApplicationStatus, GetApplicationStatus())
