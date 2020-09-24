@@ -27,7 +27,6 @@ func TestNow(t *testing.T) {
 	SetMockTime(mockTime)
 
 	assert.Equal(int64(1587904473000000000), Now().UnixNano())
-	assert.Equal(mockTime, NowString())
 	// travis中为0时区
 	// assert.Equal(mockTime, NowString())
 

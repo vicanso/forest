@@ -132,7 +132,7 @@ func TestGetPostgresConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	postgresConfig := GetPostgresConfig()
-	assert.Equal("postgresql://vicanso:A123456@127.0.0.1:5432/forest", postgresConfig.URI)
+	assert.NotNil(postgresConfig.URI)
 }
 
 func TestGetLocationConfig(t *testing.T) {

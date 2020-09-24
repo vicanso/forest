@@ -18,12 +18,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vicanso/forest/config"
 )
 
 func TestENV(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.True(IsDevelopment())
-	assert.False(IsTest())
+	env := config.GetENV()
+	assert.Equal(env == config.Dev, IsDevelopment())
+	assert.Equal(env == config.Test, IsTest())
 	assert.False(IsProduction())
 }
