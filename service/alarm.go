@@ -24,26 +24,34 @@ import (
 )
 
 var (
-	mailDialer = newMailDialer()
-	mailSender string
-
-	sendingMailMutex = new(sync.Mutex)
-
-	basicInfo   config.BasicConfig
-	alarmConfig config.AlarmConfig
+	sendingMailMutex = sync.Mutex{}
 )
 
-func newMailDialer() *gomail.Dialer {
-	basicInfo = config.GetBasicConfig()
+var (
+	defaultMailDialer *gomail.Dialer
+)
+
+var (
+	newMailOnce = new(sync.Once)
+)
+var (
+	basicInfo   = config.GetBasicConfig()
 	alarmConfig = config.GetAlarmConfig()
-	mailConfig := config.GetMailConfig()
-	if mailConfig.Host == "" {
-		return nil
-	}
-	mailSender = mailConfig.User
-	d := gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-	return d
+	mailConfig  = config.GetMailConfig()
+)
+
+// newMailDialer 新建邮件发送dialer
+func newMailDialer() *gomail.Dialer {
+	newMailOnce.Do(func() {
+		if mailConfig.Host == "" {
+			return
+		}
+		d := gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		defaultMailDialer = d
+	})
+	return defaultMailDialer
+
 }
 
 // AlarmError 发送出错警告
@@ -52,10 +60,11 @@ func AlarmError(message string) {
 		zap.String("app", basicInfo.Name),
 		zap.String("category", "alarm-error"),
 	)
-	if mailDialer != nil {
+	d := newMailDialer()
+	if d != nil {
 		m := gomail.NewMessage()
 		receivers := alarmConfig.Receivers
-		m.SetHeader("From", mailSender)
+		m.SetHeader("From", mailConfig.User)
 		m.SetHeader("To", receivers...)
 		m.SetHeader("Subject", "Alarm-"+basicInfo.Name)
 		m.SetBody("text/plain", message)
@@ -64,7 +73,7 @@ func AlarmError(message string) {
 			// 一次只允许一个email发送（由于使用的邮件服务有限制）
 			sendingMailMutex.Lock()
 			defer sendingMailMutex.Unlock()
-			err := mailDialer.DialAndSend(m)
+			err := d.DialAndSend(m)
 			if err != nil {
 				logger.Error("send mail fail",
 					zap.Error(err),

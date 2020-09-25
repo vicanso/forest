@@ -123,29 +123,41 @@ func newOnErrorHandler(e *elton.Elton) {
 	})
 	e.OnError(func(c *elton.Context, err error) {
 		he := hes.Wrap(err)
+
+		if he.Extra == nil {
+			he.Extra = make(map[string]interface{})
+		}
 		if !util.IsProduction() {
-			if he.Extra == nil {
-				he.Extra = make(map[string]interface{})
-			}
 			he.Extra["stack"] = util.GetStack(5)
 		}
 		ip := c.RealIP()
 		uri := c.Request.RequestURI
 
+		he.Extra["route"] = c.Route
+		he.Extra["uri"] = uri
+
+		// 记录exception
 		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]interface{}{
 			"ip":  ip,
 			"uri": uri,
 		}, map[string]string{
 			"category": "routeError",
+			"route":    c.Route,
 		})
 
 		// 可以针对实际场景输出更多的日志信息
 		log.Default().Error("exception",
 			zap.String("ip", ip),
+			zap.String("route", c.Route),
 			zap.String("uri", uri),
 			zap.Error(he.Err),
 		)
 		warnerException.Inc("exception", 1)
+		// TODO 对于ErrRecoverCategory panic导致的recover error，
+		// 如果程序部署为多集群高可用，则在发送告警之后，重启该实例
+		if he.Category == M.ErrRecoverCategory {
+			service.AlarmError("panic recover:" + string(he.ToJSON()))
+		}
 	})
 }
 
@@ -172,9 +184,13 @@ func main() {
 			logger.Error("panic error",
 				zap.Any("error", r),
 			)
+			// TODO 对于ErrRecoverCategory panic导致的recover error，
+			// 如果程序部署为多集群高可用，则在发送告警之后，重启该实例
+			service.AlarmError(fmt.Sprintf("panic recover:%v", r))
 		}
 	}()
 
+	e := elton.New()
 	closeOnce := sync.Once{}
 	closeDeps := func() {
 		closeOnce.Do(func() {
@@ -184,9 +200,13 @@ func main() {
 		})
 	}
 	defer closeDeps()
+	// 非开发环境，监听信号退出
+	if !util.IsDevelopment() {
+		watchForClose(e, closeDeps)
+	}
+
 	basicConfig := config.GetBasicConfig()
 
-	e := elton.New()
 	newOnErrorHandler(e)
 	// 启用耗时跟踪
 	if util.IsDevelopment() {
@@ -201,11 +221,6 @@ func main() {
 	// 自定义404与405的处理
 	e.NotFoundHandler = middleware.NewNotFoundHandler()
 	e.MethodNotAllowedHandler = middleware.NewMethodNotAllowedHandler()
-
-	// 非开发环境，监听信号退出
-	if !util.IsDevelopment() {
-		watchForClose(e, closeDeps)
-	}
 
 	// 捕捉panic异常，避免程序崩溃
 	e.UseWithName(M.NewRecover(), "recover")
@@ -284,7 +299,7 @@ func main() {
 	}
 	logger.Info("server will listen on " + basicConfig.Listen)
 	err = e.ListenAndServe(basicConfig.Listen)
-	// 如果出错而且非用户关闭，则发送告警
+	// 如果出错而且非主动关闭，则发送告警
 	if err != nil && !closedByUser {
 		service.AlarmError("listen and serve fail, " + err.Error())
 		logger.Error("exception",
