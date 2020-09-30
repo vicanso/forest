@@ -187,20 +187,24 @@ func (ulc *UserLoginCreate) Mutation() *UserLoginMutation {
 
 // Save creates the UserLogin in the database.
 func (ulc *UserLoginCreate) Save(ctx context.Context) (*UserLogin, error) {
-	if err := ulc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *UserLogin
 	)
+	ulc.defaults()
 	if len(ulc.hooks) == 0 {
+		if err = ulc.check(); err != nil {
+			return nil, err
+		}
 		node, err = ulc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserLoginMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ulc.check(); err != nil {
+				return nil, err
 			}
 			ulc.mutation = mutation
 			node, err = ulc.sqlSave(ctx)
@@ -226,7 +230,8 @@ func (ulc *UserLoginCreate) SaveX(ctx context.Context) *UserLogin {
 	return v
 }
 
-func (ulc *UserLoginCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (ulc *UserLoginCreate) defaults() {
 	if _, ok := ulc.mutation.CreatedAt(); !ok {
 		v := userlogin.DefaultCreatedAt()
 		ulc.mutation.SetCreatedAt(v)
@@ -234,6 +239,16 @@ func (ulc *UserLoginCreate) preSave() error {
 	if _, ok := ulc.mutation.UpdatedAt(); !ok {
 		v := userlogin.DefaultUpdatedAt()
 		ulc.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ulc *UserLoginCreate) check() error {
+	if _, ok := ulc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := ulc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
 	}
 	if _, ok := ulc.mutation.Account(); !ok {
 		return &ValidationError{Name: "account", err: errors.New("ent: missing required field \"account\"")}
@@ -247,7 +262,7 @@ func (ulc *UserLoginCreate) preSave() error {
 }
 
 func (ulc *UserLoginCreate) sqlSave(ctx context.Context) (*UserLogin, error) {
-	ul, _spec := ulc.createSpec()
+	_node, _spec := ulc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ulc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -255,13 +270,13 @@ func (ulc *UserLoginCreate) sqlSave(ctx context.Context) (*UserLogin, error) {
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	ul.ID = int(id)
-	return ul, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 	var (
-		ul    = &UserLogin{config: ulc.config}
+		_node = &UserLogin{config: ulc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: userlogin.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -276,7 +291,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldCreatedAt,
 		})
-		ul.CreatedAt = value
+		_node.CreatedAt = value
 	}
 	if value, ok := ulc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -284,7 +299,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldUpdatedAt,
 		})
-		ul.UpdatedAt = value
+		_node.UpdatedAt = value
 	}
 	if value, ok := ulc.mutation.Account(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -292,7 +307,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldAccount,
 		})
-		ul.Account = value
+		_node.Account = value
 	}
 	if value, ok := ulc.mutation.UserAgent(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -300,7 +315,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldUserAgent,
 		})
-		ul.UserAgent = value
+		_node.UserAgent = value
 	}
 	if value, ok := ulc.mutation.IP(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -308,7 +323,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldIP,
 		})
-		ul.IP = value
+		_node.IP = value
 	}
 	if value, ok := ulc.mutation.TrackID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -316,7 +331,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldTrackID,
 		})
-		ul.TrackID = value
+		_node.TrackID = value
 	}
 	if value, ok := ulc.mutation.SessionID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -324,7 +339,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldSessionID,
 		})
-		ul.SessionID = value
+		_node.SessionID = value
 	}
 	if value, ok := ulc.mutation.XForwardedFor(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -332,7 +347,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldXForwardedFor,
 		})
-		ul.XForwardedFor = value
+		_node.XForwardedFor = value
 	}
 	if value, ok := ulc.mutation.Country(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -340,7 +355,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldCountry,
 		})
-		ul.Country = value
+		_node.Country = value
 	}
 	if value, ok := ulc.mutation.Province(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -348,7 +363,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldProvince,
 		})
-		ul.Province = value
+		_node.Province = value
 	}
 	if value, ok := ulc.mutation.City(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -356,7 +371,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldCity,
 		})
-		ul.City = value
+		_node.City = value
 	}
 	if value, ok := ulc.mutation.Isp(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -364,9 +379,9 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: userlogin.FieldIsp,
 		})
-		ul.Isp = value
+		_node.Isp = value
 	}
-	return ul, _spec
+	return _node, _spec
 }
 
 // UserLoginCreateBulk is the builder for creating a bulk of UserLogin entities.
@@ -383,13 +398,14 @@ func (ulcb *UserLoginCreateBulk) Save(ctx context.Context) ([]*UserLogin, error)
 	for i := range ulcb.builders {
 		func(i int, root context.Context) {
 			builder := ulcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*UserLoginMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

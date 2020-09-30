@@ -106,20 +106,24 @@ func (cc *ConfigurationCreate) Mutation() *ConfigurationMutation {
 
 // Save creates the Configuration in the database.
 func (cc *ConfigurationCreate) Save(ctx context.Context) (*Configuration, error) {
-	if err := cc.preSave(); err != nil {
-		return nil, err
-	}
 	var (
 		err  error
 		node *Configuration
 	)
+	cc.defaults()
 	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
 		node, err = cc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ConfigurationMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
@@ -145,7 +149,8 @@ func (cc *ConfigurationCreate) SaveX(ctx context.Context) *Configuration {
 	return v
 }
 
-func (cc *ConfigurationCreate) preSave() error {
+// defaults sets the default values of the builder before save.
+func (cc *ConfigurationCreate) defaults() {
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		v := configuration.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)
@@ -157,6 +162,19 @@ func (cc *ConfigurationCreate) preSave() error {
 	if _, ok := cc.mutation.Status(); !ok {
 		v := configuration.DefaultStatus
 		cc.mutation.SetStatus(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cc *ConfigurationCreate) check() error {
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
+	if _, ok := cc.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
 	}
 	if v, ok := cc.mutation.Status(); ok {
 		if err := configuration.StatusValidator(int8(v)); err != nil {
@@ -205,7 +223,7 @@ func (cc *ConfigurationCreate) preSave() error {
 }
 
 func (cc *ConfigurationCreate) sqlSave(ctx context.Context) (*Configuration, error) {
-	c, _spec := cc.createSpec()
+	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -213,13 +231,13 @@ func (cc *ConfigurationCreate) sqlSave(ctx context.Context) (*Configuration, err
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	c.ID = int(id)
-	return c, nil
+	_node.ID = int(id)
+	return _node, nil
 }
 
 func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Configuration{config: cc.config}
+		_node = &Configuration{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: configuration.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -234,7 +252,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldCreatedAt,
 		})
-		c.CreatedAt = value
+		_node.CreatedAt = value
 	}
 	if value, ok := cc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -242,7 +260,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldUpdatedAt,
 		})
-		c.UpdatedAt = value
+		_node.UpdatedAt = value
 	}
 	if value, ok := cc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -250,7 +268,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldStatus,
 		})
-		c.Status = value
+		_node.Status = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -258,7 +276,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldName,
 		})
-		c.Name = value
+		_node.Name = value
 	}
 	if value, ok := cc.mutation.Category(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -266,7 +284,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldCategory,
 		})
-		c.Category = value
+		_node.Category = value
 	}
 	if value, ok := cc.mutation.Owner(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -274,7 +292,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldOwner,
 		})
-		c.Owner = value
+		_node.Owner = value
 	}
 	if value, ok := cc.mutation.Data(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -282,7 +300,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldData,
 		})
-		c.Data = value
+		_node.Data = value
 	}
 	if value, ok := cc.mutation.StartedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -290,7 +308,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldStartedAt,
 		})
-		c.StartedAt = value
+		_node.StartedAt = value
 	}
 	if value, ok := cc.mutation.EndedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -298,9 +316,9 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 			Value:  value,
 			Column: configuration.FieldEndedAt,
 		})
-		c.EndedAt = value
+		_node.EndedAt = value
 	}
-	return c, _spec
+	return _node, _spec
 }
 
 // ConfigurationCreateBulk is the builder for creating a bulk of Configuration entities.
@@ -317,13 +335,14 @@ func (ccb *ConfigurationCreateBulk) Save(ctx context.Context) ([]*Configuration,
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				if err := builder.preSave(); err != nil {
-					return nil, err
-				}
 				mutation, ok := m.(*ConfigurationMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
 				}
 				builder.mutation = mutation
 				nodes[i], specs[i] = builder.createSpec()

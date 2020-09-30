@@ -87,41 +87,24 @@ func (cu *ConfigurationUpdate) Mutation() *ConfigurationMutation {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *ConfigurationUpdate) Save(ctx context.Context) (int, error) {
-	if _, ok := cu.mutation.UpdatedAt(); !ok {
-		v := configuration.UpdateDefaultUpdatedAt()
-		cu.mutation.SetUpdatedAt(v)
-	}
-	if v, ok := cu.mutation.Status(); ok {
-		if err := configuration.StatusValidator(int8(v)); err != nil {
-			return 0, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Category(); ok {
-		if err := configuration.CategoryValidator(v); err != nil {
-			return 0, &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Owner(); ok {
-		if err := configuration.OwnerValidator(v); err != nil {
-			return 0, &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Data(); ok {
-		if err := configuration.DataValidator(v); err != nil {
-			return 0, &ValidationError{Name: "data", err: fmt.Errorf("ent: validator failed for field \"data\": %w", err)}
-		}
-	}
 	var (
 		err      error
 		affected int
 	)
+	cu.defaults()
 	if len(cu.hooks) == 0 {
+		if err = cu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ConfigurationMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cu.check(); err != nil {
+				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.sqlSave(ctx)
@@ -158,6 +141,39 @@ func (cu *ConfigurationUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cu *ConfigurationUpdate) defaults() {
+	if _, ok := cu.mutation.UpdatedAt(); !ok {
+		v := configuration.UpdateDefaultUpdatedAt()
+		cu.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cu *ConfigurationUpdate) check() error {
+	if v, ok := cu.mutation.Status(); ok {
+		if err := configuration.StatusValidator(int8(v)); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	if v, ok := cu.mutation.Category(); ok {
+		if err := configuration.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+		}
+	}
+	if v, ok := cu.mutation.Owner(); ok {
+		if err := configuration.OwnerValidator(v); err != nil {
+			return &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
+		}
+	}
+	if v, ok := cu.mutation.Data(); ok {
+		if err := configuration.DataValidator(v); err != nil {
+			return &ValidationError{Name: "data", err: fmt.Errorf("ent: validator failed for field \"data\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cu *ConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -310,41 +326,24 @@ func (cuo *ConfigurationUpdateOne) Mutation() *ConfigurationMutation {
 
 // Save executes the query and returns the updated entity.
 func (cuo *ConfigurationUpdateOne) Save(ctx context.Context) (*Configuration, error) {
-	if _, ok := cuo.mutation.UpdatedAt(); !ok {
-		v := configuration.UpdateDefaultUpdatedAt()
-		cuo.mutation.SetUpdatedAt(v)
-	}
-	if v, ok := cuo.mutation.Status(); ok {
-		if err := configuration.StatusValidator(int8(v)); err != nil {
-			return nil, &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Category(); ok {
-		if err := configuration.CategoryValidator(v); err != nil {
-			return nil, &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Owner(); ok {
-		if err := configuration.OwnerValidator(v); err != nil {
-			return nil, &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Data(); ok {
-		if err := configuration.DataValidator(v); err != nil {
-			return nil, &ValidationError{Name: "data", err: fmt.Errorf("ent: validator failed for field \"data\": %w", err)}
-		}
-	}
 	var (
 		err  error
 		node *Configuration
 	)
+	cuo.defaults()
 	if len(cuo.hooks) == 0 {
+		if err = cuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ConfigurationMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cuo.check(); err != nil {
+				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.sqlSave(ctx)
@@ -363,11 +362,11 @@ func (cuo *ConfigurationUpdateOne) Save(ctx context.Context) (*Configuration, er
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *ConfigurationUpdateOne) SaveX(ctx context.Context) *Configuration {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -383,7 +382,40 @@ func (cuo *ConfigurationUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (c *Configuration, err error) {
+// defaults sets the default values of the builder before save.
+func (cuo *ConfigurationUpdateOne) defaults() {
+	if _, ok := cuo.mutation.UpdatedAt(); !ok {
+		v := configuration.UpdateDefaultUpdatedAt()
+		cuo.mutation.SetUpdatedAt(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cuo *ConfigurationUpdateOne) check() error {
+	if v, ok := cuo.mutation.Status(); ok {
+		if err := configuration.StatusValidator(int8(v)); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	if v, ok := cuo.mutation.Category(); ok {
+		if err := configuration.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+		}
+	}
+	if v, ok := cuo.mutation.Owner(); ok {
+		if err := configuration.OwnerValidator(v); err != nil {
+			return &ValidationError{Name: "owner", err: fmt.Errorf("ent: validator failed for field \"owner\": %w", err)}
+		}
+	}
+	if v, ok := cuo.mutation.Data(); ok {
+		if err := configuration.DataValidator(v); err != nil {
+			return &ValidationError{Name: "data", err: fmt.Errorf("ent: validator failed for field \"data\": %w", err)}
+		}
+	}
+	return nil
+}
+
+func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *Configuration, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   configuration.Table,
@@ -455,9 +487,9 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (c *Configuratio
 			Column: configuration.FieldEndedAt,
 		})
 	}
-	c = &Configuration{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Configuration{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{configuration.Label}
@@ -466,5 +498,5 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (c *Configuratio
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

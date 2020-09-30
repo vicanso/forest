@@ -214,14 +214,11 @@ func (ulu *UserLoginUpdate) Mutation() *UserLoginMutation {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ulu *UserLoginUpdate) Save(ctx context.Context) (int, error) {
-	if _, ok := ulu.mutation.UpdatedAt(); !ok {
-		v := userlogin.UpdateDefaultUpdatedAt()
-		ulu.mutation.SetUpdatedAt(v)
-	}
 	var (
 		err      error
 		affected int
 	)
+	ulu.defaults()
 	if len(ulu.hooks) == 0 {
 		affected, err = ulu.sqlSave(ctx)
 	} else {
@@ -264,6 +261,14 @@ func (ulu *UserLoginUpdate) Exec(ctx context.Context) error {
 func (ulu *UserLoginUpdate) ExecX(ctx context.Context) {
 	if err := ulu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ulu *UserLoginUpdate) defaults() {
+	if _, ok := ulu.mutation.UpdatedAt(); !ok {
+		v := userlogin.UpdateDefaultUpdatedAt()
+		ulu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -614,14 +619,11 @@ func (uluo *UserLoginUpdateOne) Mutation() *UserLoginMutation {
 
 // Save executes the query and returns the updated entity.
 func (uluo *UserLoginUpdateOne) Save(ctx context.Context) (*UserLogin, error) {
-	if _, ok := uluo.mutation.UpdatedAt(); !ok {
-		v := userlogin.UpdateDefaultUpdatedAt()
-		uluo.mutation.SetUpdatedAt(v)
-	}
 	var (
 		err  error
 		node *UserLogin
 	)
+	uluo.defaults()
 	if len(uluo.hooks) == 0 {
 		node, err = uluo.sqlSave(ctx)
 	} else {
@@ -647,11 +649,11 @@ func (uluo *UserLoginUpdateOne) Save(ctx context.Context) (*UserLogin, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (uluo *UserLoginUpdateOne) SaveX(ctx context.Context) *UserLogin {
-	ul, err := uluo.Save(ctx)
+	node, err := uluo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ul
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -667,7 +669,15 @@ func (uluo *UserLoginUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (uluo *UserLoginUpdateOne) sqlSave(ctx context.Context) (ul *UserLogin, err error) {
+// defaults sets the default values of the builder before save.
+func (uluo *UserLoginUpdateOne) defaults() {
+	if _, ok := uluo.mutation.UpdatedAt(); !ok {
+		v := userlogin.UpdateDefaultUpdatedAt()
+		uluo.mutation.SetUpdatedAt(v)
+	}
+}
+
+func (uluo *UserLoginUpdateOne) sqlSave(ctx context.Context) (_node *UserLogin, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   userlogin.Table,
@@ -807,9 +817,9 @@ func (uluo *UserLoginUpdateOne) sqlSave(ctx context.Context) (ul *UserLogin, err
 			Column: userlogin.FieldIsp,
 		})
 	}
-	ul = &UserLogin{config: uluo.config}
-	_spec.Assign = ul.assignValues
-	_spec.ScanValues = ul.scanValues()
+	_node = &UserLogin{config: uluo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, uluo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userlogin.Label}
@@ -818,5 +828,5 @@ func (uluo *UserLoginUpdateOne) sqlSave(ctx context.Context) (ul *UserLogin, err
 		}
 		return nil, err
 	}
-	return ul, nil
+	return _node, nil
 }

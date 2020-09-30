@@ -54,23 +54,23 @@ func (ulq *UserLoginQuery) Order(o ...OrderFunc) *UserLoginQuery {
 
 // First returns the first UserLogin entity in the query. Returns *NotFoundError when no userlogin was found.
 func (ulq *UserLoginQuery) First(ctx context.Context) (*UserLogin, error) {
-	uls, err := ulq.Limit(1).All(ctx)
+	nodes, err := ulq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(uls) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{userlogin.Label}
 	}
-	return uls[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (ulq *UserLoginQuery) FirstX(ctx context.Context) *UserLogin {
-	ul, err := ulq.First(ctx)
+	node, err := ulq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return ul
+	return node
 }
 
 // FirstID returns the first UserLogin id in the query. Returns *NotFoundError when no id was found.
@@ -97,13 +97,13 @@ func (ulq *UserLoginQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only UserLogin entity in the query, returns an error if not exactly one entity was returned.
 func (ulq *UserLoginQuery) Only(ctx context.Context) (*UserLogin, error) {
-	uls, err := ulq.Limit(2).All(ctx)
+	nodes, err := ulq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(uls) {
+	switch len(nodes) {
 	case 1:
-		return uls[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{userlogin.Label}
 	default:
@@ -113,11 +113,11 @@ func (ulq *UserLoginQuery) Only(ctx context.Context) (*UserLogin, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (ulq *UserLoginQuery) OnlyX(ctx context.Context) *UserLogin {
-	ul, err := ulq.Only(ctx)
+	node, err := ulq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ul
+	return node
 }
 
 // OnlyID returns the only UserLogin id in the query, returns an error if not exactly one id was returned.
@@ -156,11 +156,11 @@ func (ulq *UserLoginQuery) All(ctx context.Context) ([]*UserLogin, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (ulq *UserLoginQuery) AllX(ctx context.Context) []*UserLogin {
-	uls, err := ulq.All(ctx)
+	nodes, err := ulq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return uls
+	return nodes
 }
 
 // IDs executes the query and returns a list of UserLogin ids.
@@ -362,7 +362,7 @@ func (ulq *UserLoginQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ulq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, userlogin.ValidColumn)
 			}
 		}
 	}
@@ -381,7 +381,7 @@ func (ulq *UserLoginQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ulq.order {
-		p(selector)
+		p(selector, userlogin.ValidColumn)
 	}
 	if offset := ulq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -616,8 +616,17 @@ func (ulgb *UserLoginGroupBy) BoolX(ctx context.Context) bool {
 }
 
 func (ulgb *UserLoginGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ulgb.fields {
+		if !userlogin.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := ulgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ulgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ulgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -630,7 +639,7 @@ func (ulgb *UserLoginGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ulgb.fields)+len(ulgb.fns))
 	columns = append(columns, ulgb.fields...)
 	for _, fn := range ulgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, userlogin.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ulgb.fields...)
 }
@@ -850,6 +859,11 @@ func (uls *UserLoginSelect) BoolX(ctx context.Context) bool {
 }
 
 func (uls *UserLoginSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range uls.fields {
+		if !userlogin.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := uls.sqlQuery().Query()
 	if err := uls.driver.Query(ctx, query, args, rows); err != nil {

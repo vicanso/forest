@@ -206,11 +206,11 @@ func (c *ConfigurationClient) Get(ctx context.Context, id int) (*Configuration, 
 
 // GetX is like Get, but panics if an error occurs.
 func (c *ConfigurationClient) GetX(ctx context.Context, id int) *Configuration {
-	co, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return co
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -294,11 +294,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -382,11 +382,11 @@ func (c *UserLoginClient) Get(ctx context.Context, id int) (*UserLogin, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserLoginClient) GetX(ctx context.Context, id int) *UserLogin {
-	ul, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ul
+	return obj
 }
 
 // Hooks returns the client hooks.
