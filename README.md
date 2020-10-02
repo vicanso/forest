@@ -35,10 +35,9 @@ docker run -d --restart=always \
 
 docker exec -it forest sh
 
-psql -U postgres
-CREATE DATABASE forest
-CREATE USER vicanso WITH PASSWORD 'A123456'
-GRANT ALL PRIVILEGES ON DATABASE forest to vicanso
+psql -c "CREATE DATABASE forest;" -U postgres
+psql -c "CREATE USER vicanso WITH PASSWORD 'A123456';" -U postgres
+psql -c "GRANT ALL PRIVILEGES ON DATABASE forest to vicanso;" -U postgres
 ```
 
 ## redis
@@ -48,6 +47,6 @@ docker pull redis:alpine
 
 docker run -d --restart=always \
   -p 6379:6379 \
-  -name=redis \
+  --name=redis \
   redis:alpine
 ```
