@@ -27,7 +27,7 @@ tidy:
 
 build:
 	packr2
-	go build -ldflags "-X main.Version=0.0.1 -X 'main.BuildedAt=`date`'" -o origin 
+	go build -ldflags "-X main.Version=0.0.1 -X 'main.BuildedAt=`date`'" -o forest 
 
 clean:
 	packr2 clean
