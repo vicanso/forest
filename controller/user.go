@@ -29,6 +29,7 @@ import (
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
+	"github.com/vicanso/forest/ent/userlogin"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
@@ -56,6 +57,11 @@ type (
 	userRoleListResp struct {
 		UserRoles []*schema.UserRoleInfo `json:"userRoles,omitempty"`
 	}
+	// userLoginListResp 用户登录列表响应
+	userLoginListResp struct {
+		UserLogins []*ent.UserLogin `json:"userLogins,omitempty"`
+		Count      int              `json:"count,omitempty"`
+	}
 
 	// userListParams 用户查询参数
 	userListParams struct {
@@ -65,6 +71,15 @@ type (
 		Role    string `json:"role,omitempty" validate:"omitempty,xUserRole"`
 		Group   string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
 		Status  string `json:"status,omitempty" validate:"omitempty,xStatus"`
+	}
+
+	// userLoginListParams 用户登录查询
+	userLoginListParams struct {
+		listParams
+
+		Begin   time.Time `json:"begin,omitempty"`
+		End     time.Time `json:"end,omitempty"`
+		Account string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
 	}
 
 	// userRegisterLoginParams 注册与登录参数
@@ -203,6 +218,13 @@ func init() {
 		ctrl.logout,
 	)
 
+	// 获取客户登录记录
+	g.GET(
+		"/v1/login-records",
+		shouldBeAdmin,
+		ctrl.listLoginRecord,
+	)
+
 	// 获取用户角色分组
 	noneSessionGroup.GET(
 		"/v1/roles",
@@ -330,6 +352,33 @@ func (params *userListParams) count(ctx context.Context) (count int, err error) 
 
 	query = params.where(query)
 
+	return query.Count(ctx)
+}
+
+// where 登录记录的where筛选
+func (params *userLoginListParams) where(query *ent.UserLoginQuery) *ent.UserLoginQuery {
+	if params.Account != "" {
+		query = query.Where(userlogin.AccountEQ(params.Account))
+	}
+	query = query.Where(userlogin.CreatedAtGTE(params.Begin))
+	query = query.Where(userlogin.CreatedAtLTE(params.End))
+	return query
+}
+
+// queryAll 查询所有的登录记录
+func (params *userLoginListParams) queryAll(ctx context.Context) (userLogins []*ent.UserLogin, err error) {
+	query := getEntClient().UserLogin.Query()
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+	return query.All(ctx)
+}
+
+// count 计算登录记录总数
+func (params *userLoginListParams) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().UserLogin.Query()
+	query = params.where(query)
 	return query.Count(ctx)
 }
 
@@ -654,6 +703,31 @@ func (*userCtrl) getRoleList(c *elton.Context) (err error) {
 	c.CacheMaxAge("1m")
 	c.Body = &userRoleListResp{
 		UserRoles: schema.GetUserRoleList(),
+	}
+	return
+}
+
+// listLoginRecord list login record
+func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
+	params := userLoginListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	userLogins, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = &userLoginListResp{
+		Count:      count,
+		UserLogins: userLogins,
 	}
 	return
 }

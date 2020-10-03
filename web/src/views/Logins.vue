@@ -26,8 +26,8 @@
             {{ scope.row.isp || "--" }}
           </template>
         </el-table-column>
-        <el-table-column prop="sessionId" key="sessionId" label="Session ID" />
-        <el-table-column prop="trackId" key="trackId" label="Track ID" />
+        <el-table-column prop="sessionID" key="sessionID" label="Session ID" />
+        <el-table-column prop="trackID" key="trackID" label="Track ID" />
         <el-table-column label="Forwarded For" width="120">
           <template slot-scope="scope">
             <el-tooltip v-if="scope.row.xForwardedFor">
@@ -117,9 +117,9 @@ export default {
   },
   computed: {
     ...mapState({
-      loginCount: state => state.user.loginList.count,
-      processing: state => state.user.loginListProcessing,
-      logins: state => state.user.loginList.data || []
+      loginCount: state => state.user.userLogins.count,
+      processing: state => state.user.userLoginListProcessing,
+      logins: state => state.user.userLogins.data || []
     })
   },
   methods: {
@@ -137,6 +137,7 @@ export default {
         query.begin = "";
         query.end = "";
       }
+      delete query.dateRange;
       try {
         await this.listUserLogins(query);
       } catch (err) {

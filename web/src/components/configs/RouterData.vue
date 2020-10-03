@@ -135,7 +135,14 @@ export default {
       this.handleChange();
     },
     handleChange() {
-      const { router, status, contentType, response, delaySeconds, url } = this.form;
+      const {
+        router,
+        status,
+        contentType,
+        response,
+        delaySeconds,
+        url
+      } = this.form;
       let value = "";
       if (router && status && contentType && response) {
         const [method, route] = router.split(" ");

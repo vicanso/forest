@@ -80,8 +80,8 @@ const state = {
   updateProcessing: false,
 
   // 用户登录
-  loginListProcessing: false,
-  loginList: {
+  userLoginListProcessing: false,
+  userLogins: {
     data: null,
     count: -1
   }
@@ -210,13 +210,13 @@ export default {
       Object.assign(state.info, data);
     },
     [mutationUserListLoginProcessing](state, processing) {
-      state.loginListProcessing = processing;
+      state.userLoginListProcessing = processing;
     },
-    [mutationUserListLogin](state, { logins = [], count }) {
+    [mutationUserListLogin](state, { userLogins = [], count = 0 }) {
       if (count >= 0) {
-        state.loginList.count = count;
+        state.userLogins.count = count;
       }
-      logins.forEach(item => {
+      userLogins.forEach(item => {
         item.createdAtDesc = formatDate(item.createdAt);
         const locations = [];
         ["country", "province", "city"].forEach(key => {
@@ -226,7 +226,7 @@ export default {
         });
         item.location = locations.join(" ") || "--";
       });
-      state.loginList.data = logins;
+      state.userLogins.data = userLogins;
     }
   },
   actions: {
@@ -359,6 +359,7 @@ export default {
         const { data } = await request.get(USERS_LOGINS, {
           params: queryOmitEmpty(params)
         });
+        console.dir(data);
         commit(mutationUserListLogin, data);
       } finally {
         commit(mutationUserListLoginProcessing, false);
