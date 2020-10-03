@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -41,6 +42,8 @@ var (
 )
 var (
 	initSchemaOnce sync.Once
+
+	maskRegExp = regexp.MustCompile(`(?i)password`)
 )
 
 // processingKeyAll 记录所有表的正在处理请求
@@ -153,7 +156,11 @@ func initSchemaHooks(c *ent.Client) {
 				if !ok {
 					continue
 				}
-				data[name] = value
+				if maskRegExp.MatchString(name) {
+					data[name] = "***"
+				} else {
+					data[name] = value
+				}
 			}
 
 			d := time.Since(startedAt)
