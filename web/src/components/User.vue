@@ -94,10 +94,10 @@ export default {
       this.id = Number(id);
     }
     try {
-      const { roles } = await this.listUserRole();
+      const { userRoles } = await this.listUserRole();
       const { statuses } = await this.listUserStatus();
       userRoles.length = 0;
-      userRoles.push(...roles);
+      userRoles.push(...userRoles)
       userStatuses.length = 0;
       userStatuses.push(...statuses);
       this.fields = fields;
