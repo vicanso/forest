@@ -54,6 +54,14 @@ type entProcessingStats struct {
 	data map[string]*atomic.Uint32
 }
 
+// EntEntListParams 公共的列表查询参数
+type EntListParams struct {
+	Limit  string `json:"limit,omitempty" validate:"required,xLimit"`
+	Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
+	Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
+	Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
+}
+
 var currentEntProcessingStats = new(entProcessingStats)
 
 // initClientX 初始化客户端与driver
@@ -86,6 +94,52 @@ func initClientX() (*entsql.Driver, *ent.Client) {
 	}
 	initSchemaHooks(c)
 	return driver, c
+}
+
+// GetLimit 获取limit的值
+func (params *EntListParams) GetLimit() int {
+	limit, _ := strconv.Atoi(params.Limit)
+	// 保证limit必须大于0
+	if limit <= 0 {
+		limit = 10
+	}
+	return limit
+}
+
+// GetOffset 获取offset的值
+func (params *EntListParams) GetOffset() int {
+	offset, _ := strconv.Atoi(params.Offset)
+	return offset
+}
+
+// GetOrders 获取排序的函数列表
+func (params *EntListParams) GetOrders() []ent.OrderFunc {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]ent.OrderFunc, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = ent.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = ent.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
+}
+
+// GetFields 获取选择的字段
+func (params *EntListParams) GetFields() []string {
+	if params.Fields == "" {
+		return nil
+	}
+	arr := strings.Split(params.Fields, ",")
+	result := make([]string, len(arr))
+	for index, item := range arr {
+		result[index] = strcase.ToSnake(item)
+	}
+	return result
 }
 
 // init 初始化统计
