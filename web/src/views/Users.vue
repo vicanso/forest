@@ -171,7 +171,6 @@ export default {
       userStatuses.push(...statuses);
       this.filterFields = filterFields;
     } catch (err) {
-      console.dir(err.stack);
       this.$message.error(err.message);
     } finally {
       this.inited = true;

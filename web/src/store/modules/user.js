@@ -111,7 +111,7 @@ function updateUserDesc(user) {
 async function listUserRole({ commit }) {
   if (state.roles) {
     return {
-      roles: state.roles
+      userRoles: state.roles
     };
   }
   commit(mutationUserListRoleProcessing, true);
@@ -359,7 +359,6 @@ export default {
         const { data } = await request.get(USERS_LOGINS, {
           params: queryOmitEmpty(params)
         });
-        console.dir(data);
         commit(mutationUserListLogin, data);
       } finally {
         commit(mutationUserListLoginProcessing, false);
