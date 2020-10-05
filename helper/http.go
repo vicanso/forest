@@ -42,8 +42,9 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 	if ht != nil {
 		reused = ht.Reused
 		addr = ht.Addr
-		use = ht.Stats().Total.String()
-		ms = int(ht.Stats().Total.Milliseconds())
+		timelineStats := ht.Stats()
+		use = timelineStats.String()
+		ms = int(timelineStats.Total.Milliseconds())
 	}
 	logger.Info("http request stats",
 		zap.String("service", serviceName),
@@ -51,6 +52,7 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 		zap.String("method", conf.Method),
 		zap.String("route", conf.Route),
 		zap.String("url", conf.URL),
+		zap.Any("params", conf.Params),
 		zap.Any("query", conf.Query),
 		zap.Int("status", resp.Status),
 		zap.String("addr", addr),
