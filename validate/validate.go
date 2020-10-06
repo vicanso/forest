@@ -70,6 +70,13 @@ func toString(fl validator.FieldLevel) (string, bool) {
 // 	return exists
 // }
 
+// newIsInString new is in string validator
+func newIsInString(values []string) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		return isInString(fl, values)
+	}
+}
+
 // isInString 判断是否在string数组中
 func isInString(fl validator.FieldLevel, values []string) bool {
 	value, ok := toString(fl)

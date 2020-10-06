@@ -14,13 +14,9 @@
 
 package validate
 
-import "github.com/go-playground/validator/v10"
-
 func init() {
-	buckes := []string{
+	buckets := []string{
 		"files",
 	}
-	Add("xFileBucket", func(fl validator.FieldLevel) bool {
-		return isInString(fl, buckes)
-	})
+	Add("xFileBucket", newIsInString(buckets))
 }
