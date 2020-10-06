@@ -4,9 +4,9 @@
     summary="针对应用时间Mock，用于测试环境中调整应用时间"
     :category="category"
     :defaultValue="defaultValue"
+    :backDisabled="true"
     v-if="!processing"
     :id="currentID"
-    :back="back"
   >
     <template v-slot:data="configProps">
       <MockTimeData
@@ -40,8 +40,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["listConfig"]),
-    back() {}
+    ...mapActions(["listConfig"])
   },
   async beforeMount() {
     this.processing = true;

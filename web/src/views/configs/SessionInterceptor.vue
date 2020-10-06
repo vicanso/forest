@@ -6,7 +6,7 @@
     :defaultValue="defaultValue"
     v-if="!processing"
     :id="currentID"
-    :back="back"
+    :backDisabled="true"
   >
     <template v-slot:data="configProps">
       <SessionInterceptorData
@@ -39,8 +39,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["listConfig"]),
-    back() {}
+    ...mapActions(["listConfig"])
   },
   async beforeMount() {
     this.processing = true;

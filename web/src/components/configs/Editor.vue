@@ -71,14 +71,14 @@
             </el-form-item>
           </el-col>
           <slot :form="form" name="data"></slot>
-          <el-col :span="12">
+          <el-col :span="primarySpan">
             <el-form-item>
               <el-button class="submit" type="primary" @click="submit">{{
                 submitText
               }}</el-button>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" v-if="!$props.backDisabled">
             <el-form-item>
               <el-button class="submit" @click="goBack">返回</el-button>
             </el-form-item>
@@ -108,7 +108,8 @@ export default {
     name: String,
     summary: String,
     // 返回函数
-    back: Function
+    back: Function,
+    backDisabled: Boolean
   },
   computed: {
     ...mapState({
@@ -125,9 +126,11 @@ export default {
   },
   data() {
     const { $props, $route } = this;
-    const { defaultValue } = $props;
+    const { defaultValue, backDisabled } = $props;
     const submitText = $route.query.id ? "更新" : "提交";
+    const primarySpan = backDisabled ? 24 : 12;
     return {
+      primarySpan,
       originalValue: null,
       fetching: false,
       submitText,

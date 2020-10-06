@@ -97,7 +97,7 @@ export default {
       const { userRoles } = await this.listUserRole();
       const { statuses } = await this.listUserStatus();
       userRoles.length = 0;
-      userRoles.push(...userRoles)
+      userRoles.push(...userRoles);
       userStatuses.length = 0;
       userStatuses.push(...statuses);
       this.fields = fields;
