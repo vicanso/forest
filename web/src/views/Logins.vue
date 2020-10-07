@@ -58,6 +58,7 @@
         layout="prev, pager, next, sizes"
         :current-page="currentPage"
         :page-size="query.limit"
+        :page-sizes="pageSizes"
         :total="loginCount"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -70,6 +71,7 @@ import { mapActions, mapState } from "vuex";
 import { today, yesterday, formatBegin, formatEnd } from "@/helpers/util";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
+import { PAGE_SIZES } from "@/constants/common";
 
 const defaultDateRange = [yesterday(), today()];
 const filterFields = [
@@ -103,13 +105,13 @@ export default {
     BaseFilter
   },
   data() {
-    const pageSizes = [10, 20, 30, 50];
     return {
       filterFields,
+      pageSizes: PAGE_SIZES,
       query: {
         dateRange: defaultDateRange,
         offset: 0,
-        limit: pageSizes[0],
+        limit: PAGE_SIZES[0],
         account: "",
         order: "-createdAt"
       }
