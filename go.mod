@@ -24,6 +24,7 @@ require (
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/shirou/gopsutil v2.20.9+incompatible
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.1

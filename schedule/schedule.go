@@ -24,6 +24,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var logger = log.Default()
+
 func init() {
 	c := cron.New()
 	_, _ = c.AddFunc("@every 5m", redisCheck)
@@ -31,13 +33,14 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
+	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	c.Start()
 }
 
 func redisCheck() {
 	err := helper.RedisPing()
 	if err != nil {
-		log.Default().Error("redis check fail",
+		logger.Error("redis check fail",
 			zap.Error(err),
 		)
 		service.AlarmError("redis check fail, " + err.Error())
@@ -48,7 +51,7 @@ func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
 	err := configSrv.Refresh()
 	if err != nil {
-		log.Default().Error("config refresh fail",
+		logger.Error("config refresh fail",
 			zap.Error(err),
 		)
 		service.AlarmError("config refresh fail, " + err.Error())
@@ -64,7 +67,7 @@ func redisStats() {
 func entCheck() {
 	err := helper.EntPing()
 	if err != nil {
-		log.Default().Error("ent check fail",
+		logger.Error("ent check fail",
 			zap.Error(err),
 		)
 		service.AlarmError("ent check fail, " + err.Error())
@@ -75,4 +78,15 @@ func entCheck() {
 func entStats() {
 	stats := helper.EntGetStats()
 	helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
+}
+
+// cpuUsageStats cpu使用率
+func cpuUsageStats() {
+	err := service.UpdateCPUUsage()
+	if err != nil {
+		logger.Error("update cpu usage fail",
+			zap.Error(err),
+		)
+		service.AlarmError("update cpu usage fail, " + err.Error())
+	}
 }

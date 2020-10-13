@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -38,7 +39,7 @@ import (
 )
 
 var (
-	defaultEntDriver, defaultEntClient = initClientX()
+	defaultEntDriver, defaultEntClient = initEntClientX()
 )
 var (
 	initSchemaOnce sync.Once
@@ -64,8 +65,8 @@ type EntListParams struct {
 
 var currentEntProcessingStats = new(entProcessingStats)
 
-// initClientX 初始化客户端与driver
-func initClientX() (*entsql.Driver, *ent.Client) {
+// initEntClientX 初始化客户端与driver
+func initEntClientX() (*entsql.Driver, *ent.Client) {
 	postgresConfig := config.GetPostgresConfig()
 
 	maskURI := postgresConfig.URI
@@ -210,6 +211,17 @@ func initSchemaHooks(c *ent.Client) {
 				if !ok {
 					continue
 				}
+				valueType := reflect.TypeOf(value)
+				maxString := 50
+				switch valueType.Kind() {
+				case reflect.String:
+					str := value.(string)
+					// 如果更新过长，则截断
+					if len(str) > maxString {
+						value = str[:maxString] + "..."
+					}
+				}
+
 				if maskRegExp.MatchString(name) {
 					data[name] = "***"
 				} else {
@@ -280,7 +292,7 @@ func EntPing() error {
 
 // EntInitSchema 初始化schema
 func EntInitSchema() (err error) {
-	// 只执行一次shcema初始化以及hook
+	// 只执行一次schema初始化以及hook
 	initSchemaOnce.Do(func() {
 		err = defaultEntClient.Schema.Create(context.Background())
 	})

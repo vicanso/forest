@@ -15,8 +15,10 @@
 package service
 
 import (
+	"os"
 	"runtime"
 
+	"github.com/shirou/gopsutil/process"
 	"go.uber.org/atomic"
 )
 
@@ -25,16 +27,29 @@ type (
 	Performance struct {
 		GoMaxProcs   int    `json:"goMaxProcs,omitempty"`
 		Concurrency  uint32 `json:"concurrency,omitempty"`
-		Sys          int    `json:"sys,omitempty"`
-		HeapSys      int    `json:"heapSys,omitempty"`
-		HeapInuse    int    `json:"heapInuse,omitempty"`
+		MemSys       int    `json:"memSys,omitempty"`
+		MemHeapSys   int    `json:"memHeapSys,omitempty"`
+		MemHeapInuse int    `json:"memHeapInuse,omitempty"`
 		RoutineCount int    `json:"routineCount,omitempty"`
+		CPUUsage     uint32 `json:"cpuUsage,omitempty"`
 	}
 )
 
 var (
 	concurrency atomic.Uint32
+	cpuUsage    atomic.Uint32
 )
+
+var currentProcess *process.Process
+
+func init() {
+	p, err := process.NewProcess(int32(os.Getpid()))
+	if err != nil {
+		panic(err)
+	}
+	currentProcess = p
+	_ = UpdateCPUUsage()
+}
 
 // GetPerformance 获取应用性能指标
 func GetPerformance() Performance {
@@ -44,10 +59,11 @@ func GetPerformance() Performance {
 	return Performance{
 		GoMaxProcs:   runtime.GOMAXPROCS(0),
 		Concurrency:  GetConcurrency(),
-		Sys:          int(m.Sys / mb),
-		HeapSys:      int(m.HeapSys / mb),
-		HeapInuse:    int(m.HeapInuse / mb),
+		MemSys:       int(m.Sys / mb),
+		MemHeapSys:   int(m.HeapSys / mb),
+		MemHeapInuse: int(m.HeapInuse / mb),
 		RoutineCount: runtime.NumGoroutine(),
+		CPUUsage:     cpuUsage.Load(),
 	}
 }
 
@@ -64,4 +80,14 @@ func DecreaseConcurrency() uint32 {
 // GetConcurrency 获取当前并发请求
 func GetConcurrency() uint32 {
 	return concurrency.Load()
+}
+
+// UpdateCPUUsage 更新cpu使用率
+func UpdateCPUUsage() error {
+	usage, err := currentProcess.Percent(0)
+	if err != nil {
+		return err
+	}
+	cpuUsage.Store(uint32(usage))
+	return nil
 }
