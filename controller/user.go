@@ -700,7 +700,7 @@ func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
 
 // getRoleList 获取用户角色列表
 func (*userCtrl) getRoleList(c *elton.Context) (err error) {
-	c.CacheMaxAge("1m")
+	c.CacheMaxAge(time.Minute)
 	c.Body = &userRoleListResp{
 		UserRoles: schema.GetUserRoleList(),
 	}

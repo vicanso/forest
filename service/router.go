@@ -124,7 +124,7 @@ func RouterGetConfig(method, route string) *RouterConfig {
 func InitRouterConcurrencyLimiter(routers []elton.RouterInfo) {
 	m := make(map[string]*RouterConcurrency)
 	for _, item := range routers {
-		m[item.Method+" "+item.Path] = &RouterConcurrency{}
+		m[item.Method+" "+item.Route] = &RouterConcurrency{}
 	}
 	currentRCLimiter.m = m
 }

@@ -107,7 +107,7 @@ func (*commonCtrl) ping(c *elton.Context) error {
 
 // getApplicationInfo 获取应用信息
 func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
-	c.CacheMaxAge("1m")
+	c.CacheMaxAge(time.Minute)
 	c.Body = &applicationInfoResp{
 		config.GetApplicationVersion(),
 		config.GetApplicationBuildedAt(),
@@ -122,7 +122,7 @@ func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 
 // getRouters 获取系统的路由
 func (*commonCtrl) getRouters(c *elton.Context) (err error) {
-	c.CacheMaxAge("1m")
+	c.CacheMaxAge(time.Minute)
 	c.Body = &routersResp{
 		Routers: c.Elton().GetRouters(),
 	}
@@ -159,7 +159,7 @@ func (*commonCtrl) getPerformance(c *elton.Context) (err error) {
 
 // listStatus 获取状态列表
 func (*commonCtrl) listStatus(c *elton.Context) (err error) {
-	c.CacheMaxAge("5m")
+	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &statusListResp{
 		Statuses: schema.GetStatusList(),
 	}

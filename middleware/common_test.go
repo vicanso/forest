@@ -127,7 +127,7 @@ func TestNewNoCacheWithCondition(t *testing.T) {
 	req := httptest.NewRequest("GET", "/?cache-control=no-cache", nil)
 	c := elton.NewContext(httptest.NewRecorder(), req)
 	c.Next = func() error {
-		c.CacheMaxAge("1m")
+		c.CacheMaxAge(time.Minute)
 		return nil
 	}
 	err := fn(c)
@@ -138,7 +138,7 @@ func TestNewNoCacheWithCondition(t *testing.T) {
 	req = httptest.NewRequest("GET", "/?cache-control=xxx", nil)
 	c = elton.NewContext(httptest.NewRecorder(), req)
 	c.Next = func() error {
-		c.CacheMaxAge("1m")
+		c.CacheMaxAge(time.Minute)
 		return nil
 	}
 	err = fn(c)
