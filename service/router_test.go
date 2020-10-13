@@ -27,11 +27,11 @@ func TestRouterLimiter(t *testing.T) {
 	InitRouterConcurrencyLimiter([]elton.RouterInfo{
 		{
 			Method: "GET",
-			Path:   "/",
+			Route:  "/",
 		},
 		{
 			Method: "GET",
-			Path:   "/users/me",
+			Route:  "/users/me",
 		},
 	})
 	rc := GetRouterConcurrencyLimiter()
