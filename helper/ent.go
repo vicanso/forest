@@ -215,9 +215,9 @@ func initSchemaHooks(c *ent.Client) {
 				maxString := 50
 				switch valueType.Kind() {
 				case reflect.String:
-					str := value.(string)
+					str, ok := value.(string)
 					// 如果更新过长，则截断
-					if len(str) > maxString {
+					if ok && len(str) > maxString {
 						value = str[:maxString] + "..."
 					}
 				}

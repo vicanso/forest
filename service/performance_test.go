@@ -30,5 +30,5 @@ func TestPerformanceConcurrency(t *testing.T) {
 func TestGetPerformance(t *testing.T) {
 	assert := assert.New(t)
 	p := GetPerformance()
-	assert.NotEmpty(p.Sys)
+	assert.NotEmpty(p.MemSys)
 }
