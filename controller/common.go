@@ -94,6 +94,13 @@ func init() {
 	g.GET("/performance", ctrl.getPerformance)
 	g.GET("/schema-statuses", ctrl.listStatus)
 	g.GET("/random-keys", ctrl.getRandomKeys)
+	// 获取系统prof指标
+	g.GET(
+		"/prof",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.getProf,
+	)
 }
 
 // ping 用于检测服务是否可用
@@ -183,5 +190,25 @@ func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
 	c.Body = &randomKeysResp{
 		Keys: result,
 	}
+	return
+}
+
+// getProf 获取prof信息
+func (*commonCtrl) getProf(c *elton.Context) (err error) {
+	d := 30 * time.Second
+	v := c.QueryParam("d")
+	if v != "" {
+		d, err = time.ParseDuration(v)
+		if err != nil {
+			return
+		}
+	}
+	result, err := profSrv.Get(d)
+	if err != nil {
+		return
+	}
+	c.SetHeader(elton.HeaderContentType, elton.MIMEBinary)
+	c.SetHeader("Content-Disposition", `attachment; filename="gprof"`)
+	c.BodyBuffer = result
 	return
 }

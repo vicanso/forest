@@ -86,7 +86,9 @@ var (
 	// 获取influx service
 	getInfluxSrv = helper.GetInfluxSrv
 	// 文件服务
-	fileSrv = new(service.FileSrv)
+	fileSrv = &service.FileSrv{}
+	// prof服务
+	profSrv = &service.ProfSrv{}
 )
 
 func newMagicalCaptchaValidate() elton.Handler {
