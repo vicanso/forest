@@ -429,7 +429,7 @@ func (*userCtrl) findByID(c *elton.Context) (err error) {
 		return
 	}
 	data, err := getEntClient().User.Query().
-		Where(user.IDEQ(id)).
+		Where(user.ID(id)).
 		First(c.Context())
 	if err != nil {
 		return
