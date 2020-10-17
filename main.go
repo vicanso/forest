@@ -173,17 +173,17 @@ func main() {
 
 	e := elton.New()
 	closeOnce := sync.Once{}
-	closeDeps := func() {
+	closeDepends := func() {
 		closeOnce.Do(func() {
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
 			helper.EntGetClient().Close()
 		})
 	}
-	defer closeDeps()
+	defer closeDepends()
 	// 非开发环境，监听信号退出
 	if !util.IsDevelopment() {
-		watchForClose(e, closeDeps)
+		watchForClose(e, closeDepends)
 	}
 
 	basicConfig := config.GetBasicConfig()
@@ -245,9 +245,9 @@ func main() {
 		Limiter: service.GetRouterConcurrencyLimiter(),
 	}), "rcl")
 
-	// etag与fresh的处理
+	// eTag与fresh的处理
 	e.UseWithName(M.NewDefaultFresh(), "fresh").
-		UseWithName(M.NewDefaultETag(), "etag")
+		UseWithName(M.NewDefaultETag(), "eTag")
 
 	// 对响应数据 c.Body 转换为相应的json响应
 	e.UseWithName(M.NewDefaultResponder(), "responder")

@@ -77,9 +77,9 @@ func init() {
 	}
 	g.GET("/static/*", M.NewStaticServe(sf, M.StaticServeConfig{
 		// 客户端缓存一年
-		MaxAge: 365 * 24 * 3600,
+		MaxAge: 365 * 24 * time.Hour,
 		// 缓存服务器缓存一个小时
-		SMaxAge:             60 * 60,
+		SMaxAge:             time.Hour,
 		DenyQueryString:     true,
 		DisableLastModified: true,
 		// 静态文件的etag则pike缓存生成
