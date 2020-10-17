@@ -24,7 +24,7 @@
 </template>
 <script>
 import { SIGNED_KEY } from "@/constants/config";
-import { CONFIG_EDITE_MODE } from "@/constants/route";
+import { CONFIG_EDIT_MODE } from "@/constants/route";
 import ConfigEditor from "@/components/configs/Editor.vue";
 import ConfigTable from "@/components/configs/Table.vue";
 import SignedKeyData from "@/components/configs/SignedKeyData.vue";
@@ -45,14 +45,14 @@ export default {
   },
   computed: {
     editMode() {
-      return this.$route.query.mode === CONFIG_EDITE_MODE;
+      return this.$route.query.mode === CONFIG_EDIT_MODE;
     }
   },
   methods: {
     add() {
       this.$router.push({
         query: {
-          mode: CONFIG_EDITE_MODE
+          mode: CONFIG_EDIT_MODE
         }
       });
     }

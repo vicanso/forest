@@ -12,7 +12,7 @@ export const CONFIG_ORDER_COMMISSION = "OrderCommission";
 export const CONFIG_MARKETING_GROUP = "MarketingGroup";
 export const CONFIG_SESSION_INTERCEPTOR = "SessionInterceptor";
 
-export const CONFIG_EDITE_MODE = "edit";
+export const CONFIG_EDIT_MODE = "edit";
 export const CONFIG_LIST_MODE = "list";
 
 export const USERS = "Users";

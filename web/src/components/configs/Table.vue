@@ -100,7 +100,7 @@
 </template>
 <script>
 import { mapActions, mapState } from "vuex";
-import { CONFIG_EDITE_MODE } from "@/constants/route";
+import { CONFIG_EDIT_MODE } from "@/constants/route";
 import { CONFIG_ENABLED } from "@/constants/config";
 
 export default {
@@ -159,7 +159,7 @@ export default {
     modify(item) {
       this.$router.push({
         query: {
-          mode: CONFIG_EDITE_MODE,
+          mode: CONFIG_EDIT_MODE,
           id: item.id
         }
       });

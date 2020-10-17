@@ -1,5 +1,5 @@
 <script>
-import { CONFIG_EDITE_MODE } from "@/constants/route";
+import { CONFIG_EDIT_MODE } from "@/constants/route";
 export default {
   name: "BaseTable",
   computed: {
@@ -8,7 +8,7 @@ export default {
       return Math.floor(offset / limit) + 1;
     },
     editMode() {
-      return this.$route.query.mode === CONFIG_EDITE_MODE;
+      return this.$route.query.mode === CONFIG_EDIT_MODE;
     }
   },
   methods: {
@@ -33,14 +33,14 @@ export default {
     add() {
       this.$router.push({
         query: {
-          mode: CONFIG_EDITE_MODE
+          mode: CONFIG_EDIT_MODE
         }
       });
     },
     modify(item) {
       this.$router.push({
         query: {
-          mode: CONFIG_EDITE_MODE,
+          mode: CONFIG_EDIT_MODE,
           id: item.id
         }
       });
