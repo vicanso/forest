@@ -50,15 +50,15 @@ func newContextAndUserSession() (*elton.Context, *service.UserSession) {
 	return c, us
 }
 
-func TestIsLogined(t *testing.T) {
+func TestIsLogin(t *testing.T) {
 	assert := assert.New(t)
 	c, us := newContextAndUserSession()
-	assert.False(isLogined(c))
+	assert.False(isLogin(c))
 	err := us.SetInfo(service.UserSessionInfo{
 		Account: "trexie",
 	})
 	assert.Nil(err)
-	assert.True(isLogined(c))
+	assert.True(isLogin(c))
 }
 
 func TestCheckLogin(t *testing.T) {

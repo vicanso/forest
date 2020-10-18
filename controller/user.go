@@ -214,7 +214,7 @@ func init() {
 	g.DELETE(
 		"/v1/me",
 		newTracker(cs.ActionLogout),
-		shouldBeLogined,
+		shouldBeLogin,
 		ctrl.logout,
 	)
 
@@ -679,7 +679,7 @@ func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
 		return
 	}
 	// 如果未登录，无法修改用户信息
-	if !us.IsLogined() {
+	if !us.IsLogin() {
 		err = errShouldLogin
 		return
 	}

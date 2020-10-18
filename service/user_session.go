@@ -37,7 +37,7 @@ type (
 		Roles     []string `json:"roles,omitempty"`
 		Groups    []string `json:"groups,omitempty"`
 		UpdatedAt string   `json:"updatedAt,omitempty"`
-		LoginedAt string   `json:"loginedAt,omitempty"`
+		LoginAt   string   `json:"loginAt,omitempty"`
 	}
 	// UserSession 用户session
 	UserSession struct {
@@ -76,8 +76,8 @@ func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
 	return info
 }
 
-// IsLogined 判断用户是否已登录
-func (us *UserSession) IsLogined() bool {
+// IsLogin 判断用户是否已登录
+func (us *UserSession) IsLogin() bool {
 	info, err := us.GetInfo()
 	if err != nil {
 		return false
@@ -87,8 +87,8 @@ func (us *UserSession) IsLogined() bool {
 
 // SetInfo 设置用户信息
 func (us *UserSession) SetInfo(info UserSessionInfo) (err error) {
-	if info.Account != "" && info.LoginedAt == "" {
-		info.LoginedAt = util.NowString()
+	if info.Account != "" && info.LoginAt == "" {
+		info.LoginAt = util.NowString()
 	}
 	info.UpdatedAt = util.NowString()
 	us.info = info

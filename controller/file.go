@@ -48,7 +48,7 @@ func init() {
 	g.POST(
 		"/v1",
 		loadUserSession,
-		shouldBeLogined,
+		shouldBeLogin,
 		ctrl.upload,
 	)
 }

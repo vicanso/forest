@@ -48,11 +48,11 @@ func TestUserSession(t *testing.T) {
 
 	t.Run("is logined", func(t *testing.T) {
 		us := newUserSession(`{}`)
-		assert.False(us.IsLogined())
+		assert.False(us.IsLogin())
 		us = newUserSession(`{
 			"account": "treexie"
 		}`)
-		assert.True(us.IsLogined())
+		assert.True(us.IsLogin())
 	})
 
 	t.Run("set info", func(t *testing.T) {
