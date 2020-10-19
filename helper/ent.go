@@ -61,6 +61,8 @@ type EntListParams struct {
 	Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
 	Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
 	Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
+	// IgnoreCount 忽略计算总数
+	IgnoreCount string `json:"ignoreCount,omitempty"`
 }
 
 var currentEntProcessingStats = new(entProcessingStats)
@@ -141,6 +143,11 @@ func (params *EntListParams) GetFields() []string {
 		result[index] = strcase.ToSnake(item)
 	}
 	return result
+}
+
+// Countable 判断是否需要计算总数
+func (params *EntListParams) Countable() bool {
+	return params.IgnoreCount == "" && params.GetOffset() == 0
 }
 
 // init 初始化统计

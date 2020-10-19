@@ -222,7 +222,7 @@ func (*configurationCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.GetOffset() == 0 {
+	if params.Countable() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return

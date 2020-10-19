@@ -47,7 +47,7 @@ type (
 	}
 )
 
-// GetUesrInfo 获取用户信息
+// GetUserInfo 获取用户信息
 func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 	if us.unmarshalDone {
 		info = us.info
