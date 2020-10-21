@@ -38,6 +38,9 @@ type (
 		NumGC         uint32        `json:"numGC,omitempty"`
 		RecentPause   string        `json:"recentPause,omitempty"`
 		RecentPauseNs time.Duration `json:"recentPauseNs,omitempty"`
+		PauseTotal    string        `json:"pauseTotal,omitempty"`
+		CPUBusy       string        `json:"cpuBusy,omitempty"`
+		Uptime        string        `json:"uptime,omitempty"`
 		PauseNs       [256]uint64   `json:"pauseNs,omitempty"`
 	}
 )
@@ -46,6 +49,7 @@ var (
 	concurrency atomic.Uint32
 	cpuUsage    atomic.Uint32
 )
+var startedAt = time.Now()
 
 var currentProcess *process.Process
 
@@ -65,6 +69,13 @@ func GetPerformance() Performance {
 	runtime.ReadMemStats(m)
 	seconds := int64(m.LastGC) / int64(time.Second)
 	recentPauseNs := time.Duration(int64(m.PauseNs[(m.NumGC+255)%256]))
+	pauseTotalNs := time.Duration(int64(m.PauseTotalNs))
+	cpuTimes, _ := currentProcess.Times()
+	cpuBusy := ""
+	if cpuTimes != nil {
+		busy := time.Duration(int64(cpuTimes.Total()-cpuTimes.Idle)) * time.Second
+		cpuBusy = busy.String()
+	}
 	return Performance{
 		GoMaxProcs:    runtime.GOMAXPROCS(0),
 		Concurrency:   GetConcurrency(),
@@ -78,6 +89,9 @@ func GetPerformance() Performance {
 		NumGC:         m.NumGC,
 		RecentPause:   recentPauseNs.String(),
 		RecentPauseNs: recentPauseNs,
+		PauseTotal:    pauseTotalNs.String(),
+		CPUBusy:       cpuBusy,
+		Uptime:        time.Since(startedAt).String(),
 		PauseNs:       m.PauseNs,
 	}
 }
