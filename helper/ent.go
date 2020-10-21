@@ -147,7 +147,7 @@ func (params *EntListParams) GetFields() []string {
 
 // Countable 判断是否需要计算总数
 func (params *EntListParams) Countable() bool {
-	return params.IgnoreCount == "" && params.GetOffset() == 0
+	return params.IgnoreCount == "true" && params.GetOffset() == 0
 }
 
 // init 初始化统计

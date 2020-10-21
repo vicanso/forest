@@ -36,7 +36,7 @@ var (
 	box = packr.New("config", "../configs")
 	env = os.Getenv("GO_ENV")
 
-	defaultViperX = loadConfigX()
+	defaultViperX = mustLoadConfig()
 
 	// 应用状态
 	applicationStatusAtom = atomic.NewInt32(ApplicationStatusStopped)
@@ -149,8 +149,8 @@ type (
 	}
 )
 
-// loadConfigX 加载配置，出错是则抛出panic
-func loadConfigX() *viperx.ViperX {
+// mustLoadConfig 加载配置，出错是则抛出panic
+func mustLoadConfig() *viperx.ViperX {
 	configType := "yml"
 	defaultViperX := viperx.New(configType)
 
@@ -173,8 +173,8 @@ func loadConfigX() *viperx.ViperX {
 	return defaultViperX
 }
 
-// validateX 对数据校验，如果出错则panic，仅用于初始化时的配置检查
-func validateX(v interface{}) {
+// mustValidate 对数据校验，如果出错则panic，仅用于初始化时的配置检查
+func mustValidate(v interface{}) {
 	err := validate.Do(v, nil)
 	if err != nil {
 		panic(err)
@@ -232,7 +232,7 @@ func GetBasicConfig() BasicConfig {
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 	}
-	validateX(&basicConfig)
+	mustValidate(&basicConfig)
 	return basicConfig
 }
 
@@ -246,7 +246,7 @@ func GetSessionConfig() SessionConfig {
 		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
 		TrackKey:   defaultViperX.GetString(prefix + "trackKey"),
 	}
-	validateX(&sessConfig)
+	mustValidate(&sessConfig)
 	return sessConfig
 }
 
@@ -299,7 +299,7 @@ func GetRedisConfig() RedisConfig {
 		MaxProcessing: uint32(maxProcessing),
 	}
 
-	validateX(&redisConfig)
+	mustValidate(&redisConfig)
 	return redisConfig
 }
 
@@ -309,7 +309,7 @@ func GetPostgresConfig() PostgresConfig {
 	postgresConfig := PostgresConfig{
 		URI: defaultViperX.GetString(prefix + "uri"),
 	}
-	validateX(&postgresConfig)
+	mustValidate(&postgresConfig)
 	return postgresConfig
 }
 
@@ -322,7 +322,7 @@ func GetMailConfig() MailConfig {
 		User:     defaultViperX.GetStringFromENV(prefix + "user"),
 		Password: defaultViperX.GetStringFromENV(prefix + "password"),
 	}
-	validateX(&mailConfig)
+	mustValidate(&mailConfig)
 	return mailConfig
 }
 
@@ -338,7 +338,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		FlushInterval: defaultViperX.GetDuration(prefix + "flushInterval"),
 		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
 	}
-	validateX(&influxdbConfig)
+	mustValidate(&influxdbConfig)
 	return influxdbConfig
 }
 
@@ -348,7 +348,7 @@ func GetAlarmConfig() AlarmConfig {
 	alarmConfig := AlarmConfig{
 		Receivers: defaultViperX.GetStringSlice(prefix + "receivers"),
 	}
-	validateX(&alarmConfig)
+	mustValidate(&alarmConfig)
 	return alarmConfig
 }
 
@@ -360,7 +360,7 @@ func GetLocationConfig() LocationConfig {
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
 		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
 	}
-	validateX(&locationConfig)
+	mustValidate(&locationConfig)
 	return locationConfig
 }
 
@@ -373,6 +373,6 @@ func GetMinioConfig() MinioConfig {
 		SecretAccessKey: defaultViperX.GetStringFromENV(prefix + "secretAccessKey"),
 		SSL:             defaultViperX.GetBool(prefix + "ssl"),
 	}
-	validateX(&minioConfig)
+	mustValidate(&minioConfig)
 	return minioConfig
 }
