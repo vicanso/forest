@@ -15,6 +15,8 @@
 package cs
 
 const (
+	// MeasurementPerformance 应用性能统计
+	MeasurementPerformance = "performance"
 	// MeasurementHTTPRequest http request统计
 	MeasurementHTTPRequest = "httpRequest"
 	// MeasurementRedisStats redis性能统计

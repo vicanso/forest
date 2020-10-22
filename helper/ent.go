@@ -34,6 +34,7 @@ import (
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/hook"
 	"github.com/vicanso/forest/ent/migrate"
+	"github.com/vicanso/forest/util"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 )
@@ -224,8 +225,8 @@ func initSchemaHooks(c *ent.Client) {
 				case reflect.String:
 					str, ok := value.(string)
 					// 如果更新过长，则截断
-					if ok && len(str) > maxString {
-						value = str[:maxString] + "..."
+					if ok {
+						value = util.CutRune(str, maxString)
 					}
 				}
 

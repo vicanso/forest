@@ -39,6 +39,7 @@ type (
 		RecentPause   string        `json:"recentPause,omitempty"`
 		RecentPauseNs time.Duration `json:"recentPauseNs,omitempty"`
 		PauseTotal    string        `json:"pauseTotal,omitempty"`
+		PauseTotalNs  time.Duration `json:"pauseTotalNs,omitempty"`
 		CPUBusy       string        `json:"cpuBusy,omitempty"`
 		Uptime        string        `json:"uptime,omitempty"`
 		PauseNs       [256]uint64   `json:"pauseNs,omitempty"`
@@ -90,6 +91,7 @@ func GetPerformance() Performance {
 		RecentPause:   recentPauseNs.String(),
 		RecentPauseNs: recentPauseNs,
 		PauseTotal:    pauseTotalNs.String(),
+		PauseTotalNs:  pauseTotalNs,
 		CPUBusy:       cpuBusy,
 		Uptime:        time.Since(startedAt).String(),
 		PauseNs:       m.PauseNs,
