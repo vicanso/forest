@@ -107,15 +107,12 @@ func newOnError(serviceName string) axios.OnError {
 		if conf.Response != nil {
 			code = conf.Response.Status
 		}
-		var he *hes.Error
-		if hes.IsError(err) {
-			he, _ = err.(*hes.Error)
-		} else {
-			he = hes.Wrap(err)
+		he := hes.Wrap(err)
+		if code >= http.StatusBadRequest {
 			he.StatusCode = code
 		}
 		// 如果未设置http响应码，则设置为500
-		if he.StatusCode == 0 {
+		if he.StatusCode < http.StatusBadRequest {
 			he.StatusCode = http.StatusInternalServerError
 		}
 

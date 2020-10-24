@@ -35,7 +35,7 @@ require (
 	github.com/vicanso/elton-compress v1.0.0
 	github.com/vicanso/elton-session v1.0.2
 	github.com/vicanso/go-axios v0.1.15
-	github.com/vicanso/hes v0.2.3
+	github.com/vicanso/hes v0.2.4
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/viperx v0.1.3
 	go.uber.org/atomic v1.7.0
@@ -43,7 +43,7 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20201016165138-7b1cca2348c0
+	golang.org/x/net v0.0.0-20201022231255-08b38378de70
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

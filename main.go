@@ -51,6 +51,9 @@ var (
 	BuildedAt string
 )
 
+// closeDepends 程序关闭时关闭依赖的服务
+var closeDepends func()
+
 func init() {
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
@@ -58,13 +61,33 @@ func init() {
 	}))
 	config.SetApplicationVersion(Version)
 	config.SetApplicationBuildedAt(BuildedAt)
+	closeOnce := sync.Once{}
+	closeDepends = func() {
+		closeOnce.Do(func() {
+			// 关闭influxdb，flush统计数据
+			helper.GetInfluxSrv().Close()
+			helper.EntGetClient().Close()
+		})
+	}
 }
 
 // 是否用户主动关闭
 var closedByUser = false
 
+func gracefulClose(e *elton.Elton) {
+	log.Default().Info("start to graceful close")
+	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
+	config.SetApplicationStatus(config.ApplicationStatusStopping)
+	// docker 在10秒内退出，因此设置8秒后退出
+	time.Sleep(5 * time.Second)
+	// 所有新的请求均返回出错
+	e.GracefulClose(3 * time.Second)
+	closeDepends()
+	os.Exit(0)
+}
+
 // watchForClose 监听信号关闭程序
-func watchForClose(e *elton.Elton, fn func()) {
+func watchForClose(e *elton.Elton) {
 	logger := log.Default()
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -74,14 +97,7 @@ func watchForClose(e *elton.Elton, fn func()) {
 				zap.String("signal", s.String()),
 			)
 			closedByUser = true
-			// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
-			config.SetApplicationStatus(config.ApplicationStatusStopping)
-			// docker 在10秒内退出，因此设置8秒后退出
-			time.Sleep(5 * time.Second)
-			// 所有新的请求均返回出错
-			e.GracefulClose(3 * time.Second)
-			fn()
-			os.Exit(0)
+			gracefulClose(e)
 		}
 	}()
 }
@@ -150,40 +166,32 @@ func newOnErrorHandler(e *elton.Elton) {
 			zap.Error(he.Err),
 		)
 		warnerException.Inc("exception", 1)
-		// TODO 对于ErrRecoverCategory panic导致的recover error，
-		// 如果程序部署为多集群高可用，则在发送告警之后，重启该实例
+		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
 			service.AlarmError("panic recover:" + string(he.ToJSON()))
+			gracefulClose(e)
 		}
 	})
 }
 
 func main() {
+	e := elton.New()
 	logger := log.Default()
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("panic error",
 				zap.Any("error", r),
 			)
-			// TODO 对于ErrRecoverCategory panic导致的recover error，
-			// 如果程序部署为多集群高可用，则在发送告警之后，重启该实例
 			service.AlarmError(fmt.Sprintf("panic recover:%v", r))
+			// panic类的异常都graceful close
+			gracefulClose(e)
 		}
 	}()
 
-	e := elton.New()
-	closeOnce := sync.Once{}
-	closeDepends := func() {
-		closeOnce.Do(func() {
-			// 关闭influxdb，flush统计数据
-			helper.GetInfluxSrv().Close()
-			helper.EntGetClient().Close()
-		})
-	}
 	defer closeDepends()
 	// 非开发环境，监听信号退出
 	if !util.IsDevelopment() {
-		watchForClose(e, closeDepends)
+		watchForClose(e)
 	}
 
 	basicConfig := config.GetBasicConfig()

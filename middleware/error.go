@@ -45,6 +45,8 @@ func NewError() elton.Handler {
 			he = hes.NewWithError(err)
 			he.StatusCode = http.StatusInternalServerError
 			he.Exception = true
+		} else {
+			he = he.Clone()
 		}
 		if he.StatusCode == 0 {
 			he.StatusCode = http.StatusInternalServerError
