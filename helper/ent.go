@@ -190,6 +190,18 @@ func initSchemaHooks(c *ent.Client) {
 		schemas[index] = name[:len(name)-1]
 	}
 	currentEntProcessingStats.init(schemas)
+	ignoredNameList := []string{
+		"updated_at",
+		"created_at",
+	}
+	isIgnored := func(name string) bool {
+		for _, item := range ignoredNameList {
+			if item == name {
+				return true
+			}
+		}
+		return false
+	}
 	// 禁止删除数据
 	c.Use(hook.Reject(ent.OpDelete | ent.OpDeleteOne))
 	// 数据库操作统计
@@ -212,7 +224,7 @@ func initSchemaHooks(c *ent.Client) {
 			data := make(map[string]interface{})
 			for _, name := range m.Fields() {
 				// 更新时间字段忽略
-				if name == "updated_at" {
+				if isIgnored(name) {
 					continue
 				}
 				value, ok := m.Field(name)
