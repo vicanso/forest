@@ -79,12 +79,13 @@ type TimeMixin struct {
 func (TimeMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
-			StructTag(`json:"createdAt,omitempty"`).
+			// 对于多个单词组成的，如果需要使用select，则需要添加sql tag
+			StructTag(`json:"createdAt,omitempty" sql:"created_at"`).
 			Immutable().
 			Default(time.Now).
 			Comment("创建时间，添加记录时由程序自动生成"),
 		field.Time("updated_at").
-			StructTag(`json:"updatedAt,omitempty"`).
+			StructTag(`json:"updatedAt,omitempty" sql:"updated_at"`).
 			Default(time.Now).
 			Immutable().
 			UpdateDefault(time.Now).

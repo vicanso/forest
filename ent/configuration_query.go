@@ -237,7 +237,7 @@ func (cq *ConfigurationQuery) Clone() *ConfigurationQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -263,7 +263,7 @@ func (cq *ConfigurationQuery) GroupBy(field string, fields ...string) *Configura
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //	}
 //
 //	client.Configuration.Query().

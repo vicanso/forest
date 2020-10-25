@@ -203,7 +203,7 @@ func initSchemaHooks(c *ent.Client) {
 			startedAt := time.Now()
 			result := 0
 			message := ""
-			value, err := next.Mutate(ctx, m)
+			mutateResult, err := next.Mutate(ctx, m)
 			// 如果失败，则记录出错信息
 			if err != nil {
 				result = 1
@@ -261,7 +261,7 @@ func initSchemaHooks(c *ent.Client) {
 				"result": strconv.Itoa(result),
 			}
 			GetInfluxSrv().Write(cs.MeasurementEntOP, fields, tags)
-			return value, err
+			return mutateResult, err
 		})
 	})
 }

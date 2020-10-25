@@ -14,13 +14,13 @@ import (
 
 // Configuration is the model entity for the Configuration schema.
 type Configuration struct {
-	config `json:"-"`
+	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
 	// Status holds the value of the "status" field.
 	Status schema.Status `json:"status,omitempty"`
 	// Name holds the value of the "name" field.
