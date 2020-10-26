@@ -223,7 +223,6 @@ func initSchemaHooks(c *ent.Client) {
 			}
 			data := make(map[string]interface{})
 			for _, name := range m.Fields() {
-				// 更新时间字段忽略
 				if isIgnored(name) {
 					continue
 				}

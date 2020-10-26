@@ -38,7 +38,8 @@ type (
 
 // ResetIPBlocker 重置IP拦截器的IP列表
 func ResetIPBlocker(ipList []string) {
-	list := ips.New()
+	// blocker 有读写锁，因此ips可以使用无锁
+	list := ips.NewWithoutMutex()
 	for _, value := range ipList {
 		_ = list.Add(value)
 	}

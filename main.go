@@ -134,6 +134,7 @@ func newOnErrorHandler(e *elton.Elton) {
 	warnerException.On(func(_ string, _ warner.Count) {
 		service.AlarmError("too many uncaught exception")
 	})
+	// 只有未被处理的error才会触发此回调
 	e.OnError(func(c *elton.Context, err error) {
 		he := hes.Wrap(err)
 

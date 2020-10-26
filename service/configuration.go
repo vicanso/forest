@@ -78,7 +78,7 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 		Where(configuration.Status(schema.StatusEnabled)).
 		Where(configuration.StartedAtLT(now)).
 		Where(configuration.EndedAtGT(now)).
-		Order(ent.Desc("updated_at")).
+		Order(ent.Desc(configuration.FieldUpdatedAt)).
 		All(ctx)
 }
 

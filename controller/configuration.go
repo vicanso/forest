@@ -265,9 +265,7 @@ func (*configurationCtrl) findByID(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	configuration, err := getEntClient().Configuration.Query().
-		Where(configuration.ID(id)).
-		First(c.Context())
+	configuration, err := getEntClient().Configuration.Get(c.Context(), id)
 	if err != nil {
 		return
 	}
