@@ -20,6 +20,7 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -73,6 +74,8 @@ type (
 		RequestLimit uint `validate:"required"`
 		// 应用名称
 		Name string `validate:"required,ascii"`
+		// PID文件
+		PidFile string `validate:"required"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
@@ -232,6 +235,12 @@ func GetBasicConfig() BasicConfig {
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 	}
+	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
+	pwd, _ := os.Getwd()
+	if pwd != "" {
+		pidFile = pwd + "/" + pidFile
+	}
+	basicConfig.PidFile = pidFile
 	mustValidate(&basicConfig)
 	return basicConfig
 }

@@ -16,9 +16,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -196,6 +198,15 @@ func main() {
 	}
 
 	basicConfig := config.GetBasicConfig()
+	go func() {
+		pidData := []byte(strconv.Itoa(os.Getpid()))
+		err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
+		if err != nil {
+			logger.Error("create pid file fail",
+				zap.Error(err),
+			)
+		}
+	}()
 
 	newOnErrorHandler(e)
 	// 启用耗时跟踪
