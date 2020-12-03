@@ -17,15 +17,15 @@ package helper
 import (
 	"time"
 
-	influxdb "github.com/influxdata/influxdb-client-go"
-	influxdbAPI "github.com/influxdata/influxdb-client-go/api"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	influxdbAPI "github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/vicanso/forest/config"
 	"go.uber.org/zap"
 )
 
 type (
 	InfluxSrv struct {
-		client influxdb.Client
+		client influxdb2.Client
 		writer influxdbAPI.WriteAPI
 	}
 )
@@ -39,7 +39,7 @@ func newInfluxSrvX() *InfluxSrv {
 
 		return new(InfluxSrv)
 	}
-	opts := influxdb.DefaultOptions()
+	opts := influxdb2.DefaultOptions()
 	// 设置批量提交的大小
 	opts.SetBatchSize(influxdbConfig.BatchSize)
 	// 如果定时提交间隔大于1秒，则设定定时提交间隔
@@ -47,6 +47,7 @@ func newInfluxSrvX() *InfluxSrv {
 		v := influxdbConfig.FlushInterval / time.Millisecond
 		opts.SetFlushInterval(uint(v))
 	}
+	opts.SetUseGZip(influxdbConfig.Gzip)
 	logger.Info("new influxdb client",
 		zap.String("uri", influxdbConfig.URI),
 		zap.String("org", influxdbConfig.Org),
@@ -55,7 +56,7 @@ func newInfluxSrvX() *InfluxSrv {
 		zap.String("token", influxdbConfig.Token[:5]+"..."),
 		zap.Duration("interval", influxdbConfig.FlushInterval),
 	)
-	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
+	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
 	newInfluxdbErrorLogger(writer)
 	return &InfluxSrv{
@@ -91,8 +92,7 @@ func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, t
 	} else {
 		now = time.Now()
 	}
-
-	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, now))
+	srv.writer.WritePoint(influxdb2.NewPoint(measurement, tags, fields, now))
 }
 
 // Close 关闭当前client

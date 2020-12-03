@@ -16,14 +16,13 @@ import (
 // ConfigurationDelete is the builder for deleting a Configuration entity.
 type ConfigurationDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ConfigurationMutation
-	predicates []predicate.Configuration
+	hooks    []Hook
+	mutation *ConfigurationMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (cd *ConfigurationDelete) Where(ps ...predicate.Configuration) *ConfigurationDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
 }
 
@@ -75,7 +74,7 @@ func (cd *ConfigurationDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := cd.predicates; len(ps) > 0 {
+	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

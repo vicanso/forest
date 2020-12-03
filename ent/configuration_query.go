@@ -86,8 +86,8 @@ func (cq *ConfigurationQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (cq *ConfigurationQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (cq *ConfigurationQuery) FirstIDX(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -218,6 +218,9 @@ func (cq *ConfigurationQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *ConfigurationQuery) Clone() *ConfigurationQuery {
+	if cq == nil {
+		return nil
+	}
 	return &ConfigurationQuery{
 		config:     cq.config,
 		limit:      cq.limit,

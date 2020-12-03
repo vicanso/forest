@@ -16,14 +16,13 @@ import (
 // UserLoginUpdate is the builder for updating UserLogin entities.
 type UserLoginUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserLoginMutation
-	predicates []predicate.UserLogin
+	hooks    []Hook
+	mutation *UserLoginMutation
 }
 
 // Where adds a new predicate for the builder.
 func (ulu *UserLoginUpdate) Where(ps ...predicate.UserLogin) *UserLoginUpdate {
-	ulu.predicates = append(ulu.predicates, ps...)
+	ulu.mutation.predicates = append(ulu.mutation.predicates, ps...)
 	return ulu
 }
 
@@ -212,7 +211,7 @@ func (ulu *UserLoginUpdate) Mutation() *UserLoginMutation {
 	return ulu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (ulu *UserLoginUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -283,7 +282,7 @@ func (ulu *UserLoginUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := ulu.predicates; len(ps) > 0 {
+	if ps := ulu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

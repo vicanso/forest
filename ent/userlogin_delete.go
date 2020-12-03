@@ -16,14 +16,13 @@ import (
 // UserLoginDelete is the builder for deleting a UserLogin entity.
 type UserLoginDelete struct {
 	config
-	hooks      []Hook
-	mutation   *UserLoginMutation
-	predicates []predicate.UserLogin
+	hooks    []Hook
+	mutation *UserLoginMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (uld *UserLoginDelete) Where(ps ...predicate.UserLogin) *UserLoginDelete {
-	uld.predicates = append(uld.predicates, ps...)
+	uld.mutation.predicates = append(uld.mutation.predicates, ps...)
 	return uld
 }
 
@@ -75,7 +74,7 @@ func (uld *UserLoginDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := uld.predicates; len(ps) > 0 {
+	if ps := uld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

@@ -21,10 +21,10 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-var defaultLogger = newLoggerX()
+var defaultLogger = mustNewLogger()
 
-// newLoggerX 初始化logger
-func newLoggerX() *zap.Logger {
+// mustNewLogger 初始化logger
+func mustNewLogger() *zap.Logger {
 
 	if util.IsDevelopment() {
 		c := zap.NewDevelopmentConfig()

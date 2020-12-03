@@ -12,6 +12,7 @@ Vue.config.productionTip = false;
 Vue.config.errorHandler = function(err, vm, info) {
   // TODO 错误异常上报
   const { tag } = vm.$vnode.componentOptions;
+
   console.error(err);
   console.info(vm);
   console.info(tag);

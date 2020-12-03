@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/vicanso/forest/ent/configuration"
+	"github.com/vicanso/forest/ent/predicate"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/ent/userlogin"
@@ -50,6 +51,7 @@ type ConfigurationMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Configuration, error)
+	predicates    []predicate.Configuration
 }
 
 var _ ent.Mutation = (*ConfigurationMutation)(nil)
@@ -819,6 +821,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1669,6 +1672,7 @@ type UserLoginMutation struct {
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*UserLogin, error)
+	predicates      []predicate.UserLogin
 }
 
 var _ ent.Mutation = (*UserLoginMutation)(nil)

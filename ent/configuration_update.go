@@ -18,14 +18,13 @@ import (
 // ConfigurationUpdate is the builder for updating Configuration entities.
 type ConfigurationUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *ConfigurationMutation
-	predicates []predicate.Configuration
+	hooks    []Hook
+	mutation *ConfigurationMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *ConfigurationUpdate) Where(ps ...predicate.Configuration) *ConfigurationUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -85,7 +84,7 @@ func (cu *ConfigurationUpdate) Mutation() *ConfigurationMutation {
 	return cu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ConfigurationUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -187,7 +186,7 @@ func (cu *ConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

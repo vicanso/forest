@@ -86,8 +86,8 @@ func (ulq *UserLoginQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (ulq *UserLoginQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (ulq *UserLoginQuery) FirstIDX(ctx context.Context) int {
 	id, err := ulq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -218,6 +218,9 @@ func (ulq *UserLoginQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (ulq *UserLoginQuery) Clone() *UserLoginQuery {
+	if ulq == nil {
+		return nil
+	}
 	return &UserLoginQuery{
 		config:     ulq.config,
 		limit:      ulq.limit,

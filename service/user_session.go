@@ -67,7 +67,8 @@ func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 	return
 }
 
-// MustGetInfo 获取用户信息，如果信息获取失败则触发panic
+// MustGetInfo 获取用户信息，如果信息获取失败则触发panic，
+// 如果前置中间件已保证是登录状态，可以使用此函数，否则不建议使用
 func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
 	info, err := us.GetInfo()
 	if err != nil {

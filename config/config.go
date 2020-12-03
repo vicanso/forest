@@ -128,6 +128,8 @@ type (
 		BatchSize uint `validate:"required,min=1,max=5000"`
 		// 间隔提交时长
 		FlushInterval time.Duration `validate:"required"`
+		// 是否启用gzip
+		Gzip bool
 		// 是否禁用
 		Disabled bool
 	}
@@ -345,6 +347,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		Token:         defaultViperX.GetStringFromENV(prefix + "token"),
 		BatchSize:     defaultViperX.GetUint(prefix + "batchSize"),
 		FlushInterval: defaultViperX.GetDuration(prefix + "flushInterval"),
+		Gzip:          defaultViperX.GetBool(prefix + "gzip"),
 		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
 	}
 	mustValidate(&influxdbConfig)
