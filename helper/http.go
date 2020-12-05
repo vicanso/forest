@@ -29,8 +29,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, map[string]interface{}) {
-	conf := resp.Config
+func getHTTPStats(serviceName string, conf *axios.Config) (map[string]string, map[string]interface{}) {
 
 	ht := conf.HTTPTrace
 
@@ -39,12 +38,16 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 	use := ""
 	ms := 0
 	id := conf.GetString(cs.CID)
+	status := -1
 	if ht != nil {
 		reused = ht.Reused
 		addr = ht.Addr
 		timelineStats := ht.Stats()
 		use = timelineStats.String()
 		ms = int(timelineStats.Total.Milliseconds())
+	}
+	if conf.Response != nil {
+		status = conf.Response.Status
 	}
 	logger.Info("http request stats",
 		zap.String("service", serviceName),
@@ -54,7 +57,7 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 		zap.String("url", conf.URL),
 		zap.Any("params", conf.Params),
 		zap.Any("query", conf.Query),
-		zap.Int("status", resp.Status),
+		zap.Int("status", status),
 		zap.String("addr", addr),
 		zap.Bool("reused", reused),
 		zap.String("use", use),
@@ -67,7 +70,7 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 	fields := map[string]interface{}{
 		"cid":    id,
 		"url":    conf.URL,
-		"status": resp.Status,
+		"status": status,
 		"addr":   addr,
 		"reused": reused,
 		"use":    ms,
@@ -78,7 +81,7 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 // newHTTPStats http stats
 func newHTTPStats(serviceName string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
-		tags, fields := getHTTPStats(serviceName, resp)
+		tags, fields := getHTTPStats(serviceName, resp.Config)
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
 		return
 	}
@@ -139,6 +142,12 @@ func newOnError(serviceName string) axios.OnError {
 			zap.String("url", conf.URL),
 			zap.String("error", err.Error()),
 		)
+		if conf.Response == nil {
+			// 对于无响应的异常，由于连接失败、超时等原因导致
+			tags, fields := getHTTPStats(serviceName, conf)
+			fields["error"] = err.Error()
+			GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
+		}
 		return
 	}
 }
