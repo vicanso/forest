@@ -78,12 +78,61 @@ func getHTTPStats(serviceName string, conf *axios.Config) (map[string]string, ma
 	return tags, fields
 }
 
-// newHTTPStats http stats
-func newHTTPStats(serviceName string) axios.ResponseInterceptor {
-	return func(resp *axios.Response) (err error) {
-		tags, fields := getHTTPStats(serviceName, resp.Config)
+func newOnDone(serviceName string) axios.OnDone {
+	return func(conf *axios.Config, resp *axios.Response, err error) {
+		ht := conf.HTTPTrace
+
+		reused := false
+		addr := ""
+		use := ""
+		ms := 0
+		id := conf.GetString(cs.CID)
+		status := -1
+		if ht != nil {
+			reused = ht.Reused
+			addr = ht.Addr
+			timelineStats := ht.Stats()
+			use = timelineStats.String()
+			ms = int(timelineStats.Total.Milliseconds())
+		}
+		if resp != nil {
+			status = conf.Response.Status
+		}
+
+		tags := map[string]string{
+			"service": serviceName,
+			"route":   conf.Route,
+			"method":  conf.Method,
+		}
+		fields := map[string]interface{}{
+			"cid":    id,
+			"url":    conf.URL,
+			"status": status,
+			"addr":   addr,
+			"reused": reused,
+			"use":    ms,
+		}
+		message := ""
+		if err != nil {
+			message = err.Error()
+			fields["error"] = err.Error()
+		}
+		logger.Info("http request stats",
+			zap.String("service", serviceName),
+			zap.String("cid", id),
+			zap.String("method", conf.Method),
+			zap.String("route", conf.Route),
+			zap.String("url", conf.URL),
+			zap.Any("params", conf.Params),
+			zap.Any("query", conf.Query),
+			zap.Int("status", status),
+			zap.String("addr", addr),
+			zap.Bool("reused", reused),
+			zap.String("use", use),
+			zap.String("error", message),
+		)
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
-		return
+
 	}
 }
 
@@ -105,7 +154,6 @@ func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 // newOnError 新建error的处理函数
 func newOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
-		id := conf.GetString(cs.CID)
 		code := -1
 		if conf.Response != nil {
 			code = conf.Response.Status
@@ -134,21 +182,7 @@ func newOnError(serviceName string) axios.OnError {
 			he.Extra["requestCURL"] = conf.CURL()
 			// TODO 是否非生产环境增加更多的信息，方便测试时确认问题
 		}
-		newErr = he
-		logger.Info("http error",
-			zap.String("service", serviceName),
-			zap.String("cid", id),
-			zap.String("method", conf.Method),
-			zap.String("url", conf.URL),
-			zap.String("error", err.Error()),
-		)
-		if conf.Response == nil {
-			// 对于无响应的异常，由于连接失败、超时等原因导致
-			tags, fields := getHTTPStats(serviceName, conf)
-			fields["error"] = err.Error()
-			GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
-		}
-		return
+		return newErr
 	}
 }
 
@@ -158,9 +192,10 @@ func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Inst
 		EnableTrace: true,
 		Timeout:     timeout,
 		OnError:     newOnError(serviceName),
+		OnDone:      newOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newHTTPStats(serviceName),
+			// newHTTPStats(serviceName),
 			newConvertResponseToError(serviceName),
 		},
 	})
