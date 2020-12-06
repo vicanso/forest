@@ -29,55 +29,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func getHTTPStats(serviceName string, conf *axios.Config) (map[string]string, map[string]interface{}) {
-
-	ht := conf.HTTPTrace
-
-	reused := false
-	addr := ""
-	use := ""
-	ms := 0
-	id := conf.GetString(cs.CID)
-	status := -1
-	if ht != nil {
-		reused = ht.Reused
-		addr = ht.Addr
-		timelineStats := ht.Stats()
-		use = timelineStats.String()
-		ms = int(timelineStats.Total.Milliseconds())
-	}
-	if conf.Response != nil {
-		status = conf.Response.Status
-	}
-	logger.Info("http request stats",
-		zap.String("service", serviceName),
-		zap.String("cid", id),
-		zap.String("method", conf.Method),
-		zap.String("route", conf.Route),
-		zap.String("url", conf.URL),
-		zap.Any("params", conf.Params),
-		zap.Any("query", conf.Query),
-		zap.Int("status", status),
-		zap.String("addr", addr),
-		zap.Bool("reused", reused),
-		zap.String("use", use),
-	)
-	tags := map[string]string{
-		"service": serviceName,
-		"route":   conf.Route,
-		"method":  conf.Method,
-	}
-	fields := map[string]interface{}{
-		"cid":    id,
-		"url":    conf.URL,
-		"status": status,
-		"addr":   addr,
-		"reused": reused,
-		"use":    ms,
-	}
-	return tags, fields
-}
-
 func newOnDone(serviceName string) axios.OnDone {
 	return func(conf *axios.Config, resp *axios.Response, err error) {
 		ht := conf.HTTPTrace
@@ -115,7 +66,7 @@ func newOnDone(serviceName string) axios.OnDone {
 		message := ""
 		if err != nil {
 			message = err.Error()
-			fields["error"] = err.Error()
+			fields["error"] = message
 		}
 		logger.Info("http request stats",
 			zap.String("service", serviceName),
