@@ -133,7 +133,7 @@ func newOnError(serviceName string) axios.OnError {
 			he.Extra["requestCURL"] = conf.CURL()
 			// TODO 是否非生产环境增加更多的信息，方便测试时确认问题
 		}
-		return newErr
+		return he
 	}
 }
 
@@ -146,7 +146,6 @@ func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Inst
 		OnDone:      newOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			// newHTTPStats(serviceName),
 			newConvertResponseToError(serviceName),
 		},
 	})
