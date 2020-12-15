@@ -28,6 +28,7 @@ type (
 	Performance struct {
 		GoMaxProcs    int           `json:"goMaxProcs,omitempty"`
 		Concurrency   uint32        `json:"concurrency,omitempty"`
+		ThreadCount   int32         `json:"threadCount,omitempty"`
 		MemSys        int           `json:"memSys,omitempty"`
 		MemHeapSys    int           `json:"memHeapSys,omitempty"`
 		MemHeapInuse  int           `json:"memHeapInuse,omitempty"`
@@ -77,9 +78,11 @@ func GetPerformance() Performance {
 		busy := time.Duration(int64(cpuTimes.Total()-cpuTimes.Idle)) * time.Second
 		cpuBusy = busy.String()
 	}
+	threadCount, _ := currentProcess.NumThreads()
 	return Performance{
 		GoMaxProcs:    runtime.GOMAXPROCS(0),
 		Concurrency:   GetConcurrency(),
+		ThreadCount:   threadCount,
 		MemSys:        int(m.Sys / mb),
 		MemHeapSys:    int(m.HeapSys / mb),
 		MemHeapInuse:  int(m.HeapInuse / mb),

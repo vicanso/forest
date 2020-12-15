@@ -125,6 +125,7 @@ func performanceStats() {
 		fields := map[string]interface{}{
 			"goMaxProcs":   data.GoMaxProcs,
 			"concurrency":  data.Concurrency,
+			"threadCount":  data.ThreadCount,
 			"memSys":       data.MemSys,
 			"memHeapSys":   data.MemHeapSys,
 			"memHeapInuse": data.MemHeapInuse,
