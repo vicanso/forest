@@ -30,7 +30,6 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/viperx"
-	"go.uber.org/atomic"
 )
 
 var (
@@ -38,13 +37,6 @@ var (
 	env = os.Getenv("GO_ENV")
 
 	defaultViperX = mustLoadConfig()
-
-	// 应用状态
-	applicationStatusAtom = atomic.NewInt32(ApplicationStatusStopped)
-	// 应用版本
-	applicationVersion string
-	// 应用构建时间
-	applicationBuildedAt string
 )
 
 const (
@@ -54,15 +46,6 @@ const (
 	Test = "test"
 	// Production 生产环境下的环境变量
 	Production = "production"
-)
-
-const (
-	// ApplicationStatusStopped 应用停止
-	ApplicationStatusStopped int32 = iota + 1
-	// ApplicationStatusRunning 应用运行中
-	ApplicationStatusRunning
-	// ApplicationStatusStopping 应用正在停止
-	ApplicationStatusStopping
 )
 
 type (
@@ -192,41 +175,6 @@ func GetENV() string {
 		return Dev
 	}
 	return env
-}
-
-// SetApplicationStatus 设置应用运行状态
-func SetApplicationStatus(status int32) {
-	applicationStatusAtom.Store(status)
-}
-
-// GetApplicationStatus 获取应用运行状态
-func GetApplicationStatus() int32 {
-	return applicationStatusAtom.Load()
-}
-
-// ApplicationIsRunning 判断应用是否正在运行
-func ApplicationIsRunning() bool {
-	return applicationStatusAtom.Load() == ApplicationStatusRunning
-}
-
-// GetApplicationVersion 获取应用版本号
-func GetApplicationVersion() string {
-	return applicationVersion
-}
-
-// SetApplicationVersion 设置应用版本号
-func SetApplicationVersion(v string) {
-	applicationVersion = v
-}
-
-// GetApplicationBuildedAt 获取应用构建时间
-func GetApplicationBuildedAt() string {
-	return applicationBuildedAt
-}
-
-// SetApplicationBuildedAt 设置应用构建时间
-func SetApplicationBuildedAt(v string) {
-	applicationBuildedAt = v
 }
 
 // GetBasicConfig 获取基本配置信息

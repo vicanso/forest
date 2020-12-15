@@ -17,7 +17,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -42,8 +41,6 @@ import (
 	"github.com/vicanso/hes"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 var (
@@ -61,8 +58,8 @@ func init() {
 		value := fmt.Sprintf(format, args...)
 		log.Default().Info(value)
 	}))
-	config.SetApplicationVersion(Version)
-	config.SetApplicationBuildedAt(BuildedAt)
+	service.SetApplicationVersion(Version)
+	service.SetApplicationBuildedAt(BuildedAt)
 	closeOnce := sync.Once{}
 	closeDepends = func() {
 		closeOnce.Do(func() {
@@ -79,7 +76,7 @@ var closedByUser = false
 func gracefulClose(e *elton.Elton) {
 	log.Default().Info("start to graceful close")
 	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
-	config.SetApplicationStatus(config.ApplicationStatusStopping)
+	service.SetApplicationStatus(service.ApplicationStatusStopping)
 	// docker 在10秒内退出，因此设置8秒后退出
 	time.Sleep(5 * time.Second)
 	// 所有新的请求均返回出错
@@ -143,9 +140,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		if he.Extra == nil {
 			he.Extra = make(map[string]interface{})
 		}
-		if !util.IsProduction() {
-			he.Extra["stack"] = util.GetStack(5)
-		}
+		stack := util.GetStack(5)
 		ip := c.RealIP()
 		uri := c.Request.RequestURI
 
@@ -166,6 +161,7 @@ func newOnErrorHandler(e *elton.Elton) {
 			zap.String("ip", ip),
 			zap.String("route", c.Route),
 			zap.String("uri", uri),
+			zap.Strings("stack", stack),
 			zap.Error(he.Err),
 		)
 		warnerException.Inc("exception", 1)
@@ -292,12 +288,13 @@ func main() {
 		return
 	}
 
-	config.SetApplicationStatus(config.ApplicationStatusRunning)
+	service.SetApplicationStatus(service.ApplicationStatusRunning)
 
 	// http1与http2均支持
-	e.Server = &http.Server{
-		Handler: h2c.NewHandler(e, &http2.Server{}),
-	}
+	// 一般后端服务可以不需要启用
+	// e.Server = &http.Server{
+	// 	Handler: h2c.NewHandler(e, &http2.Server{}),
+	// }
 	logger.Info("server will listen on " + basicConfig.Listen)
 	err = e.ListenAndServe(basicConfig.Listen)
 	// 如果出错而且非主动关闭，则发送告警

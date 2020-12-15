@@ -105,7 +105,7 @@ func init() {
 
 // ping 用于检测服务是否可用
 func (*commonCtrl) ping(c *elton.Context) error {
-	if !config.ApplicationIsRunning() {
+	if !service.ApplicationIsRunning() {
 		return errAppIsNotRunning
 	}
 	c.BodyBuffer = bytes.NewBufferString("pong")
@@ -116,8 +116,8 @@ func (*commonCtrl) ping(c *elton.Context) error {
 func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &applicationInfoResp{
-		config.GetApplicationVersion(),
-		config.GetApplicationBuildedAt(),
+		service.GetApplicationVersion(),
+		service.GetApplicationBuildedAt(),
 		time.Since(applicationStartedAt).String(),
 		runtime.GOOS,
 		runtime.Version(),
