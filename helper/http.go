@@ -16,8 +16,10 @@ package helper
 
 import (
 	"errors"
+	"net"
 	"net/http"
-	"net/url"
+	"os"
+	"syscall"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -27,6 +29,15 @@ import (
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
+)
+
+const (
+	httpErrCategoryDNS     = "dns"
+	httpErrCategoryTimeout = "timeout"
+	httpErrCategoryAddr    = "addr"
+	httpErrCategoryAborted = "aborted"
+	httpErrCategoryRefused = "refused"
+	httpErrCategoryReset   = "reset"
 )
 
 func newOnDone(serviceName string) axios.OnDone {
@@ -67,6 +78,10 @@ func newOnDone(serviceName string) axios.OnDone {
 		if err != nil {
 			message = err.Error()
 			fields["error"] = message
+			errCategory := getErrorCategory(err)
+			if errCategory != "" {
+				fields["errCategory"] = errCategory
+			}
 		}
 		logger.Info("http request stats",
 			zap.String("service", serviceName),
@@ -102,6 +117,47 @@ func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	}
 }
 
+// getErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
+func getErrorCategory(err error) string {
+
+	netErr, ok := err.(net.Error)
+	if ok && netErr.Timeout() {
+		return httpErrCategoryTimeout
+	}
+
+	var dnsErr *net.DNSError
+	if errors.As(err, &dnsErr) {
+		return httpErrCategoryDNS
+	}
+	var addrErr *net.AddrError
+	if errors.As(err, &addrErr) {
+		return httpErrCategoryAddr
+	}
+
+	opErr, ok := netErr.(*net.OpError)
+	if !ok {
+		return ""
+	}
+	switch e := opErr.Err.(type) {
+	// 针对以下几种系统调用返回对应类型
+	case *os.SyscallError:
+		if no, ok := e.Err.(syscall.Errno); ok {
+			switch no {
+			case syscall.ECONNREFUSED:
+				return httpErrCategoryRefused
+			case syscall.ECONNABORTED:
+				return httpErrCategoryAborted
+			case syscall.ECONNRESET:
+				return httpErrCategoryReset
+			case syscall.ETIMEDOUT:
+				return httpErrCategoryTimeout
+			}
+		}
+	}
+
+	return ""
+}
+
 // newOnError 新建error的处理函数
 func newOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
@@ -122,11 +178,8 @@ func newOnError(serviceName string) axios.OnError {
 			he.Extra = make(map[string]interface{})
 		}
 
-		// 请求超时
-		e, ok := err.(*url.Error)
-		if ok && e.Timeout() {
-			he.Extra["category"] = "timeout"
-		}
+		he.Category = getErrorCategory(err)
+
 		if !util.IsProduction() {
 			he.Extra["requestRoute"] = conf.Route
 			he.Extra["requestService"] = serviceName
