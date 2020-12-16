@@ -40,7 +40,7 @@ const (
 	httpErrCategoryReset   = "reset"
 )
 
-func newOnDone(serviceName string) axios.OnDone {
+func newHTTPOnDone(serviceName string) axios.OnDone {
 	return func(conf *axios.Config, resp *axios.Response, err error) {
 		ht := conf.HTTPTrace
 
@@ -78,7 +78,7 @@ func newOnDone(serviceName string) axios.OnDone {
 		if err != nil {
 			message = err.Error()
 			fields["error"] = message
-			errCategory := getErrorCategory(err)
+			errCategory := getHTTPErrorCategory(err)
 			if errCategory != "" {
 				fields["errCategory"] = errCategory
 			}
@@ -97,13 +97,13 @@ func newOnDone(serviceName string) axios.OnDone {
 			zap.String("use", use),
 			zap.String("error", message),
 		)
-		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
+		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
 
 	}
 }
 
-// newConvertResponseToError 将http响应码为>=400的转换为出错
-func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
+// newHTTPConvertResponseToError 将http响应码为>=400的转换为出错
+func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
@@ -117,8 +117,8 @@ func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	}
 }
 
-// getErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
-func getErrorCategory(err error) string {
+// getHTTPErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
+func getHTTPErrorCategory(err error) string {
 
 	netErr, ok := err.(net.Error)
 	if ok && netErr.Timeout() {
@@ -158,8 +158,8 @@ func getErrorCategory(err error) string {
 	return ""
 }
 
-// newOnError 新建error的处理函数
-func newOnError(serviceName string) axios.OnError {
+// newHTTPOnError 新建error的处理函数
+func newHTTPOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
 		code := -1
 		if conf.Response != nil {
@@ -178,7 +178,7 @@ func newOnError(serviceName string) axios.OnError {
 			he.Extra = make(map[string]interface{})
 		}
 
-		he.Category = getErrorCategory(err)
+		he.Category = getHTTPErrorCategory(err)
 
 		if !util.IsProduction() {
 			he.Extra["requestRoute"] = conf.Route
@@ -190,16 +190,16 @@ func newOnError(serviceName string) axios.OnError {
 	}
 }
 
-// NewInstance 新建实例
-func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
+// NewHTTPInstance 新建实例
+func NewHTTPInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
 	return axios.NewInstance(&axios.InstanceConfig{
 		EnableTrace: true,
 		Timeout:     timeout,
-		OnError:     newOnError(serviceName),
-		OnDone:      newOnDone(serviceName),
+		OnError:     newHTTPOnError(serviceName),
+		OnDone:      newHTTPOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newConvertResponseToError(serviceName),
+			newHTTPConvertResponseToError(serviceName),
 		},
 	})
 }

@@ -30,7 +30,7 @@ func TestHTTPStats(t *testing.T) {
 	assert := assert.New(t)
 
 	data := []byte("abcd")
-	ins := NewInstance("test", "https://test.com", time.Second)
+	ins := NewHTTPInstance("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 200,
 		Data:   data,
@@ -45,7 +45,7 @@ func TestHTTPStats(t *testing.T) {
 
 func TestConvertResponseToError(t *testing.T) {
 	assert := assert.New(t)
-	fn := newConvertResponseToError("test")
+	fn := newHTTPConvertResponseToError("test")
 	data := []byte(`{
 		"message": "error message"
 	}`)
@@ -55,7 +55,7 @@ func TestConvertResponseToError(t *testing.T) {
 	})
 	assert.Equal("error message", err.Error())
 
-	ins := NewInstance("test", "https://test.com", time.Second)
+	ins := NewHTTPInstance("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 400,
 		Data:   data,
@@ -72,7 +72,7 @@ func TestOnError(t *testing.T) {
 	data := []byte(`{
 		"message": "error message"
 	}`)
-	ins := NewInstance("test", "https://test.com", time.Second)
+	ins := NewHTTPInstance("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 400,
 		Data:   data,

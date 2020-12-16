@@ -62,6 +62,7 @@ var (
 
 // IncConcurrency 当前路由处理数+1
 func (l *rcLimiter) IncConcurrency(key string) (current uint32, max uint32) {
+	// 该map仅初始化一次，因此无需要考虑锁
 	r, ok := l.m[key]
 	if !ok {
 		return

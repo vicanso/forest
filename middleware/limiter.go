@@ -79,7 +79,7 @@ func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) elton.H
 	})
 }
 
-// NewConcurrentLimitWithDone 创建并发限制中间件，且带done函数
+// NewConcurrentLimitWithDone 创建并发限制中间件，完成时则执行done清除
 func NewConcurrentLimitWithDone(keys []string, ttl time.Duration, prefix string) elton.Handler {
 	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
 		NotAllowEmpty: true,

@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	defaultRedisClient, defaultRedisHook = newRedisClientX()
+	defaultRedisClient, defaultRedisHook = mustNewRedisClient()
 	// redisNoop 无操作的空函数
 	redisNoop = func() error {
 		return nil
@@ -71,7 +71,7 @@ type (
 	}
 )
 
-func newRedisClientX() (*redis.Client, *redisHook) {
+func mustNewRedisClient() (*redis.Client, *redisHook) {
 	redisConfig := config.GetRedisConfig()
 	logger.Info("connect to redis",
 		zap.String("addr", redisConfig.Addr),
@@ -108,7 +108,7 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 			"use":   int(d.Milliseconds()),
 			"error": err,
 		}
-		GetInfluxSrv().Write(cs.MeasurementRedisStats, fields, tags)
+		GetInfluxSrv().Write(cs.MeasurementRedisStats, tags, fields)
 	}
 }
 

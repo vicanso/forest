@@ -68,7 +68,7 @@ func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 }
 
 // MustGetInfo 获取用户信息，如果信息获取失败则触发panic，
-// 如果前置中间件已保证是登录状态，可以使用此函数，否则不建议使用
+// 如果前置中间件已保证是登录状态，可以使用此函数，否则禁止使用
 func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
 	info, err := us.GetInfo()
 	if err != nil {
@@ -88,6 +88,7 @@ func (us *UserSession) IsLogin() bool {
 
 // SetInfo 设置用户信息
 func (us *UserSession) SetInfo(info UserSessionInfo) (err error) {
+	// 登录时设置登录时间
 	if info.Account != "" && info.LoginAt == "" {
 		info.LoginAt = util.NowString()
 	}
@@ -110,7 +111,7 @@ func (us *UserSession) Destroy() error {
 	return us.se.Destroy()
 }
 
-// Refresh 刷新用户sesion ttl
+// Refresh 刷新用户session ttl
 func (us *UserSession) Refresh() error {
 	return us.se.Refresh()
 }

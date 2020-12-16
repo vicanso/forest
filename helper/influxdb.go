@@ -30,10 +30,10 @@ type (
 	}
 )
 
-var defaultInfluxSrv = newInfluxSrvX()
+var defaultInfluxSrv = mustNewInfluxSrv()
 
-// newInfluxSrvX 创建新的influx服务
-func newInfluxSrvX() *InfluxSrv {
+// mustNewInfluxSrv 创建新的influx服务
+func mustNewInfluxSrv() *InfluxSrv {
 	influxdbConfig := config.GetInfluxdbConfig()
 	if influxdbConfig.Disabled {
 
@@ -43,7 +43,7 @@ func newInfluxSrvX() *InfluxSrv {
 	// 设置批量提交的大小
 	opts.SetBatchSize(influxdbConfig.BatchSize)
 	// 如果定时提交间隔大于1秒，则设定定时提交间隔
-	if influxdbConfig.FlushInterval > time.Millisecond {
+	if influxdbConfig.FlushInterval > time.Second {
 		v := influxdbConfig.FlushInterval / time.Millisecond
 		opts.SetFlushInterval(uint(v))
 	}
@@ -58,7 +58,7 @@ func newInfluxSrvX() *InfluxSrv {
 	)
 	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
-	newInfluxdbErrorLogger(writer)
+	go newInfluxdbErrorLogger(writer)
 	return &InfluxSrv{
 		client: c,
 		writer: writer,
@@ -67,13 +67,11 @@ func newInfluxSrvX() *InfluxSrv {
 
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
 func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
-	go func() {
-		for err := range writer.Errors() {
-			logger.Error("influxdb write fail",
-				zap.Error(err),
-			)
-		}
-	}()
+	for err := range writer.Errors() {
+		logger.Error("influxdb write fail",
+			zap.Error(err),
+		)
+	}
 }
 
 // GetInfluxSrv 获取默认的influxdb服务
@@ -82,7 +80,7 @@ func GetInfluxSrv() *InfluxSrv {
 }
 
 // Write 写入数据
-func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string, ts ...time.Time) {
+func (srv *InfluxSrv) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
 	if srv.writer == nil {
 		return
 	}

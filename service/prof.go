@@ -25,9 +25,9 @@ import (
 type ProfSrv struct{}
 
 func (srv *ProfSrv) Get(d time.Duration) (result *bytes.Buffer, err error) {
-	// 禁止拉取超过5分钟的prof
-	if d > 5*time.Minute {
-		err = errors.New("duration should be less than 5m")
+	// 禁止拉取超过1分钟的prof
+	if d > 1*time.Minute {
+		err = errors.New("duration should be less than 1m")
 		return
 	}
 	result = &bytes.Buffer{}

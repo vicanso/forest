@@ -20,16 +20,16 @@ import (
 )
 
 func TestInfluxWrite(t *testing.T) {
-	GetInfluxSrv().Write("test", map[string]interface{}{
+	GetInfluxSrv().Write("test", map[string]string{
+		"type": "vip",
+	}, map[string]interface{}{
 		"name":  "test",
 		"count": 1,
-	}, map[string]string{
-		"type": "vip",
 	})
-	GetInfluxSrv().Write("test", map[string]interface{}{
+	GetInfluxSrv().Write("test", map[string]string{
+		"type": "vip",
+	}, map[string]interface{}{
 		"name":  "test",
 		"count": 1,
-	}, map[string]string{
-		"type": "vip",
 	}, time.Now())
 }

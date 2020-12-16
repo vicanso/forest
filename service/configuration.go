@@ -104,6 +104,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		case schema.ConfigurationCategoryBlockIP:
 			blockIPList = append(blockIPList, item.Data)
 		case schema.ConfigurationCategorySignedKey:
+			// 按更新时间排序，因此如果已获取则不需要再更新
 			if len(signedKeys) == 0 {
 				signedKeys = strings.Split(item.Data, ",")
 			}
@@ -112,7 +113,10 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		case schema.ConfigurationCategoryRouter:
 			routerConfigs = append(routerConfigs, item.Data)
 		case schema.ConfigurationCategorySessionInterceptor:
-			sessionInterceptorValue = item.Data
+			// 按更新时间排序，因此如果已获取则不需要再更新
+			if sessionInterceptorValue == "" {
+				sessionInterceptorValue = item.Data
+			}
 		}
 	}
 

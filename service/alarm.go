@@ -24,16 +24,14 @@ import (
 )
 
 var (
-	sendingMailMutex = sync.Mutex{}
+	sendingMailMutex = &sync.Mutex{}
+	newMailOnce      = &sync.Once{}
 )
 
 var (
 	defaultMailDialer *gomail.Dialer
 )
 
-var (
-	newMailOnce = new(sync.Once)
-)
 var (
 	basicInfo   = config.GetBasicConfig()
 	alarmConfig = config.GetAlarmConfig()

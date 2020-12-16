@@ -148,12 +148,12 @@ func newOnErrorHandler(e *elton.Elton) {
 		he.Extra["uri"] = uri
 
 		// 记录exception
-		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]interface{}{
-			"ip":  ip,
-			"uri": uri,
-		}, map[string]string{
+		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
 			"category": "routeError",
 			"route":    c.Route,
+		}, map[string]interface{}{
+			"ip":  ip,
+			"uri": uri,
 		})
 
 		// 可以针对实际场景输出更多的日志信息

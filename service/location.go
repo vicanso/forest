@@ -31,7 +31,7 @@ const (
 // newLocationInstance 初始化location的实例
 func newLocationInstance() *axios.Instance {
 	locationConfig := config.GetLocationConfig()
-	return helper.NewInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
+	return helper.NewHTTPInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
 // Location location

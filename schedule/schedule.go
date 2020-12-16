@@ -48,17 +48,18 @@ func init() {
 func doTask(desc string, fn taskFn) {
 	startedAt := time.Now()
 	err := fn()
+	use := time.Since(startedAt)
 	if err != nil {
 		logger.Error(desc+" fail",
 			zap.String("category", "schedule"),
-			zap.Duration("use", time.Since(startedAt)),
+			zap.Duration("use", use),
 			zap.Error(err),
 		)
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
 		logger.Info(desc+" success",
 			zap.String("category", "schedule"),
-			zap.Duration("use", time.Since(startedAt)),
+			zap.Duration("use", use),
 		)
 	}
 }
@@ -86,7 +87,7 @@ func redisStats() {
 	doStatsTask("redis stats", func() map[string]interface{} {
 		// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 		stats := helper.RedisStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, stats, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, nil, stats)
 		return stats
 	})
 }
@@ -99,7 +100,7 @@ func entPing() {
 func entStats() {
 	doStatsTask("ent stats", func() map[string]interface{} {
 		stats := helper.EntGetStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, nil, stats)
 		return stats
 	})
 }
@@ -137,8 +138,9 @@ func performanceStats() {
 		}
 		prevMemFrees = data.MemFrees
 		prevNumGC = data.NumGC
+		prevPauseTotal = data.PauseTotalNs
 
-		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, fields, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, nil, fields)
 		return fields
 	})
 }

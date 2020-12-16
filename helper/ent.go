@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	defaultEntDriver, defaultEntClient = initEntClientX()
+	defaultEntDriver, defaultEntClient = mustNewEntClient()
 )
 var (
 	initSchemaOnce sync.Once
@@ -68,8 +68,8 @@ type EntListParams struct {
 
 var currentEntProcessingStats = new(entProcessingStats)
 
-// initEntClientX 初始化客户端与driver
-func initEntClientX() (*entsql.Driver, *ent.Client) {
+// mustNewEntClient 初始化客户端与driver
+func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	postgresConfig := config.GetPostgresConfig()
 
 	maskURI := postgresConfig.URI
@@ -146,8 +146,8 @@ func (params *EntListParams) GetFields() []string {
 	return result
 }
 
-// Countable 判断是否需要计算总数
-func (params *EntListParams) Countable() bool {
+// ShouldCount 判断是否需要计算总数
+func (params *EntListParams) ShouldCount() bool {
 	return params.IgnoreCount == "" && params.GetOffset() == 0
 }
 
@@ -271,7 +271,7 @@ func initSchemaHooks(c *ent.Client) {
 				"op":     op,
 				"result": strconv.Itoa(result),
 			}
-			GetInfluxSrv().Write(cs.MeasurementEntOP, fields, tags)
+			GetInfluxSrv().Write(cs.MeasurementEntOP, tags, fields)
 			return mutateResult, err
 		})
 	})

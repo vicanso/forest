@@ -47,10 +47,10 @@ type (
 	}
 )
 
-var defaultMinioClient = newMinioClientX()
+var defaultMinioClient = mustNewMinioClient()
 
-// newMinioClientX 初始化minio client
-func newMinioClientX() *minio.Client {
+// mustNewMinioClient 初始化minio client
+func mustNewMinioClient() *minio.Client {
 	minioConfig := config.GetMinioConfig()
 	c, err := minio.New(minioConfig.Endpoint, &minio.Options{
 		Secure: minioConfig.SSL,

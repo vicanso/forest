@@ -174,7 +174,8 @@ func init() {
 	// 用户注册
 	g.POST(
 		"/v1/me",
-		middleware.WaitFor(time.Second, true),
+		// 注册无论成功失败都最少等待1秒
+		middleware.WaitFor(time.Second),
 		newTracker(cs.ActionRegister),
 		captchaValidate,
 		// 限制相同IP在60秒之内只能调用5次
@@ -186,11 +187,12 @@ func init() {
 	// 用户登录
 	g.POST(
 		"/v1/me/login",
+		// 登录如果失败则最少等待1秒
 		middleware.WaitFor(time.Second, true),
 		newTracker(cs.ActionLogin),
 		captchaValidate,
 		shouldBeAnonymous,
-		// 限制3秒只能登录一次（无论成功还是失败）
+		// 同一个账号限制3秒只能登录一次（无论成功还是失败）
 		newConcurrentLimit([]string{
 			"account",
 		}, 3*time.Second, cs.ActionLogin),
@@ -404,7 +406,7 @@ func (*userCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -485,7 +487,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 				fields["city"] = location.City
 				fields["isp"] = location.ISP
 			}
-			getInfluxSrv().Write(cs.MeasurementUserAddTrack, fields, nil)
+			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
 	}
 	resp, err := pickUserInfo(c)
@@ -607,7 +609,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			)
 		}
 		// 记录用户登录行为
-		getInfluxSrv().Write(cs.MeasurementUserLogin, fields, nil)
+		getInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
 	}()
 
 	// 返回用户信息
@@ -713,7 +715,7 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return

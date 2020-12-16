@@ -21,6 +21,7 @@ import (
 
 	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
@@ -140,8 +141,9 @@ func NewNotFoundHandler() http.HandlerFunc {
 			zap.String("method", req.Method),
 			zap.String("uri", req.RequestURI),
 		)
+		status := http.StatusNotFound
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
-		resp.WriteHeader(http.StatusNotFound)
+		resp.WriteHeader(status)
 		_, err := resp.Write(notFoundErrBytes)
 		if err != nil {
 			logger.Info("404 response fail",
@@ -151,6 +153,16 @@ func NewNotFoundHandler() http.HandlerFunc {
 			)
 		}
 		warner404.Inc(ip, 1)
+
+		tags := map[string]string{
+			"method": req.Method,
+		}
+		fields := map[string]interface{}{
+			"ip":         ip,
+			"uri":        req.RequestURI,
+			"statusCode": status,
+		}
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }
 
@@ -170,7 +182,8 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 			zap.String("uri", req.RequestURI),
 		)
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
-		resp.WriteHeader(http.StatusMethodNotAllowed)
+		status := http.StatusMethodNotAllowed
+		resp.WriteHeader(status)
 		_, err := resp.Write(methodNotAllowedErrBytes)
 		if err != nil {
 			logger.Info("method not allowed response fail",
@@ -179,5 +192,14 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 				zap.Error(err),
 			)
 		}
+		tags := map[string]string{
+			"method": req.Method,
+		}
+		fields := map[string]interface{}{
+			"ip":         ip,
+			"uri":        req.RequestURI,
+			"statusCode": status,
+		}
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }

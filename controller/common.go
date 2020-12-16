@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/ent/schema"
@@ -118,7 +119,7 @@ func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.Body = &applicationInfoResp{
 		service.GetApplicationVersion(),
 		service.GetApplicationBuildedAt(),
-		time.Since(applicationStartedAt).String(),
+		humanize.Time(applicationStartedAt),
 		runtime.GOOS,
 		runtime.Version(),
 		runtime.GOARCH,
@@ -150,8 +151,8 @@ func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	// c.SetContentTypeByExt(".jpeg")
-	// c.Body = info.Data
+	// 防止此字段未设置好，序列化至前端
+	info.Value = ""
 	c.NoStore()
 	c.Body = &info
 	return

@@ -32,7 +32,7 @@ func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 		entryFn()
 		defer exitFn()
 		c.SetHeader(xResponseID, c.ID)
-		// 非测试环境返回x-forwarded-for，方便确认链路
+		// 测试环境返回x-forwarded-for，方便确认链路
 		if !util.IsProduction() {
 			c.SetHeader(elton.HeaderXForwardedFor, c.GetRequestHeader(elton.HeaderXForwardedFor))
 		}

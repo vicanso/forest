@@ -46,6 +46,7 @@ func NewError() elton.Handler {
 			he.StatusCode = http.StatusInternalServerError
 			he.Exception = true
 		} else {
+			// 避免修改了原有的error对象
 			he = he.Clone()
 		}
 		if he.StatusCode == 0 {
@@ -67,7 +68,7 @@ func NewError() elton.Handler {
 			"category": he.Category,
 		}
 
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, fields, tags)
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, tags, fields)
 		c.StatusCode = he.StatusCode
 		c.BodyBuffer = bytes.NewBuffer(he.ToJSON())
 		return nil
