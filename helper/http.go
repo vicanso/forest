@@ -83,6 +83,11 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 				fields["errCategory"] = errCategory
 			}
 		}
+		// 输出响应数据，如果响应数据为隐私数据可不输出
+		var data interface{}
+		if resp != nil {
+			data = resp.UnmarshalData
+		}
 		logger.Info("http request stats",
 			zap.String("service", serviceName),
 			zap.String("cid", id),
@@ -91,6 +96,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			zap.String("url", conf.URL),
 			zap.Any("params", conf.Params),
 			zap.Any("query", conf.Query),
+			zap.Any("data", data),
 			zap.Int("status", status),
 			zap.String("addr", addr),
 			zap.Bool("reused", reused),

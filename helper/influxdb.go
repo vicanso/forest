@@ -15,6 +15,7 @@
 package helper
 
 import (
+	"os"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -30,7 +31,12 @@ type (
 	}
 )
 
+var hostname string
 var defaultInfluxSrv = mustNewInfluxSrv()
+
+func init() {
+	hostname, _ = os.Hostname()
+}
 
 // mustNewInfluxSrv 创建新的influx服务
 func mustNewInfluxSrv() *InfluxSrv {
@@ -89,6 +95,12 @@ func (srv *InfluxSrv) Write(measurement string, tags map[string]string, fields m
 		now = ts[0]
 	} else {
 		now = time.Now()
+	}
+	if fields == nil {
+		fields = make(map[string]interface{})
+	}
+	if hostname != "" && fields["hostname"] == nil {
+		fields["hostname"] = hostname
 	}
 	srv.writer.WritePoint(influxdb2.NewPoint(measurement, tags, fields, now))
 }

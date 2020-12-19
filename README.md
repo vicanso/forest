@@ -50,3 +50,7 @@ docker run -d --restart=always \
   --name=redis \
   redis:alpine
 ```
+
+## 规范
+
+- 所有自定义的error都必须为hes.Error

@@ -14,7 +14,11 @@
 
 package service
 
-import "go.uber.org/atomic"
+import (
+	"os"
+
+	"go.uber.org/atomic"
+)
 
 var (
 	// 应用状态
@@ -23,6 +27,8 @@ var (
 	applicationVersion string
 	// 应用构建时间
 	applicationBuildedAt string
+	// 应用运行环境的hostname
+	applicationHostname string
 )
 
 const (
@@ -33,6 +39,10 @@ const (
 	// ApplicationStatusStopping 应用正在停止
 	ApplicationStatusStopping
 )
+
+func init() {
+	applicationHostname, _ = os.Hostname()
+}
 
 // SetApplicationStatus 设置应用运行状态
 func SetApplicationStatus(status int32) {
@@ -67,4 +77,9 @@ func GetApplicationBuildedAt() string {
 // SetApplicationBuildedAt 设置应用构建时间
 func SetApplicationBuildedAt(v string) {
 	applicationBuildedAt = v
+}
+
+// GetApplicationHostname 获取应用运行的hostname
+func GetApplicationHostname() string {
+	return applicationHostname
 }
