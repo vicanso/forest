@@ -80,6 +80,8 @@ var (
 	newIPLimit = middleware.NewIPLimit
 	// 创建出错限制中间件
 	newErrorLimit = middleware.NewErrorLimit
+	// noCacheIfRequestNoCache 请求参数指定no cache，则设置no-cache
+	noCacheIfRequestNoCache = middleware.NewNoCacheWithCondition("cacheControl", "no-cache")
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()

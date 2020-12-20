@@ -3,7 +3,7 @@
     <h1>
       <router-link :to="{ name: home }">
         <i class="el-icon-eleme" />
-        Origin
+        Forest
       </router-link>
     </h1>
     <nav>

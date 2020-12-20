@@ -22,11 +22,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqljson"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	"github.com/vicanso/forest/ent/predicate"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/ent/userlogin"
@@ -230,6 +233,7 @@ func init() {
 	// 获取用户角色分组
 	noneSessionGroup.GET(
 		"/v1/roles",
+		noCacheIfRequestNoCache,
 		ctrl.getRoleList,
 	)
 }
@@ -326,9 +330,12 @@ func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 	if params.Keyword != "" {
 		query = query.Where(user.AccountContains(params.Keyword))
 	}
-	// TODO role的查询
-	// if params.Role != "" {
-	// }
+	if params.Role != "" {
+		query = query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sqljson.ValueContains(user.FieldRoles, params.Role))
+		}))
+
+	}
 	if params.Status != "" {
 		v, _ := strconv.Atoi(params.Status)
 		query = query.Where(user.Status(schema.Status(v)))
