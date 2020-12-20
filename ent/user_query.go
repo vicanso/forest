@@ -21,7 +21,6 @@ type UserQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.User
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -226,7 +225,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		limit:      uq.limit,
 		offset:     uq.offset,
 		order:      append([]OrderFunc{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),

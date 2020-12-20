@@ -21,7 +21,6 @@ type ConfigurationQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Configuration
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -226,7 +225,6 @@ func (cq *ConfigurationQuery) Clone() *ConfigurationQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Configuration{}, cq.predicates...),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),

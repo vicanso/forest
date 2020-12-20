@@ -111,7 +111,7 @@ function updateUserDesc(user) {
 async function listUserRole({ commit }) {
   if (state.roles) {
     return {
-      userRoles: state.roles
+      roles: state.roles
     };
   }
   commit(mutationUserListRoleProcessing, true);

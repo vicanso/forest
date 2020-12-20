@@ -21,7 +21,6 @@ type UserLoginQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.UserLogin
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -226,7 +225,6 @@ func (ulq *UserLoginQuery) Clone() *UserLoginQuery {
 		limit:      ulq.limit,
 		offset:     ulq.offset,
 		order:      append([]OrderFunc{}, ulq.order...),
-		unique:     append([]string{}, ulq.unique...),
 		predicates: append([]predicate.UserLogin{}, ulq.predicates...),
 		// clone intermediate query.
 		sql:  ulq.sql.Clone(),

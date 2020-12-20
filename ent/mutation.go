@@ -59,7 +59,7 @@ var _ ent.Mutation = (*ConfigurationMutation)(nil)
 // configurationOption allows to manage the mutation configuration using functional options.
 type configurationOption func(*ConfigurationMutation)
 
-// newConfigurationMutation creates new mutation for $n.Name.
+// newConfigurationMutation creates new mutation for Configuration.
 func newConfigurationMutation(c config, op Op, opts ...configurationOption) *ConfigurationMutation {
 	m := &ConfigurationMutation{
 		config:        c,
@@ -829,7 +829,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
@@ -1680,7 +1680,7 @@ var _ ent.Mutation = (*UserLoginMutation)(nil)
 // userloginOption allows to manage the mutation configuration using functional options.
 type userloginOption func(*UserLoginMutation)
 
-// newUserLoginMutation creates new mutation for $n.Name.
+// newUserLoginMutation creates new mutation for UserLogin.
 func newUserLoginMutation(c config, op Op, opts ...userloginOption) *UserLoginMutation {
 	m := &UserLoginMutation{
 		config:        c,
