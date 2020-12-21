@@ -147,7 +147,7 @@ func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	if fontColor == "" {
 		fontColor = "102,102,102"
 	}
-	info, err := service.GetCaptcha(fontColor, bgColor)
+	info, err := service.GetCaptcha(c.Context(), fontColor, bgColor)
 	if err != nil {
 		return
 	}

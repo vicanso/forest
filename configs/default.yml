@@ -25,6 +25,8 @@ redis:
 
 # postgres postgres配置
 postgres:
+  # 可以配置为下面的形式，则从env中获取POSTGRES_URI对应的字符串来当postgres连接串
+  # uri: POSTGRES_URI
   uri: postgresql://vicanso:A123456@127.0.0.1:5432/forest
 
 # influxdb 配置

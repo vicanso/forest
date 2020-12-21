@@ -21,8 +21,12 @@ const (
 	MeasurementHTTPRequest = "httpRequest"
 	// MeasurementRedisStats redis性能统计
 	MeasurementRedisStats = "redisStats"
+	// MeasurementRedisError redis出错统计
+	MeasurementRedisError = "redisError"
 	// MeasurementHTTPStats http性能统计
 	MeasurementHTTPStats = "httpStats"
+	// MeasurementHTTPInstanceStats http instance统计
+	MeasurementHTTPInstanceStats = "httpInstanceStats"
 	// MeasurementEntStats ent性能统计
 	MeasurementEntStats = "entStats"
 	// MeasurementEntOP ent的操作记录

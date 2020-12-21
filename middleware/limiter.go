@@ -49,11 +49,12 @@ type (
 
 // createConcurrentLimitLock 创建并发限制的lock函数
 func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) middleware.ConcurrentLimiterLock {
-	return func(key string, _ *elton.Context) (success bool, done func(), err error) {
+	return func(key string, c *elton.Context) (success bool, done func(), err error) {
+		ctx := c.Context()
 		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
 		done = nil
 		if withDone {
-			success, redisDone, err := redisSrv.LockWithDone(k, ttl)
+			success, redisDone, err := redisSrv.LockWithDone(ctx, k, ttl)
 			done = func() {
 				err := redisDone()
 				if err != nil {
@@ -65,7 +66,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			}
 			return success, done, err
 		}
-		success, err = redisSrv.Lock(k, ttl)
+		success, err = redisSrv.Lock(ctx, k, ttl)
 		return
 	}
 }
@@ -91,8 +92,9 @@ func NewConcurrentLimitWithDone(keys []string, ttl time.Duration, prefix string)
 // NewIPLimit 创建IP限制中间件
 func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler {
 	return func(c *elton.Context) (err error) {
+		ctx := c.Context()
 		key := ipLimitKeyPrefix + "-" + prefix + "-" + c.RealIP()
-		count, err := redisSrv.IncWithTTL(key, ttl)
+		count, err := redisSrv.IncWithTTL(ctx, key, ttl)
 		if err != nil {
 			return
 		}
@@ -107,8 +109,9 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler 
 // NewErrorLimit 创建出错限制中间件
 func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Handler {
 	return func(c *elton.Context) (err error) {
+		ctx := c.Context()
 		key := errorLimitKeyPrefix + "-" + fn(c)
-		result, err := redisSrv.GetIgnoreNilErr(key)
+		result, err := redisSrv.GetIgnoreNilErr(ctx, key)
 		if err != nil {
 			return
 		}
@@ -121,7 +124,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 		err = c.Next()
 		// 如果出错，则出错次数+1
 		if err != nil {
-			_, _ = redisSrv.IncWithTTL(key, ttl)
+			_, _ = redisSrv.IncWithTTL(ctx, key, ttl)
 		}
 		return
 	}

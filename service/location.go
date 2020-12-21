@@ -16,23 +16,16 @@ package service
 
 import (
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = newLocationInstance()
+var locationIns = helper.GetLocationInstance()
 
 // 相关的URL
 const (
 	locationURL = "/ip-locations/json/:ip"
 )
-
-// newLocationInstance 初始化location的实例
-func newLocationInstance() *axios.Instance {
-	locationConfig := config.GetLocationConfig()
-	return helper.NewHTTPInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
-}
 
 // Location location
 type Location struct {

@@ -86,7 +86,7 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 		if magicalCaptcha != "" && arr[1] == magicalCaptcha {
 			return c.Next()
 		}
-		valid, err := service.ValidateCaptcha(arr[0], arr[1])
+		valid, err := service.ValidateCaptcha(c.Context(), arr[0], arr[1])
 		if err != nil {
 			if helper.RedisIsNilError(err) {
 				err = errCaptchaExpired

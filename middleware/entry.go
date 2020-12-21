@@ -31,7 +31,9 @@ func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		entryFn()
 		defer exitFn()
-		c.SetHeader(xResponseID, c.ID)
+		if c.ID != "" {
+			c.SetHeader(xResponseID, c.ID)
+		}
 		// 测试环境返回x-forwarded-for，方便确认链路
 		if !util.IsProduction() {
 			c.SetHeader(elton.HeaderXForwardedFor, c.GetRequestHeader(elton.HeaderXForwardedFor))

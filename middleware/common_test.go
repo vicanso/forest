@@ -15,6 +15,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http/httptest"
 	"testing"
@@ -106,7 +107,7 @@ func TestValidateCaptcha(t *testing.T) {
 	assert.True(done)
 
 	// 正确的校验
-	info, err := service.GetCaptcha("0,0,0", "0,0,0")
+	info, err := service.GetCaptcha(context.TODO(), "0,0,0", "0,0,0")
 	assert.Nil(err)
 	done = false
 	c.Next = func() error {

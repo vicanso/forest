@@ -103,7 +103,7 @@ func TestNewErrorLimit(t *testing.T) {
 	fn := NewErrorLimit(1, 5*time.Millisecond, func(c *elton.Context) string {
 		return ""
 	})
-	c := elton.NewContext(nil, nil)
+	c := elton.NewContext(nil, httptest.NewRequest("GET", "/", nil))
 	customErr := errors.New("abc")
 	c.Next = func() error {
 		return customErr

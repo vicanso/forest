@@ -73,7 +73,7 @@
         label="更新时间"
         width="180"
       />
-      <el-table-column fixed="right" label="操作" width="120">
+      <el-table-column fixed="right" label="操作">
         <template slot-scope="scope">
           <div v-if="scope.row.owner === userAccount">
             <el-popconfirm
@@ -164,12 +164,8 @@ export default {
         }
       });
     },
-    async remove(item) {
-      try {
-        await this.removeConfigByID(item.id);
-      } catch (err) {
-        this.$message.error(err.message);
-      }
+    async remove() {
+      this.$message.warning("不支持删除配置，请将配置禁用即可");
     }
   },
   async beforeMount() {

@@ -16,6 +16,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -137,7 +138,7 @@ func parseColor(s string) (c color.RGBA, err error) {
 }
 
 // GetCaptcha 获取图形验证码
-func GetCaptcha(fontColor, bgColor string) (info CaptchaInfo, err error) {
+func GetCaptcha(ctx context.Context, fontColor, bgColor string) (info CaptchaInfo, err error) {
 	value := util.RandomDigit(4)
 	fc, err := parseColor(fontColor)
 	if err != nil {
@@ -159,7 +160,7 @@ func GetCaptcha(fontColor, bgColor string) (info CaptchaInfo, err error) {
 	}
 	id := util.GenUlid()
 	ttl := 5 * time.Minute
-	err = redisSrv.Set(captchaKeyPrefix+id, value, ttl+time.Minute)
+	err = redisSrv.Set(ctx, captchaKeyPrefix+id, value, ttl+time.Minute)
 	if err != nil {
 		return
 	}
@@ -174,8 +175,8 @@ func GetCaptcha(fontColor, bgColor string) (info CaptchaInfo, err error) {
 }
 
 // ValidateCaptcha 校验图形验证码是否正确
-func ValidateCaptcha(id, value string) (valid bool, err error) {
-	data, err := redisSrv.GetAndDel(captchaKeyPrefix + id)
+func ValidateCaptcha(ctx context.Context, id, value string) (valid bool, err error) {
+	data, err := redisSrv.GetAndDel(ctx, captchaKeyPrefix+id)
 	if err != nil {
 		return
 	}

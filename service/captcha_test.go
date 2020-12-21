@@ -15,6 +15,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -37,7 +38,7 @@ func TestParseColor(t *testing.T) {
 
 func TestGetCaptcha(t *testing.T) {
 	assert := assert.New(t)
-	info, err := GetCaptcha("0,0,0", "255,255,255")
+	info, err := GetCaptcha(context.TODO(), "0,0,0", "255,255,255")
 	assert.Nil(err)
 	assert.Equal(4, len(info.Value))
 	assert.GreaterOrEqual(time.Now().Add(5*time.Minute).Unix(), info.ExpiredAt.Unix())
@@ -47,9 +48,9 @@ func TestGetCaptcha(t *testing.T) {
 
 func TestValidateCaptcha(t *testing.T) {
 	assert := assert.New(t)
-	info, err := GetCaptcha("0,0,0", "255,255,255")
+	info, err := GetCaptcha(context.TODO(), "0,0,0", "255,255,255")
 	assert.Nil(err)
-	valid, err := ValidateCaptcha(info.ID, info.Value)
+	valid, err := ValidateCaptcha(context.TODO(), info.ID, info.Value)
 	assert.Nil(err)
 	assert.True(valid)
 }

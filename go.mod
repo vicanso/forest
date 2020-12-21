@@ -10,7 +10,7 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/frankban/quicktest v1.11.3 // indirect
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/go-redis/redis/v7 v7.4.0
+	github.com/go-redis/redis/v8 v8.4.4
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/iancoleman/strcase v0.1.2

@@ -23,7 +23,7 @@ const (
 
 	// ActionUserInfoUpdate update user info
 	ActionUserInfoUpdate = "updateUserInfo"
-	// ActionUserMeUpdate update minie info
+	// ActionUserMeUpdate update my info
 	ActionUserMeUpdate = "updateUserMe"
 	// ActionUserTrackAdd add user track
 	ActionUserTrackAdd = "addUserTrack"

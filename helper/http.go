@@ -190,7 +190,6 @@ func newHTTPOnError(serviceName string) axios.OnError {
 			he.Extra["requestRoute"] = conf.Route
 			he.Extra["requestService"] = serviceName
 			he.Extra["requestCURL"] = conf.CURL()
-			// TODO 是否非生产环境增加更多的信息，方便测试时确认问题
 		}
 		return he
 	}

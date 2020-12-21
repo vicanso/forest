@@ -15,6 +15,7 @@
 package helper
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -38,19 +39,20 @@ func TestRedisSrv(t *testing.T) {
 	assert := assert.New(t)
 	srv := new(Redis)
 	assert.NotNil(RedisGetClient())
+	todoCtx := context.TODO()
 	t.Run("lock", func(t *testing.T) {
 		key := util.RandomString(10)
 		// 首次成功
-		ok, err := srv.Lock(key, 5*time.Millisecond)
+		ok, err := srv.Lock(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.True(ok)
 		// 第二次失败
-		ok, err = srv.Lock(key, 5*time.Millisecond)
+		ok, err = srv.Lock(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.False(ok)
 		// 第三次等待过期后成功
 		time.Sleep(10 * time.Millisecond)
-		ok, err = srv.Lock(key, 5*time.Millisecond)
+		ok, err = srv.Lock(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.True(ok)
 	})
@@ -58,47 +60,47 @@ func TestRedisSrv(t *testing.T) {
 	t.Run("lock with done", func(t *testing.T) {
 		key := util.RandomString(10)
 		// 首次成功
-		ok, done, err := srv.LockWithDone(key, 5*time.Millisecond)
+		ok, done, err := srv.LockWithDone(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.True(ok)
 
 		// 第二次失败
-		ok, _, err = srv.LockWithDone(key, 5*time.Millisecond)
+		ok, _, err = srv.LockWithDone(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.False(ok)
 
 		// 删除数据后第三次成功
 		err = done()
 		assert.Nil(err)
-		ok, _, err = srv.LockWithDone(key, 5*time.Millisecond)
+		ok, _, err = srv.LockWithDone(todoCtx, key, 5*time.Millisecond)
 		assert.Nil(err)
 		assert.True(ok)
 	})
 
 	t.Run("inc with ttl", func(t *testing.T) {
 		key := util.RandomString(10)
-		count, err := srv.IncWithTTL(key, time.Minute)
+		count, err := srv.IncWithTTL(todoCtx, key, time.Minute)
 		assert.Nil(err)
 		assert.Equal(int64(1), count)
 
-		count, err = srv.IncWithTTL(key, time.Minute, 2)
+		count, err = srv.IncWithTTL(todoCtx, key, time.Minute, 2)
 		assert.Nil(err)
 		assert.Equal(int64(3), count)
 	})
 
 	t.Run("get/set", func(t *testing.T) {
 		key := util.RandomString(10)
-		_, err := srv.Get(key)
+		_, err := srv.Get(todoCtx, key)
 		assert.True(RedisIsNilError(err))
 
-		result, err := srv.GetIgnoreNilErr(key)
+		result, err := srv.GetIgnoreNilErr(todoCtx, key)
 		assert.Nil(err)
 		assert.Empty(result)
 
 		value := "abc"
-		err = srv.Set(key, value, time.Minute)
+		err = srv.Set(todoCtx, key, value, time.Minute)
 		assert.Nil((err))
-		result, err = srv.Get(key)
+		result, err = srv.Get(todoCtx, key)
 		assert.Nil(err)
 		assert.Equal(value, result)
 	})
@@ -109,12 +111,12 @@ func TestRedisSrv(t *testing.T) {
 			Name string `json:"name,omitempty"`
 		}
 		name := "abc"
-		err := srv.SetStruct(key, &T{
+		err := srv.SetStruct(todoCtx, key, &T{
 			Name: name,
 		}, time.Minute)
 		assert.Nil(err)
 		result := T{}
-		err = srv.GetStruct(key, &result)
+		err = srv.GetStruct(todoCtx, key, &result)
 		assert.Nil(err)
 		assert.Equal(name, result.Name)
 	})

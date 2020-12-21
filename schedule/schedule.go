@@ -42,6 +42,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", entStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
+	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
 	c.Start()
 }
 
@@ -141,6 +142,15 @@ func performanceStats() {
 		prevPauseTotal = data.PauseTotalNs
 
 		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, nil, fields)
+		return fields
+	})
+}
+
+// httpInstanceStats http instance stats
+func httpInstanceStats() {
+	doStatsTask("http instance stats", func() map[string]interface{} {
+		fields := helper.GetHTTPInstanceStats()
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})
 }
