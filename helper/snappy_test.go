@@ -20,14 +20,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRedisStats(t *testing.T) {
+func TestSnappy(t *testing.T) {
 	assert := assert.New(t)
-	m := RedisStats()
-	assert.NotNil(m)
-}
+	data := []byte("Snappy 是一个 C++ 的用来压缩和解压缩的开发包。其目标不是最大限度压缩或者兼容其他压缩格式，而是旨在提供高速压缩速度和合理的压缩率。Snappy 比 zlib 更快，但文件相对要大 20% 到 100%。在 64位模式的 Core i7 处理器上，可达每秒 250~500兆的压缩速度。")
+	buf := SnappyEncode(data)
+	assert.True(len(buf) < len(data))
 
-func TestRedisPing(t *testing.T) {
-	assert := assert.New(t)
-	err := RedisPing()
+	result, err := SnappyDecode(buf)
 	assert.Nil(err)
+	assert.Equal(data, result)
 }

@@ -50,7 +50,7 @@ func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 	}
 	helper.AttachWithContext(conf, c)
 	lo = Location{}
-	err = locationIns.EnhanceRequest(conf, &lo)
+	err = locationIns.EnhanceRequest(&lo, conf)
 	if err != nil {
 		return
 	}

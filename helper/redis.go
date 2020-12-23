@@ -16,7 +16,6 @@ package helper
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -31,22 +30,15 @@ import (
 
 var (
 	defaultRedisClient, defaultRedisHook = mustNewRedisClient()
-	// redisSessionDefaultTimeout 默认超时
-	redisSessionDefaultTimeout = 3 * time.Second
-	// redisNoop 无操作的空函数
-	redisNoop = func() error {
-		return nil
-	}
-	// errRedisNil 为空是返回的出错
-	errRedisNil = hes.New("key is not exists or expired")
-	// redisSrv 默认的redis服务
-	redisSrv = new(Redis)
+
 	// ErrRedisTooManyProcessing 处理请求太多时的出错
 	ErrRedisTooManyProcessing = &hes.Error{
 		Message:    "too many processing",
 		StatusCode: http.StatusInternalServerError,
 		Category:   "redis",
 	}
+	// ErrRedisNil 为空是返回的出错
+	ErrRedisNil = hes.New("key is not exists or expired")
 )
 
 type (
@@ -58,18 +50,6 @@ type (
 		processing     atomic.Uint32
 		pipeProcessing atomic.Uint32
 		total          atomic.Uint64
-	}
-)
-
-type (
-	// RedisDone redis的done函数
-	RedisDone func() error
-	// Redis redis service
-	Redis struct{}
-
-	// RedisSessionStore session的redis缓存
-	RedisSessionStore struct {
-		Prefix string
 	}
 )
 
@@ -203,7 +183,7 @@ func RedisGetClient() *redis.Client {
 
 // RedisIsNilError 判断是否redis的nil error
 func RedisIsNilError(err error) bool {
-	return err == errRedisNil || err == redis.Nil
+	return err == ErrRedisNil || err == redis.Nil
 }
 
 // RedisStats 获取redis的性能统计
@@ -229,136 +209,4 @@ func RedisPing() (err error) {
 	defer cancel()
 	_, err = RedisGetClient().Ping(ctx).Result()
 	return
-}
-
-// Lock 将key锁定ttl的时间
-func (srv *Redis) Lock(ctx context.Context, key string, ttl time.Duration) (bool, error) {
-	return RedisGetClient().SetNX(ctx, key, true, ttl).Result()
-}
-
-// Del 从缓存中删除key
-func (srv *Redis) Del(ctx context.Context, key string) (err error) {
-	_, err = RedisGetClient().Del(ctx, key).Result()
-	return
-}
-
-// LockWithDone 将key锁定ttl的时间，并提供done(删除)函数
-func (srv *Redis) LockWithDone(ctx context.Context, key string, ttl time.Duration) (bool, RedisDone, error) {
-	success, err := srv.Lock(ctx, key, ttl)
-	// 如果lock失败，则返回no op 的done function
-	if err != nil || !success {
-		return false, redisNoop, err
-	}
-	done := func() error {
-		err := srv.Del(ctx, key)
-		return err
-	}
-	return true, done, nil
-}
-
-// IncWithTTL 增加key对应的值，并设置ttl
-func (srv *Redis) IncWithTTL(ctx context.Context, key string, ttl time.Duration, value ...int64) (count int64, err error) {
-	pipe := RedisGetClient().TxPipeline()
-	// 保证只有首次会设置ttl
-	pipe.SetNX(ctx, key, 0, ttl)
-	var incr *redis.IntCmd
-	if len(value) != 0 {
-		incr = pipe.IncrBy(ctx, key, value[0])
-	} else {
-		incr = pipe.Incr(ctx, key)
-	}
-	_, err = pipe.Exec(ctx)
-	if err != nil {
-		return
-	}
-	count = incr.Val()
-	return
-}
-
-// Get 获取key的值
-func (srv *Redis) Get(ctx context.Context, key string) (result string, err error) {
-	result, err = RedisGetClient().Get(ctx, key).Result()
-	if err == redis.Nil {
-		err = errRedisNil
-	}
-	return
-}
-
-// GetIgnoreNilErr 获取key的值并忽略nil error
-func (srv *Redis) GetIgnoreNilErr(ctx context.Context, key string) (result string, err error) {
-	result, err = srv.Get(ctx, key)
-	if RedisIsNilError(err) {
-		err = nil
-	}
-	return
-}
-
-// GetAndDel 获取key的值之后并删除它
-func (srv *Redis) GetAndDel(ctx context.Context, key string) (result string, err error) {
-	pipe := RedisGetClient().TxPipeline()
-	cmd := pipe.Get(ctx, key)
-	pipe.Del(ctx, key)
-	_, err = pipe.Exec(ctx)
-	if err != nil {
-		if err == redis.Nil {
-			err = errRedisNil
-		}
-		return
-	}
-	result = cmd.Val()
-	return
-}
-
-// Set 设置key的值并添加ttl
-func (srv *Redis) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) (err error) {
-	RedisGetClient().Set(ctx, key, value, ttl)
-	return
-}
-
-// GetStruct 获取缓存并转换为struct
-func (srv *Redis) GetStruct(ctx context.Context, key string, value interface{}) (err error) {
-	result, err := srv.Get(ctx, key)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal([]byte(result), value)
-	return
-}
-
-// SetStruct 将struct转换为字符串后保存并设置ttl
-func (srv *Redis) SetStruct(ctx context.Context, key string, value interface{}, ttl time.Duration) (err error) {
-	buf, err := json.Marshal(value)
-	if err != nil {
-		return
-	}
-	return srv.Set(ctx, key, string(buf), ttl)
-}
-
-func (rs *RedisSessionStore) getKey(key string) string {
-	return rs.Prefix + key
-}
-
-// Get 从redis中获取缓存的session
-func (rs *RedisSessionStore) Get(key string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), redisSessionDefaultTimeout)
-	defer cancel()
-	result, err := redisSrv.Get(ctx, rs.getKey(key))
-	if RedisIsNilError(err) {
-		return nil, nil
-	}
-	return []byte(result), err
-}
-
-// Set 设置session至redis中
-func (rs *RedisSessionStore) Set(key string, data []byte, ttl time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), redisSessionDefaultTimeout)
-	defer cancel()
-	return redisSrv.Set(ctx, rs.getKey(key), data, ttl)
-}
-
-// Destroy 从redis中删除session
-func (rs *RedisSessionStore) Destroy(key string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), redisSessionDefaultTimeout)
-	defer cancel()
-	return redisSrv.Del(ctx, rs.getKey(key))
 }

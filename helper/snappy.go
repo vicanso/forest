@@ -14,20 +14,15 @@
 
 package helper
 
-import (
-	"testing"
+import "github.com/golang/snappy"
 
-	"github.com/stretchr/testify/assert"
-)
-
-func TestRedisStats(t *testing.T) {
-	assert := assert.New(t)
-	m := RedisStats()
-	assert.NotNil(m)
+func SnappyEncode(data []byte) []byte {
+	dst := []byte{}
+	dst = snappy.Encode(dst, data)
+	return dst
 }
 
-func TestRedisPing(t *testing.T) {
-	assert := assert.New(t)
-	err := RedisPing()
-	assert.Nil(err)
+func SnappyDecode(buf []byte) ([]byte, error) {
+	var dst []byte
+	return snappy.Decode(dst, buf)
 }

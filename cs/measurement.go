@@ -35,6 +35,9 @@ const (
 	MeasurementHTTPError = "httpError"
 	// MeasurementUserTracker 用户行为记录
 	MeasurementUserTracker = "userTracker"
+	// MeasurementUserAction 用户行为记录
+	// 用于前端记录客户相关的操作，如点击、确认、取消等
+	MeasurementUserAction = "userAction"
 	// MeasurementUserLogin 用户登录
 	MeasurementUserLogin = "userLogin"
 	// MeasurementUserAddTrack 添加用户跟踪

@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -99,6 +100,17 @@ type (
 		Email       string `json:"email,omitempty" validate:"omitempty,xUserEmail"`
 		Password    string `json:"password,omitempty" validate:"omitempty,xUserPassword"`
 		NewPassword string `json:"newPassword,omitempty" validate:"omitempty,xUserPassword"`
+	}
+	// userActionAddParams 用户添加行为记录的参数
+	userActionAddParams struct {
+		Actions []struct {
+			// Category 用户行为类型
+			Category string `json:"category,omitempty" validate:"required,xUserActionCategory"`
+			// Route 触发时所在路由
+			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
+			// Time 记录的时间戳，单位秒
+			Time int64 `json:"time,omitempty" validate:"required"`
+		} `json:"actions,omitempty" validate:"required,dive"`
 	}
 )
 
@@ -228,6 +240,13 @@ func init() {
 		"/v1/login-records",
 		shouldBeAdmin,
 		ctrl.listLoginRecord,
+	)
+
+	// 添加用户行为
+	g.POST(
+		"/v1/actions",
+		shouldBeLogin,
+		ctrl.addUserAction,
 	)
 
 	// 获取用户角色分组
@@ -736,5 +755,37 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 		Count:      count,
 		UserLogins: userLogins,
 	}
+	return
+}
+
+// addUserAction add user action
+func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
+	params := userActionAddParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	now := time.Now().Unix()
+	us := getUserSession(c)
+	account := us.MustGetInfo().Account
+
+	for _, item := range params.Actions {
+		// 如果时间大于当前时间或者一天前，则忽略
+		if item.Time > now || item.Time < now-24*3600 {
+			continue
+		}
+		// 由于客户端的统计时间精度只到second
+		// 随机生成nano second填充
+		nsec := rand.Int() % int(time.Second)
+		t := time.Unix(item.Time, int64(nsec))
+		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
+			"category": item.Category,
+		}, map[string]interface{}{
+			"account": account,
+			"route":   item.Route,
+		}, t)
+	}
+
+	c.NoContent()
 	return
 }

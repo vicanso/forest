@@ -35,6 +35,6 @@ func GetLocationInstance() *axios.Instance {
 // GetHTTPInstanceStats get http instance stats
 func GetHTTPInstanceStats() map[string]interface{} {
 	return map[string]interface{}{
-		"location": 0,
+		"location": locationIns.GetConcurrency(),
 	}
 }

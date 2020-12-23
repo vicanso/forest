@@ -27,4 +27,12 @@ func init() {
 	AddAlias("xUserRole", "ascii,min=1,max=10")
 	// 用户分组
 	AddAlias("xUserGroup", "ascii,min=1,max=10")
+	// 用户行为分类
+	Add("xUserActionCategory", newIsInString([]string{
+		"tap",
+		"confirm",
+		"cancel",
+	}))
+	// 用户行为触发所在路由
+	AddAlias("xUserActionRoute", "max=50")
 }

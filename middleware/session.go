@@ -17,14 +17,14 @@ package middleware
 import (
 	"github.com/vicanso/elton"
 	session "github.com/vicanso/elton-session"
+	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/config"
-	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
 )
 
 // NewSession new session middleware
 func NewSession() elton.Handler {
-	store := &helper.RedisSessionStore{
+	store := &cache.RedisSessionStore{
 		Prefix: "ss-",
 	}
 	scf := config.GetSessionConfig()

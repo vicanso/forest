@@ -21,7 +21,7 @@ import (
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/elton/middleware"
-	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -39,7 +39,7 @@ var (
 		Message:    "请求过于频繁，请稍候再试！",
 		Category:   errLimitCategory,
 	}
-	redisSrv = new(helper.Redis)
+	redisSrv = new(cache.Redis)
 )
 
 type (
@@ -115,7 +115,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 		if err != nil {
 			return
 		}
-		count, _ := strconv.Atoi(result)
+		count, _ := strconv.Atoi(string(result))
 		// 因为count是处理完才inc，因此增加等于的判断
 		if int64(count) >= maxCount {
 			err = errTooFrequently
