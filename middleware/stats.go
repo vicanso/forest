@@ -33,11 +33,13 @@ func NewStats() elton.Handler {
 			if info.URI == "/ping" {
 				return
 			}
+			// TODO 如果需要可以从session中获取账号
+			// 此处记录的session id，需要从客户登录记录中获取对应的session id
+			// us := service.NewUserSession(c)
 			sid := util.GetSessionID(c)
 			logger.Info("access log",
 				// 由客户端设置的uuid
 				zap.String("uuid", c.GetRequestHeader("X-UUID")),
-				zap.String("id", info.CID),
 				zap.String("ip", info.IP),
 				zap.String("sid", sid),
 				zap.String("method", info.Method),
@@ -54,7 +56,6 @@ func NewStats() elton.Handler {
 				"route":  info.Route,
 			}
 			fields := map[string]interface{}{
-				"id":         info.CID,
 				"ip":         info.IP,
 				"sid":        sid,
 				"uri":        info.URI,

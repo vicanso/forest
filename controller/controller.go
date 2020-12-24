@@ -162,7 +162,6 @@ func newTracker(action string) elton.Handler {
 			fields = append(
 				fields,
 				zap.String("action", action),
-				zap.String("cid", info.CID),
 				zap.String("account", account),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
@@ -185,7 +184,6 @@ func newTracker(action string) elton.Handler {
 				"action": action,
 				"result": strconv.Itoa(info.Result),
 			}, map[string]interface{}{
-				"cid":     info.CID,
 				"account": account,
 				"ip":      ip,
 				"sid":     sid,

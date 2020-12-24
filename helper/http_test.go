@@ -21,7 +21,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
 )
@@ -106,6 +105,5 @@ func TestAttachWithContext(t *testing.T) {
 	c := elton.NewContext(nil, req)
 	c.ID = "abcd"
 	AttachWithContext(config, c)
-	assert.Equal(c.ID, config.GetString(cs.CID))
 	assert.Equal(c.Context(), config.Context)
 }

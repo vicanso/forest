@@ -47,16 +47,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		reused := false
 		addr := ""
 		use := ""
-		ms := 0
-		id := conf.GetString(cs.CID)
 		status := -1
-		if ht != nil {
-			reused = ht.Reused
-			addr = ht.Addr
-			timelineStats := ht.Stats()
-			use = timelineStats.String()
-			ms = int(timelineStats.Total.Milliseconds())
-		}
 		if resp != nil {
 			status = conf.Response.Status
 		}
@@ -67,18 +58,44 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			"method":  conf.Method,
 		}
 		fields := map[string]interface{}{
-			"cid":    id,
 			"url":    conf.URL,
 			"status": status,
 			"addr":   addr,
-			"reused": reused,
-			"use":    ms,
+		}
+		if ht != nil {
+			reused = ht.Reused
+			addr = ht.Addr
+			timelineStats := ht.Stats()
+			use = timelineStats.String()
+			fields["reused"] = reused
+			fields["use"] = timelineStats.Total.Milliseconds()
+			dns := timelineStats.DNSLookup.Milliseconds()
+			if dns != 0 {
+				fields["dns"] = dns
+			}
+			tcp := timelineStats.TCPConnection.Milliseconds()
+			if tcp != 0 {
+				fields["tcp"] = tcp
+			}
+			tls := timelineStats.TLSHandshake.Milliseconds()
+			if tls != 0 {
+				fields["tls"] = tls
+			}
+			serverProcessing := timelineStats.ServerProcessing.Milliseconds()
+			if serverProcessing != 0 {
+				fields["serverProcessing"] = serverProcessing
+			}
+			contentTransfer := timelineStats.ContentTransfer.Milliseconds()
+			if contentTransfer != 0 {
+				fields["contentTransfer"] = contentTransfer
+			}
 		}
 		message := ""
 		if err != nil {
-			message = err.Error()
+			he := hes.Wrap(err)
+			message = he.Error()
 			fields["error"] = message
-			errCategory := getHTTPErrorCategory(err)
+			errCategory := he.Category
 			if errCategory != "" {
 				fields["errCategory"] = errCategory
 			}
@@ -90,7 +107,6 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		}
 		logger.Info("http request stats",
 			zap.String("service", serviceName),
-			zap.String("cid", id),
 			zap.String("method", conf.Method),
 			zap.String("route", conf.Route),
 			zap.String("url", conf.URL),
@@ -104,7 +120,6 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			zap.String("error", message),
 		)
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
-
 	}
 }
 
@@ -116,7 +131,8 @@ func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor
 			if message == "" {
 				message = string(resp.Data)
 			}
-			// 只返回普通的error对象，由onError来转换为http error
+			// TODO 根据实际使用不同的service生成不同的转换函数
+			// 只返回普通的error对象，由onError来转换为http error，也可此处则处理为http error
 			err = errors.New(message)
 		}
 		return
@@ -124,7 +140,7 @@ func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor
 }
 
 // getHTTPErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
-func getHTTPErrorCategory(err error) string {
+func getHTTPErrorCategory(err error, defaultCategory string) string {
 
 	netErr, ok := err.(net.Error)
 	if ok && netErr.Timeout() {
@@ -142,7 +158,7 @@ func getHTTPErrorCategory(err error) string {
 
 	opErr, ok := netErr.(*net.OpError)
 	if !ok {
-		return ""
+		return defaultCategory
 	}
 	switch e := opErr.Err.(type) {
 	// 针对以下几种系统调用返回对应类型
@@ -161,7 +177,7 @@ func getHTTPErrorCategory(err error) string {
 		}
 	}
 
-	return ""
+	return defaultCategory
 }
 
 // newHTTPOnError 新建error的处理函数
@@ -184,7 +200,10 @@ func newHTTPOnError(serviceName string) axios.OnError {
 			he.Extra = make(map[string]interface{})
 		}
 
-		he.Category = getHTTPErrorCategory(err)
+		// 如果为空，则通过error获取
+		if he.Category == "" {
+			he.Category = getHTTPErrorCategory(err, serviceName)
+		}
 
 		if !util.IsProduction() {
 			he.Extra["requestRoute"] = conf.Route
@@ -214,7 +233,6 @@ func AttachWithContext(conf *axios.Config, c *elton.Context) {
 	if c == nil || conf == nil {
 		return
 	}
-	conf.Set(cs.CID, c.ID)
 	if conf.Context == nil {
 		conf.Context = c.Context()
 	}
