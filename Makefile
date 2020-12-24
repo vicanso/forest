@@ -1,4 +1,4 @@
-.PHONY: default test test-cover dev generate
+.PHONY: default test test-cover dev generate hooks
 
 # for dev
 dev:
@@ -33,4 +33,7 @@ clean:
 	packr2 clean
 
 lint:
-	golangci-lint run --timeout 2m --skip-dirs /web
+	golangci-lint run --timeout 2m --skip-dirs web
+
+hooks:
+	cp hooks/* .git/hooks/
