@@ -17,6 +17,7 @@ package helper
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -106,6 +107,30 @@ func (srv *InfluxSrv) Health() (err error) {
 		err = errors.New(string(result.Status))
 		return
 	}
+	return
+}
+
+func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+	if srv.client == nil {
+		return
+	}
+	query = fmt.Sprintf(`from(bucket: "%s")`, srv.config.Bucket) + query
+	result, err := srv.client.QueryAPI(srv.config.Org).Query(ctx, query)
+	if err != nil {
+		return
+	}
+	items = make([]map[string]interface{}, 0)
+	for result.Next() {
+		if result.TableChanged() {
+			continue
+		}
+		items = append(items, result.Record().Values())
+	}
+	err = result.Err()
+	if err != nil {
+		return
+	}
+
 	return
 }
 

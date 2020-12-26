@@ -158,36 +158,40 @@ func newTracker(action string) elton.Handler {
 			}
 			ip := c.RealIP()
 			sid := util.GetSessionID(c)
-			fields := make([]zap.Field, 0, 10)
-			fields = append(
-				fields,
+			zapFields := make([]zap.Field, 0, 10)
+			zapFields = append(
+				zapFields,
 				zap.String("action", action),
 				zap.String("account", account),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
 				zap.Int("result", info.Result),
 			)
-			if info.Query != nil {
-				fields = append(fields, zap.Any("query", info.Query))
-			}
-			if info.Params != nil {
-				fields = append(fields, zap.Any("params", info.Params))
-			}
-			if info.Form != nil {
-				fields = append(fields, zap.Any("form", info.Form))
-			}
-			if info.Err != nil {
-				fields = append(fields, zap.Error(info.Err))
-			}
-			logger.Info("tracker", fields...)
-			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
-				"action": action,
-				"result": strconv.Itoa(info.Result),
-			}, map[string]interface{}{
+			fields := map[string]interface{}{
 				"account": account,
 				"ip":      ip,
 				"sid":     sid,
-			})
+			}
+			if len(info.Query) != 0 {
+				zapFields = append(zapFields, zap.Any("query", info.Query))
+				fields["query"] = info.Query
+			}
+			if len(info.Params) != 0 {
+				zapFields = append(zapFields, zap.Any("params", info.Params))
+				fields["params"] = info.Params
+			}
+			if len(info.Form) != 0 {
+				zapFields = append(zapFields, zap.Any("form", info.Form))
+				fields["form"] = info.Form
+			}
+			if info.Err != nil {
+				zapFields = append(zapFields, zap.Error(info.Err))
+			}
+			logger.Info("tracker", zapFields...)
+			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
+				"action": action,
+				"result": strconv.Itoa(info.Result),
+			}, fields)
 		},
 	})
 }

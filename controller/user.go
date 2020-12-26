@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -111,6 +112,12 @@ type (
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
 		} `json:"actions,omitempty" validate:"required,dive"`
+	}
+	// userTrackerListParams 查询用户tracker记录
+	userTrackerListParams struct {
+		Begin   time.Time `json:"begin,omitempty" validate:"required"`
+		End     time.Time `json:"end,omitempty" validate:"required"`
+		Account string    `json:"account,omitempty" validate:"required,xUserAccount"`
 	}
 )
 
@@ -247,6 +254,13 @@ func init() {
 		"/v1/actions",
 		shouldBeLogin,
 		ctrl.addUserAction,
+	)
+
+	// 查询用户tracker
+	g.GET(
+		"/v1/trackers",
+		shouldBeAdmin,
+		ctrl.listTracker,
 	)
 
 	// 获取用户角色分组
@@ -787,5 +801,43 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	}
 
 	c.NoContent()
+	return
+}
+
+// listTracker lis tracker
+func (ctrl userCtrl) listTracker(c *elton.Context) (err error) {
+	params := userTrackerListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	start := util.FormatTime(params.Begin)
+	stop := util.FormatTime(params.End)
+	query := fmt.Sprintf(`
+	|> range(start: %s, stop: %s)
+	|> filter(fn: (r) => r["_measurement"] == "userTracker")
+	|> pivot(
+		rowKey:["_time"],
+		columnKey: ["_field"],
+		valueColumn: "_value"
+	)
+	`, start, stop)
+	if params.Account != "" {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.account == "%s")`, params.Account)
+	}
+	result, err := getInfluxSrv().Query(c.Context(), query)
+	if err != nil {
+		return
+	}
+	// 清除不需要字段
+	for _, item := range result {
+		delete(item, "_measurement")
+		delete(item, "_start")
+		delete(item, "_stop")
+		delete(item, "table")
+	}
+	c.Body = map[string]interface{}{
+		"trackers": result,
+	}
 	return
 }
