@@ -15,11 +15,14 @@
 package helper
 
 import (
+	"context"
+	"errors"
 	"os"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	influxdbAPI "github.com/influxdata/influxdb-client-go/v2/api"
+	influxdbDomain "github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/vicanso/forest/config"
 	"go.uber.org/zap"
 )
@@ -28,6 +31,7 @@ type (
 	InfluxSrv struct {
 		client influxdb2.Client
 		writer influxdbAPI.WriteAPI
+		config config.InfluxdbConfig
 	}
 )
 
@@ -65,9 +69,11 @@ func mustNewInfluxSrv() *InfluxSrv {
 	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
 	go newInfluxdbErrorLogger(writer)
+
 	return &InfluxSrv{
 		client: c,
 		writer: writer,
+		config: influxdbConfig,
 	}
 }
 
@@ -83,6 +89,24 @@ func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
 // GetInfluxSrv 获取默认的influxdb服务
 func GetInfluxSrv() *InfluxSrv {
 	return defaultInfluxSrv
+}
+
+// Health check influxdb health
+func (srv *InfluxSrv) Health() (err error) {
+	if srv.client == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := srv.client.Health(ctx)
+	if err != nil {
+		return
+	}
+	if result.Status != influxdbDomain.HealthCheckStatusPass {
+		err = errors.New(string(result.Status))
+		return
+	}
+	return
 }
 
 // Write 写入数据

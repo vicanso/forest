@@ -37,6 +37,7 @@ func init() {
 	c := cron.New()
 	_, _ = c.AddFunc("@every 1m", redisPing)
 	_, _ = c.AddFunc("@every 1m", entPing)
+	_, _ = c.AddFunc("@every 1m", influxdbPing)
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 5m", entStats)
@@ -153,4 +154,9 @@ func httpInstanceStats() {
 		helper.GetInfluxSrv().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})
+}
+
+// influxdbPing influxdb ping
+func influxdbPing() {
+	doTask("influxdb ping", helper.GetInfluxSrv().Health)
 }

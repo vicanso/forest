@@ -131,9 +131,10 @@ func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor
 			if message == "" {
 				message = string(resp.Data)
 			}
-			// TODO 根据实际使用不同的service生成不同的转换函数
-			// 只返回普通的error对象，由onError来转换为http error，也可此处则处理为http error
-			err = errors.New(message)
+			return &hes.Error{
+				StatusCode: resp.Status,
+				Message:    message,
+			}
 		}
 		return
 	}

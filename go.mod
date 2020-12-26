@@ -28,7 +28,7 @@ require (
 	github.com/vicanso/elton v1.2.3
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
-	github.com/vicanso/go-axios v0.1.17
+	github.com/vicanso/go-axios v0.1.18
 	github.com/vicanso/hes v0.2.4
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.2.1
