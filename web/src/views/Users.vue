@@ -31,7 +31,7 @@
           <el-table-column label="用户角色">
             <template slot-scope="scope">
               <ul>
-                <li v-for="role in scope.row.rolesDesc" :key="role">
+                <li v-for="role in scope.row.roles" :key="role">
                   {{ role }}
                 </li>
               </ul>

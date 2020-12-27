@@ -102,6 +102,11 @@ type (
 		Password    string `json:"password,omitempty" validate:"omitempty,xUserPassword"`
 		NewPassword string `json:"newPassword,omitempty" validate:"omitempty,xUserPassword"`
 	}
+	// userUpdateParams 更新用户信息参数
+	userUpdateParams struct {
+		Roles  []string      `json:"roles,omitempty" validate:"omitempty"`
+		Status schema.Status `json:"status,omitempty" validate:"omitempty,xStatus"`
+	}
 	// userActionAddParams 用户添加行为记录的参数
 	userActionAddParams struct {
 		Actions []struct {
@@ -178,6 +183,13 @@ func init() {
 		"/v1/{id}",
 		shouldBeAdmin,
 		ctrl.findByID,
+	)
+
+	// 更新用户信息
+	g.PATCH(
+		"/v1/{id}",
+		shouldBeAdmin,
+		ctrl.updateByID,
 	)
 
 	// 获取登录token
@@ -358,6 +370,18 @@ func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account 
 	return updateOne.Save(ctx)
 }
 
+// updateByID 通过ID更新信息
+func (params *userUpdateParams) updateByID(ctx context.Context, id int) (u *ent.User, err error) {
+	updateOne := getEntClient().User.UpdateOneID(id)
+	if len(params.Roles) != 0 {
+		updateOne = updateOne.SetRoles(params.Roles)
+	}
+	if params.Status != 0 {
+		updateOne = updateOne.SetStatus(params.Status)
+	}
+	return updateOne.Save(ctx)
+}
+
 // where 将查询条件中的参数转换为对应的where条件
 func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 	if params.Keyword != "" {
@@ -475,6 +499,25 @@ func (*userCtrl) findByID(c *elton.Context) (err error) {
 		return
 	}
 	c.Body = data
+	return
+}
+
+// updateByID 更新信息
+func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := userUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	user, err := params.updateByID(c.Context(), id)
+	if err != nil {
+		return
+	}
+	c.Body = user
 	return
 }
 

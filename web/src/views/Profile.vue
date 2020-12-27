@@ -19,7 +19,7 @@
         </el-col>
         <el-col :span="6">
           <el-form-item label="角色：">
-            {{ profile.rolesDesc.join(",") || "--" }}
+            {{ profile.roles.join(",") || "--" }}
           </el-form-item>
         </el-col>
         <el-col :span="6">

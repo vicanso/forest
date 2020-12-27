@@ -95,9 +95,7 @@ function commitUserInfo(commit, data) {
       name: data.name || "",
       trackID: data.trackID || "",
       roles: data.roles || [],
-      groups: data.groups || [],
-      groupsDesc: data.groupsDesc || [],
-      rolesDesc: data.rolesDesc || []
+      groups: data.groups || []
     })
   );
 }
