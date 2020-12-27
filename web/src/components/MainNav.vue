@@ -49,6 +49,7 @@ import {
   CONFIG_SESSION_INTERCEPTOR,
   USERS,
   LOGINS,
+  TRACKERS,
   BRANDS,
   PRODUCTS,
   PRODUCT_CATEGORIES,
@@ -109,6 +110,10 @@ const navs = [
       {
         name: "登录记录",
         route: LOGINS
+      },
+      {
+        name: "用户行为",
+        route: TRACKERS
       }
     ]
   },

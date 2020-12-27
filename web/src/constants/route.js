@@ -17,6 +17,7 @@ export const CONFIG_LIST_MODE = "list";
 
 export const USERS = "Users";
 export const LOGINS = "Logins";
+export const TRACKERS = "Trackers";
 
 export const BRANDS = "Brands";
 

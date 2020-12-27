@@ -1,77 +1,49 @@
 <template>
-  <el-card class="logins">
+  <el-card class="trackers">
     <div slot="header">
       <i class="el-icon-user-solid" />
-      <span>用户登录查询</span>
+      <span>用户行为查询</span>
     </div>
     <div v-loading="processing">
       <BaseFilter :fields="filterFields" @filter="filter" />
-      <el-table :data="logins" row-key="id" stripe>
+      <el-table :data="trackers" row-key="_time" stripe>
         <el-table-column
           prop="account"
           key="account"
           label="账户"
           width="120"
         />
-
-        <el-table-column prop="ip" key="ip" label="IP" width="120" />
-        <el-table-column
-          prop="location"
-          key="location"
-          label="定位"
-          width="180"
-        />
-        <el-table-column label="运营商" width="80">
+        <el-table-column prop="action" key="action" label="类型" width="150" />
+        <el-table-column label="状态" width="80">
           <template slot-scope="scope">
-            {{ scope.row.isp || "--" }}
+            <span v-if="scope.row.result == '0'">成功</span>
+            <span v-else>失败</span>
           </template>
         </el-table-column>
+        <el-table-column prop="form" key="form" label="Form" />
+        <el-table-column prop="query" key="query" label="Query" />
+        <el-table-column prop="params" key="params" label="Params" />
         <el-table-column label="Session ID">
           <template slot-scope="scope">
-            <BaseToolTip :content="scope.row.sessionID" />
+            <BaseToolTip :content="scope.row.sid" />
           </template>
         </el-table-column>
-        <el-table-column label="Track ID">
+        <el-table-column label="IP">
           <template slot-scope="scope">
-            <BaseToolTip :content="scope.row.trackID" />
-          </template>
-        </el-table-column>
-        <el-table-column label="Forwarded For" width="120">
-          <template slot-scope="scope">
-            <BaseToolTip
-              icon="el-icon-info"
-              :content="scope.row.xForwardedFor"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="User Agent" width="120">
-          <template slot-scope="scope">
-            <BaseToolTip
-              icon="el-icon-mobile-phone"
-              :content="scope.row.userAgent"
-            />
+            <BaseToolTip icon="el-icon-info" :content="scope.row.ip" />
           </template>
         </el-table-column>
         <el-table-column
-          prop="createdAtDesc"
-          key="createdAtDesc"
+          prop="timeDesc"
+          key="timeDesc"
           label="时间"
           width="180"
         />
       </el-table>
-      <el-pagination
-        class="pagination"
-        layout="prev, pager, next, sizes"
-        :current-page="currentPage"
-        :page-size="query.limit"
-        :page-sizes="pageSizes"
-        :total="loginCount"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
     </div>
   </el-card>
 </template>
+
 <script>
 import { mapActions, mapState } from "vuex";
 import { today, formatBegin, formatEnd } from "@/helpers/util";
@@ -104,9 +76,8 @@ const filterFields = [
     span: 6
   }
 ];
-
 export default {
-  name: "Logins",
+  name: "Trackers",
   extends: BaseTable,
   components: {
     BaseFilter,
@@ -114,29 +85,32 @@ export default {
   },
   data() {
     return {
+      disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
       query: {
         dateRange: defaultDateRange,
         offset: 0,
         limit: PAGE_SIZES[0],
-        account: "",
-        order: "-createdAt"
+        account: ""
       }
     };
   },
   computed: {
     ...mapState({
-      loginCount: state => state.user.userLogins.count,
-      processing: state => state.user.userLoginListProcessing,
-      logins: state => state.user.userLogins.data || []
+      processing: state => state.tracker.listProcessing,
+      trackers: state => state.tracker.list.data || []
     })
   },
   methods: {
-    ...mapActions(["listUserLogins"]),
+    ...mapActions(["listTracker"]),
     async fetch() {
       const { query, processing } = this;
       if (processing) {
+        return;
+      }
+      if (!query.account) {
+        this.$message.error("账号不能为空");
         return;
       }
       const value = query.dateRange;
@@ -149,7 +123,7 @@ export default {
       }
       delete query.dateRange;
       try {
-        await this.listUserLogins(query);
+        await this.listTracker(query);
       } catch (err) {
         this.$message.error(err.message);
       }
@@ -159,7 +133,7 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import "@/common.sass"
-.logins
+.trackers
   margin: $mainMargin
   i
     margin-right: 5px

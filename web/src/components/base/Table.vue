@@ -59,7 +59,7 @@ export default {
     }
   },
   beforeMount() {
-    if (!this.editMode) {
+    if (!this.editMode && !this.disableBeforeMountFetch) {
       this.fetch();
     }
   }

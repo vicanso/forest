@@ -13,7 +13,8 @@ import {
   CONFIG_SESSION_INTERCEPTOR,
   USERS,
   PROFILE,
-  LOGINS
+  LOGINS,
+  TRACKERS
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -26,6 +27,7 @@ import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
 import SessionInterceptor from "@/views/configs/SessionInterceptor.vue";
 import Users from "@/views/Users.vue";
 import Logins from "@/views/Logins.vue";
+import Trackers from "@/views/Trackers.vue";
 
 Vue.use(VueRouter);
 
@@ -105,6 +107,14 @@ const routes = [
     path: "/logins",
     name: LOGINS,
     component: Logins,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/trackers",
+    name: TRACKERS,
+    component: Trackers,
     meta: {
       requiresAuth: true
     }
