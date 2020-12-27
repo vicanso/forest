@@ -600,8 +600,8 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	}
 
 	ip := c.RealIP()
-	trackID := util.GetTrackID(c)
-	sessionID := util.GetSessionID(c)
+	tid := util.GetTrackID(c)
+	sid := util.GetSessionID(c)
 	userAgent := c.GetRequestHeader("User-Agent")
 
 	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
@@ -610,8 +610,8 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			"account":   account,
 			"userAgent": userAgent,
 			"ip":        ip,
-			"trackID":   trackID,
-			"sessionID": sessionID,
+			"tid":       tid,
+			"sid":       sid,
 		}
 		location, _ := service.GetLocationByIP(ip, nil)
 		country := ""
@@ -635,8 +635,8 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			SetAccount(account).
 			SetUserAgent(userAgent).
 			SetIP(ip).
-			SetTrackID(trackID).
-			SetSessionID(sessionID).
+			SetTrackID(tid).
+			SetSessionID(sid).
 			SetXForwardedFor(xForwardedFor).
 			SetCountry(country).
 			SetProvince(province).

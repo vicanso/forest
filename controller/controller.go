@@ -152,6 +152,7 @@ func newTracker(action string) elton.Handler {
 		Mask: regexp.MustCompile(`(?i)password`),
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
+			tid := util.GetTrackID(c)
 			us := service.NewUserSession(c)
 			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
@@ -165,12 +166,14 @@ func newTracker(action string) elton.Handler {
 				zap.String("account", account),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
+				zap.String("tid", tid),
 				zap.Int("result", info.Result),
 			)
 			fields := map[string]interface{}{
 				"account": account,
 				"ip":      ip,
 				"sid":     sid,
+				"tid":     tid,
 			}
 			if len(info.Query) != 0 {
 				zapFields = append(zapFields, zap.Any("query", info.Query))

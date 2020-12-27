@@ -28,6 +28,11 @@
             <BaseToolTip :content="scope.row.sid" />
           </template>
         </el-table-column>
+        <el-table-column label="Track ID">
+          <template slot-scope="scope">
+            <BaseToolTip :content="scope.row.tid" />
+          </template>
+        </el-table-column>
         <el-table-column label="IP">
           <template slot-scope="scope">
             <BaseToolTip icon="el-icon-info" :content="scope.row.ip" />
