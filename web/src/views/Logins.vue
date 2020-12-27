@@ -139,17 +139,18 @@ export default {
       if (processing) {
         return;
       }
-      const value = query.dateRange;
+      const params = Object.assign({}, query);
+      const value = params.dateRange;
       if (value) {
-        query.begin = formatBegin(value[0]);
-        query.end = formatEnd(value[1]);
+        params.begin = formatBegin(value[0]);
+        params.end = formatEnd(value[1]);
       } else {
-        query.begin = "";
-        query.end = "";
+        params.begin = "";
+        params.end = "";
       }
-      delete query.dateRange;
+      delete params.dateRange;
       try {
-        await this.listUserLogins(query);
+        await this.listUserLogins(params);
       } catch (err) {
         this.$message.error(err.message);
       }

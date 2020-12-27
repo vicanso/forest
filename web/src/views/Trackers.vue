@@ -189,21 +189,22 @@ export default {
       if (processing) {
         return;
       }
-      if (!query.account) {
+      const params = Object.assign({}, query);
+      if (!params.account) {
         this.$message.error("账号不能为空");
         return;
       }
-      const value = query.dateRange;
+      const value = params.dateRange;
       if (value) {
-        query.begin = formatBegin(value[0]);
-        query.end = formatEnd(value[1]);
+        params.begin = formatBegin(value[0]);
+        params.end = formatEnd(value[1]);
       } else {
-        query.begin = "";
-        query.end = "";
+        params.begin = "";
+        params.end = "";
       }
-      delete query.dateRange;
+      delete params.dateRange;
       try {
-        await this.listTracker(query);
+        await this.listTracker(params);
       } catch (err) {
         this.$message.error(err.message);
       }
