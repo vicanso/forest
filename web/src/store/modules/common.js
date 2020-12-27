@@ -57,7 +57,7 @@ export default {
     [mutationCommonRouterList](state, { routers }) {
       if (routers) {
         routers.forEach(item => {
-          item.key = `${item.method} ${item.path}`;
+          item.key = `${item.method} ${item.route}`;
         });
       }
       state.routers = routers;

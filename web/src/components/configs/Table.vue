@@ -140,8 +140,8 @@ export default {
             return false;
           }
           const now = Date.now();
-          const beginDate = new Date(item.beginDate).getTime();
-          const endDate = new Date(item.endDate).getTime();
+          const beginDate = new Date(item.startedAt).getTime();
+          const endDate = new Date(item.endedAt).getTime();
           // 如果未到开始时间或者已结束
           if (beginDate > now || endDate < now) {
             return false;

@@ -30,9 +30,21 @@
             <span v-else>失败</span>
           </template>
         </el-table-column>
-        <el-table-column prop="form" key="form" label="Form" />
-        <el-table-column prop="query" key="query" label="Query" />
-        <el-table-column prop="params" key="params" label="Params" />
+        <el-table-column label="Form">
+          <template slot-scope="scope">
+            <BaseJSON :content="scope.row.form" />
+          </template>
+        </el-table-column>
+        <el-table-column label="Query">
+          <template slot-scope="scope">
+            <BaseJSON :content="scope.row.query" />
+          </template>
+        </el-table-column>
+        <el-table-column label="Params">
+          <template slot-scope="scope">
+            <BaseJSON :content="scope.row.params" />
+          </template>
+        </el-table-column>
         <el-table-column
           label="Session ID"
           :filters="sessionIDFilters"
@@ -53,7 +65,7 @@
             <BaseToolTip :content="scope.row.tid" />
           </template>
         </el-table-column>
-        <el-table-column label="IP">
+        <el-table-column label="IP" width="80">
           <template slot-scope="scope">
             <BaseToolTip icon="el-icon-info" :content="scope.row.ip" />
           </template>
@@ -76,6 +88,7 @@ import { today, formatBegin, formatEnd } from "@/helpers/util";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
 import BaseToolTip from "@/components/base/ToolTip.vue";
+import BaseJSON from "@/components/base/JSON.vue";
 import { PAGE_SIZES } from "@/constants/common";
 
 const defaultDateRange = [today(), today()];
@@ -126,7 +139,8 @@ export default {
   extends: BaseTable,
   components: {
     BaseFilter,
-    BaseToolTip
+    BaseToolTip,
+    BaseJSON
   },
   data() {
     return {
