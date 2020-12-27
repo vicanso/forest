@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { sha256 } from "@/helpers/crypto";
 
 const hash = "JT";
@@ -12,8 +13,8 @@ export function formatDate(str) {
   if (!str) {
     return "--";
   }
-  const d = new Date(str);
-  return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+
+  return dayjs(str).format("YYYY-MM-DD HH:mm:ss");
 }
 
 // formatDuration 格式化duration

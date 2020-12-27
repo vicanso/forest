@@ -6,7 +6,12 @@
     </div>
     <div v-loading="processing">
       <BaseFilter :fields="filterFields" @filter="filter" />
-      <el-table :data="trackers" row-key="_time" stripe>
+      <el-table
+        :data="trackers"
+        row-key="_time"
+        stripe
+        :default-sort="{ prop: 'timeDesc', order: 'descending' }"
+      >
         <el-table-column
           prop="account"
           key="account"
@@ -14,7 +19,12 @@
           width="120"
         />
         <el-table-column prop="action" key="action" label="类型" width="150" />
-        <el-table-column label="状态" width="80">
+        <el-table-column
+          label="状态"
+          width="80"
+          :filters="resultFilters"
+          :filter-method="filterResult"
+        >
           <template slot-scope="scope">
             <span v-if="scope.row.result == '0'">成功</span>
             <span v-else>失败</span>
@@ -23,12 +33,22 @@
         <el-table-column prop="form" key="form" label="Form" />
         <el-table-column prop="query" key="query" label="Query" />
         <el-table-column prop="params" key="params" label="Params" />
-        <el-table-column label="Session ID">
+        <el-table-column
+          label="Session ID"
+          :filters="sessionIDFilters"
+          :filter-method="filterSession"
+          width="110"
+        >
           <template slot-scope="scope">
             <BaseToolTip :content="scope.row.sid" />
           </template>
         </el-table-column>
-        <el-table-column label="Track ID">
+        <el-table-column
+          label="Track ID"
+          :filters="trackIDFilters"
+          :filter-method="filterTrack"
+          width="90"
+        >
           <template slot-scope="scope">
             <BaseToolTip :content="scope.row.tid" />
           </template>
@@ -43,6 +63,7 @@
           key="timeDesc"
           label="时间"
           width="180"
+          sortable
         />
       </el-table>
     </div>
@@ -81,6 +102,25 @@ const filterFields = [
     span: 6
   }
 ];
+
+function getUniqueKey(data, key) {
+  if (!data || !data.length) {
+    return [];
+  }
+  const keys = {};
+  data.forEach(item => {
+    if (item[key]) {
+      keys[item[key]] = true;
+    }
+  });
+  return Object.keys(keys).map(item => {
+    return {
+      text: item,
+      value: item
+    };
+  });
+}
+
 export default {
   name: "Trackers",
   extends: BaseTable,
@@ -90,6 +130,16 @@ export default {
   },
   data() {
     return {
+      resultFilters: [
+        {
+          text: "成功",
+          value: "0"
+        },
+        {
+          text: "失败",
+          value: "1"
+        }
+      ],
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
@@ -103,12 +153,23 @@ export default {
   },
   computed: {
     ...mapState({
+      trackIDFilters: state => getUniqueKey(state.tracker.list.data, "tid"),
+      sessionIDFilters: state => getUniqueKey(state.tracker.list.data, "sid"),
       processing: state => state.tracker.listProcessing,
       trackers: state => state.tracker.list.data || []
     })
   },
   methods: {
     ...mapActions(["listTracker"]),
+    filterResult(value, row) {
+      return row.result == value;
+    },
+    filterTrack(value, row) {
+      return row.tid == value;
+    },
+    filterSession(value, row) {
+      return row.sid == value;
+    },
     async fetch() {
       const { query, processing } = this;
       if (processing) {
