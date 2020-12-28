@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{ shrinking: shrinking }">
     <MainHeader class="header" />
-    <MainNav class="nav" />
+    <MainNav class="nav" :onToggle="toggleNav" :shrinking="shrinking" />
     <div class="mainContent">
       <router-view />
     </div>
@@ -18,6 +18,11 @@ export default {
     MainHeader,
     MainNav
   },
+  data() {
+    return {
+      shrinking: false
+    };
+  },
   computed: mapState({
     userAccount: state => state.user.info.account
   }),
@@ -28,6 +33,9 @@ export default {
         return;
       }
       this.updateMe({});
+    },
+    toggleNav() {
+      this.shrinking = !this.shrinking;
     }
   },
   async mounted() {
@@ -45,6 +53,13 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import "@/common.sass"
+.shrinking
+  .header
+    left: $mainNavShrinkingWidth
+  .nav
+    width: $mainNavShrinkingWidth
+  .mainContent
+    padding-left: $mainNavShrinkingWidth
 .header
   position: fixed
   left: $mainNavWidth

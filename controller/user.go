@@ -116,6 +116,8 @@ type (
 			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
+			// Extra 其它额外信息
+			Extra map[string]interface{} `json:"extra,omitempty"`
 		} `json:"actions,omitempty" validate:"required,dive"`
 	}
 	// userTrackerListParams 查询用户tracker记录
@@ -826,24 +828,29 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	account := us.MustGetInfo().Account
 
+	count := 0
 	for _, item := range params.Actions {
 		// 如果时间大于当前时间或者一天前，则忽略
 		if item.Time > now || item.Time < now-24*3600 {
 			continue
 		}
+		count++
 		// 由于客户端的统计时间精度只到second
 		// 随机生成nano second填充
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
-		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
-			"category": item.Category,
-		}, map[string]interface{}{
+		fields := map[string]interface{}{
 			"account": account,
 			"route":   item.Route,
-		}, t)
+		}
+		fields = util.MergeMapStringInterface(fields, item.Extra)
+		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
+			"category": item.Category,
+		}, fields, t)
 	}
-
-	c.NoContent()
+	c.Body = map[string]int{
+		"count": count,
+	}
 	return
 }
 

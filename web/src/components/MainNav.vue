@@ -1,12 +1,16 @@
 <template>
   <div class="mainNav">
+    <a href="#" @click="toggleNav" class="toggleNav">
+      <i v-if="$props.shrinking" class="el-icon-s-unfold" />
+      <i v-else class="el-icon-s-fold" />
+    </a>
     <h1>
-      <router-link :to="{ name: home }">
+      <router-link :to="{ name: home }" v-if="!$props.shrinking">
         <i class="el-icon-eleme" />
         Forest
       </router-link>
     </h1>
-    <nav>
+    <nav v-if="!$props.shrinking">
       <el-menu
         class="menu"
         :default-active="active"
@@ -152,6 +156,10 @@ const navs = [
 
 export default {
   name: "MainNav",
+  props: {
+    shrinking: Boolean,
+    onToggle: Function
+  },
   data() {
     return {
       home: HOME,
@@ -216,6 +224,12 @@ export default {
     }
   },
   methods: {
+    toggleNav(e) {
+      e.preventDefault();
+      if (this.$props.onToggle) {
+        this.$props.onToggle();
+      }
+    },
     goTo({ route }) {
       if (!route || this.$route.name === route) {
         return;
@@ -234,6 +248,13 @@ $mainNavColor: #000c17
   min-height: 100vh
   overflow-y: auto
   background-color: $mainNavColor
+.toggleNav
+  height: $mainHeaderHeight
+  line-height: $mainHeaderHeight
+  display: block
+  float: right
+  width: $mainNavShrinkingWidth
+  text-align: center
 h1
   height: $mainHeaderHeight
   line-height: $mainHeaderHeight
