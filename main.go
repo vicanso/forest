@@ -54,6 +54,8 @@ var (
 var closeDepends func()
 
 func init() {
+	// 启动出错日志中的caller记录
+	hes.EnableCaller(true)
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
 		log.Default().Info(value)

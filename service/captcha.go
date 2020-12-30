@@ -17,11 +17,11 @@ package service
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
 	"math/rand"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -37,14 +37,6 @@ const (
 	captchaKeyPrefix = "captcha-"
 
 	errCaptchaCategory = "captcha"
-)
-
-var (
-	errColorInvalid = &hes.Error{
-		Category:   errCaptchaCategory,
-		Message:    "非法颜色值",
-		StatusCode: http.StatusBadRequest,
-	}
 )
 
 type (
@@ -111,7 +103,7 @@ func createCaptcha(fontColor, bgColor color.Color, width, height int, text strin
 func parseColor(s string) (c color.RGBA, err error) {
 	arr := strings.Split(s, ",")
 	if len(arr) != 3 {
-		err = errColorInvalid
+		err = hes.New(fmt.Sprintf("非法颜色值，格式必须为：1,1,1，当前为：%s", s), errCaptchaCategory)
 		return
 	}
 	c.A = 0xff
@@ -122,7 +114,7 @@ func parseColor(s string) (c color.RGBA, err error) {
 			return
 		}
 		if value > 255 || value < 0 {
-			err = errColorInvalid
+			err = hes.New(fmt.Sprintf("非法颜色值，必须>=0 <=255，当前为：%d", value), errCaptchaCategory)
 			return
 		}
 		switch index {

@@ -75,13 +75,6 @@ const (
 var (
 	// applicationStartedAt 应用启动时间
 	applicationStartedAt = time.Now()
-
-	// errAppIsNotRunning 应用非运行状态
-	errAppIsNotRunning = &hes.Error{
-		StatusCode: http.StatusServiceUnavailable,
-		Message:    "应用服务不可用",
-		Category:   errCommonCategory,
-	}
 )
 
 func init() {
@@ -107,7 +100,7 @@ func init() {
 // ping 用于检测服务是否可用
 func (*commonCtrl) ping(c *elton.Context) error {
 	if !service.ApplicationIsRunning() {
-		return errAppIsNotRunning
+		return hes.NewWithStatusCode("应用服务不可用", http.StatusServiceUnavailable, errCommonCategory)
 	}
 	c.BodyBuffer = bytes.NewBufferString("pong")
 	return nil

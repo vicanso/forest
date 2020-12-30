@@ -15,7 +15,7 @@
 package middleware
 
 import (
-	"net/http"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -34,11 +34,6 @@ const (
 )
 
 var (
-	errTooFrequently = &hes.Error{
-		StatusCode: http.StatusBadRequest,
-		Message:    "请求过于频繁，请稍候再试！",
-		Category:   errLimitCategory,
-	}
 	redisSrv = new(cache.Redis)
 )
 
@@ -99,7 +94,7 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler 
 			return
 		}
 		if count > maxCount {
-			err = errTooFrequently
+			err = hes.New(fmt.Sprintf("请求过于频繁，请稍候再试！(%d/%d)", count, maxCount), errLimitCategory)
 			return
 		}
 		return c.Next()
@@ -118,7 +113,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 		count, _ := strconv.Atoi(string(result))
 		// 因为count是处理完才inc，因此增加等于的判断
 		if int64(count) >= maxCount {
-			err = errTooFrequently
+			err = hes.New(fmt.Sprintf("请求过于频繁，请稍候再试！(%d/%d)", count, maxCount), errLimitCategory)
 			return
 		}
 		err = c.Next()

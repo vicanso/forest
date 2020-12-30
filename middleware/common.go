@@ -15,6 +15,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -31,19 +32,6 @@ import (
 const (
 	xCaptchaHeader    = "X-Captcha"
 	errCommonCategory = "common-validate"
-)
-
-var (
-	errCaptchaIsInvalid = &hes.Error{
-		StatusCode: http.StatusBadRequest,
-		Message:    "图形验证码错误",
-		Category:   errCommonCategory,
-	}
-	errCaptchaExpired = &hes.Error{
-		StatusCode: http.StatusBadRequest,
-		Message:    "图形验证码已过期，请刷新",
-		Category:   errCommonCategory,
-	}
 )
 
 // WaitFor 延时响应中间件，设置最少等待多久再响应
@@ -74,12 +62,12 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		value := c.GetRequestHeader(xCaptchaHeader)
 		if value == "" {
-			err = errCaptchaIsInvalid
+			err = hes.New("图形验证码参数不能为空", errCommonCategory)
 			return
 		}
 		arr := strings.Split(value, ":")
 		if len(arr) != 2 {
-			err = errCaptchaIsInvalid
+			err = hes.New(fmt.Sprintf("图形验证码参数长度异常(%d)", len(arr)), errCommonCategory)
 			return
 		}
 		// 如果有配置万能验证码，则判断是否相等
@@ -89,12 +77,12 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 		valid, err := service.ValidateCaptcha(c.Context(), arr[0], arr[1])
 		if err != nil {
 			if helper.RedisIsNilError(err) {
-				err = errCaptchaExpired
+				err = hes.New("图形验证码已过期，请刷新", errCommonCategory)
 			}
 			return err
 		}
 		if !valid {
-			err = errCaptchaIsInvalid
+			err = hes.New("图形验证码错误", errCommonCategory)
 			return
 		}
 		return c.Next()
@@ -128,12 +116,11 @@ func NewNotFoundHandler() http.HandlerFunc {
 			warner404.ClearExpired()
 		}
 	}()
-	notFoundErr := &hes.Error{
+	notFoundErrBytes := (&hes.Error{
 		Message:    "Not Found",
 		StatusCode: http.StatusNotFound,
 		Category:   "defaultNotFound",
-	}
-	notFoundErrBytes := notFoundErr.ToJSON()
+	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
 		logger.Info("404",
@@ -168,12 +155,11 @@ func NewNotFoundHandler() http.HandlerFunc {
 
 // NewMethodNotAllowedHandler 创建method not allowed的处理函数
 func NewMethodNotAllowedHandler() http.HandlerFunc {
-	methodNotAllowedErr := &hes.Error{
+	methodNotAllowedErrBytes := (&hes.Error{
 		Message:    "Method Not Allowed",
 		StatusCode: http.StatusMethodNotAllowed,
 		Category:   "defaultMethodNotAllowed",
-	}
-	methodNotAllowedErrBytes := methodNotAllowedErr.ToJSON()
+	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
 		logger.Info("method not allowed",

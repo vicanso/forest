@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/hes"
 )
 
 func TestNewConcurrentLimit(t *testing.T) {
@@ -90,7 +91,7 @@ func TestNewIPLimit(t *testing.T) {
 
 	// 第二次访问时，则拦截
 	err = fn(c)
-	assert.Equal(errTooFrequently, err)
+	assert.Equal("请求过于频繁，请稍候再试！(2/1)", err.(*hes.Error).Message)
 
 	// 等待过期后可正常执行
 	time.Sleep(10 * time.Millisecond)
@@ -113,5 +114,5 @@ func TestNewErrorLimit(t *testing.T) {
 
 	// 第二次执行时，被拦截
 	err = fn(c)
-	assert.Equal(err, errTooFrequently)
+	assert.Equal("请求过于频繁，请稍候再试！(1/1)", err.(*hes.Error).Message)
 }

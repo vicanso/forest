@@ -131,10 +131,7 @@ func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor
 			if message == "" {
 				message = string(resp.Data)
 			}
-			return &hes.Error{
-				StatusCode: resp.Status,
-				Message:    message,
-			}
+			return hes.NewWithStatusCode(message, resp.Status)
 		}
 		return
 	}

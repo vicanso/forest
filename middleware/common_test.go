@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/hes"
 )
 
 func TestWaitFor(t *testing.T) {
@@ -88,12 +89,12 @@ func TestValidateCaptcha(t *testing.T) {
 
 	// 请求头未设置
 	err := fn(c)
-	assert.Equal(errCaptchaIsInvalid, err)
+	assert.Equal("图形验证码参数不能为空", err.(*hes.Error).Message)
 
 	// 错误的请求头设置
 	req.Header.Set(xCaptchaHeader, "abc")
 	err = fn(c)
-	assert.Equal(errCaptchaIsInvalid, err)
+	assert.Equal("图形验证码参数长度异常(1)", err.(*hes.Error).Message)
 
 	// macical captcha
 	req.Header.Set(xCaptchaHeader, "ax:"+magicalCaptcha)

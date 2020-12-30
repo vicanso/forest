@@ -33,7 +33,7 @@ func TestNewIPBlocker(t *testing.T) {
 	req.Header.Set(elton.HeaderXForwardedFor, "1.1.1.1")
 	c := elton.NewContext(nil, req)
 	err := fn(c)
-	assert.Equal(errIPNotAllow, err)
+	assert.Equal(ErrIPNotAllow, err)
 
 	req.Header.Del(elton.HeaderXForwardedFor)
 	// 由于context的ip会缓存，因此重新创建

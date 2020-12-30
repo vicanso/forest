@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	errIPNotAllow = &hes.Error{
+	ErrIPNotAllow = &hes.Error{
 		StatusCode: http.StatusBadRequest,
 		Message:    "request is forbidden",
 		Category:   "IB",
@@ -35,7 +35,7 @@ type IPBlockFunc func(string) bool
 func NewIPBlocker(fn IPBlockFunc) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		if fn(c.RealIP()) {
-			err = errIPNotAllow
+			err = ErrIPNotAllow
 			return
 		}
 		return c.Next()

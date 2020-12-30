@@ -36,24 +36,6 @@ import (
 type listParams = helper.EntListParams
 
 var (
-	errShouldLogin = &hes.Error{
-		Message:    "请先登录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errLoginAlready = &hes.Error{
-		Message:    "已是登录状态，请先退出登录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errForbidden = &hes.Error{
-		StatusCode: http.StatusForbidden,
-		Message:    "禁止使用该功能",
-		Category:   errUserCategory,
-	}
-)
-
-var (
 	logger       = log.Default()
 	getEntClient = helper.EntGetClient
 	now          = util.NowString
@@ -108,10 +90,18 @@ func isLogin(c *elton.Context) bool {
 	return us.IsLogin()
 }
 
+func validateLogin(c *elton.Context) (err error) {
+	if !isLogin(c) {
+		err = hes.New("请先登录", errUserCategory)
+		return
+	}
+	return
+}
+
 // checkLogin 校验是否登录中间件
 func checkLogin(c *elton.Context) (err error) {
-	if !isLogin(c) {
-		err = errShouldLogin
+	err = validateLogin(c)
+	if err != nil {
 		return
 	}
 	return c.Next()
@@ -120,7 +110,7 @@ func checkLogin(c *elton.Context) (err error) {
 // checkAnonymous 判断是匿名状态
 func checkAnonymous(c *elton.Context) (err error) {
 	if isLogin(c) {
-		err = errLoginAlready
+		err = hes.New("已是登录状态，请先退出登录", errUserCategory)
 		return
 	}
 	return c.Next()
@@ -129,8 +119,8 @@ func checkAnonymous(c *elton.Context) (err error) {
 // newCheckRolesMiddleware 创建用户角色校验中间件
 func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		if !isLogin(c) {
-			err = errShouldLogin
+		err = validateLogin(c)
+		if err != nil {
 			return
 		}
 		us := service.NewUserSession(c)
@@ -142,7 +132,7 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 		if valid {
 			return c.Next()
 		}
-		err = errForbidden
+		err = hes.NewWithStatusCode("禁止使用该功能", http.StatusForbidden, errUserCategory)
 		return
 	}
 }

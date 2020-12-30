@@ -24,6 +24,7 @@ import (
 	confSchema "github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 )
 
 func TestConfigurationParams(t *testing.T) {
@@ -64,7 +65,7 @@ func TestConfigurationParams(t *testing.T) {
 		assert.Nil(err)
 		params.Name = name
 		err = params.validateBeforeSave(context.Background())
-		assert.Equal(errConfigurationExists, err)
+		assert.Equal("该配置已存在", err.(*hes.Error).Message)
 	})
 
 	t.Run("query by name", func(t *testing.T) {

@@ -22,6 +22,7 @@ import (
 	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/hes"
 )
 
 func TestListParams(t *testing.T) {
@@ -65,7 +66,7 @@ func TestCheckLogin(t *testing.T) {
 	assert := assert.New(t)
 	c, us := newContextAndUserSession()
 	err := checkLogin(c)
-	assert.Equal(errShouldLogin, err)
+	assert.Equal("请先登录", err.(*hes.Error).Message)
 	err = us.SetInfo(service.UserSessionInfo{
 		Account: "trexie",
 	})
@@ -96,7 +97,7 @@ func TestCheckAnonymous(t *testing.T) {
 	})
 	assert.Nil(err)
 	err = checkAnonymous(c)
-	assert.Equal(errLoginAlready, err)
+	assert.Equal("已是登录状态，请先退出登录", err.(*hes.Error).Message)
 }
 
 func TestNewCheckRolesMiddleware(t *testing.T) {
@@ -107,7 +108,7 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	c, us := newContextAndUserSession()
 	// 未登录
 	err := fn(c)
-	assert.Equal(errShouldLogin, err)
+	assert.Equal("请先登录", err.(*hes.Error).Message)
 
 	// 已登录但无权限
 	err = us.SetInfo(service.UserSessionInfo{
@@ -115,7 +116,7 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	})
 	assert.Nil(err)
 	err = fn(c)
-	assert.Equal(errForbidden, err)
+	assert.Equal("禁止使用该功能", err.(*hes.Error).Message)
 
 	// 已登录且权限允许
 	err = us.SetInfo(service.UserSessionInfo{

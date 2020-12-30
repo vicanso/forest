@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vicanso/hes"
 )
 
 func TestParseColor(t *testing.T) {
@@ -31,9 +32,9 @@ func TestParseColor(t *testing.T) {
 	assert.Equal(uint8(255), c.B)
 
 	_, err = parseColor("255,255")
-	assert.Equal(errColorInvalid, err)
-	_, err = parseColor("255,255, 256")
-	assert.Equal(errColorInvalid, err)
+	assert.Equal("非法颜色值，格式必须为：1,1,1，当前为：255,255", err.(*hes.Error).Message)
+	_, err = parseColor("255,255,256")
+	assert.Equal("非法颜色值，必须>=0 <=255，当前为：256", err.(*hes.Error).Message)
 }
 
 func TestGetCaptcha(t *testing.T) {
