@@ -42,11 +42,11 @@ var (
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(sessionInterceptor, middleware.NewSession())
+	loadUserSession = elton.Compose(sessionInterceptorMiddleware, middleware.NewSession())
 	// 判断用户是否登录
-	shouldBeLogin = checkLogin
+	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录
-	shouldBeAnonymous = checkAnonymous
+	shouldBeAnonymous = checkAnonymousMiddleware
 	// 判断用户是否admin权限
 	shouldBeAdmin = newCheckRolesMiddleware([]string{
 		schema.UserRoleSu,
@@ -98,8 +98,8 @@ func validateLogin(c *elton.Context) (err error) {
 	return
 }
 
-// checkLogin 校验是否登录中间件
-func checkLogin(c *elton.Context) (err error) {
+// checkLoginMiddleware 校验是否登录中间件
+func checkLoginMiddleware(c *elton.Context) (err error) {
 	err = validateLogin(c)
 	if err != nil {
 		return
@@ -107,8 +107,8 @@ func checkLogin(c *elton.Context) (err error) {
 	return c.Next()
 }
 
-// checkAnonymous 判断是匿名状态
-func checkAnonymous(c *elton.Context) (err error) {
+// checkAnonymousMiddleware 判断是匿名状态
+func checkAnonymousMiddleware(c *elton.Context) (err error) {
 	if isLogin(c) {
 		err = hes.New("已是登录状态，请先退出登录", errUserCategory)
 		return
@@ -137,8 +137,8 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 	}
 }
 
-// newTracker 初始化用户行为跟踪中间件
-func newTracker(action string) elton.Handler {
+// newTrackerMiddleware 初始化用户行为跟踪中间件
+func newTrackerMiddleware(action string) elton.Handler {
 	marshalString := func(data interface{}) string {
 		buf, _ := json.Marshal(data)
 		return string(buf)
@@ -206,13 +206,13 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 	return
 }
 
-// sessionInterceptor session的拦截
-func sessionInterceptor(c *elton.Context) error {
+// sessionInterceptorMiddleware session的拦截
+func sessionInterceptorMiddleware(c *elton.Context) error {
 	message, ok := service.GetSessionInterceptorMessage()
 	// 如果有配置拦截信息，则以出错返回
 	if ok {
 		he := hes.New(message)
-		he.Category = "sessionInterceptor"
+		he.Category = "sessionInterceptorMiddleware"
 		return he
 	}
 	return c.Next()

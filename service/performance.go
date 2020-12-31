@@ -26,30 +26,37 @@ import (
 type (
 	// Performance 应用性能指标
 	Performance struct {
-		GoMaxProcs    int           `json:"goMaxProcs,omitempty"`
-		Concurrency   uint32        `json:"concurrency,omitempty"`
-		ThreadCount   int32         `json:"threadCount,omitempty"`
-		MemSys        int           `json:"memSys,omitempty"`
-		MemHeapSys    int           `json:"memHeapSys,omitempty"`
-		MemHeapInuse  int           `json:"memHeapInuse,omitempty"`
-		MemFrees      uint64        `json:"memFrees,omitempty"`
-		RoutineCount  int           `json:"routineCount,omitempty"`
-		CPUUsage      uint32        `json:"cpuUsage,omitempty"`
-		LastGC        time.Time     `json:"lastGC,omitempty"`
-		NumGC         uint32        `json:"numGC,omitempty"`
-		RecentPause   string        `json:"recentPause,omitempty"`
-		RecentPauseNs time.Duration `json:"recentPauseNs,omitempty"`
-		PauseTotal    string        `json:"pauseTotal,omitempty"`
-		PauseTotalNs  time.Duration `json:"pauseTotalNs,omitempty"`
-		CPUBusy       string        `json:"cpuBusy,omitempty"`
-		Uptime        string        `json:"uptime,omitempty"`
-		PauseNs       [256]uint64   `json:"pauseNs,omitempty"`
+		GoMaxProcs      int           `json:"goMaxProcs,omitempty"`
+		Concurrency     int32         `json:"concurrency,omitempty"`
+		ConnConcurrency int32         `json:"connConcurrency,omitempty"`
+		ConnAlive       int32         `json:"connAlive,omitempty"`
+		ThreadCount     int32         `json:"threadCount,omitempty"`
+		MemSys          int           `json:"memSys,omitempty"`
+		MemHeapSys      int           `json:"memHeapSys,omitempty"`
+		MemHeapInuse    int           `json:"memHeapInuse,omitempty"`
+		MemFrees        uint64        `json:"memFrees,omitempty"`
+		RoutineCount    int           `json:"routineCount,omitempty"`
+		CPUUsage        int32         `json:"cpuUsage,omitempty"`
+		LastGC          time.Time     `json:"lastGC,omitempty"`
+		NumGC           uint32        `json:"numGC,omitempty"`
+		RecentPause     string        `json:"recentPause,omitempty"`
+		RecentPauseNs   time.Duration `json:"recentPauseNs,omitempty"`
+		PauseTotal      string        `json:"pauseTotal,omitempty"`
+		PauseTotalNs    time.Duration `json:"pauseTotalNs,omitempty"`
+		CPUBusy         string        `json:"cpuBusy,omitempty"`
+		Uptime          string        `json:"uptime,omitempty"`
+		PauseNs         [256]uint64   `json:"pauseNs,omitempty"`
 	}
 )
 
 var (
-	concurrency atomic.Uint32
-	cpuUsage    atomic.Uint32
+	// 选择int32可根据如果值少于0，则处理有误
+	concurrency atomic.Int32
+	cpuUsage    atomic.Int32
+	// 连接并发数
+	connConcurrency atomic.Int32
+	// 存活连接数
+	connAlive atomic.Int32
 )
 var startedAt = time.Now()
 
@@ -80,40 +87,72 @@ func GetPerformance() Performance {
 	}
 	threadCount, _ := currentProcess.NumThreads()
 	return Performance{
-		GoMaxProcs:    runtime.GOMAXPROCS(0),
-		Concurrency:   GetConcurrency(),
-		ThreadCount:   threadCount,
-		MemSys:        int(m.Sys / mb),
-		MemHeapSys:    int(m.HeapSys / mb),
-		MemHeapInuse:  int(m.HeapInuse / mb),
-		MemFrees:      m.Frees,
-		RoutineCount:  runtime.NumGoroutine(),
-		CPUUsage:      cpuUsage.Load(),
-		LastGC:        time.Unix(seconds, 0),
-		NumGC:         m.NumGC,
-		RecentPause:   recentPauseNs.String(),
-		RecentPauseNs: recentPauseNs,
-		PauseTotal:    pauseTotalNs.String(),
-		PauseTotalNs:  pauseTotalNs,
-		CPUBusy:       cpuBusy,
-		Uptime:        time.Since(startedAt).String(),
-		PauseNs:       m.PauseNs,
+		GoMaxProcs:      runtime.GOMAXPROCS(0),
+		Concurrency:     GetConcurrency(),
+		ConnConcurrency: GetConnConcurrency(),
+		ConnAlive:       GetConnAlive(),
+		ThreadCount:     threadCount,
+		MemSys:          int(m.Sys / mb),
+		MemHeapSys:      int(m.HeapSys / mb),
+		MemHeapInuse:    int(m.HeapInuse / mb),
+		MemFrees:        m.Frees,
+		RoutineCount:    runtime.NumGoroutine(),
+		CPUUsage:        cpuUsage.Load(),
+		LastGC:          time.Unix(seconds, 0),
+		NumGC:           m.NumGC,
+		RecentPause:     recentPauseNs.String(),
+		RecentPauseNs:   recentPauseNs,
+		PauseTotal:      pauseTotalNs.String(),
+		PauseTotalNs:    pauseTotalNs,
+		CPUBusy:         cpuBusy,
+		Uptime:          time.Since(startedAt).String(),
+		PauseNs:         m.PauseNs,
 	}
 }
 
 // IncreaseConcurrency 当前并发请求+1
-func IncreaseConcurrency() uint32 {
+func IncreaseConcurrency() int32 {
 	return concurrency.Inc()
 }
 
 // DecreaseConcurrency 当前并发请求-1
-func DecreaseConcurrency() uint32 {
+func DecreaseConcurrency() int32 {
 	return concurrency.Dec()
 }
 
 // GetConcurrency 获取当前并发请求
-func GetConcurrency() uint32 {
+func GetConcurrency() int32 {
 	return concurrency.Load()
+}
+
+// IncreaseConnConcurrency 当前并发连接数+1
+func IncreaseConnConcurrency() int32 {
+	return connConcurrency.Inc()
+}
+
+// DecreaseConnConcurrency 当前并发连接数-1
+func DecreaseConnConcurrency() int32 {
+	return connConcurrency.Dec()
+}
+
+// GetConnConcurrency 获取当前并发连接数
+func GetConnConcurrency() int32 {
+	return connConcurrency.Load()
+}
+
+// IncreaseConnAlive 存活连接数+1
+func IncreaseConnAlive() int32 {
+	return connAlive.Inc()
+}
+
+// DecreaseConnAlive 存活连接数-1
+func DecreaseConnAlive() int32 {
+	return connAlive.Dec()
+}
+
+// GetConnAlive 获取当前存活连接数
+func GetConnAlive() int32 {
+	return connAlive.Load()
 }
 
 // UpdateCPUUsage 更新cpu使用率
@@ -122,6 +161,6 @@ func UpdateCPUUsage() error {
 	if err != nil {
 		return err
 	}
-	cpuUsage.Store(uint32(usage))
+	cpuUsage.Store(int32(usage))
 	return nil
 }

@@ -21,6 +21,13 @@ const (
 	UserSession = "userSession"
 )
 
+type ContextKey string
+
+const (
+	// ConnContextKey conn context key
+	ConnContextKey ContextKey = "connContext"
+)
+
 const (
 	// MagicalCaptcha magical captcha(for test only)
 	MagicalCaptcha = "0145"

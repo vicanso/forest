@@ -184,7 +184,7 @@ func init() {
 		"/v1/me",
 		// 注册无论成功失败都最少等待1秒
 		middleware.WaitFor(time.Second),
-		newTracker(cs.ActionRegister),
+		newTrackerMiddleware(cs.ActionRegister),
 		captchaValidate,
 		// 限制相同IP在60秒之内只能调用5次
 		newIPLimit(5, 60*time.Second, cs.ActionRegister),
@@ -197,7 +197,7 @@ func init() {
 		"/v1/me/login",
 		// 登录如果失败则最少等待1秒
 		middleware.WaitFor(time.Second, true),
-		newTracker(cs.ActionLogin),
+		newTrackerMiddleware(cs.ActionLogin),
 		captchaValidate,
 		shouldBeAnonymous,
 		// 同一个账号限制3秒只能登录一次（无论成功还是失败）
@@ -216,7 +216,7 @@ func init() {
 	// 刷新user session的ttl
 	g.PATCH(
 		"/v1/me",
-		newTracker(cs.ActionUserMeUpdate),
+		newTrackerMiddleware(cs.ActionUserMeUpdate),
 		shouldBeLogin,
 		ctrl.updateMe,
 	)
@@ -224,7 +224,7 @@ func init() {
 	// 用户退出登录
 	g.DELETE(
 		"/v1/me",
-		newTracker(cs.ActionLogout),
+		newTrackerMiddleware(cs.ActionLogout),
 		shouldBeLogin,
 		ctrl.logout,
 	)

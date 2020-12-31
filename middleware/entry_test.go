@@ -35,10 +35,10 @@ func TestNewEntry(t *testing.T) {
 	doneEntry := false
 	doneExit := false
 
-	fn := NewEntry(func() uint32 {
+	fn := NewEntry(func() int32 {
 		doneEntry = true
 		return 0
-	}, func() uint32 {
+	}, func() int32 {
 		doneExit = true
 		return 0
 	})

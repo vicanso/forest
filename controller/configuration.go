@@ -84,14 +84,14 @@ func init() {
 	// 添加配置
 	g.POST(
 		"/v1",
-		newTracker(cs.ActionConfigurationAdd),
+		newTrackerMiddleware(cs.ActionConfigurationAdd),
 		ctrl.add,
 	)
 
 	// 更新配置
 	g.PATCH(
 		"/v1/{id}",
-		newTracker(cs.ActionConfigurationUpdate),
+		newTrackerMiddleware(cs.ActionConfigurationUpdate),
 		ctrl.update,
 	)
 

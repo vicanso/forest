@@ -22,9 +22,9 @@ import (
 
 func TestPerformanceConcurrency(t *testing.T) {
 	assert := assert.New(t)
-	assert.Equal(uint32(1), IncreaseConcurrency())
-	assert.Equal(uint32(1), GetConcurrency())
-	assert.Equal(uint32(0), DecreaseConcurrency())
+	assert.Equal(int32(1), IncreaseConcurrency())
+	assert.Equal(int32(1), GetConcurrency())
+	assert.Equal(int32(0), DecreaseConcurrency())
 }
 
 func TestGetPerformance(t *testing.T) {

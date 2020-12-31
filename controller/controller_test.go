@@ -65,7 +65,7 @@ func TestIsLogin(t *testing.T) {
 func TestCheckLogin(t *testing.T) {
 	assert := assert.New(t)
 	c, us := newContextAndUserSession()
-	err := checkLogin(c)
+	err := checkLoginMiddleware(c)
 	assert.Equal("请先登录", err.(*hes.Error).Message)
 	err = us.SetInfo(service.UserSessionInfo{
 		Account: "trexie",
@@ -76,7 +76,7 @@ func TestCheckLogin(t *testing.T) {
 		done = true
 		return nil
 	}
-	err = checkLogin(c)
+	err = checkLoginMiddleware(c)
 	assert.Nil(err)
 	assert.True(done)
 }
@@ -89,14 +89,14 @@ func TestCheckAnonymous(t *testing.T) {
 		done = true
 		return nil
 	}
-	err := checkAnonymous(c)
+	err := checkAnonymousMiddleware(c)
 	assert.Nil(err)
 	assert.True(done)
 	err = us.SetInfo(service.UserSessionInfo{
 		Account: "trexie",
 	})
 	assert.Nil(err)
-	err = checkAnonymous(c)
+	err = checkAnonymousMiddleware(c)
 	assert.Equal("已是登录状态，请先退出登录", err.(*hes.Error).Message)
 }
 

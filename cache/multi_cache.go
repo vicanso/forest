@@ -22,71 +22,35 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	lruttl "github.com/vicanso/lru-ttl"
 )
 
-type multiCache struct {
-	ttl    time.Duration
-	lru    *lruttl.Cache
-	prefix string
+var multiCacheDefaultTimeout = 3 * time.Second
+
+type redisCache struct{}
+
+func (sc *redisCache) Get(key string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), multiCacheDefaultTimeout)
+	defer cancel()
+	return redisSrv.Get(ctx, key)
+}
+
+func (sc *redisCache) Set(key string, value []byte, ttl time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), multiCacheDefaultTimeout)
+	defer cancel()
+	return redisSrv.Set(ctx, key, value, ttl)
 }
 
 // NewMultiCache create a new multi cache
-func NewMultiCache(lruSize int, ttl time.Duration) *multiCache {
-	return &multiCache{
-		ttl: ttl,
-		lru: lruttl.New(lruSize, ttl),
-	}
+func NewMultiCache(lruSize int, ttl time.Duration) *lruttl.L2Cache {
+	return lruttl.NewL2Cache(&redisCache{}, lruSize, ttl)
 }
 
-// SetPrefix set prefix for cache
-func (mc *multiCache) SetPrefix(prefix string) *multiCache {
-	mc.prefix = prefix
-	return mc
-}
-
-func (mc *multiCache) getKey(key string) string {
-	return mc.prefix + key
-}
-
-// SetStruct set struct to cache
-func (mc *multiCache) SetStruct(ctx context.Context, key string, value interface{}) (err error) {
-	buf, err := json.Marshal(value)
-	if err != nil {
-		return
-	}
-	key = mc.getKey(key)
-	// 先保存至redis
-	err = redisSrv.Set(ctx, key, buf, mc.ttl)
-	if err != nil {
-		return
-	}
-	// 保存至lru
-	mc.lru.Add(key, buf)
-	return
-}
-
-// GetStruct get struct from cache
-func (mc *multiCache) GetStruct(ctx context.Context, key string, value interface{}) (err error) {
-	var buf []byte
-	key = mc.getKey(key)
-	data, ok := mc.lru.Get(key)
-	if ok {
-		buf, _ = data.([]byte)
-	}
-	// 如果数据为空，则从redis中拉取
-	if len(buf) == 0 {
-		buf, err = redisSrv.Get(ctx, key)
-		if err != nil {
-			return
-		}
-	}
-	err = json.Unmarshal(buf, value)
-	if err != nil {
-		return
-	}
-	return
+// NewMultiCacheWithPrefix create a new multi cache and set prefix key
+func NewMultiCacheWithPrefix(lruSize int, ttl time.Duration, prefix string) *lruttl.L2Cache {
+	l2 := NewMultiCache(lruSize, ttl)
+	l2.SetPrefix(prefix)
+	return l2
 }

@@ -23,8 +23,8 @@ const (
 	xResponseID = "X-Response-Id"
 )
 
-type EntryFunc func() uint32
-type ExitFunc func() uint32
+type EntryFunc func() int32
+type ExitFunc func() int32
 
 // NewEntry create an entry middleware
 func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
