@@ -17,8 +17,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -180,20 +178,8 @@ func newOnErrorHandler(e *elton.Elton) {
 func main() {
 	e := elton.New()
 	// 记录server中连接的状态变化
-	e.Server.ConnState = func(c net.Conn, cs http.ConnState) {
-		switch cs {
-		case http.StateNew:
-			service.IncreaseConnAlive()
-		case http.StateActive:
-			service.IncreaseConnConcurrency()
-		case http.StateIdle:
-			service.DecreaseConnConcurrency()
-		case http.StateHijacked:
-			fallthrough
-		case http.StateClosed:
-			service.DecreaseConnAlive()
-		}
-	}
+	e.Server.ConnState = service.GetHTTPServerConnState()
+
 	logger := log.Default()
 	defer func() {
 		if r := recover(); r != nil {

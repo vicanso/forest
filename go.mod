@@ -21,7 +21,6 @@ require (
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/shirou/gopsutil/v3 v3.20.11
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.7
 	github.com/vicanso/count-warner v1.1.0
@@ -29,6 +28,7 @@ require (
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.1.18
+	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.0
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.3.1
