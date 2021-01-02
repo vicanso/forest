@@ -33,9 +33,7 @@ const (
 	errLimitCategory         = "requestLimit"
 )
 
-var (
-	redisSrv = new(cache.Redis)
-)
+var redisSrv = cache.GetRedisCache()
 
 type (
 	// KeyGenerator key generator
@@ -89,7 +87,7 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler 
 	return func(c *elton.Context) (err error) {
 		ctx := c.Context()
 		key := ipLimitKeyPrefix + "-" + prefix + "-" + c.RealIP()
-		count, err := redisSrv.IncWithTTL(ctx, key, ttl)
+		count, err := redisSrv.IncWith(ctx, key, 1, ttl)
 		if err != nil {
 			return
 		}
@@ -119,7 +117,7 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 		err = c.Next()
 		// 如果出错，则出错次数+1
 		if err != nil {
-			_, _ = redisSrv.IncWithTTL(ctx, key, ttl)
+			_, _ = redisSrv.IncWith(ctx, key, 1, ttl)
 		}
 		return
 	}

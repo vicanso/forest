@@ -172,6 +172,6 @@ func ValidateCaptcha(ctx context.Context, id, value string) (valid bool, err err
 	if err != nil {
 		return
 	}
-	valid = data == value
+	valid = string(data) == value
 	return
 }

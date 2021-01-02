@@ -24,9 +24,7 @@ import (
 
 // NewSession new session middleware
 func NewSession() elton.Handler {
-	store := &cache.RedisSessionStore{
-		Prefix: "ss-",
-	}
+	store := cache.GetRedisSession()
 	scf := config.GetSessionConfig()
 	return session.NewByCookie(session.CookieConfig{
 		Store:   store,
