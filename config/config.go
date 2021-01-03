@@ -85,6 +85,8 @@ type (
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
 		MaxProcessing uint32 `validate:"required"`
+		// key前缀
+		Prefix string
 	}
 	// PostgresConfig postgres配置
 	PostgresConfig struct {
@@ -256,6 +258,10 @@ func GetRedisConfig() RedisConfig {
 		DB:            db,
 		Slow:          slow,
 		MaxProcessing: uint32(maxProcessing),
+	}
+	keyPrefix := query.Get("prefix")
+	if keyPrefix != "" {
+		redisConfig.Prefix = keyPrefix + ":"
 	}
 
 	mustValidate(&redisConfig)
