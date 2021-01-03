@@ -15,6 +15,8 @@
 package log
 
 import (
+	"log"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -22,6 +24,15 @@ import (
 )
 
 var defaultLogger = mustNewLogger()
+
+type httpServerLogger struct{}
+
+func (hsl *httpServerLogger) Write(p []byte) (int, error) {
+	defaultLogger.Info(string(p),
+		zap.String("category", "httpServerLogger"),
+	)
+	return len(p), nil
+}
 
 // mustNewLogger 初始化logger
 func mustNewLogger() *zap.Logger {
@@ -53,4 +64,9 @@ func mustNewLogger() *zap.Logger {
 // Default 获取默认的logger
 func Default() *zap.Logger {
 	return defaultLogger
+}
+
+// NewHTTPServerLogger create a http server logger
+func NewHTTPServerLogger() *log.Logger {
+	return log.New(&httpServerLogger{}, "", 0)
 }

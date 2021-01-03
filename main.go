@@ -179,6 +179,7 @@ func main() {
 	e := elton.New()
 	// 记录server中连接的状态变化
 	e.Server.ConnState = service.GetHTTPServerConnState()
+	e.Server.ErrorLog = log.NewHTTPServerLogger()
 
 	logger := log.Default()
 	defer func() {
