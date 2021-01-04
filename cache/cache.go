@@ -60,3 +60,8 @@ func NewMultilevelCache(lruSize int, ttl time.Duration, prefix string) *lruttl.L
 		Prefix:  prefix,
 	})
 }
+
+// NewLRUCache new lru cache with ttl
+func NewLRUCache(maxEntries int, defaultTTL time.Duration) *lruttl.Cache {
+	return lruttl.New(maxEntries, defaultTTL)
+}

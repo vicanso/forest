@@ -53,7 +53,7 @@ const processingKeyAll = "All"
 
 // entProcessingStats ent的处理请求统计
 type entProcessingStats struct {
-	data map[string]*atomic.Uint32
+	data map[string]*atomic.Int32
 }
 
 // EntEntListParams 公共的列表查询参数
@@ -153,16 +153,16 @@ func (params *EntListParams) ShouldCount() bool {
 
 // init 初始化统计
 func (stats *entProcessingStats) init(schemas []string) {
-	data := make(map[string]*atomic.Uint32)
-	data[processingKeyAll] = atomic.NewUint32(0)
+	data := make(map[string]*atomic.Int32)
+	data[processingKeyAll] = atomic.NewInt32(0)
 	for _, schema := range schemas {
-		data[schema] = atomic.NewUint32(0)
+		data[schema] = atomic.NewInt32(0)
 	}
 	stats.data = data
 }
 
 // inc 处理数+1
-func (stats *entProcessingStats) inc(schema string) (uint32, uint32) {
+func (stats *entProcessingStats) inc(schema string) (int32, int32) {
 	total := stats.data[processingKeyAll].Inc()
 	p, ok := stats.data[schema]
 	if !ok {
@@ -172,7 +172,7 @@ func (stats *entProcessingStats) inc(schema string) (uint32, uint32) {
 }
 
 // desc 处理数-1
-func (stats *entProcessingStats) dec(schema string) (uint32, uint32) {
+func (stats *entProcessingStats) dec(schema string) (int32, int32) {
 	total := stats.data[processingKeyAll].Dec()
 	p, ok := stats.data[schema]
 	if !ok {
@@ -253,8 +253,8 @@ func initSchemaHooks(c *ent.Client) {
 				zap.String("schema", schemaType),
 				zap.String("op", op),
 				zap.Int("result", result),
-				zap.Uint32("processing", processing),
-				zap.Uint32("totalProcessing", totalProcessing),
+				zap.Int32("processing", processing),
+				zap.Int32("totalProcessing", totalProcessing),
 				zap.String("use", d.String()),
 				zap.Any("data", data),
 				zap.String("message", message),

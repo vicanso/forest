@@ -23,6 +23,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/hes"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
@@ -37,8 +38,6 @@ var (
 		StatusCode: http.StatusInternalServerError,
 		Category:   "redis",
 	}
-	// ErrRedisNil 为空是返回的出错
-	ErrRedisNil = hes.New("key is not exists or expired")
 )
 
 type (
@@ -63,6 +62,7 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
 	}
+	redis.SetLogger(log.NewRedisLogger())
 	c := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
 		Password: redisConfig.Password,
@@ -183,7 +183,7 @@ func RedisGetClient() *redis.Client {
 
 // RedisIsNilError 判断是否redis的nil error
 func RedisIsNilError(err error) bool {
-	return err == ErrRedisNil || err == redis.Nil
+	return err == redis.Nil
 }
 
 // RedisStats 获取redis的性能统计

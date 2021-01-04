@@ -15,6 +15,8 @@
 package log
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	"go.uber.org/zap"
@@ -32,6 +34,14 @@ func (hsl *httpServerLogger) Write(p []byte) (int, error) {
 		zap.String("category", "httpServerLogger"),
 	)
 	return len(p), nil
+}
+
+type redisLogger struct{}
+
+func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
+	defaultLogger.Info(fmt.Sprintf(format, v...),
+		zap.String("category", "redisLogger"),
+	)
 }
 
 // mustNewLogger 初始化logger
@@ -69,4 +79,9 @@ func Default() *zap.Logger {
 // NewHTTPServerLogger create a http server logger
 func NewHTTPServerLogger() *log.Logger {
 	return log.New(&httpServerLogger{}, "", 0)
+}
+
+// NewRedisLogger create a redis logger
+func NewRedisLogger() *redisLogger {
+	return &redisLogger{}
 }

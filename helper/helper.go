@@ -20,9 +20,9 @@ var (
 	logger = log.Default()
 )
 
-type ContextKey string
+type ContextKey struct{}
 
-const (
+var (
 	// 记录命令开始时间
-	startedAtKey ContextKey = "startedAt"
+	startedAtKey *ContextKey = &ContextKey{}
 )

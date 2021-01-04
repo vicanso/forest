@@ -33,6 +33,8 @@ type (
 
 var logger = log.Default()
 
+const logCategory = "schedule"
+
 func init() {
 	c := cron.New()
 	_, _ = c.AddFunc("@every 1m", redisPing)
@@ -53,14 +55,14 @@ func doTask(desc string, fn taskFn) {
 	use := time.Since(startedAt)
 	if err != nil {
 		logger.Error(desc+" fail",
-			zap.String("category", "schedule"),
+			zap.String("category", logCategory),
 			zap.Duration("use", use),
 			zap.Error(err),
 		)
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
 		logger.Info(desc+" success",
-			zap.String("category", "schedule"),
+			zap.String("category", logCategory),
 			zap.Duration("use", use),
 		)
 	}
@@ -70,7 +72,7 @@ func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
 	logger.Info(desc,
-		zap.String("category", "schedule"),
+		zap.String("category", logCategory),
 		zap.Duration("use", time.Since(startedAt)),
 		zap.Any("stats", stats),
 	)
