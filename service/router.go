@@ -90,6 +90,15 @@ func (l *rcLimiter) GetConcurrency(key string) uint32 {
 	return r.Current.Load()
 }
 
+// GetStats 获取统计
+func (l *rcLimiter) GetStats() map[string]uint32 {
+	result := make(map[string]uint32)
+	for key, r := range l.m {
+		result[key] = r.Current.Load()
+	}
+	return result
+}
+
 // 更新router config配置
 func updateRouterConfigs(configs []string) {
 	result := make(map[string]*RouterConfig)

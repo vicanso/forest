@@ -36,12 +36,8 @@ type (
 	}
 )
 
-var hostname string
+var hostname, _ = os.Hostname()
 var defaultInfluxSrv = mustNewInfluxSrv()
-
-func init() {
-	hostname, _ = os.Hostname()
-}
 
 // mustNewInfluxSrv 创建新的influx服务
 func mustNewInfluxSrv() *InfluxSrv {

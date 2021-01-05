@@ -46,6 +46,7 @@ func init() {
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
+	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
 	c.Start()
 }
 
@@ -161,4 +162,27 @@ func httpInstanceStats() {
 // influxdbPing influxdb ping
 func influxdbPing() {
 	doTask("influxdb ping", helper.GetInfluxSrv().Health)
+}
+
+// routerConcurrencyStats router concurrency stats
+func routerConcurrencyStats() {
+	doStatsTask("router concurrency stats", func() map[string]interface{} {
+		result := service.GetRouterConcurrencyLimiter().GetStats()
+		fields := make(map[string]interface{})
+
+		influxSrv := helper.GetInfluxSrv()
+		for key, value := range result {
+			// 如果并发为0，则不记录
+			if value == 0 {
+				continue
+			}
+			fields[key] = value
+			influxSrv.Write(cs.MeasurementRouterConcurrency, map[string]string{
+				"route": key,
+			}, map[string]interface{}{
+				"count": value,
+			})
+		}
+		return fields
+	})
 }

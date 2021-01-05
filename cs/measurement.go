@@ -23,6 +23,10 @@ const (
 	MeasurementRedisStats = "redisStats"
 	// MeasurementRedisError redis出错统计
 	MeasurementRedisError = "redisError"
+	// MeasurementRedisConn redis连接
+	MeasurementRedisConn = "redisConn"
+	// MeasurementRouterConcurrency 路由并发访问
+	MeasurementRouterConcurrency = "routerConcurrency"
 	// MeasurementHTTPStats http性能统计
 	MeasurementHTTPStats = "httpStats"
 	// MeasurementHTTPInstanceStats http instance统计

@@ -70,6 +70,9 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		Limiter:  hook,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			logger.Info("redis new connection is established")
+			GetInfluxSrv().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
+				"count": 1,
+			})
 			return nil
 		},
 	})
