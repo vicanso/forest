@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
-	github.com/facebook/ent v0.5.3
+	github.com/facebook/ent v0.5.4
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
 	github.com/go-playground/validator/v10 v10.4.1
@@ -28,15 +28,16 @@ require (
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.1.18
-	github.com/vicanso/go-cache v0.0.2
+	github.com/vicanso/go-cache v0.0.3
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.0
 	github.com/vicanso/ips v1.1.0
-	github.com/vicanso/lru-ttl v0.3.1
+	github.com/vicanso/lru-ttl v0.3.2
 	github.com/vicanso/viperx v0.1.3
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/image v0.0.0-20201208152932-35266b937fa6
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

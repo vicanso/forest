@@ -21,13 +21,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
 	return uc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetCreatedAt(*t)
@@ -35,13 +35,13 @@ func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetUpdatedAt(t)
 	return uc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetUpdatedAt(*t)
@@ -49,13 +49,13 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uc *UserCreate) SetStatus(s schema.Status) *UserCreate {
 	uc.mutation.SetStatus(s)
 	return uc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uc *UserCreate) SetNillableStatus(s *schema.Status) *UserCreate {
 	if s != nil {
 		uc.SetStatus(*s)
@@ -63,25 +63,25 @@ func (uc *UserCreate) SetNillableStatus(s *schema.Status) *UserCreate {
 	return uc
 }
 
-// SetAccount sets the account field.
+// SetAccount sets the "account" field.
 func (uc *UserCreate) SetAccount(s string) *UserCreate {
 	uc.mutation.SetAccount(s)
 	return uc
 }
 
-// SetPassword sets the password field.
+// SetPassword sets the "password" field.
 func (uc *UserCreate) SetPassword(s string) *UserCreate {
 	uc.mutation.SetPassword(s)
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	if s != nil {
 		uc.SetName(*s)
@@ -89,25 +89,25 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	return uc
 }
 
-// SetRoles sets the roles field.
+// SetRoles sets the "roles" field.
 func (uc *UserCreate) SetRoles(s []string) *UserCreate {
 	uc.mutation.SetRoles(s)
 	return uc
 }
 
-// SetGroups sets the groups field.
+// SetGroups sets the "groups" field.
 func (uc *UserCreate) SetGroups(s []string) *UserCreate {
 	uc.mutation.SetGroups(s)
 	return uc
 }
 
-// SetEmail sets the email field.
+// SetEmail sets the "email" field.
 func (uc *UserCreate) SetEmail(s string) *UserCreate {
 	uc.mutation.SetEmail(s)
 	return uc
 }
 
-// SetNillableEmail sets the email field if the given value is not nil.
+// SetNillableEmail sets the "email" field if the given value is not nil.
 func (uc *UserCreate) SetNillableEmail(s *string) *UserCreate {
 	if s != nil {
 		uc.SetEmail(*s)
@@ -315,7 +315,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -373,7 +373,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

@@ -21,13 +21,14 @@ type UserLoginQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.UserLogin
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserLoginQuery builder.
 func (ulq *UserLoginQuery) Where(ps ...predicate.UserLogin) *UserLoginQuery {
 	ulq.predicates = append(ulq.predicates, ps...)
 	return ulq
@@ -51,7 +52,8 @@ func (ulq *UserLoginQuery) Order(o ...OrderFunc) *UserLoginQuery {
 	return ulq
 }
 
-// First returns the first UserLogin entity in the query. Returns *NotFoundError when no userlogin was found.
+// First returns the first UserLogin entity from the query.
+// Returns a *NotFoundError when no UserLogin was found.
 func (ulq *UserLoginQuery) First(ctx context.Context) (*UserLogin, error) {
 	nodes, err := ulq.Limit(1).All(ctx)
 	if err != nil {
@@ -72,7 +74,8 @@ func (ulq *UserLoginQuery) FirstX(ctx context.Context) *UserLogin {
 	return node
 }
 
-// FirstID returns the first UserLogin id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first UserLogin ID from the query.
+// Returns a *NotFoundError when no UserLogin ID was found.
 func (ulq *UserLoginQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = ulq.Limit(1).IDs(ctx); err != nil {
@@ -94,7 +97,9 @@ func (ulq *UserLoginQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only UserLogin entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single UserLogin entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one UserLogin entity is not found.
+// Returns a *NotFoundError when no UserLogin entities are found.
 func (ulq *UserLoginQuery) Only(ctx context.Context) (*UserLogin, error) {
 	nodes, err := ulq.Limit(2).All(ctx)
 	if err != nil {
@@ -119,7 +124,9 @@ func (ulq *UserLoginQuery) OnlyX(ctx context.Context) *UserLogin {
 	return node
 }
 
-// OnlyID returns the only UserLogin id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only UserLogin ID in the query.
+// Returns a *NotSingularError when exactly one UserLogin ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (ulq *UserLoginQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = ulq.Limit(2).IDs(ctx); err != nil {
@@ -162,7 +169,7 @@ func (ulq *UserLoginQuery) AllX(ctx context.Context) []*UserLogin {
 	return nodes
 }
 
-// IDs executes the query and returns a list of UserLogin ids.
+// IDs executes the query and returns a list of UserLogin IDs.
 func (ulq *UserLoginQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := ulq.Select(userlogin.FieldID).Scan(ctx, &ids); err != nil {
@@ -214,7 +221,7 @@ func (ulq *UserLoginQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the UserLoginQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (ulq *UserLoginQuery) Clone() *UserLoginQuery {
 	if ulq == nil {
@@ -232,7 +239,7 @@ func (ulq *UserLoginQuery) Clone() *UserLoginQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -259,7 +266,8 @@ func (ulq *UserLoginQuery) GroupBy(field string, fields ...string) *UserLoginGro
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -272,18 +280,16 @@ func (ulq *UserLoginQuery) GroupBy(field string, fields ...string) *UserLoginGro
 //		Scan(ctx, &v)
 //
 func (ulq *UserLoginQuery) Select(field string, fields ...string) *UserLoginSelect {
-	selector := &UserLoginSelect{config: ulq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ulq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ulq.sqlQuery(), nil
-	}
-	return selector
+	ulq.fields = append([]string{field}, fields...)
+	return &UserLoginSelect{UserLoginQuery: ulq}
 }
 
 func (ulq *UserLoginQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range ulq.fields {
+		if !userlogin.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if ulq.path != nil {
 		prev, err := ulq.path(ctx)
 		if err != nil {
@@ -299,18 +305,17 @@ func (ulq *UserLoginQuery) sqlAll(ctx context.Context) ([]*UserLogin, error) {
 		nodes = []*UserLogin{}
 		_spec = ulq.querySpec()
 	)
-	_spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &UserLogin{config: ulq.config}
 		nodes = append(nodes, node)
-		values := node.scanValues()
-		return values
+		return node.scanValues(columns)
 	}
-	_spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		return node.assignValues(values...)
+		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ulq.driver, _spec); err != nil {
 		return nil, err
@@ -346,6 +351,15 @@ func (ulq *UserLoginQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   ulq.sql,
 		Unique: true,
+	}
+	if fields := ulq.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, userlogin.FieldID)
+		for i := range fields {
+			if fields[i] != userlogin.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := ulq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -395,7 +409,7 @@ func (ulq *UserLoginQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// UserLoginGroupBy is the builder for group-by UserLogin entities.
+// UserLoginGroupBy is the group-by builder for UserLogin entities.
 type UserLoginGroupBy struct {
 	config
 	fields []string
@@ -411,7 +425,7 @@ func (ulgb *UserLoginGroupBy) Aggregate(fns ...AggregateFunc) *UserLoginGroupBy 
 	return ulgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (ulgb *UserLoginGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := ulgb.path(ctx)
 	if err != nil {
@@ -428,7 +442,8 @@ func (ulgb *UserLoginGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(ulgb.fields) > 1 {
 		return nil, errors.New("ent: UserLoginGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -449,7 +464,8 @@ func (ulgb *UserLoginGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ulgb.Strings(ctx); err != nil {
@@ -475,7 +491,8 @@ func (ulgb *UserLoginGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ulgb.fields) > 1 {
 		return nil, errors.New("ent: UserLoginGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -496,7 +513,8 @@ func (ulgb *UserLoginGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ulgb.Ints(ctx); err != nil {
@@ -522,7 +540,8 @@ func (ulgb *UserLoginGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ulgb.fields) > 1 {
 		return nil, errors.New("ent: UserLoginGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -543,7 +562,8 @@ func (ulgb *UserLoginGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ulgb.Float64s(ctx); err != nil {
@@ -569,7 +589,8 @@ func (ulgb *UserLoginGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ulgb.fields) > 1 {
 		return nil, errors.New("ent: UserLoginGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -590,7 +611,8 @@ func (ulgb *UserLoginGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ulgb *UserLoginGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ulgb.Bools(ctx); err != nil {
@@ -645,22 +667,19 @@ func (ulgb *UserLoginGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(ulgb.fields...)
 }
 
-// UserLoginSelect is the builder for select fields of UserLogin entities.
+// UserLoginSelect is the builder for selecting fields of UserLogin entities.
 type UserLoginSelect struct {
-	config
-	fields []string
+	*UserLoginQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (uls *UserLoginSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := uls.path(ctx)
-	if err != nil {
+	if err := uls.prepareQuery(ctx); err != nil {
 		return err
 	}
-	uls.sql = query
+	uls.sql = uls.UserLoginQuery.sqlQuery()
 	return uls.sqlScan(ctx, v)
 }
 
@@ -671,7 +690,7 @@ func (uls *UserLoginSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(uls.fields) > 1 {
 		return nil, errors.New("ent: UserLoginSelect.Strings is not achievable when selecting more than 1 field")
@@ -692,7 +711,7 @@ func (uls *UserLoginSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = uls.Strings(ctx); err != nil {
@@ -718,7 +737,7 @@ func (uls *UserLoginSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(uls.fields) > 1 {
 		return nil, errors.New("ent: UserLoginSelect.Ints is not achievable when selecting more than 1 field")
@@ -739,7 +758,7 @@ func (uls *UserLoginSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = uls.Ints(ctx); err != nil {
@@ -765,7 +784,7 @@ func (uls *UserLoginSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(uls.fields) > 1 {
 		return nil, errors.New("ent: UserLoginSelect.Float64s is not achievable when selecting more than 1 field")
@@ -786,7 +805,7 @@ func (uls *UserLoginSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = uls.Float64s(ctx); err != nil {
@@ -812,7 +831,7 @@ func (uls *UserLoginSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(uls.fields) > 1 {
 		return nil, errors.New("ent: UserLoginSelect.Bools is not achievable when selecting more than 1 field")
@@ -833,7 +852,7 @@ func (uls *UserLoginSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (uls *UserLoginSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = uls.Bools(ctx); err != nil {
@@ -860,11 +879,6 @@ func (uls *UserLoginSelect) BoolX(ctx context.Context) bool {
 }
 
 func (uls *UserLoginSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range uls.fields {
-		if !userlogin.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := uls.sqlQuery().Query()
 	if err := uls.driver.Query(ctx, query, args, rows); err != nil {

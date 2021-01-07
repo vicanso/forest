@@ -20,13 +20,13 @@ type UserLoginCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (ulc *UserLoginCreate) SetCreatedAt(t time.Time) *UserLoginCreate {
 	ulc.mutation.SetCreatedAt(t)
 	return ulc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableCreatedAt(t *time.Time) *UserLoginCreate {
 	if t != nil {
 		ulc.SetCreatedAt(*t)
@@ -34,13 +34,13 @@ func (ulc *UserLoginCreate) SetNillableCreatedAt(t *time.Time) *UserLoginCreate 
 	return ulc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (ulc *UserLoginCreate) SetUpdatedAt(t time.Time) *UserLoginCreate {
 	ulc.mutation.SetUpdatedAt(t)
 	return ulc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableUpdatedAt(t *time.Time) *UserLoginCreate {
 	if t != nil {
 		ulc.SetUpdatedAt(*t)
@@ -48,19 +48,19 @@ func (ulc *UserLoginCreate) SetNillableUpdatedAt(t *time.Time) *UserLoginCreate 
 	return ulc
 }
 
-// SetAccount sets the account field.
+// SetAccount sets the "account" field.
 func (ulc *UserLoginCreate) SetAccount(s string) *UserLoginCreate {
 	ulc.mutation.SetAccount(s)
 	return ulc
 }
 
-// SetUserAgent sets the user_agent field.
+// SetUserAgent sets the "user_agent" field.
 func (ulc *UserLoginCreate) SetUserAgent(s string) *UserLoginCreate {
 	ulc.mutation.SetUserAgent(s)
 	return ulc
 }
 
-// SetNillableUserAgent sets the user_agent field if the given value is not nil.
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableUserAgent(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetUserAgent(*s)
@@ -68,13 +68,13 @@ func (ulc *UserLoginCreate) SetNillableUserAgent(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (ulc *UserLoginCreate) SetIP(s string) *UserLoginCreate {
 	ulc.mutation.SetIP(s)
 	return ulc
 }
 
-// SetNillableIP sets the ip field if the given value is not nil.
+// SetNillableIP sets the "ip" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableIP(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetIP(*s)
@@ -82,13 +82,13 @@ func (ulc *UserLoginCreate) SetNillableIP(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetTrackID sets the track_id field.
+// SetTrackID sets the "track_id" field.
 func (ulc *UserLoginCreate) SetTrackID(s string) *UserLoginCreate {
 	ulc.mutation.SetTrackID(s)
 	return ulc
 }
 
-// SetNillableTrackID sets the track_id field if the given value is not nil.
+// SetNillableTrackID sets the "track_id" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableTrackID(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetTrackID(*s)
@@ -96,13 +96,13 @@ func (ulc *UserLoginCreate) SetNillableTrackID(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetSessionID sets the session_id field.
+// SetSessionID sets the "session_id" field.
 func (ulc *UserLoginCreate) SetSessionID(s string) *UserLoginCreate {
 	ulc.mutation.SetSessionID(s)
 	return ulc
 }
 
-// SetNillableSessionID sets the session_id field if the given value is not nil.
+// SetNillableSessionID sets the "session_id" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableSessionID(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetSessionID(*s)
@@ -110,13 +110,13 @@ func (ulc *UserLoginCreate) SetNillableSessionID(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetXForwardedFor sets the x_forwarded_for field.
+// SetXForwardedFor sets the "x_forwarded_for" field.
 func (ulc *UserLoginCreate) SetXForwardedFor(s string) *UserLoginCreate {
 	ulc.mutation.SetXForwardedFor(s)
 	return ulc
 }
 
-// SetNillableXForwardedFor sets the x_forwarded_for field if the given value is not nil.
+// SetNillableXForwardedFor sets the "x_forwarded_for" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableXForwardedFor(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetXForwardedFor(*s)
@@ -124,13 +124,13 @@ func (ulc *UserLoginCreate) SetNillableXForwardedFor(s *string) *UserLoginCreate
 	return ulc
 }
 
-// SetCountry sets the country field.
+// SetCountry sets the "country" field.
 func (ulc *UserLoginCreate) SetCountry(s string) *UserLoginCreate {
 	ulc.mutation.SetCountry(s)
 	return ulc
 }
 
-// SetNillableCountry sets the country field if the given value is not nil.
+// SetNillableCountry sets the "country" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableCountry(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetCountry(*s)
@@ -138,13 +138,13 @@ func (ulc *UserLoginCreate) SetNillableCountry(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetProvince sets the province field.
+// SetProvince sets the "province" field.
 func (ulc *UserLoginCreate) SetProvince(s string) *UserLoginCreate {
 	ulc.mutation.SetProvince(s)
 	return ulc
 }
 
-// SetNillableProvince sets the province field if the given value is not nil.
+// SetNillableProvince sets the "province" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableProvince(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetProvince(*s)
@@ -152,13 +152,13 @@ func (ulc *UserLoginCreate) SetNillableProvince(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetCity sets the city field.
+// SetCity sets the "city" field.
 func (ulc *UserLoginCreate) SetCity(s string) *UserLoginCreate {
 	ulc.mutation.SetCity(s)
 	return ulc
 }
 
-// SetNillableCity sets the city field if the given value is not nil.
+// SetNillableCity sets the "city" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableCity(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetCity(*s)
@@ -166,13 +166,13 @@ func (ulc *UserLoginCreate) SetNillableCity(s *string) *UserLoginCreate {
 	return ulc
 }
 
-// SetIsp sets the isp field.
+// SetIsp sets the "isp" field.
 func (ulc *UserLoginCreate) SetIsp(s string) *UserLoginCreate {
 	ulc.mutation.SetIsp(s)
 	return ulc
 }
 
-// SetNillableIsp sets the isp field if the given value is not nil.
+// SetNillableIsp sets the "isp" field if the given value is not nil.
 func (ulc *UserLoginCreate) SetNillableIsp(s *string) *UserLoginCreate {
 	if s != nil {
 		ulc.SetIsp(*s)
@@ -384,7 +384,7 @@ func (ulc *UserLoginCreate) createSpec() (*UserLogin, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserLoginCreateBulk is the builder for creating a bulk of UserLogin entities.
+// UserLoginCreateBulk is the builder for creating many UserLogin entities in bulk.
 type UserLoginCreateBulk struct {
 	config
 	builders []*UserLoginCreate
@@ -442,7 +442,7 @@ func (ulcb *UserLoginCreateBulk) Save(ctx context.Context) ([]*UserLogin, error)
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ulcb *UserLoginCreateBulk) SaveX(ctx context.Context) []*UserLogin {
 	v, err := ulcb.Save(ctx)
 	if err != nil {

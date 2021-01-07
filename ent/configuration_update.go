@@ -22,20 +22,20 @@ type ConfigurationUpdate struct {
 	mutation *ConfigurationMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ConfigurationUpdate builder.
 func (cu *ConfigurationUpdate) Where(ps ...predicate.Configuration) *ConfigurationUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (cu *ConfigurationUpdate) SetStatus(s schema.Status) *ConfigurationUpdate {
 	cu.mutation.ResetStatus()
 	cu.mutation.SetStatus(s)
 	return cu
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (cu *ConfigurationUpdate) SetNillableStatus(s *schema.Status) *ConfigurationUpdate {
 	if s != nil {
 		cu.SetStatus(*s)
@@ -43,37 +43,37 @@ func (cu *ConfigurationUpdate) SetNillableStatus(s *schema.Status) *Configuratio
 	return cu
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (cu *ConfigurationUpdate) AddStatus(s schema.Status) *ConfigurationUpdate {
 	cu.mutation.AddStatus(s)
 	return cu
 }
 
-// SetCategory sets the category field.
+// SetCategory sets the "category" field.
 func (cu *ConfigurationUpdate) SetCategory(c configuration.Category) *ConfigurationUpdate {
 	cu.mutation.SetCategory(c)
 	return cu
 }
 
-// SetOwner sets the owner field.
+// SetOwner sets the "owner" field.
 func (cu *ConfigurationUpdate) SetOwner(s string) *ConfigurationUpdate {
 	cu.mutation.SetOwner(s)
 	return cu
 }
 
-// SetData sets the data field.
+// SetData sets the "data" field.
 func (cu *ConfigurationUpdate) SetData(s string) *ConfigurationUpdate {
 	cu.mutation.SetData(s)
 	return cu
 }
 
-// SetStartedAt sets the started_at field.
+// SetStartedAt sets the "started_at" field.
 func (cu *ConfigurationUpdate) SetStartedAt(t time.Time) *ConfigurationUpdate {
 	cu.mutation.SetStartedAt(t)
 	return cu
 }
 
-// SetEndedAt sets the ended_at field.
+// SetEndedAt sets the "ended_at" field.
 func (cu *ConfigurationUpdate) SetEndedAt(t time.Time) *ConfigurationUpdate {
 	cu.mutation.SetEndedAt(t)
 	return cu
@@ -267,14 +267,14 @@ type ConfigurationUpdateOne struct {
 	mutation *ConfigurationMutation
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (cuo *ConfigurationUpdateOne) SetStatus(s schema.Status) *ConfigurationUpdateOne {
 	cuo.mutation.ResetStatus()
 	cuo.mutation.SetStatus(s)
 	return cuo
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (cuo *ConfigurationUpdateOne) SetNillableStatus(s *schema.Status) *ConfigurationUpdateOne {
 	if s != nil {
 		cuo.SetStatus(*s)
@@ -282,37 +282,37 @@ func (cuo *ConfigurationUpdateOne) SetNillableStatus(s *schema.Status) *Configur
 	return cuo
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (cuo *ConfigurationUpdateOne) AddStatus(s schema.Status) *ConfigurationUpdateOne {
 	cuo.mutation.AddStatus(s)
 	return cuo
 }
 
-// SetCategory sets the category field.
+// SetCategory sets the "category" field.
 func (cuo *ConfigurationUpdateOne) SetCategory(c configuration.Category) *ConfigurationUpdateOne {
 	cuo.mutation.SetCategory(c)
 	return cuo
 }
 
-// SetOwner sets the owner field.
+// SetOwner sets the "owner" field.
 func (cuo *ConfigurationUpdateOne) SetOwner(s string) *ConfigurationUpdateOne {
 	cuo.mutation.SetOwner(s)
 	return cuo
 }
 
-// SetData sets the data field.
+// SetData sets the "data" field.
 func (cuo *ConfigurationUpdateOne) SetData(s string) *ConfigurationUpdateOne {
 	cuo.mutation.SetData(s)
 	return cuo
 }
 
-// SetStartedAt sets the started_at field.
+// SetStartedAt sets the "started_at" field.
 func (cuo *ConfigurationUpdateOne) SetStartedAt(t time.Time) *ConfigurationUpdateOne {
 	cuo.mutation.SetStartedAt(t)
 	return cuo
 }
 
-// SetEndedAt sets the ended_at field.
+// SetEndedAt sets the "ended_at" field.
 func (cuo *ConfigurationUpdateOne) SetEndedAt(t time.Time) *ConfigurationUpdateOne {
 	cuo.mutation.SetEndedAt(t)
 	return cuo
@@ -323,7 +323,7 @@ func (cuo *ConfigurationUpdateOne) Mutation() *ConfigurationMutation {
 	return cuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Configuration entity.
 func (cuo *ConfigurationUpdateOne) Save(ctx context.Context) (*Configuration, error) {
 	var (
 		err  error
@@ -488,7 +488,7 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *Configur
 	}
 	_node = &Configuration{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{configuration.Label}

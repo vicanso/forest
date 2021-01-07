@@ -21,13 +21,13 @@ type ConfigurationCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (cc *ConfigurationCreate) SetCreatedAt(t time.Time) *ConfigurationCreate {
 	cc.mutation.SetCreatedAt(t)
 	return cc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (cc *ConfigurationCreate) SetNillableCreatedAt(t *time.Time) *ConfigurationCreate {
 	if t != nil {
 		cc.SetCreatedAt(*t)
@@ -35,13 +35,13 @@ func (cc *ConfigurationCreate) SetNillableCreatedAt(t *time.Time) *Configuration
 	return cc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (cc *ConfigurationCreate) SetUpdatedAt(t time.Time) *ConfigurationCreate {
 	cc.mutation.SetUpdatedAt(t)
 	return cc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (cc *ConfigurationCreate) SetNillableUpdatedAt(t *time.Time) *ConfigurationCreate {
 	if t != nil {
 		cc.SetUpdatedAt(*t)
@@ -49,13 +49,13 @@ func (cc *ConfigurationCreate) SetNillableUpdatedAt(t *time.Time) *Configuration
 	return cc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (cc *ConfigurationCreate) SetStatus(s schema.Status) *ConfigurationCreate {
 	cc.mutation.SetStatus(s)
 	return cc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (cc *ConfigurationCreate) SetNillableStatus(s *schema.Status) *ConfigurationCreate {
 	if s != nil {
 		cc.SetStatus(*s)
@@ -63,37 +63,37 @@ func (cc *ConfigurationCreate) SetNillableStatus(s *schema.Status) *Configuratio
 	return cc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cc *ConfigurationCreate) SetName(s string) *ConfigurationCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// SetCategory sets the category field.
+// SetCategory sets the "category" field.
 func (cc *ConfigurationCreate) SetCategory(c configuration.Category) *ConfigurationCreate {
 	cc.mutation.SetCategory(c)
 	return cc
 }
 
-// SetOwner sets the owner field.
+// SetOwner sets the "owner" field.
 func (cc *ConfigurationCreate) SetOwner(s string) *ConfigurationCreate {
 	cc.mutation.SetOwner(s)
 	return cc
 }
 
-// SetData sets the data field.
+// SetData sets the "data" field.
 func (cc *ConfigurationCreate) SetData(s string) *ConfigurationCreate {
 	cc.mutation.SetData(s)
 	return cc
 }
 
-// SetStartedAt sets the started_at field.
+// SetStartedAt sets the "started_at" field.
 func (cc *ConfigurationCreate) SetStartedAt(t time.Time) *ConfigurationCreate {
 	cc.mutation.SetStartedAt(t)
 	return cc
 }
 
-// SetEndedAt sets the ended_at field.
+// SetEndedAt sets the "ended_at" field.
 func (cc *ConfigurationCreate) SetEndedAt(t time.Time) *ConfigurationCreate {
 	cc.mutation.SetEndedAt(t)
 	return cc
@@ -321,7 +321,7 @@ func (cc *ConfigurationCreate) createSpec() (*Configuration, *sqlgraph.CreateSpe
 	return _node, _spec
 }
 
-// ConfigurationCreateBulk is the builder for creating a bulk of Configuration entities.
+// ConfigurationCreateBulk is the builder for creating many Configuration entities in bulk.
 type ConfigurationCreateBulk struct {
 	config
 	builders []*ConfigurationCreate
@@ -379,7 +379,7 @@ func (ccb *ConfigurationCreateBulk) Save(ctx context.Context) ([]*Configuration,
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *ConfigurationCreateBulk) SaveX(ctx context.Context) []*Configuration {
 	v, err := ccb.Save(ctx)
 	if err != nil {

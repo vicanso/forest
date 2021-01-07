@@ -17,7 +17,9 @@ import (
 func init() {
 	configurationMixin := schema.Configuration{}.Mixin()
 	configurationMixinFields0 := configurationMixin[0].Fields()
+	_ = configurationMixinFields0
 	configurationMixinFields1 := configurationMixin[1].Fields()
+	_ = configurationMixinFields1
 	configurationFields := schema.Configuration{}.Fields()
 	_ = configurationFields
 	// configurationDescCreatedAt is the schema descriptor for created_at field.
@@ -50,7 +52,9 @@ func init() {
 	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userMixinFields1 := userMixin[1].Fields()
+	_ = userMixinFields1
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -93,6 +97,7 @@ func init() {
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	userloginMixin := schema.UserLogin{}.Mixin()
 	userloginMixinFields0 := userloginMixin[0].Fields()
+	_ = userloginMixinFields0
 	userloginFields := schema.UserLogin{}.Fields()
 	_ = userloginFields
 	// userloginDescCreatedAt is the schema descriptor for created_at field.

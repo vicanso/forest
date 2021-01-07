@@ -21,20 +21,20 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uu *UserUpdate) SetStatus(s schema.Status) *UserUpdate {
 	uu.mutation.ResetStatus()
 	uu.mutation.SetStatus(s)
 	return uu
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableStatus(s *schema.Status) *UserUpdate {
 	if s != nil {
 		uu.SetStatus(*s)
@@ -42,25 +42,25 @@ func (uu *UserUpdate) SetNillableStatus(s *schema.Status) *UserUpdate {
 	return uu
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (uu *UserUpdate) AddStatus(s schema.Status) *UserUpdate {
 	uu.mutation.AddStatus(s)
 	return uu
 }
 
-// SetPassword sets the password field.
+// SetPassword sets the "password" field.
 func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	uu.mutation.SetPassword(s)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetName(*s)
@@ -68,43 +68,43 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (uu *UserUpdate) ClearName() *UserUpdate {
 	uu.mutation.ClearName()
 	return uu
 }
 
-// SetRoles sets the roles field.
+// SetRoles sets the "roles" field.
 func (uu *UserUpdate) SetRoles(s []string) *UserUpdate {
 	uu.mutation.SetRoles(s)
 	return uu
 }
 
-// ClearRoles clears the value of roles.
+// ClearRoles clears the value of the "roles" field.
 func (uu *UserUpdate) ClearRoles() *UserUpdate {
 	uu.mutation.ClearRoles()
 	return uu
 }
 
-// SetGroups sets the groups field.
+// SetGroups sets the "groups" field.
 func (uu *UserUpdate) SetGroups(s []string) *UserUpdate {
 	uu.mutation.SetGroups(s)
 	return uu
 }
 
-// ClearGroups clears the value of groups.
+// ClearGroups clears the value of the "groups" field.
 func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	uu.mutation.ClearGroups()
 	return uu
 }
 
-// SetEmail sets the email field.
+// SetEmail sets the "email" field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	uu.mutation.SetEmail(s)
 	return uu
 }
 
-// SetNillableEmail sets the email field if the given value is not nil.
+// SetNillableEmail sets the "email" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetEmail(*s)
@@ -112,7 +112,7 @@ func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
 	return uu
 }
 
-// ClearEmail clears the value of email.
+// ClearEmail clears the value of the "email" field.
 func (uu *UserUpdate) ClearEmail() *UserUpdate {
 	uu.mutation.ClearEmail()
 	return uu
@@ -320,14 +320,14 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uuo *UserUpdateOne) SetStatus(s schema.Status) *UserUpdateOne {
 	uuo.mutation.ResetStatus()
 	uuo.mutation.SetStatus(s)
 	return uuo
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableStatus(s *schema.Status) *UserUpdateOne {
 	if s != nil {
 		uuo.SetStatus(*s)
@@ -335,25 +335,25 @@ func (uuo *UserUpdateOne) SetNillableStatus(s *schema.Status) *UserUpdateOne {
 	return uuo
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (uuo *UserUpdateOne) AddStatus(s schema.Status) *UserUpdateOne {
 	uuo.mutation.AddStatus(s)
 	return uuo
 }
 
-// SetPassword sets the password field.
+// SetPassword sets the "password" field.
 func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	uuo.mutation.SetPassword(s)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetName(*s)
@@ -361,43 +361,43 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (uuo *UserUpdateOne) ClearName() *UserUpdateOne {
 	uuo.mutation.ClearName()
 	return uuo
 }
 
-// SetRoles sets the roles field.
+// SetRoles sets the "roles" field.
 func (uuo *UserUpdateOne) SetRoles(s []string) *UserUpdateOne {
 	uuo.mutation.SetRoles(s)
 	return uuo
 }
 
-// ClearRoles clears the value of roles.
+// ClearRoles clears the value of the "roles" field.
 func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
 	uuo.mutation.ClearRoles()
 	return uuo
 }
 
-// SetGroups sets the groups field.
+// SetGroups sets the "groups" field.
 func (uuo *UserUpdateOne) SetGroups(s []string) *UserUpdateOne {
 	uuo.mutation.SetGroups(s)
 	return uuo
 }
 
-// ClearGroups clears the value of groups.
+// ClearGroups clears the value of the "groups" field.
 func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	uuo.mutation.ClearGroups()
 	return uuo
 }
 
-// SetEmail sets the email field.
+// SetEmail sets the "email" field.
 func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 	uuo.mutation.SetEmail(s)
 	return uuo
 }
 
-// SetNillableEmail sets the email field if the given value is not nil.
+// SetNillableEmail sets the "email" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetEmail(*s)
@@ -405,7 +405,7 @@ func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// ClearEmail clears the value of email.
+// ClearEmail clears the value of the "email" field.
 func (uuo *UserUpdateOne) ClearEmail() *UserUpdateOne {
 	uuo.mutation.ClearEmail()
 	return uuo
@@ -416,7 +416,7 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -595,7 +595,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}

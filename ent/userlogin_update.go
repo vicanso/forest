@@ -20,19 +20,19 @@ type UserLoginUpdate struct {
 	mutation *UserLoginMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserLoginUpdate builder.
 func (ulu *UserLoginUpdate) Where(ps ...predicate.UserLogin) *UserLoginUpdate {
 	ulu.mutation.predicates = append(ulu.mutation.predicates, ps...)
 	return ulu
 }
 
-// SetUserAgent sets the user_agent field.
+// SetUserAgent sets the "user_agent" field.
 func (ulu *UserLoginUpdate) SetUserAgent(s string) *UserLoginUpdate {
 	ulu.mutation.SetUserAgent(s)
 	return ulu
 }
 
-// SetNillableUserAgent sets the user_agent field if the given value is not nil.
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableUserAgent(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetUserAgent(*s)
@@ -40,19 +40,19 @@ func (ulu *UserLoginUpdate) SetNillableUserAgent(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearUserAgent clears the value of user_agent.
+// ClearUserAgent clears the value of the "user_agent" field.
 func (ulu *UserLoginUpdate) ClearUserAgent() *UserLoginUpdate {
 	ulu.mutation.ClearUserAgent()
 	return ulu
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (ulu *UserLoginUpdate) SetIP(s string) *UserLoginUpdate {
 	ulu.mutation.SetIP(s)
 	return ulu
 }
 
-// SetNillableIP sets the ip field if the given value is not nil.
+// SetNillableIP sets the "ip" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableIP(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetIP(*s)
@@ -60,19 +60,19 @@ func (ulu *UserLoginUpdate) SetNillableIP(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearIP clears the value of ip.
+// ClearIP clears the value of the "ip" field.
 func (ulu *UserLoginUpdate) ClearIP() *UserLoginUpdate {
 	ulu.mutation.ClearIP()
 	return ulu
 }
 
-// SetTrackID sets the track_id field.
+// SetTrackID sets the "track_id" field.
 func (ulu *UserLoginUpdate) SetTrackID(s string) *UserLoginUpdate {
 	ulu.mutation.SetTrackID(s)
 	return ulu
 }
 
-// SetNillableTrackID sets the track_id field if the given value is not nil.
+// SetNillableTrackID sets the "track_id" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableTrackID(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetTrackID(*s)
@@ -80,19 +80,19 @@ func (ulu *UserLoginUpdate) SetNillableTrackID(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearTrackID clears the value of track_id.
+// ClearTrackID clears the value of the "track_id" field.
 func (ulu *UserLoginUpdate) ClearTrackID() *UserLoginUpdate {
 	ulu.mutation.ClearTrackID()
 	return ulu
 }
 
-// SetSessionID sets the session_id field.
+// SetSessionID sets the "session_id" field.
 func (ulu *UserLoginUpdate) SetSessionID(s string) *UserLoginUpdate {
 	ulu.mutation.SetSessionID(s)
 	return ulu
 }
 
-// SetNillableSessionID sets the session_id field if the given value is not nil.
+// SetNillableSessionID sets the "session_id" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableSessionID(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetSessionID(*s)
@@ -100,19 +100,19 @@ func (ulu *UserLoginUpdate) SetNillableSessionID(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearSessionID clears the value of session_id.
+// ClearSessionID clears the value of the "session_id" field.
 func (ulu *UserLoginUpdate) ClearSessionID() *UserLoginUpdate {
 	ulu.mutation.ClearSessionID()
 	return ulu
 }
 
-// SetXForwardedFor sets the x_forwarded_for field.
+// SetXForwardedFor sets the "x_forwarded_for" field.
 func (ulu *UserLoginUpdate) SetXForwardedFor(s string) *UserLoginUpdate {
 	ulu.mutation.SetXForwardedFor(s)
 	return ulu
 }
 
-// SetNillableXForwardedFor sets the x_forwarded_for field if the given value is not nil.
+// SetNillableXForwardedFor sets the "x_forwarded_for" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableXForwardedFor(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetXForwardedFor(*s)
@@ -120,19 +120,19 @@ func (ulu *UserLoginUpdate) SetNillableXForwardedFor(s *string) *UserLoginUpdate
 	return ulu
 }
 
-// ClearXForwardedFor clears the value of x_forwarded_for.
+// ClearXForwardedFor clears the value of the "x_forwarded_for" field.
 func (ulu *UserLoginUpdate) ClearXForwardedFor() *UserLoginUpdate {
 	ulu.mutation.ClearXForwardedFor()
 	return ulu
 }
 
-// SetCountry sets the country field.
+// SetCountry sets the "country" field.
 func (ulu *UserLoginUpdate) SetCountry(s string) *UserLoginUpdate {
 	ulu.mutation.SetCountry(s)
 	return ulu
 }
 
-// SetNillableCountry sets the country field if the given value is not nil.
+// SetNillableCountry sets the "country" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableCountry(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetCountry(*s)
@@ -140,19 +140,19 @@ func (ulu *UserLoginUpdate) SetNillableCountry(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearCountry clears the value of country.
+// ClearCountry clears the value of the "country" field.
 func (ulu *UserLoginUpdate) ClearCountry() *UserLoginUpdate {
 	ulu.mutation.ClearCountry()
 	return ulu
 }
 
-// SetProvince sets the province field.
+// SetProvince sets the "province" field.
 func (ulu *UserLoginUpdate) SetProvince(s string) *UserLoginUpdate {
 	ulu.mutation.SetProvince(s)
 	return ulu
 }
 
-// SetNillableProvince sets the province field if the given value is not nil.
+// SetNillableProvince sets the "province" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableProvince(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetProvince(*s)
@@ -160,19 +160,19 @@ func (ulu *UserLoginUpdate) SetNillableProvince(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearProvince clears the value of province.
+// ClearProvince clears the value of the "province" field.
 func (ulu *UserLoginUpdate) ClearProvince() *UserLoginUpdate {
 	ulu.mutation.ClearProvince()
 	return ulu
 }
 
-// SetCity sets the city field.
+// SetCity sets the "city" field.
 func (ulu *UserLoginUpdate) SetCity(s string) *UserLoginUpdate {
 	ulu.mutation.SetCity(s)
 	return ulu
 }
 
-// SetNillableCity sets the city field if the given value is not nil.
+// SetNillableCity sets the "city" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableCity(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetCity(*s)
@@ -180,19 +180,19 @@ func (ulu *UserLoginUpdate) SetNillableCity(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearCity clears the value of city.
+// ClearCity clears the value of the "city" field.
 func (ulu *UserLoginUpdate) ClearCity() *UserLoginUpdate {
 	ulu.mutation.ClearCity()
 	return ulu
 }
 
-// SetIsp sets the isp field.
+// SetIsp sets the "isp" field.
 func (ulu *UserLoginUpdate) SetIsp(s string) *UserLoginUpdate {
 	ulu.mutation.SetIsp(s)
 	return ulu
 }
 
-// SetNillableIsp sets the isp field if the given value is not nil.
+// SetNillableIsp sets the "isp" field if the given value is not nil.
 func (ulu *UserLoginUpdate) SetNillableIsp(s *string) *UserLoginUpdate {
 	if s != nil {
 		ulu.SetIsp(*s)
@@ -200,7 +200,7 @@ func (ulu *UserLoginUpdate) SetNillableIsp(s *string) *UserLoginUpdate {
 	return ulu
 }
 
-// ClearIsp clears the value of isp.
+// ClearIsp clears the value of the "isp" field.
 func (ulu *UserLoginUpdate) ClearIsp() *UserLoginUpdate {
 	ulu.mutation.ClearIsp()
 	return ulu
@@ -431,13 +431,13 @@ type UserLoginUpdateOne struct {
 	mutation *UserLoginMutation
 }
 
-// SetUserAgent sets the user_agent field.
+// SetUserAgent sets the "user_agent" field.
 func (uluo *UserLoginUpdateOne) SetUserAgent(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetUserAgent(s)
 	return uluo
 }
 
-// SetNillableUserAgent sets the user_agent field if the given value is not nil.
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableUserAgent(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetUserAgent(*s)
@@ -445,19 +445,19 @@ func (uluo *UserLoginUpdateOne) SetNillableUserAgent(s *string) *UserLoginUpdate
 	return uluo
 }
 
-// ClearUserAgent clears the value of user_agent.
+// ClearUserAgent clears the value of the "user_agent" field.
 func (uluo *UserLoginUpdateOne) ClearUserAgent() *UserLoginUpdateOne {
 	uluo.mutation.ClearUserAgent()
 	return uluo
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (uluo *UserLoginUpdateOne) SetIP(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetIP(s)
 	return uluo
 }
 
-// SetNillableIP sets the ip field if the given value is not nil.
+// SetNillableIP sets the "ip" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableIP(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetIP(*s)
@@ -465,19 +465,19 @@ func (uluo *UserLoginUpdateOne) SetNillableIP(s *string) *UserLoginUpdateOne {
 	return uluo
 }
 
-// ClearIP clears the value of ip.
+// ClearIP clears the value of the "ip" field.
 func (uluo *UserLoginUpdateOne) ClearIP() *UserLoginUpdateOne {
 	uluo.mutation.ClearIP()
 	return uluo
 }
 
-// SetTrackID sets the track_id field.
+// SetTrackID sets the "track_id" field.
 func (uluo *UserLoginUpdateOne) SetTrackID(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetTrackID(s)
 	return uluo
 }
 
-// SetNillableTrackID sets the track_id field if the given value is not nil.
+// SetNillableTrackID sets the "track_id" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableTrackID(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetTrackID(*s)
@@ -485,19 +485,19 @@ func (uluo *UserLoginUpdateOne) SetNillableTrackID(s *string) *UserLoginUpdateOn
 	return uluo
 }
 
-// ClearTrackID clears the value of track_id.
+// ClearTrackID clears the value of the "track_id" field.
 func (uluo *UserLoginUpdateOne) ClearTrackID() *UserLoginUpdateOne {
 	uluo.mutation.ClearTrackID()
 	return uluo
 }
 
-// SetSessionID sets the session_id field.
+// SetSessionID sets the "session_id" field.
 func (uluo *UserLoginUpdateOne) SetSessionID(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetSessionID(s)
 	return uluo
 }
 
-// SetNillableSessionID sets the session_id field if the given value is not nil.
+// SetNillableSessionID sets the "session_id" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableSessionID(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetSessionID(*s)
@@ -505,19 +505,19 @@ func (uluo *UserLoginUpdateOne) SetNillableSessionID(s *string) *UserLoginUpdate
 	return uluo
 }
 
-// ClearSessionID clears the value of session_id.
+// ClearSessionID clears the value of the "session_id" field.
 func (uluo *UserLoginUpdateOne) ClearSessionID() *UserLoginUpdateOne {
 	uluo.mutation.ClearSessionID()
 	return uluo
 }
 
-// SetXForwardedFor sets the x_forwarded_for field.
+// SetXForwardedFor sets the "x_forwarded_for" field.
 func (uluo *UserLoginUpdateOne) SetXForwardedFor(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetXForwardedFor(s)
 	return uluo
 }
 
-// SetNillableXForwardedFor sets the x_forwarded_for field if the given value is not nil.
+// SetNillableXForwardedFor sets the "x_forwarded_for" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableXForwardedFor(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetXForwardedFor(*s)
@@ -525,19 +525,19 @@ func (uluo *UserLoginUpdateOne) SetNillableXForwardedFor(s *string) *UserLoginUp
 	return uluo
 }
 
-// ClearXForwardedFor clears the value of x_forwarded_for.
+// ClearXForwardedFor clears the value of the "x_forwarded_for" field.
 func (uluo *UserLoginUpdateOne) ClearXForwardedFor() *UserLoginUpdateOne {
 	uluo.mutation.ClearXForwardedFor()
 	return uluo
 }
 
-// SetCountry sets the country field.
+// SetCountry sets the "country" field.
 func (uluo *UserLoginUpdateOne) SetCountry(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetCountry(s)
 	return uluo
 }
 
-// SetNillableCountry sets the country field if the given value is not nil.
+// SetNillableCountry sets the "country" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableCountry(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetCountry(*s)
@@ -545,19 +545,19 @@ func (uluo *UserLoginUpdateOne) SetNillableCountry(s *string) *UserLoginUpdateOn
 	return uluo
 }
 
-// ClearCountry clears the value of country.
+// ClearCountry clears the value of the "country" field.
 func (uluo *UserLoginUpdateOne) ClearCountry() *UserLoginUpdateOne {
 	uluo.mutation.ClearCountry()
 	return uluo
 }
 
-// SetProvince sets the province field.
+// SetProvince sets the "province" field.
 func (uluo *UserLoginUpdateOne) SetProvince(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetProvince(s)
 	return uluo
 }
 
-// SetNillableProvince sets the province field if the given value is not nil.
+// SetNillableProvince sets the "province" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableProvince(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetProvince(*s)
@@ -565,19 +565,19 @@ func (uluo *UserLoginUpdateOne) SetNillableProvince(s *string) *UserLoginUpdateO
 	return uluo
 }
 
-// ClearProvince clears the value of province.
+// ClearProvince clears the value of the "province" field.
 func (uluo *UserLoginUpdateOne) ClearProvince() *UserLoginUpdateOne {
 	uluo.mutation.ClearProvince()
 	return uluo
 }
 
-// SetCity sets the city field.
+// SetCity sets the "city" field.
 func (uluo *UserLoginUpdateOne) SetCity(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetCity(s)
 	return uluo
 }
 
-// SetNillableCity sets the city field if the given value is not nil.
+// SetNillableCity sets the "city" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableCity(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetCity(*s)
@@ -585,19 +585,19 @@ func (uluo *UserLoginUpdateOne) SetNillableCity(s *string) *UserLoginUpdateOne {
 	return uluo
 }
 
-// ClearCity clears the value of city.
+// ClearCity clears the value of the "city" field.
 func (uluo *UserLoginUpdateOne) ClearCity() *UserLoginUpdateOne {
 	uluo.mutation.ClearCity()
 	return uluo
 }
 
-// SetIsp sets the isp field.
+// SetIsp sets the "isp" field.
 func (uluo *UserLoginUpdateOne) SetIsp(s string) *UserLoginUpdateOne {
 	uluo.mutation.SetIsp(s)
 	return uluo
 }
 
-// SetNillableIsp sets the isp field if the given value is not nil.
+// SetNillableIsp sets the "isp" field if the given value is not nil.
 func (uluo *UserLoginUpdateOne) SetNillableIsp(s *string) *UserLoginUpdateOne {
 	if s != nil {
 		uluo.SetIsp(*s)
@@ -605,7 +605,7 @@ func (uluo *UserLoginUpdateOne) SetNillableIsp(s *string) *UserLoginUpdateOne {
 	return uluo
 }
 
-// ClearIsp clears the value of isp.
+// ClearIsp clears the value of the "isp" field.
 func (uluo *UserLoginUpdateOne) ClearIsp() *UserLoginUpdateOne {
 	uluo.mutation.ClearIsp()
 	return uluo
@@ -616,7 +616,7 @@ func (uluo *UserLoginUpdateOne) Mutation() *UserLoginMutation {
 	return uluo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated UserLogin entity.
 func (uluo *UserLoginUpdateOne) Save(ctx context.Context) (*UserLogin, error) {
 	var (
 		err  error
@@ -818,7 +818,7 @@ func (uluo *UserLoginUpdateOne) sqlSave(ctx context.Context) (_node *UserLogin, 
 	}
 	_node = &UserLogin{config: uluo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uluo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userlogin.Label}

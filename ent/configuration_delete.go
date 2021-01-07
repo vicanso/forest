@@ -20,7 +20,7 @@ type ConfigurationDelete struct {
 	mutation *ConfigurationMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the ConfigurationDelete builder.
 func (cd *ConfigurationDelete) Where(ps ...predicate.Configuration) *ConfigurationDelete {
 	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd

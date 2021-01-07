@@ -39,96 +39,113 @@ type User struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // created_at
-		&sql.NullTime{},   // updated_at
-		&sql.NullInt64{},  // status
-		&sql.NullString{}, // account
-		&sql.NullString{}, // password
-		&sql.NullString{}, // name
-		&[]byte{},         // roles
-		&[]byte{},         // groups
-		&sql.NullString{}, // email
+func (*User) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldRoles, user.FieldGroups:
+			values[i] = &[]byte{}
+		case user.FieldID, user.FieldStatus:
+			values[i] = &sql.NullInt64{}
+		case user.FieldAccount, user.FieldPassword, user.FieldName, user.FieldEmail:
+			values[i] = &sql.NullString{}
+		case user.FieldCreatedAt, user.FieldUpdatedAt:
+			values[i] = &sql.NullTime{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m < n {
+func (u *User) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	u.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[0])
-	} else if value.Valid {
-		u.CreatedAt = value.Time
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_at", values[1])
-	} else if value.Valid {
-		u.UpdatedAt = value.Time
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[2])
-	} else if value.Valid {
-		u.Status = schema.Status(value.Int64)
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field account", values[3])
-	} else if value.Valid {
-		u.Account = value.String
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field password", values[4])
-	} else if value.Valid {
-		u.Password = value.String
-	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[5])
-	} else if value.Valid {
-		u.Name = value.String
-	}
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			u.ID = int(value.Int64)
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				u.UpdatedAt = value.Time
+			}
+		case user.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				u.Status = schema.Status(value.Int64)
+			}
+		case user.FieldAccount:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account", values[i])
+			} else if value.Valid {
+				u.Account = value.String
+			}
+		case user.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				u.Password = value.String
+			}
+		case user.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				u.Name = value.String
+			}
+		case user.FieldRoles:
 
-	if value, ok := values[6].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field roles", values[6])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Roles); err != nil {
-			return fmt.Errorf("unmarshal field roles: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field roles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Roles); err != nil {
+					return fmt.Errorf("unmarshal field roles: %v", err)
+				}
+			}
+		case user.FieldGroups:
 
-	if value, ok := values[7].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field groups", values[7])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Groups); err != nil {
-			return fmt.Errorf("unmarshal field groups: %v", err)
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field groups", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Groups); err != nil {
+					return fmt.Errorf("unmarshal field groups: %v", err)
+				}
+			}
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				u.Email = value.String
+			}
 		}
-	}
-	if value, ok := values[8].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field email", values[8])
-	} else if value.Valid {
-		u.Email = value.String
 	}
 	return nil
 }
 
 // Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {

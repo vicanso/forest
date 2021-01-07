@@ -21,13 +21,14 @@ type ConfigurationQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Configuration
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ConfigurationQuery builder.
 func (cq *ConfigurationQuery) Where(ps ...predicate.Configuration) *ConfigurationQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -51,7 +52,8 @@ func (cq *ConfigurationQuery) Order(o ...OrderFunc) *ConfigurationQuery {
 	return cq
 }
 
-// First returns the first Configuration entity in the query. Returns *NotFoundError when no configuration was found.
+// First returns the first Configuration entity from the query.
+// Returns a *NotFoundError when no Configuration was found.
 func (cq *ConfigurationQuery) First(ctx context.Context) (*Configuration, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -72,7 +74,8 @@ func (cq *ConfigurationQuery) FirstX(ctx context.Context) *Configuration {
 	return node
 }
 
-// FirstID returns the first Configuration id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Configuration ID from the query.
+// Returns a *NotFoundError when no Configuration ID was found.
 func (cq *ConfigurationQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -94,7 +97,9 @@ func (cq *ConfigurationQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Configuration entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Configuration entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Configuration entity is not found.
+// Returns a *NotFoundError when no Configuration entities are found.
 func (cq *ConfigurationQuery) Only(ctx context.Context) (*Configuration, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -119,7 +124,9 @@ func (cq *ConfigurationQuery) OnlyX(ctx context.Context) *Configuration {
 	return node
 }
 
-// OnlyID returns the only Configuration id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Configuration ID in the query.
+// Returns a *NotSingularError when exactly one Configuration ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *ConfigurationQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -162,7 +169,7 @@ func (cq *ConfigurationQuery) AllX(ctx context.Context) []*Configuration {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Configuration ids.
+// IDs executes the query and returns a list of Configuration IDs.
 func (cq *ConfigurationQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(configuration.FieldID).Scan(ctx, &ids); err != nil {
@@ -214,7 +221,7 @@ func (cq *ConfigurationQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the ConfigurationQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *ConfigurationQuery) Clone() *ConfigurationQuery {
 	if cq == nil {
@@ -232,7 +239,7 @@ func (cq *ConfigurationQuery) Clone() *ConfigurationQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -259,7 +266,8 @@ func (cq *ConfigurationQuery) GroupBy(field string, fields ...string) *Configura
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -272,18 +280,16 @@ func (cq *ConfigurationQuery) GroupBy(field string, fields ...string) *Configura
 //		Scan(ctx, &v)
 //
 func (cq *ConfigurationQuery) Select(field string, fields ...string) *ConfigurationSelect {
-	selector := &ConfigurationSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(), nil
-	}
-	return selector
+	cq.fields = append([]string{field}, fields...)
+	return &ConfigurationSelect{ConfigurationQuery: cq}
 }
 
 func (cq *ConfigurationQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range cq.fields {
+		if !configuration.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
 		if err != nil {
@@ -299,18 +305,17 @@ func (cq *ConfigurationQuery) sqlAll(ctx context.Context) ([]*Configuration, err
 		nodes = []*Configuration{}
 		_spec = cq.querySpec()
 	)
-	_spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Configuration{config: cq.config}
 		nodes = append(nodes, node)
-		values := node.scanValues()
-		return values
+		return node.scanValues(columns)
 	}
-	_spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		return node.assignValues(values...)
+		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
@@ -346,6 +351,15 @@ func (cq *ConfigurationQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   cq.sql,
 		Unique: true,
+	}
+	if fields := cq.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, configuration.FieldID)
+		for i := range fields {
+			if fields[i] != configuration.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -395,7 +409,7 @@ func (cq *ConfigurationQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// ConfigurationGroupBy is the builder for group-by Configuration entities.
+// ConfigurationGroupBy is the group-by builder for Configuration entities.
 type ConfigurationGroupBy struct {
 	config
 	fields []string
@@ -411,7 +425,7 @@ func (cgb *ConfigurationGroupBy) Aggregate(fns ...AggregateFunc) *ConfigurationG
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *ConfigurationGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -428,7 +442,8 @@ func (cgb *ConfigurationGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -449,7 +464,8 @@ func (cgb *ConfigurationGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -475,7 +491,8 @@ func (cgb *ConfigurationGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -496,7 +513,8 @@ func (cgb *ConfigurationGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -522,7 +540,8 @@ func (cgb *ConfigurationGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -543,7 +562,8 @@ func (cgb *ConfigurationGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -569,7 +589,8 @@ func (cgb *ConfigurationGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -590,7 +611,8 @@ func (cgb *ConfigurationGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConfigurationGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -645,22 +667,19 @@ func (cgb *ConfigurationGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// ConfigurationSelect is the builder for select fields of Configuration entities.
+// ConfigurationSelect is the builder for selecting fields of Configuration entities.
 type ConfigurationSelect struct {
-	config
-	fields []string
+	*ConfigurationQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *ConfigurationSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cs.path(ctx)
-	if err != nil {
+	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = query
+	cs.sql = cs.ConfigurationQuery.sqlQuery()
 	return cs.sqlScan(ctx, v)
 }
 
@@ -671,7 +690,7 @@ func (cs *ConfigurationSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationSelect.Strings is not achievable when selecting more than 1 field")
@@ -692,7 +711,7 @@ func (cs *ConfigurationSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -718,7 +737,7 @@ func (cs *ConfigurationSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationSelect.Ints is not achievable when selecting more than 1 field")
@@ -739,7 +758,7 @@ func (cs *ConfigurationSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -765,7 +784,7 @@ func (cs *ConfigurationSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationSelect.Float64s is not achievable when selecting more than 1 field")
@@ -786,7 +805,7 @@ func (cs *ConfigurationSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -812,7 +831,7 @@ func (cs *ConfigurationSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: ConfigurationSelect.Bools is not achievable when selecting more than 1 field")
@@ -833,7 +852,7 @@ func (cs *ConfigurationSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *ConfigurationSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {
@@ -860,11 +879,6 @@ func (cs *ConfigurationSelect) BoolX(ctx context.Context) bool {
 }
 
 func (cs *ConfigurationSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range cs.fields {
-		if !configuration.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := cs.sqlQuery().Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

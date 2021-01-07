@@ -38,90 +38,105 @@ type Configuration struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Configuration) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // created_at
-		&sql.NullTime{},   // updated_at
-		&sql.NullInt64{},  // status
-		&sql.NullString{}, // name
-		&sql.NullString{}, // category
-		&sql.NullString{}, // owner
-		&sql.NullString{}, // data
-		&sql.NullTime{},   // started_at
-		&sql.NullTime{},   // ended_at
+func (*Configuration) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case configuration.FieldID, configuration.FieldStatus:
+			values[i] = &sql.NullInt64{}
+		case configuration.FieldName, configuration.FieldCategory, configuration.FieldOwner, configuration.FieldData:
+			values[i] = &sql.NullString{}
+		case configuration.FieldCreatedAt, configuration.FieldUpdatedAt, configuration.FieldStartedAt, configuration.FieldEndedAt:
+			values[i] = &sql.NullTime{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Configuration", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Configuration fields.
-func (c *Configuration) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(configuration.Columns); m < n {
+func (c *Configuration) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[0])
-	} else if value.Valid {
-		c.CreatedAt = value.Time
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_at", values[1])
-	} else if value.Valid {
-		c.UpdatedAt = value.Time
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[2])
-	} else if value.Valid {
-		c.Status = schema.Status(value.Int64)
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[3])
-	} else if value.Valid {
-		c.Name = value.String
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field category", values[4])
-	} else if value.Valid {
-		c.Category = configuration.Category(value.String)
-	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field owner", values[5])
-	} else if value.Valid {
-		c.Owner = value.String
-	}
-	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field data", values[6])
-	} else if value.Valid {
-		c.Data = value.String
-	}
-	if value, ok := values[7].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field started_at", values[7])
-	} else if value.Valid {
-		c.StartedAt = value.Time
-	}
-	if value, ok := values[8].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field ended_at", values[8])
-	} else if value.Valid {
-		c.EndedAt = value.Time
+	for i := range columns {
+		switch columns[i] {
+		case configuration.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case configuration.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				c.CreatedAt = value.Time
+			}
+		case configuration.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				c.UpdatedAt = value.Time
+			}
+		case configuration.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				c.Status = schema.Status(value.Int64)
+			}
+		case configuration.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
+			}
+		case configuration.FieldCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category", values[i])
+			} else if value.Valid {
+				c.Category = configuration.Category(value.String)
+			}
+		case configuration.FieldOwner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner", values[i])
+			} else if value.Valid {
+				c.Owner = value.String
+			}
+		case configuration.FieldData:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field data", values[i])
+			} else if value.Valid {
+				c.Data = value.String
+			}
+		case configuration.FieldStartedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field started_at", values[i])
+			} else if value.Valid {
+				c.StartedAt = value.Time
+			}
+		case configuration.FieldEndedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field ended_at", values[i])
+			} else if value.Valid {
+				c.EndedAt = value.Time
+			}
+		}
 	}
 	return nil
 }
 
 // Update returns a builder for updating this Configuration.
-// Note that, you need to call Configuration.Unwrap() before calling this method, if this Configuration
+// Note that you need to call Configuration.Unwrap() before calling this method if this Configuration
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Configuration) Update() *ConfigurationUpdateOne {
 	return (&ConfigurationClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Configuration entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Configuration) Unwrap() *Configuration {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {
