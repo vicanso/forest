@@ -46,16 +46,16 @@ type (
 		Category  confSchema.Category `json:"category,omitempty" validate:"required,xConfigurationCategory"`
 		Status    schema.Status       `json:"status,omitempty" validate:"required,xStatus"`
 		Data      string              `json:"data,omitempty" validate:"required,xConfigurationData"`
-		StartedAt *time.Time          `json:"startedAt,omitempty"`
-		EndedAt   *time.Time          `json:"endedAt,omitempty"`
+		StartedAt time.Time           `json:"startedAt,omitempty"`
+		EndedAt   time.Time           `json:"endedAt,omitempty"`
 	}
 	// configurationUpdateParams 更新配置参数
 	configurationUpdateParams struct {
 		Status    schema.Status       `json:"status,omitempty" validate:"omitempty,xStatus"`
 		Category  confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
 		Data      string              `json:"data,omitempty" validate:"omitempty,xConfigurationData"`
-		StartedAt *time.Time          `json:"startedAt,omitempty"`
-		EndedAt   *time.Time          `json:"endedAt,omitempty"`
+		StartedAt time.Time           `json:"startedAt,omitempty"`
+		EndedAt   time.Time           `json:"endedAt,omitempty"`
 	}
 
 	// configurationListParmas 配置查询参数
@@ -129,8 +129,8 @@ func (params *configurationAddParams) save(ctx context.Context, owner string) (c
 		SetCategory(params.Category).
 		SetData(params.Data).
 		SetOwner(owner).
-		SetStartedAt(*params.StartedAt).
-		SetEndedAt(*params.EndedAt).
+		SetStartedAt(params.StartedAt).
+		SetEndedAt(params.EndedAt).
 		Save(ctx)
 }
 
@@ -170,11 +170,11 @@ func (params *configurationListParmas) count(ctx context.Context) (count int, er
 func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int) (configuration *ent.Configuration, err error) {
 	updateOne := getEntClient().Configuration.
 		UpdateOneID(id)
-	if params.StartedAt != nil {
-		updateOne = updateOne.SetStartedAt(*params.StartedAt)
+	if !params.StartedAt.IsZero() {
+		updateOne = updateOne.SetStartedAt(params.StartedAt)
 	}
-	if params.EndedAt != nil {
-		updateOne = updateOne.SetEndedAt(*params.EndedAt)
+	if !params.EndedAt.IsZero() {
+		updateOne = updateOne.SetEndedAt(params.EndedAt)
 	}
 
 	if params.Status != 0 {

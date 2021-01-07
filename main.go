@@ -54,7 +54,7 @@ var (
 var closeDepends func()
 
 func init() {
-	// 启动出错日志中的caller记录
+	// 启动出错中的caller记录
 	hes.EnableCaller(true)
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
@@ -79,7 +79,7 @@ func gracefulClose(e *elton.Elton) {
 	log.Default().Info("start to graceful close")
 	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
 	service.SetApplicationStatus(service.ApplicationStatusStopping)
-	// docker 在10秒内退出，因此设置8秒后退出
+	// docker 在10秒内退出，因此设置5秒后退出
 	time.Sleep(5 * time.Second)
 	// 所有新的请求均返回出错
 	e.GracefulClose(3 * time.Second)

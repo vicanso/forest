@@ -110,13 +110,13 @@ func (*commonCtrl) ping(c *elton.Context) error {
 func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &applicationInfoResp{
-		service.GetApplicationVersion(),
-		service.GetApplicationBuildedAt(),
-		humanize.Time(applicationStartedAt),
-		runtime.GOOS,
-		runtime.Version(),
-		runtime.GOARCH,
-		config.GetENV(),
+		Version:   service.GetApplicationVersion(),
+		BuildedAt: service.GetApplicationBuildedAt(),
+		Uptime:    humanize.Time(applicationStartedAt),
+		OS:        runtime.GOOS,
+		GO:        runtime.Version(),
+		ARCH:      runtime.GOARCH,
+		ENV:       config.GetENV(),
 	}
 	return
 }

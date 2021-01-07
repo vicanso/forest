@@ -213,7 +213,7 @@ func init() {
 		ctrl.login,
 	)
 
-	// 刷新user session的ttl
+	// 刷新user session的ttl或更新客户信息
 	g.PATCH(
 		"/v1/me",
 		newTrackerMiddleware(cs.ActionUserMeUpdate),

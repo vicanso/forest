@@ -29,9 +29,9 @@ import (
 
 func TestConfigurationParams(t *testing.T) {
 	assert := assert.New(t)
-	now := func() *time.Time {
+	now := func() time.Time {
 		t := time.Now()
-		return &t
+		return t
 	}
 
 	name := util.RandomString(8)
