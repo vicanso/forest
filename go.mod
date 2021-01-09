@@ -17,7 +17,7 @@ require (
 	github.com/influxdata/influxdb-client-go/v2 v2.2.1
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/jinzhu/now v1.1.1
-	github.com/minio/minio-go/v7 v7.0.6
+	github.com/minio/minio-go/v7 v7.0.7
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/robfig/cron/v3 v3.0.1

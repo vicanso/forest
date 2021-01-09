@@ -59,6 +59,8 @@ type (
 		Name string `validate:"required,ascii"`
 		// PID文件
 		PidFile string `validate:"required"`
+		// 应用前缀
+		Prefixes []string `validate:"omitempty,dive,xPath"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
@@ -186,6 +188,7 @@ func GetBasicConfig() BasicConfig {
 		Name:         defaultViperX.GetString(prefix + "name"),
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
+		Prefixes:     defaultViperX.GetStringSlice(prefix + "prefixes"),
 	}
 	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
 	pwd, _ := os.Getwd()

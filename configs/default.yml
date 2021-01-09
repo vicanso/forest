@@ -4,6 +4,8 @@ basic:
   # 系统并发限制
   requestLimit: 1000
   listen: :7001
+  prefixes:
+  - /api
 
 # 用户session的配置
 session:

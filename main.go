@@ -225,6 +225,11 @@ func main() {
 	e.NotFoundHandler = middleware.NewNotFoundHandler()
 	e.MethodNotAllowedHandler = middleware.NewMethodNotAllowedHandler()
 
+	// 前缀处理
+	if len(basicConfig.Prefixes) != 0 {
+		e.Pre(middleware.NewPrefixHandler(basicConfig.Prefixes))
+	}
+
 	// 捕捉panic异常，避免程序崩溃
 	e.UseWithName(M.NewRecover(), "recover")
 
