@@ -109,7 +109,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			zap.String("service", serviceName),
 			zap.String("method", conf.Method),
 			zap.String("route", conf.Route),
-			zap.String("url", conf.URL),
+			zap.String("url", conf.GetURL()),
 			zap.Any("params", conf.Params),
 			zap.Any("query", conf.Query),
 			zap.Any("data", data),
