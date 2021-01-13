@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"sync"
 	"time"
@@ -27,11 +28,28 @@ import (
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
+	"go.uber.org/zap"
 )
 
 type (
 	// ConfigurationSrv 配置的相关函数
 	ConfigurationSrv struct{}
+
+	// SessionInterceptorData session拦截的数据
+	SessionInterceptorData struct {
+		Message       string   `json:"message,omitempty"`
+		AllowAccounts []string `json:"allowAccounts,omitempty"`
+	}
+
+	// CurrentValidConfiguration 当前有效配置
+	CurrentValidConfiguration struct {
+		MockTime           string                  `json:"mockTime,omitempty"`
+		IPBlockList        []string                `json:"ipBlockList,omitempty"`
+		SignedKeys         []string                `json:"signedKeys,omitempty"`
+		RouterConcurrency  map[string]uint32       `json:"routerConcurrency,omitempty"`
+		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
+		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
+	}
 )
 
 var (
@@ -56,17 +74,34 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 	return sessionSignedKeys
 }
 
+// GetCurrentValidConfiguration 获取当前有效配置
+func GetCurrentValidConfiguration() *CurrentValidConfiguration {
+	interData, _ := GetSessionInterceptorData()
+	result := &CurrentValidConfiguration{
+		MockTime:          util.GetMockTime(),
+		IPBlockList:       GetIPBlockList(),
+		SignedKeys:        sessionSignedKeys.GetKeys(),
+		RouterConcurrency: GetRouterConcurrency(),
+		RouterMock:        GetRouterMockConfig(),
+	}
+	if interData != nil {
+		v := *interData
+		result.SessionInterceptor = &v
+	}
+	return result
+}
+
 // GetSessionInterceptorMessage 获取session拦截的配置信息
-func GetSessionInterceptorMessage() (string, bool) {
+func GetSessionInterceptorData() (*SessionInterceptorData, bool) {
 	value, ok := sessionInterceptorConfig.Load(sessionInterceptorKey)
 	if !ok {
-		return "", false
+		return nil, false
 	}
-	str, ok := value.(string)
+	data, ok := value.(*SessionInterceptorData)
 	if !ok {
-		return "", false
+		return nil, false
 	}
-	return str, true
+	return data, true
 }
 
 // available 获取可用的配置
@@ -124,7 +159,15 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	if sessionInterceptorValue == "" {
 		sessionInterceptorConfig.Delete(sessionInterceptorKey)
 	} else {
-		sessionInterceptorConfig.Store(sessionInterceptorKey, sessionInterceptorValue)
+		interData := &SessionInterceptorData{}
+		err := json.Unmarshal([]byte(sessionInterceptorValue), interData)
+		if err != nil {
+			logger.Error("session interceptor config is invalid",
+				zap.Error(err),
+			)
+			AlarmError("session interceptor config is invalid:" + err.Error())
+		}
+		sessionInterceptorConfig.Store(sessionInterceptorKey, interData)
 	}
 
 	// 如果未配置mock time，则设置为空
@@ -143,7 +186,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	}
 
 	// 更新router configs
-	updateRouterConfigs(routerConfigs)
+	updateRouterMockConfigs(routerConfigs)
 
 	// 重置IP拦截列表
 	ResetIPBlocker(blockIPList)

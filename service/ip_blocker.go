@@ -55,3 +55,17 @@ func IsBlockIP(ip string) bool {
 	blocked := ipBlocker.IPS.Contains(ip)
 	return blocked
 }
+
+// GetIPBlockList 获取block的ip地址列表
+func GetIPBlockList() []string {
+	ipBlocker.mutex.RLock()
+	defer ipBlocker.mutex.RUnlock()
+	ipList := make([]string, 0)
+	for _, item := range ipBlocker.IPS.IPList {
+		ipList = append(ipList, item.String())
+	}
+	for _, item := range ipBlocker.IPS.IPNetList {
+		ipList = append(ipList, item.String())
+	}
+	return ipList
+}

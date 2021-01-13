@@ -42,7 +42,7 @@ var (
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(sessionInterceptorMiddleware, middleware.NewSession())
+	loadUserSession = elton.Compose(middleware.NewSession(), sessionInterceptorMiddleware)
 	// 判断用户是否登录
 	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录
@@ -208,12 +208,18 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 
 // sessionInterceptorMiddleware session的拦截
 func sessionInterceptorMiddleware(c *elton.Context) error {
-	message, ok := service.GetSessionInterceptorMessage()
-	// 如果有配置拦截信息，则以出错返回
-	if ok {
-		he := hes.New(message)
-		he.Category = "sessionInterceptorMiddleware"
-		return he
+	us := service.NewUserSession(c)
+	account := ""
+	if us.IsLogin() {
+		account = us.MustGetInfo().Account
 	}
-	return c.Next()
+	interData, _ := service.GetSessionInterceptorData()
+	// 如果无配置拦截，或者账号允许
+	if interData == nil || util.ContainsString(interData.AllowAccounts, account) {
+		return c.Next()
+	}
+	// 如果有配置拦截信息，则以出错返回
+	he := hes.New(interData.Message)
+	he.Category = "sessionInterceptorMiddleware"
+	return he
 }

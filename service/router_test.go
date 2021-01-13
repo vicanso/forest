@@ -60,7 +60,7 @@ func TestRouterLimiter(t *testing.T) {
 
 func TestRouterConfig(t *testing.T) {
 	assert := assert.New(t)
-	updateRouterConfigs([]string{
+	updateRouterMockConfigs([]string{
 		`{
 			"route": "/",
 			"method": "GET",

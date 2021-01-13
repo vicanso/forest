@@ -114,6 +114,8 @@ type (
 			Category string `json:"category,omitempty" validate:"required,xUserActionCategory"`
 			// Route 触发时所在路由
 			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
+			// Path 触发时的完整路径
+			Path string `json:"path,omitempty" validate:"required,xPath"`
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
 			// Extra 其它额外信息
@@ -162,6 +164,7 @@ func init() {
 	// 更新用户信息
 	g.PATCH(
 		"/v1/{id}",
+		newTrackerMiddleware(cs.ActionUserInfoUpdate),
 		shouldBeAdmin,
 		ctrl.updateByID,
 	)
@@ -806,6 +809,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		fields := map[string]interface{}{
 			"account": account,
 			"route":   item.Route,
+			"path":    item.Path,
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{

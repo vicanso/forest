@@ -39,6 +39,15 @@ func SetMockTime(v string) {
 	mockTime.Store(seconds)
 }
 
+// GetMockTime 获取mock的时间
+func GetMockTime() string {
+	v := mockTime.Load()
+	if v == 0 {
+		return ""
+	}
+	return FormatTime(time.Unix(v, 0))
+}
+
 // Now 获取当前时间（测试环境允许使用mock的时间)
 func Now() time.Time {
 	// 正式环境不提供mock time

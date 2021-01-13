@@ -100,7 +100,7 @@ func (l *rcLimiter) GetStats() map[string]uint32 {
 }
 
 // 更新router config配置
-func updateRouterConfigs(configs []string) {
+func updateRouterMockConfigs(configs []string) {
 	result := make(map[string]*RouterConfig)
 	for _, item := range configs {
 		v := &RouterConfig{}
@@ -128,6 +128,17 @@ func RouterGetConfig(method, route string) *RouterConfig {
 	routerMutex.RLock()
 	defer routerMutex.RUnlock()
 	return currentRouterConfigs[method+route]
+}
+
+// GetRouterMockConfig 获取路由mock配置
+func GetRouterMockConfig() map[string]RouterConfig {
+	routerMutex.RLock()
+	defer routerMutex.RUnlock()
+	result := make(map[string]RouterConfig)
+	for key, value := range currentRouterConfigs {
+		result[key] = *value
+	}
+	return result
 }
 
 // InitRouterConcurrencyLimiter 初始路由并发限制
@@ -177,4 +188,16 @@ func ResetRouterConcurrency(arr []string) {
 			r.Max.Store(0)
 		}
 	}
+}
+
+// GetRouterConcurrency 获取路由并发限制数
+func GetRouterConcurrency() map[string]uint32 {
+	result := make(map[string]uint32)
+	for key, r := range currentRCLimiter.m {
+		v := r.Max.Load()
+		if v != 0 {
+			result[key] = v
+		}
+	}
+	return result
 }
