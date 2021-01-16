@@ -37,6 +37,15 @@ el-form.baseFilter(
         icon="el-icon-search"
         type="primary"
       ) 筛选
+      //- 日期时间筛选
+      el-date-picker.dateRange.fullFill(
+        v-else-if="field.type === 'dateTimeRange'"
+        v-model="current[field.key]"
+        type="datetimerange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+      )
       //- 日期筛选
       el-date-picker.dateRange.fullFill(
         v-else-if="field.type === 'dateRange'"

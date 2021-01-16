@@ -108,7 +108,8 @@ import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
 import { useFluxStore } from "../store";
 
-const defaultDateRange = [today(), today()];
+// 最近一小时
+const defaultDateRange = [new Date(Date.now() - 60 * 60 * 1000), new Date()];
 const filterFields = [
   {
     label: "账号：",
@@ -129,7 +130,7 @@ const filterFields = [
   {
     label: "时间：",
     key: "dateRange",
-    type: "dateRange",
+    type: "dateTimeRange",
     placeholder: ["开始日期", "结束日期"],
     defaultValue: defaultDateRange,
     span: 9,
@@ -171,16 +172,6 @@ export default defineComponent({
   mixins: [FilterTable],
   data() {
     return {
-      // resultFilters: [
-      //   {
-      //     text: "成功",
-      //     value: "0",
-      //   },
-      //   {
-      //     text: "失败",
-      //     value: "1",
-      //   },
-      // ],
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
