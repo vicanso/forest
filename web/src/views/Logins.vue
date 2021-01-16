@@ -104,7 +104,7 @@ import { defineComponent } from "vue";
 import { useUserStore } from "../store";
 import { today, formatBegin, formatEnd } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
-import BaseTooltip from "../components/base/Tooltip.vue";
+import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";

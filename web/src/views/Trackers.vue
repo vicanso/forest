@@ -119,7 +119,7 @@ import { defineComponent } from "vue";
 
 import { today, formatBegin, formatEnd } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
-import BaseTooltip from "../components/base/Tooltip.vue";
+import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";

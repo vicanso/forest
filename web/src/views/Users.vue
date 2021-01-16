@@ -103,7 +103,7 @@ import { defineComponent } from "vue";
 import { useUserStore, useCommonStore } from "../store";
 
 import BaseFilter from "../components/base/Filter.vue";
-import BaseTooltip from "../components/base/Tooltip.vue";
+import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
 import User from "../components/User.vue";
 import { PAGE_SIZES } from "../constants/common";
