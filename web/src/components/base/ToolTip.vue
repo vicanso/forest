@@ -1,23 +1,32 @@
-<template>
-  <el-tooltip v-if="$props.content">
-    <span slot="content">{{ $props.content }}</span>
-    <i v-if="$props.icon" :class="$props.icon" />
-    <span v-else>{{
-      $props.content.substring($props.content.length - $props.viewSize)
-    }}</span>
-  </el-tooltip>
-  <span v-else>--</span>
+<template lang="pug">
+el-tooltip(
+  v-if="$props.content"
+  :content="$props.content"
+)
+  i(
+    v-if="$props.icon"
+    :class="$props.icon"
+  )
+  span(
+    v-else
+  ) {{$props.content.substring($props.content.length - $props.viewSize)}}
+span(
+  v-else
+) --
 </template>
-<script>
-export default {
-  name: "BaseToolTip",
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "BaseTooltip",
   props: {
     icon: String,
     content: String,
     viewSize: {
       type: Number,
-      default: 5
-    }
-  }
-};
+      default: 5,
+    },
+  },
+});
 </script>

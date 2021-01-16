@@ -1,183 +1,170 @@
-<template>
-  <div class="mainNav">
-    <a href="#" @click="toggleNav" class="toggleNav">
-      <i v-if="$props.shrinking" class="el-icon-s-unfold" />
-      <i v-else class="el-icon-s-fold" />
-    </a>
-    <h1>
-      <router-link :to="{ name: home }" v-if="!$props.shrinking">
-        <i class="el-icon-eleme" />
-        Forest
-      </router-link>
-    </h1>
-    <nav v-if="!$props.shrinking">
-      <el-menu
-        class="menu"
-        :default-active="active"
-        background-color="#000c17"
-        text-color="#fff"
-        active-text-color="#fff"
-      >
-        <el-submenu
-          class="submenu"
-          v-for="(nav, i) in navs"
-          :index="`${i}`"
-          :key="`${i}`"
-        >
-          <template slot="title">
-            <i :class="nav.icon" />
-            <span>{{ nav.name }}</span>
-          </template>
-          <el-menu-item
-            class="menuItem"
-            v-for="(subItem, j) in nav.children"
-            :index="`${i}-${j}`"
-            :key="`${i}-${j}`"
-            @click="goTo(subItem)"
-          >
-            <span>{{ subItem.name }}</span>
-          </el-menu-item>
-        </el-submenu>
-      </el-menu>
-    </nav>
-  </div>
+<template lang="pug">
+.mainNav
+  //- 切换侧边栏
+  a.toggleNav(
+    href="#"
+    @click.preventDefault="toggleNav"
+  )
+    i(
+      :class=`$props.shrinking ? "el-icon-s-unfold" : "el-icon-s-fold"`
+    )
+  //- 应用图标
+  h1
+    router-link(
+      v-if="!$props.shrinking"
+      :to='{name: homeRoute}'
+    )
+      i.el-icon-eleme
+      | Forest
+  //- 菜单栏
+  nav: el-menu.menu(
+    :collapse="$props.shrinking"
+    :default-active="active"
+    background-color="#000c17"
+    text-color="#fff"
+    active-text-color="#fff"
+  )
+    el-submenu.submenu(
+      v-for="(nav, i) in navs"
+      :index="`${i}`"
+      :key="`${i}`"
+    )
+      template(
+        #title
+      )
+        i(
+          :class="nav.icon"
+        )
+        span {{nav.name}}
+      //- 子菜单栏
+      el-menu-item.menuItem(
+        v-for="(subItem, j) in nav.children"
+        :index="`${i}-${j}`"
+        :key="`${i}-${j}`"
+        @click="goTo(subItem)"
+      )
+        span {{subItem.name}}
 </template>
-<script>
+
+<script lang="ts">
+import { defineComponent } from "vue";
 import {
-  HOME,
-  CONFIG_MOCK_TIME,
-  CONFIG_BLOCK_IP,
-  CONFIG_SIGNED_KEY,
-  CONFIG_ROUTER,
-  CONFIG_ROUTER_CONCURRENCY,
-  CONFIG_SESSION_INTERCEPTOR,
-  USERS,
-  LOGINS,
-  TRACKERS,
-  BRANDS,
-  PRODUCTS,
-  PRODUCT_CATEGORIES,
-  SUPPLIERS,
-  REGIONS,
-  ADVERTISEMENTS,
-  ORDERS
-} from "@/constants/route";
-import { USER_ADMIN, USER_SU, GROUP_MARKETING } from "@/constants/user";
-import { mapState } from "vuex";
-import { isAllowedUser } from "@/helpers/util";
+  getHomeRouteName,
+  getLoginsRouteName,
+  getUsersRouteName,
+  getTrackersRouteName,
+  getMockTimeRouteName,
+  getBlockIPRouteName,
+  getSignedKeyRouteName,
+  getRouterMockRouteName,
+  getRouterConcurrencyRouteName,
+  getSessionInterceptorRouteName,
+  getValidConfigurationRouteName,
+} from "../router";
+import { USER_ADMIN, USER_SU } from "../constants/user";
+import { useUserStore } from "../store";
+import { isAllowedUser } from "../helpers/util";
 
 const navs = [
-  {
-    name: "业务",
-    icon: "el-icon-files",
-    groups: [GROUP_MARKETING],
-    children: [
-      {
-        name: "订单",
-        route: ORDERS
-      },
-      {
-        name: "品牌",
-        route: BRANDS
-      },
-      {
-        name: "产品",
-        route: PRODUCTS
-      },
-      {
-        name: "产品分类",
-        route: PRODUCT_CATEGORIES
-      },
-      {
-        name: "供应商",
-        route: SUPPLIERS
-      },
-      {
-        name: "广告",
-        route: ADVERTISEMENTS
-      },
-      {
-        name: "地区",
-        route: REGIONS
-      }
-    ]
-  },
   {
     name: "用户",
     icon: "el-icon-user",
     roles: [USER_ADMIN, USER_SU],
+    groups: [],
     children: [
       {
         name: "用户列表",
-        route: USERS
+        route: getUsersRouteName(),
+        roles: [],
+        groups: [],
       },
       {
         name: "登录记录",
-        route: LOGINS
+        route: getLoginsRouteName(),
+        roles: [],
+        groups: [],
       },
       {
         name: "用户行为",
-        route: TRACKERS
-      }
-    ]
+        route: getTrackersRouteName(),
+        roles: [],
+        groups: [],
+      },
+    ],
   },
   {
     name: "配置",
     icon: "el-icon-setting",
     roles: [USER_SU],
+    groups: [],
     children: [
       {
+        name: "当前生效配置",
+        route: getValidConfigurationRouteName(),
+        roles: [],
+        groups: [],
+      },
+      {
         name: "MockTime配置",
-        route: CONFIG_MOCK_TIME
+        route: getMockTimeRouteName(),
+        roles: [],
+        groups: [],
       },
       {
         name: "黑名单IP",
-        route: CONFIG_BLOCK_IP
+        route: getBlockIPRouteName(),
+        roles: [],
+        groups: [],
       },
       {
-        name: "SignedKey",
-        route: CONFIG_SIGNED_KEY
+        name: "SignedKey配置",
+        route: getSignedKeyRouteName(),
+        roles: [],
+        groups: [],
       },
       {
         name: "路由配置",
-        route: CONFIG_ROUTER
+        route: getRouterMockRouteName(),
+        roles: [],
+        groups: [],
       },
       {
         name: "路由并发配置",
-        route: CONFIG_ROUTER_CONCURRENCY
+        route: getRouterConcurrencyRouteName(),
+        roles: [],
+        groups: [],
       },
       {
-        name: "Session拦截信息配置",
-        route: CONFIG_SESSION_INTERCEPTOR
-      }
-    ]
-  }
+        name: "Session拦截配置",
+        route: getSessionInterceptorRouteName(),
+        roles: [],
+        groups: [],
+      },
+    ],
+  },
 ];
 
-export default {
+export default defineComponent({
   name: "MainNav",
   props: {
     shrinking: Boolean,
-    onToggle: Function
+    onToggle: Function,
   },
   data() {
     return {
-      home: HOME,
-      active: ""
+      homeRoute: getHomeRouteName(),
+      active: "",
     };
   },
   computed: {
-    ...mapState({
-      userInfo: state => state.user.info
-    }),
     navs() {
-      const { userInfo } = this;
-      if (!userInfo || !userInfo.account) {
+      const { user } = this;
+      if (!user || !user.account) {
         return [];
       }
-      const { roles, groups } = userInfo;
+      const { roles, groups } = user;
       const filterNavs = [];
-      navs.forEach(item => {
+      navs.forEach((item) => {
         // 如果该栏目有配置权限，而且用户无该权限
         if (item.roles && !isAllowedUser(item.roles, roles)) {
           return;
@@ -187,10 +174,10 @@ export default {
           return;
         }
         const clone = Object.assign({}, item);
-        const children = item.children.map(subItem =>
+        const children = item.children.map((subItem) =>
           Object.assign({}, subItem)
         );
-        clone.children = children.filter(subItem => {
+        clone.children = children.filter((subItem) => {
           // 如果未配置色色与分组限制
           if (!subItem.roles && !subItem.groups) {
             return true;
@@ -206,44 +193,56 @@ export default {
         filterNavs.push(clone);
       });
       return filterNavs;
-    }
-  },
-  watch: {
-    // 路由变化时设置对应的导航为活动状态
-    $route(to) {
-      const { navs } = this;
-      let active = "";
-      navs.forEach((nav, i) => {
-        nav.children.forEach((item, j) => {
-          if (item.route === to.name) {
-            active = `${i}-${j}`;
-          }
-        });
-      });
-      this.active = active;
-    }
+    },
   },
   methods: {
-    toggleNav(e) {
-      e.preventDefault();
-      if (this.$props.onToggle) {
-        this.$props.onToggle();
-      }
+    toggleNav() {
+      this.$emit("toggle");
     },
     goTo({ route }) {
       if (!route || this.$route.name === route) {
         return;
       }
       this.$router.push({
-        name: route
+        name: route,
       });
-    }
-  }
-};
+    },
+    // 查询定位当前选中菜单
+    updateActive(name: string) {
+      const { navs } = this;
+      let active = "";
+      navs.forEach((nav, i) => {
+        nav.children.forEach((item, j) => {
+          if (item.route === name) {
+            active = `${i}-${j}`;
+          }
+        });
+      });
+      this.active = active;
+    },
+  },
+  watch: {
+    // 如果nav变化时，根据当前route定位
+    navs() {
+      this.updateActive(this.$route.name);
+    },
+    // 路由变化时设置对应的导航为活动状态
+    $route(to) {
+      this.updateActive(to.name);
+    },
+  },
+  setup() {
+    const userStore = useUserStore();
+    return {
+      user: userStore.state.info,
+    };
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
-$mainNavColor: #000c17
+
+<style lang="stylus" scoped>
+@import "../common";
+$mainNavColor = #000c17
 .mainNav
   min-height: 100vh
   overflow-y: auto
@@ -263,6 +262,7 @@ h1
   font-size: 18px
   i
     font-weight: bold
+    margin-right: 5px
 nav
   border-top: 1px solid rgba($white, 0.3)
 .menu

@@ -1,54 +1,84 @@
-<template>
-  <header class="header">
-    <div class="userInfo">
-      <span v-if="fetchingUserInfo">正在加载...</span>
-      <div class="functions" v-else-if="userAccount">
-        <router-link :to="{ name: profile }" class="account">
-          <i class="el-icon-user" />
-          <span>{{ userAccount }}</span>
-        </router-link>
-        <span class="divided">|</span>
-        <a class="logout" href="#" title="退出登录" @click="logout">
-          <i class="el-icon-switch-button" />
-        </a>
-      </div>
-      <div v-else>
-        <router-link :to="{ name: login }" class="login">
-          <i class="el-icon-user" />
-          登录
-        </router-link>
-        <span class="divided">|</span>
-        <router-link :to="{ name: register }" class="register">
-          <i class="el-icon-circle-plus" />
-          注册
-        </router-link>
-      </div>
-    </div>
-  </header>
+<template lang="pug">
+header.header
+  //- 用户信息
+  .userInfo
+    span(
+      v-if="user.processing"
+    ) 正在加载...
+    .functions(
+      v-else-if="user.account"
+    )
+      router-link(
+        :to="{ name: profileRoute }"
+      )
+        i.el-icon-user
+        span {{user.account}}
+      span.divided |
+      a.logout(
+        href="#"
+        title="退出登录"
+        @click.preventDefault="onLogout"
+      )
+        i.el-icon-switch-button
+    div(
+      v-else
+    )
+      router-link.login(
+        :to="{ name: loginRoute }"
+      )
+        i.el-icon-user
+        | 登录
+      span.divided |
+      router-link.register(
+        :to="{ name: registerRoute }"
+      )
+        i.el-icon-circle-plus
+        | 注册
 </template>
-<script>
-import { mapState, mapActions } from "vuex";
-import { LOGIN, REGISTER, PROFILE } from "@/constants/route";
-export default {
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import { useUserStore } from "../store";
+import {
+  getHomeRouteName,
+  getLoginRouteName,
+  getRegisterRouteName,
+} from "../router";
+
+export default defineComponent({
   name: "MainHeader",
-  computed: mapState({
-    fetchingUserInfo: state => state.user.processing,
-    userAccount: state => state.user.info.account
-  }),
   data() {
     return {
-      login: LOGIN,
-      register: REGISTER,
-      profile: PROFILE
+      profileRoute: getHomeRouteName(),
+      loginRoute: getLoginRouteName(),
+      registerRoute: getRegisterRouteName(),
     };
   },
   methods: {
-    ...mapActions(["logout"])
-  }
-};
+    async onLogout() {
+      try {
+        await this.logout();
+        this.$router.push({
+          name: getHomeRouteName(),
+        });
+      } catch (err) {
+        this.$error(err.message);
+      }
+    },
+  },
+  setup() {
+    const userStore = useUserStore();
+    return {
+      user: userStore.state.info,
+      logout: () => userStore.dispatch("logout"),
+    };
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "../common";
 .header
   height: $mainHeaderHeight
   background-color: $white

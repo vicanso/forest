@@ -249,7 +249,7 @@ func main() {
 		}), "requestLimit")
 	}
 
-	// 配置只针对snappy与zstd压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理 完成）
+	// 配置只针对snappy与zstd压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理完成）
 	compressMinLength := 2 * 1024
 	compressConfig := M.NewCompressConfig(
 		&compress.SnappyCompressor{

@@ -1,91 +1,89 @@
-<template>
-  <div class="routerData">
-    <el-col :span="8">
-      <el-form-item class="hidden">
-        <el-input />
-      </el-form-item>
-    </el-col>
-    <el-col :span="8">
-      <el-form-item label="路由选择：">
-        <RouterSelector
-          class="selector"
-          :router="form.router"
-          @change="handleChangeRouter"
-        />
-      </el-form-item>
-    </el-col>
-    <el-col :span="8">
-      <el-form-item label="状态码：">
-        <el-input
-          v-model="form.status"
-          type="number"
-          placeholder="请输入响应状态码"
-        />
-      </el-form-item>
-    </el-col>
-    <el-col :span="8">
-      <el-form-item label="响应类型：">
-        <el-select
-          class="selector"
-          v-model="form.contentType"
-          placeholder="请选择响应类型"
-        >
-          <el-option
-            v-for="item in contentTypeList"
-            :key="item"
-            :label="item"
-            :value="item"
-          >
-          </el-option>
-        </el-select>
-      </el-form-item>
-    </el-col>
-    <el-col :span="8">
-      <el-form-item label="延时响应：">
-        <el-input
-          type="number"
-          v-model="form.delaySeconds"
-          placeholder="请输入延时时长，可选"
-        >
-          <template slot="append">秒</template>
-        </el-input>
-      </el-form-item>
-    </el-col>
-    <el-col :span="16">
-      <el-form-item label="完整URL：">
-        <el-input
-          v-model="form.url"
-          placeholder="请输入完整的请求URL(包含参数部分），可选"
-        />
-      </el-form-item>
-    </el-col>
-    <el-col :span="24">
-      <el-form-item label="响应数据：">
-        <el-input
-          v-model="form.response"
-          type="textarea"
-          :autosize="{ minRows: 5, maxRows: 10 }"
-          placeholder="请按选择的响应类型输入对应的响应数据"
-        />
-      </el-form-item>
-    </el-col>
-  </div>
+<template lang="pug">
+//- 占位
+el-col(
+  :span="8"
+)
+//- 路由配置选择
+el-col(
+  :span="8"
+): el-form-item(
+  label="路由选择："
+): router-selector.selector(
+  :router="form.router"
+  @change.self="handleChangeRouter"
+)
+//- 响应状态码
+el-col(
+  :span="8"
+): el-form-item(
+  label="状态码："
+): el-input(
+  v-model="form.status"
+  type="number"
+  placeholder="请输入响应状态码"
+)
+//- 响应类型
+el-col(
+  :span="8"
+): el-form-item(
+  label="响应类型："
+): el-select.selector(
+  v-model="form.contentType"
+  placeholder="请选择响应类型"
+): el-option(
+  v-for="item in contentTypeList"
+  :key="item"
+  :label="item"
+  :value="item"
+)
+//- 延时响应
+el-col(
+  :span="8"
+): el-form-item(
+  label="延时响应："
+): el-input(
+  type="number"
+  v-model="form.delaySeconds",
+  placeholder="请输入延时响应时长，可选"
+): template(
+  #append
+) 秒
+//- 完整URL
+el-col(
+  :span="16"
+): el-form-item(
+  label="完整URL："
+): el-input(
+  type="text"
+  v-model="form.url"
+  placeholder="请输入完整的请求URL(包含参数部分），可选"
+  clearable
+)
+//- 响应数据
+el-col(
+  :span="24"
+): el-form-item(
+  label="响应数据："
+): el-input(
+  v-model="form.response"
+  type="textarea"
+  :autosize="{ minRows: 5, maxRows: 10 }"
+  placeholder="请按选择的响应类型输入对应的响应数据"
+)
 </template>
-<script>
-import { mapState } from "vuex";
-import RouterSelector from "@/components/RouterSelector.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+import RouterSelector from "../../components/configs/RouterSelector.vue";
+
+export default defineComponent({
   name: "RouterData",
   components: {
-    RouterSelector
+    RouterSelector,
   },
   props: {
-    data: String
+    data: String,
   },
-  computed: mapState({
-    routers: state => state.common.routers || []
-  }),
   data() {
     const form = {
       router: "",
@@ -93,7 +91,7 @@ export default {
       contentType: "",
       response: "",
       delaySeconds: null,
-      path: ""
+      path: "",
     };
     if (this.$props.data) {
       const data = JSON.parse(this.$props.data);
@@ -107,27 +105,27 @@ export default {
       contentTypeList: [
         "application/json; charset=UTF-8",
         "text/plain; charset=UTF-8",
-        "text/html; charset=UTF-8"
+        "text/html; charset=UTF-8",
       ],
-      form
+      form,
     };
   },
   watch: {
-    "form.status": function() {
+    "form.status": function () {
       this.handleChange();
     },
-    "form.contentType": function() {
+    "form.contentType": function () {
       this.handleChange();
     },
-    "form.response": function() {
+    "form.response": function () {
       this.handleChange();
     },
-    "form.delaySeconds": function() {
+    "form.delaySeconds": function () {
       this.handleChange();
     },
-    "form.url": function() {
+    "form.url": function () {
       this.handleChange();
-    }
+    },
   },
   methods: {
     handleChangeRouter(value) {
@@ -141,7 +139,7 @@ export default {
         contentType,
         response,
         delaySeconds,
-        url
+        url,
       } = this.form;
       let value = "";
       if (router && status && contentType && response) {
@@ -151,12 +149,14 @@ export default {
           method,
           status: Number(status),
           contentType,
-          response: response.trim()
+          response: response.trim(),
+          delaySeconds: 0,
+          url: "",
         };
         if (delaySeconds) {
           data.delaySeconds = Number(delaySeconds);
           if (data.delaySeconds < 0) {
-            this.$message.error("延时时长不能小于0");
+            this.$error("延时时长不能小于0");
             return;
           }
         }
@@ -166,11 +166,11 @@ export default {
         value = JSON.stringify(data);
       }
       this.$emit("change", value);
-    }
-  }
-};
+    },
+  },
+});
 </script>
-<style lang="sass" scoped>
+<style lang="stylus" scoped>
 .selector
   width: 100%
 </style>

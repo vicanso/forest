@@ -1,95 +1,130 @@
-<template>
-  <el-card class="trackers">
-    <div slot="header">
-      <i class="el-icon-user-solid" />
-      <span>用户行为查询</span>
-    </div>
-    <div v-loading="processing">
-      <BaseFilter :fields="filterFields" @filter="filter" />
-      <el-table
-        :data="trackers"
-        row-key="_time"
-        stripe
-        :default-sort="{ prop: 'timeDesc', order: 'descending' }"
-      >
-        <el-table-column
-          prop="account"
-          key="account"
-          label="账户"
-          width="120"
-        />
-        <el-table-column prop="action" key="action" label="类型" width="150" />
-        <el-table-column
-          label="状态"
-          width="80"
-          :filters="resultFilters"
-          :filter-method="filterResult"
-        >
-          <template slot-scope="scope">
-            <span v-if="scope.row.result == '0'">成功</span>
-            <span v-else>失败</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="Form">
-          <template slot-scope="scope">
-            <BaseJSON :content="scope.row.form" />
-          </template>
-        </el-table-column>
-        <el-table-column label="Query">
-          <template slot-scope="scope">
-            <BaseJSON :content="scope.row.query" />
-          </template>
-        </el-table-column>
-        <el-table-column label="Params">
-          <template slot-scope="scope">
-            <BaseJSON :content="scope.row.params" />
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="Session ID"
-          :filters="sessionIDFilters"
-          :filter-method="filterSession"
-          width="110"
-        >
-          <template slot-scope="scope">
-            <BaseToolTip :content="scope.row.sid" />
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="Track ID"
-          :filters="trackIDFilters"
-          :filter-method="filterTrack"
-          width="90"
-        >
-          <template slot-scope="scope">
-            <BaseToolTip :content="scope.row.tid" />
-          </template>
-        </el-table-column>
-        <el-table-column label="IP" width="80">
-          <template slot-scope="scope">
-            <BaseToolTip icon="el-icon-info" :content="scope.row.ip" />
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="timeDesc"
-          key="timeDesc"
-          label="时间"
-          width="180"
-          sortable
-        />
-      </el-table>
-    </div>
-  </el-card>
+<template lang="pug">
+el-card.trackers
+  template(
+    #header
+  )
+    i.el-icon-user-solid
+    span 用户行为查询
+  div(
+    v-loading="trackers.processing"
+  )
+    base-filter(
+      :fields="filterFields"
+      @filter="filter"
+    )
+    el-table(
+      :data="trackers.items"
+      row-key="_time"
+      stripe
+      :default-sort="{ prop: '_time', order: 'descending' }"
+    )
+      el-table-column(
+        prop="account"
+        key="account"
+        label="账户"
+        width="120"
+      )
+      el-table-column(
+        prop="action"
+        key="action"
+        label="类型"
+        width="150"
+      )
+      //- 状态筛选
+      el-table-column(
+        label="状态"
+        width="80"
+        :filters="resultFilters"
+        :filter-method="filterResult"
+      ): template(
+        #default="scope"  
+      )
+        span(
+          v-if="scope.row.result === '0'"
+        ) 成功
+        span(
+          v-else
+        ) 失败
+      //- form参数
+      el-table-column(
+        label="Form"
+      ): template(
+        #default="scope"
+      ): base-json(
+        :content="scope.row.form"
+      )
+      //- query参数
+      el-table-column(
+        label="Query"
+      ): template(
+        #default="scope"
+      ): base-json(
+        :content="scope.row.query"
+      )
+      //- params参数
+      el-table-column(
+        label="Params"
+      ): template(
+        #default="scope"
+      ): base-json(
+        :content="scope.row.params"
+      )
+      //- session id
+      el-table-column(
+        label="Session ID"
+        :filters="sessionIDFilters"
+        :filter-method="filterSession"
+        width="110"
+      ): template(
+        #default="scope"
+      ): base-tooltip(
+        :content="scope.row.sid"
+      )
+      //- track id
+      el-table-column(
+        label="Track ID"
+        :filters="trackIDFilters"
+        :filter-method="filterTrack"
+        width="90"
+      ): template(
+        #default="scope"
+      ): base-tooltip(
+        :content="scope.row.tid"
+      )
+      //- ip
+      el-table-column(
+        label="IP"
+        width="80"
+      ): template(
+        #default="scope"
+      ): base-tooltip(
+        icon="el-icon-info"
+        :content="scope.row.ip"
+      )
+      //- 时间
+      el-table-column(
+        label="时间"
+        prop="_time"
+        key="_time"
+        width="120"
+      ): template(
+        #default="scope"
+      ): time-formater(
+        :time="scope.row._time"
+      )
 </template>
 
-<script>
-import { mapActions, mapState } from "vuex";
-import { today, formatBegin, formatEnd } from "@/helpers/util";
-import BaseTable from "@/components/base/Table.vue";
-import BaseFilter from "@/components/base/Filter.vue";
-import BaseToolTip from "@/components/base/ToolTip.vue";
-import BaseJSON from "@/components/base/JSON.vue";
-import { PAGE_SIZES } from "@/constants/common";
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import { today, formatBegin, formatEnd } from "../helpers/util";
+import BaseFilter from "../components/base/Filter.vue";
+import BaseTooltip from "../components/base/Tooltip.vue";
+import TimeFormater from "../components/TimeFormater.vue";
+import BaseJson from "../components/base/JSON.vue";
+import { PAGE_SIZES } from "../constants/common";
+import FilterTable from "../mixins/FilterTable";
+import { useTrackerStore } from "../store";
 
 const defaultDateRange = [today(), today()];
 const filterFields = [
@@ -98,7 +133,7 @@ const filterFields = [
     key: "account",
     placeholder: "请输入要查询的账号",
     clearable: true,
-    span: 6
+    span: 6,
   },
   {
     label: "时间：",
@@ -106,53 +141,54 @@ const filterFields = [
     type: "dateRange",
     placeholder: ["开始日期", "结束日期"],
     defaultValue: defaultDateRange,
-    span: 12
+    span: 12,
   },
   {
     label: "",
     type: "filter",
     labelWidth: "0px",
-    span: 6
-  }
+    span: 6,
+  },
 ];
 
-function getUniqueKey(data, key) {
+function getUniqueKey(data: any[], key: string) {
   if (!data || !data.length) {
     return [];
   }
   const keys = {};
-  data.forEach(item => {
+  data.forEach((item) => {
     if (item[key]) {
       keys[item[key]] = true;
     }
   });
-  return Object.keys(keys).map(item => {
+  return Object.keys(keys).map((item) => {
     return {
       text: item,
-      value: item
+      value: item,
     };
   });
 }
 
-export default {
+export default defineComponent({
   name: "Trackers",
-  extends: BaseTable,
   components: {
     BaseFilter,
-    BaseToolTip,
-    BaseJSON
+    BaseTooltip,
+    TimeFormater,
+    BaseJson,
   },
+  mixins: [FilterTable],
   data() {
     return {
       resultFilters: [
         {
           text: "成功",
-          value: "0"
+          value: "0",
         },
         {
           text: "失败",
-          value: "1"
-        }
+          value: "1",
+        },
       ],
       disableBeforeMountFetch: true,
       filterFields,
@@ -161,20 +197,19 @@ export default {
         dateRange: defaultDateRange,
         offset: 0,
         limit: PAGE_SIZES[0],
-        account: ""
-      }
+        account: "",
+      },
     };
   },
   computed: {
-    ...mapState({
-      trackIDFilters: state => getUniqueKey(state.tracker.list.data, "tid"),
-      sessionIDFilters: state => getUniqueKey(state.tracker.list.data, "sid"),
-      processing: state => state.tracker.listProcessing,
-      trackers: state => state.tracker.list.data || []
-    })
+    trackIDFilters() {
+      return getUniqueKey(this.trackers.items, "tid");
+    },
+    sessionIDFilters() {
+      return getUniqueKey(this.trackers.items, "sid");
+    },
   },
   methods: {
-    ...mapActions(["listTracker"]),
     filterResult(value, row) {
       return row.result == value;
     },
@@ -185,35 +220,42 @@ export default {
       return row.sid == value;
     },
     async fetch() {
-      const { query, processing } = this;
-      if (processing) {
+      const { trackers, query } = this;
+      if (trackers.processing) {
         return;
       }
       const params = Object.assign({}, query);
       if (!params.account) {
-        this.$message.error("账号不能为空");
+        this.$error("账号不能为空");
         return;
       }
       const value = params.dateRange;
-      if (value) {
-        params.begin = formatBegin(value[0]);
-        params.end = formatEnd(value[1]);
-      } else {
-        params.begin = "";
-        params.end = "";
+      if (!value) {
+        this.$erro("时间区间不能为空");
+        return;
       }
+      params.begin = formatBegin(value[0]);
+      params.end = formatEnd(value[1]);
       delete params.dateRange;
       try {
-        await this.listTracker(params);
+        await this.list(params);
       } catch (err) {
-        this.$message.error(err.message);
+        this.$error(err);
       }
-    }
-  }
-};
+    },
+  },
+  setup() {
+    const trackerStore = useTrackerStore();
+    return {
+      trackers: trackerStore.state.trackers,
+      list: (params) => trackerStore.dispatch("list", params),
+    };
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "../common";
 .trackers
   margin: $mainMargin
   i

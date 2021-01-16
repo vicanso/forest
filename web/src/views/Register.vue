@@ -1,13 +1,16 @@
-<template>
-  <LoginRegister type="register" />
+<template lang="pug">
+login-register(
+  type="register"
+)
 </template>
-<script>
-import LoginRegister from "@/components/LoginRegister.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+import LoginRegister from "../components/LoginRegister.vue";
+export default defineComponent({
   name: "Register",
   components: {
-    LoginRegister
-  }
-};
+    LoginRegister,
+  },
+});
 </script>

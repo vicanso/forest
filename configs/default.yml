@@ -4,8 +4,9 @@ basic:
   # 系统并发限制
   requestLimit: 1000
   listen: :7001
-  prefixes:
-  - /api
+  # 如果需要支持前缀，则可添加配置
+  # prefixes:
+  # - /api
 
 # 用户session的配置
 session:
@@ -13,6 +14,7 @@ session:
   key: forest
   ttl: 240h
   # 用于加密session cookie 
+  # 需要配置此属性或通过管理后台配置
   keys:
   - cuttlefish
   - secret

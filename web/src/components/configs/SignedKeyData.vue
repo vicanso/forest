@@ -1,25 +1,31 @@
-<template>
-  <el-col :span="8">
-    <el-form-item label="SignedKey：" class="signedKeyData">
-      <el-input placeholder="请输入签名的字符串以,分隔" v-model="key" />
-    </el-form-item>
-  </el-col>
+<template lang="pug">
+el-col(
+  :span="8"
+): el-form-item.signedKeyData(
+  label="SignedKey："
+): el-input(
+  placeholder="请输入签名使用的密钥，多个密钥以,分隔"
+  v-model="key"
+  clearable
+)
 </template>
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "SignedKeyData",
   props: {
-    data: String
+    data: String,
   },
   data() {
     return {
-      key: this.$props.data || ""
+      key: this.$props.data || "",
     };
   },
   watch: {
-    key: function(value) {
+    key: function (value) {
       this.$emit("change", value);
-    }
-  }
-};
+    },
+  },
+});
 </script>

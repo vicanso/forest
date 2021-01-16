@@ -1,58 +1,82 @@
-<template>
-  <div id="app" :class="{ shrinking: shrinking }">
-    <MainHeader class="header" />
-    <MainNav class="nav" :onToggle="toggleNav" :shrinking="shrinking" />
-    <div class="mainContent">
-      <router-view />
-    </div>
-  </div>
-</template>
-<script>
-import { mapActions, mapState } from "vuex";
-import MainHeader from "@/components/MainHeader.vue";
-import MainNav from "@/components/MainNav.vue";
+<template lang="pug">
+#app(
+  :class="{ shrinking: shrinking }"
+)
+  //- 主头部
+  main-header.header
+  //- 主导航
+  main-nav.nav(
+    :shrinking="shrinking"
+    @toggle="toggleNav"
+  )
+  //- 内容区域
+  .mainContent
+    router-view(
+      v-if="inited"
+    )
+    p.tac(
+      v-else
+    ) ...
 
-export default {
+</template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import MainHeader from "./components/MainHeader.vue";
+import MainNav from "./components/MainNav.vue";
+
+import { useUserStore } from "./store";
+import { getLoginRouteName } from "./router";
+
+export default defineComponent({
   name: "App",
   components: {
     MainHeader,
-    MainNav
+    MainNav,
   },
   data() {
     return {
-      shrinking: false
+      shrinking: false,
+      // 是否初始化完成
+      inited: false,
     };
   },
-  computed: mapState({
-    userAccount: state => state.user.info.account
-  }),
   methods: {
-    ...mapActions(["fetchUserInfo", "updateMe", "listStatus"]),
-    refreshSessionTTL() {
-      if (!this.userAccount) {
-        return;
-      }
-      this.updateMe({});
-    },
     toggleNav() {
       this.shrinking = !this.shrinking;
-    }
+    },
+    async fetch() {
+      const { userInfo, $router } = this;
+      try {
+        await this.fetchUserInfo();
+        // 如果未登录则跳转至登录
+        if (!userInfo.account) {
+          $router.push({
+            name: getLoginRouteName(),
+          });
+        }
+      } catch (err) {
+        this.$error(err.message);
+      } finally {
+        this.inited = true;
+      }
+    },
   },
-  async mounted() {
-    setInterval(() => {
-      this.refreshSessionTTL();
-    }, 5 * 60 * 1000);
-    try {
-      await this.listStatus();
-      await this.fetchUserInfo();
-    } catch (err) {
-      this.$message.error(err.message);
-    }
-  }
-};
+  mounted() {
+    this.fetch();
+  },
+  setup() {
+    const userStore = useUserStore();
+    return {
+      userInfo: userStore.state.info,
+      fetchUserInfo: () => userStore.dispatch("fetch"),
+    };
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "./common";
 .shrinking
   .header
     left: $mainNavShrinkingWidth

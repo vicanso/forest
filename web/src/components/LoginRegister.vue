@@ -1,72 +1,88 @@
-<template>
-  <div class="loginRegister">
-    <el-card>
-      <div slot="header" class="clearfix">
-        <i class="el-icon-user-solid" />
-        <span>{{ title }}</span>
-      </div>
-      <el-form
-        v-loading="processing"
-        ref="form"
-        :model="form"
-        label-width="80px"
-      >
-        <el-form-item label="账号：">
-          <el-input
-            placeholder="请输入账号"
-            v-model="form.account"
-            autofocus="true"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item label="密码：">
-          <el-input
-            v-model="form.password"
-            show-password
-            placeholder="请输入密码"
-          />
-        </el-form-item>
-        <el-form-item label="验证码：">
-          <el-row>
-            <el-col :span="18">
-              <el-input
-                class="code"
-                v-model="form.captcha"
-                maxlength="4"
-                clearable
-                @keyup.enter.native="onSubmit"
-                placeholder="请输入验证码"
-              />
-            </el-col>
-            <el-col :span="6">
-              <div class="captcha" @click="refreshCaptcha">
-                <img
-                  v-if="captchaData"
-                  :src="`data:image/jpeg;base64,${captchaData.data}`"
-                />
-              </div>
-            </el-col>
-          </el-row>
-        </el-form-item>
-        <el-form-item>
-          <el-button class="submit" type="primary" @click="onSubmit"
-            >{{ submitText }}
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-  </div>
+<template lang="pug">
+.loginRegister
+  el-card
+    //- 头部
+    template(
+      #header
+    )
+      .clearfix(
+        slot="header"
+      )
+        i.el-icon-user-solid
+        span {{title}}
+    //- 输入表单
+    el-form(
+      ref="form"
+      :model="form"
+      label-width="80px"
+    )
+      //- 账号
+      el-form-item(
+        label="账号："
+      ): el-input(
+        placeholder="请输入账号"
+        v-model="form.account"
+        autofocus="true"
+        clearable
+      )
+      //- 密码
+      el-form-item(
+        label="密码："
+      ): el-input(
+        v-model="form.password"
+        show-password
+        placeholder="请输入密码"
+      )
+      //- 验证码
+      el-form-item(
+        label="验证码："
+      ): el-row
+        //- 验证码输入框
+        el-col(
+          :span="18"
+        ): el-input.code(
+          v-model="form.captcha"
+          maxlength="4"
+          clearable
+          @keyup.enter.native="onSubmit"
+          placeholder="请输入验证码"
+        )
+        //- 验证码图片
+        el-col(
+          :span="6"
+        ): .captcha(
+          @click="refreshCaptcha"
+        )
+          img(
+            v-if="captchaData"
+            :src="`data:image/${captchaData.type};base64,${captchaData.data}`"
+          )
+          span(
+            v-else
+          ) ...
+      //- 确认按钮
+      el-form-item: ex-button(
+        :onClick="onSubmit"
+        category="confirm"
+      )
+        el-button.submit(
+          type="primary"
+        ) {{ submitText }}
+
 </template>
-<script>
-import { mapState, mapActions } from "vuex";
-import { LOGIN } from "@/constants/route";
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import { useUserStore, useCommonStore } from "../store";
+import { getLoginRouteName } from "../router";
 
 const registerType = "register";
 
-export default {
+export default defineComponent({
   name: "LoginRegister",
   props: {
-    type: String
+    type: String,
   },
   data() {
     const { type } = this.$props;
@@ -83,21 +99,18 @@ export default {
       form: {
         account: "",
         password: "",
-        captcha: ""
-      }
+        captcha: "",
+      },
     };
   },
-  computed: mapState({
-    processing: state => state.user.processing
-  }),
   methods: {
-    ...mapActions(["login", "register", "getCaptcha"]),
     async refreshCaptcha() {
       try {
+        this.captchaData = null;
         const data = await this.getCaptcha();
         this.captchaData = data;
       } catch (err) {
-        this.$message.error(err.message);
+        this.$error(err.message);
       }
     },
     async onSubmit() {
@@ -106,41 +119,48 @@ export default {
         this.$message.warning("账号、密码以及验证码不能为空");
         return;
       }
-      if (this.submitting) {
-        return;
-      }
-      this.submitting = true;
       const params = {
         account,
         password,
-        captcha: `${this.captchaData.id}:${captcha}`
+        captcha: `${this.captchaData.id}:${captcha}`,
       };
       try {
-        if (this.$props.type === registerType) {
+        const { type } = this.$props;
+        // 注册
+        if (type == registerType) {
           await this.register(params);
           this.$router.replace({
-            name: LOGIN
+            name: getLoginRouteName(),
           });
         } else {
+          // 登录
           await this.login(params);
           this.$router.back();
         }
       } catch (err) {
-        // 图形验证码只可校验一次，因此出错则刷新
         this.refreshCaptcha();
-        this.$message.error(err.message);
-      } finally {
-        this.submitting = false;
+        this.$error(err.message);
       }
-    }
+    },
   },
   mounted() {
     this.refreshCaptcha();
-  }
-};
+  },
+  setup() {
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
+    return {
+      user: userStore.state.info,
+      getCaptcha: () => commonStore.dispatch("getCaptcha"),
+      login: (params) => userStore.dispatch("login", params),
+      register: (params) => userStore.dispatch("register", params),
+    };
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "../common";
 .loginRegister
   margin: 100px auto
   max-width: 600px

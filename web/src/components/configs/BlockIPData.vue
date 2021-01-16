@@ -1,26 +1,31 @@
-<template>
-  <el-col :span="8">
-    <el-form-item label="拦截IP：" class="blockIPData">
-      <el-input placeholder="请输入IP地址或网段" v-model="ip" />
-    </el-form-item>
-  </el-col>
+<template lang="pug">
+el-col(
+  :span="8"
+): el-form-item.blockIPData(
+  label="拦截IP："
+): el-input(
+  placeholder="请输入IP地址或网段"
+  v-model="ip"
+  clearable
+)
 </template>
-<script>
-// 黑名单IP拦截数据组件
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "BlockIPData",
   props: {
-    data: String
+    data: String,
   },
   data() {
     return {
-      ip: this.$props.data || ""
+      ip: this.$props.data || "",
     };
   },
   watch: {
-    ip: function(value) {
-      this.$emit("change", value);
-    }
-  }
-};
+    ip: function (value) {
+      this.$emit("change", `${value}`);
+    },
+  },
+});
 </script>

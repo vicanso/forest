@@ -1,35 +1,40 @@
-<template>
-  <div class="jsonView">
-    <pre v-if="json">{{ data }}</pre>
-    <span v-else>{{ data }}</span>
-  </div>
+<template lang="pug">
+.jsonView
+  pre(
+    v-if="json"
+  ) {{ data }}
+  span(
+    v-else
+  ) {{ data }}
 </template>
-<script>
-const formatJSON = data => {
-  if (data && data[0] === "{") {
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+const formatJSON = (data) => {
+  if (data && (data[0] === "{" || data[0] === "[")) {
     return {
       json: true,
-      data: JSON.stringify(JSON.parse(data), null, 2)
+      data: JSON.stringify(JSON.parse(data), null, 2),
     };
   }
   return {
     json: false,
-    data: data
+    data: data,
   };
 };
-export default {
-  name: "JSON",
+
+export default defineComponent({
+  name: "BaseJson",
   props: {
-    content: String
+    content: String,
   },
   data() {
     return formatJSON(this.$props.content);
-  }
-};
+  },
+});
 </script>
-
-<style lang="sass" scoped>
-@import "@/common.sass"
+<style lang="stylus" scoped>
 .jsonView
   overflow-x: scroll
 </style>

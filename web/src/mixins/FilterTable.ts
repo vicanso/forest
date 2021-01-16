@@ -1,7 +1,7 @@
-<script>
-import { CONFIG_EDIT_MODE } from "@/constants/route";
+import { CONFIG_EDIT_MODE } from "../constants/common";
+import { diff } from "../helpers/util";
+
 export default {
-  name: "BaseTable",
   computed: {
     currentPage() {
       const { offset, limit } = this.query;
@@ -9,7 +9,7 @@ export default {
     },
     editMode() {
       return this.$route.query.mode === CONFIG_EDIT_MODE;
-    }
+    },
   },
   methods: {
     handleCurrentChange(page) {
@@ -33,35 +33,43 @@ export default {
     add() {
       this.$router.push({
         query: {
-          mode: CONFIG_EDIT_MODE
-        }
+          mode: CONFIG_EDIT_MODE,
+        },
       });
     },
     modify(item) {
       this.$router.push({
         query: {
           mode: CONFIG_EDIT_MODE,
-          id: item.id
-        }
+          id: item.id,
+        },
       });
     },
     filter(params) {
       Object.assign(this.query, params);
       this.query.offset = 0;
       this.fetch();
-    }
+    },
   },
   watch: {
-    $route() {
+    "$route.query"(query, prevQuery) {
+      // 如果路由已更换，则直接返回
+      if (this.$route.name !== this._currentRoute) {
+        return;
+      }
+      if (!diff(query, prevQuery).modifiedCount) {
+        return;
+      }
+
       if (!this.editMode) {
         this.fetch();
       }
-    }
+    },
   },
   beforeMount() {
+    this._currentRoute = this.$route.name;
     if (!this.editMode && !this.disableBeforeMountFetch) {
       this.fetch();
     }
-  }
+  },
 };
-</script>

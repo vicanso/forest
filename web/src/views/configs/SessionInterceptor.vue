@@ -1,70 +1,89 @@
-<template>
-  <ConfigEditor
-    name="设置session的拦截提示信息"
-    summary="注意：针对session拦截，用于将所有用户相关接口拦截处理（如系统维护等），配置时需要确保配置正确"
-    :category="category"
-    :defaultValue="defaultValue"
-    v-if="!processing"
-    :id="currentID"
-    :backDisabled="true"
-  >
-    <template v-slot:data="configProps">
-      <SessionInterceptorData
-        :data="configProps.form.data"
-        @change="configProps.form.data = $event"
-      />
-    </template>
-  </ConfigEditor>
+<template lang="pug">
+config-editor(
+  name="设置session的拦截提示信息"
+  summary="注意：针对session拦截，用于将所有用户相关接口拦截处理（如系统维护等），配置时需要确保配置正确"
+  :category="category"
+  :defaultValue="defaultValue"
+  :backDisabled="true"
+  v-if="!processing"
+  :id="currentID"
+  :back="noop"
+): template(
+  #data="configProps"
+): session-interceptor-data(
+  :data="configProps.form.data"
+  @change.self="configProps.form.data = $event"
+)
 </template>
-<script>
-import ConfigEditor from "@/components/configs/Editor.vue";
-import SessionInterceptorData from "@/components/configs/SessionInterceptorData.vue";
-import { SESSION_INTERCEPTOR } from "@/constants/config";
-import { mapActions } from "vuex";
-export default {
-  name: "SessionInterceptor",
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import ConfigEditor from "../../components/configs/Editor.vue";
+import SessionInterceptorData from "../../components/configs/SessionInterceptorData.vue";
+import { SESSION_INTERCEPTOR, CONFIG_EDIT_MODE } from "../../constants/common";
+import { useConfigStore } from "../../store";
+
+export default defineComponent({
+  name: "BlockIP",
   components: {
     SessionInterceptorData,
-    ConfigEditor
+    ConfigEditor,
   },
   data() {
     return {
       defaultValue: {
         name: SESSION_INTERCEPTOR,
-        category: SESSION_INTERCEPTOR
+        category: SESSION_INTERCEPTOR,
       },
-      processing: false,
+      category: SESSION_INTERCEPTOR,
+      processing: true,
       currentID: 0,
-      category: SESSION_INTERCEPTOR
     };
   },
   methods: {
-    ...mapActions(["listConfig"])
+    noop() {},
   },
-  async beforeMount() {
+  async mounted() {
+    const { $route, $router } = this;
     this.processing = true;
     try {
-      const { configurations } = await this.listConfig({
-        name: SESSION_INTERCEPTOR
+      const { configurations } = await this.list({
+        name: SESSION_INTERCEPTOR,
       });
-      if (configurations.length !== 0) {
+      if (configurations && configurations.length !== 0) {
         let currentID = null;
-        if (this.$route.query.id) {
-          currentID = Number(this.$route.query.id);
+        if ($route.query.id) {
+          currentID = Number($route.query.id);
         }
         if (currentID !== configurations[0].id) {
-          this.$router.replace({
+          $router.replace({
             query: {
-              id: configurations[0].id
-            }
+              id: configurations[0].id,
+            },
           });
         }
       }
     } catch (err) {
-      this.$message.error(err.message);
+      this.$error(err.message);
     } finally {
       this.processing = false;
     }
-  }
-};
+  },
+  setup() {
+    const configStore = useConfigStore();
+    return {
+      configs: configStore.state.configs,
+      list: (params) => configStore.dispatch("list", params),
+    };
+  },
+});
 </script>
+<style lang="stylus" scoped>
+@import "../../common";
+
+.add
+  margin: $mainMargin
+.addBtn
+  width: 100%
+</style>

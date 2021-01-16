@@ -1,67 +1,75 @@
-<template>
-  <div class="blockIP">
-    <div v-if="!editMode">
-      <ConfigTable :category="category" name="黑名单IP配置" />
-      <div class="add">
-        <el-button class="addBtn" type="primary" @click="add">添加</el-button>
-      </div>
-    </div>
-    <ConfigEditor
-      name="添加/更新IP黑名单配置"
-      summary="用于拦截访问IP"
+<template lang="pug">
+.blockIP
+  div(
+    v-if="!editMode"
+  )
+    config-table(
       :category="category"
-      :defaultValue="defaultValue"
-      v-else
-    >
-      <template v-slot:data="configProps">
-        <BlockIPData
-          :data="configProps.form.data"
-          @change="configProps.form.data = $event"
-        />
-      </template>
-    </ConfigEditor>
-  </div>
+      name="黑名单IP配置"
+    )
+    .add
+      el-button.addBtn(
+        type="primary"
+        @click="add"
+      ) 添加
+  config-editor(
+    name="添加/更新IP黑名单配置"
+    summary="用于拦截访问IP"
+    :category="category"
+    :defaultValue="defaultValue"
+    v-else
+  ): template(
+    #data="configProps"
+  ): block-iP-data(
+    :data="configProps.form.data"
+    @change.self="configProps.form.data = $event"
+  )
 </template>
-<script>
-import { BLOCK_IP } from "@/constants/config";
-import { CONFIG_EDIT_MODE } from "@/constants/route";
-import ConfigEditor from "@/components/configs/Editor.vue";
-import ConfigTable from "@/components/configs/Table.vue";
-import BlockIPData from "@/components/configs/BlockIPData.vue";
 
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import ConfigEditor from "../../components/configs/Editor.vue";
+import BlockIPData from "../../components/configs/BlockIPData.vue";
+import ConfigTable from "../../components/configs/Table.vue";
+import { BLOCK_IP, CONFIG_EDIT_MODE } from "../../constants/common";
+import { useConfigStore } from "../../store";
+
+export default defineComponent({
   name: "BlockIP",
   components: {
     BlockIPData,
     ConfigTable,
-    ConfigEditor
+    ConfigEditor,
   },
   data() {
     return {
       defaultValue: {
-        category: BLOCK_IP
+        category: BLOCK_IP,
       },
-      category: BLOCK_IP
+      category: BLOCK_IP,
     };
   },
   computed: {
     editMode() {
       return this.$route.query.mode === CONFIG_EDIT_MODE;
-    }
+    },
   },
   methods: {
+    change(data) {},
     add() {
       this.$router.push({
         query: {
-          mode: CONFIG_EDIT_MODE
-        }
+          mode: CONFIG_EDIT_MODE,
+        },
       });
-    }
-  }
-};
+    },
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+<style lang="stylus" scoped>
+@import "../../common";
+
 .add
   margin: $mainMargin
 .addBtn

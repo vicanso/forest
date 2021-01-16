@@ -1,144 +1,137 @@
-<template>
-  <el-card class="baseEditor" v-loading="processing">
-    <div slot="header">
-      <i v-if="$props.icon" :class="$props.icon"></i>
-      <span>{{ $props.title }}</span>
-    </div>
-    <el-form
-      v-if="inited"
-      :label-width="$props.labelWidth"
-      ref="baseEditorForm"
-      :rules="rules"
-      :model="current"
-    >
-      <el-row :gutter="15">
-        <el-col
-          v-for="field in $props.fields"
-          :span="field.span || 8"
-          :key="field.key"
-        >
-          <el-form-item
-            :label="field.label"
-            :label-width="field.labelWidth"
-            :class="field.itemClass"
-            :prop="field.key"
-          >
-            <el-select
-              class="select"
-              v-if="field.type === 'select'"
-              :placeholder="field.placeholder"
-              v-model="current[field.key]"
-              :multiple="field.multiple || false"
-            >
-              <el-option
-                v-for="item in field.options"
-                :key="item.key || item.value"
-                :label="item.label || item.name"
-                :value="item.value"
-              />
-            </el-select>
-            <el-input
-              v-else-if="field.type === 'specsUnit'"
-              :placeholder="field.placeholder"
-              v-model="current[field.key]"
-              :clearable="field.clearable"
-            >
-              <el-select
-                class="inputSelect"
-                v-model="current[field.selectKey]"
-                slot="append"
-                :placeholder="field.selectPlaceholder"
-              >
-                <el-option
-                  v-for="item in field.options"
-                  :key="item.name"
-                  :label="item.name"
-                  :value="item.value"
-                />
-              </el-select>
-            </el-input>
+<template lang="pug">
+el-card.baseEditor(
+  v-loading="processing"  
+)
+  template(
+    #header
+  )
+    i(
+      v-if="$props.icon"
+      :class="$props.icon"
+    )
+    span {{ $props.title }}
+  el-form(
+    v-if="inited"
+    :label-width="$props.labelWidth"
+    ref="baseEditorForm"
+    :rules="rules"
+    :model="current"
+  ): el-row(
+    :gutter="15"
+  )
+    el-col(
+      v-for="field in $props.fields"
+      :span="field.span || 8"
+      :key="field.key"
+    ): el-form-item(
+      :label="field.label"
+      :label-width="field.labelWidth"
+      :class="field.itemClass"
+      :prop="field.key"
+    )
+      //- 选择列表
+      el-select.select(
+        v-if="field.type === 'select'"
+        :placeholder="field.placeholder"
+        v-model="current[field.key]"
+        :multiple="field.multiple || false"
+      ): el-option(
+        v-for="item in field.options"
+        :key="item.key || item.value"
+        :label="item.label || item.name"
+        :value="item.value"
+      )
+      //- 带单位选择的输入框
+      el-input(
+        v-else-if="field.type === 'specsUnit'"
+        :placeholder="field.placeholder"
+        v-model="current[field.key]"
+        :clearable="field.clearable"
+      ): el-select.inputSelect(
+        #append
+        v-model="current[field.selectKey]"
+        :placeholder="field.selectPlaceholder"
+      ): el-option(
+        v-for="item in field.options"
+        :key="item.name"
+        :label="item.name"
+        :value="item.value"
+      )
+      //- 输入区域textarea
+      el-input(
+        type="textarea"
+        v-else-if="field.type === 'textarea'"
+        v-model="current[field.key]"
+        :placeholder="field.placeholder"
+        :autosize="field.autosize"
+      )
+      //- 日期选择
+      el-date-picker(
+        v-else-if="field.type === 'datePicker'"
+        v-model="current[field.key]"
+        :type="field.pickerType || 'date'"
+        :placeholder="field.placeholder"
+      )
+      //- 输入框
+      el-input(
+        v-else
+        v-model="current[field.key]"
+        :clearable="field.clearable"
+        :disabled="field.disabled || false"
+        :placeholder="field.placeholder"
+      )
+    //- 提交
+    el-col(
+      :span="12"
+    ): el-form-item: ex-button(
+      category="confirm"
+      :onClick="submit"
+    ): el-button.btn(
+      type="primary"
+    ) {{ submitText }}
+    //- 返回
+    el-col(
+      :span="12"
+    ): el-form-item: el-button.btn(
+      @click="goBack"
+    ) 返回
 
-            <el-input
-              type="textarea"
-              v-else-if="field.type === 'textarea'"
-              v-model="current[field.key]"
-              :placeholder="field.placeholder"
-              :autosize="field.autosize"
-            />
-            <Upload
-              v-else-if="field.type === 'upload'"
-              :files="current[field.key]"
-              :bucket="field.bucket"
-              :limit="field.limit"
-              :contentType="field.contentType"
-              :width="field.width"
-              :height="field.height"
-              @change="handleUpload"
-            />
-            <el-date-picker
-              v-else-if="field.type === 'datePicker'"
-              v-model="current[field.key]"
-              :type="field.pickerType || 'date'"
-              :placeholder="field.placeholder"
-            />
-            <el-input
-              v-else
-              v-model="current[field.key]"
-              :clearable="field.clearable"
-              :disabled="field.disabled || false"
-              :placeholder="field.placeholder"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item>
-            <el-button class="btn" type="primary" @click="submit">{{
-              submitText
-            }}</el-button>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item>
-            <el-button class="btn" @click="goBack">返回</el-button>
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
-  </el-card>
 </template>
-<script>
-import { diff, validateForm, omitNil, getFieldRules } from "@/helpers/util";
-import Upload from "@/components/Upload.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+import ExButton from "../ExButton.vue";
+import { diff, validateForm, omitNil, getFieldRules } from "../../helpers/util";
+
+export default defineComponent({
   name: "BaseEditor",
   components: {
-    Upload
+    ExButton,
   },
   props: {
     icon: String,
     title: {
       type: String,
-      required: true
+      required: true,
     },
     labelWidth: {
       type: String,
-      default: "80px"
+      default: "80px",
     },
     fields: {
       type: Array,
-      required: true
+      required: true,
     },
     id: Number,
     findByID: Function,
     updateByID: Function,
-    add: Function
+    add: Function,
   },
   data() {
     const { id, fields } = this.$props;
     const submitText = id ? "更新" : "添加";
     const current = {};
-    fields.forEach(item => {
+    fields.forEach((item) => {
       current[item.key] = null;
     });
 
@@ -148,13 +141,14 @@ export default {
       processing: false,
       submitText,
       current,
-      rules: getFieldRules(fields)
+      rules: getFieldRules(fields),
     };
   },
   methods: {
     handleUpload(files) {
       this.current.files = files;
     },
+    // 添加
     async handleAdd(data) {
       const { add } = this.$props;
       const { rules } = this;
@@ -167,11 +161,12 @@ export default {
         this.$message.info("已成功添加");
         this.goBack();
       } catch (err) {
-        this.$message.error(err.message);
+        this.$error(err.message);
       } finally {
         this.processing = false;
       }
     },
+    // 更新
     async handleUpdate(data) {
       const { id, updateByID } = this.$props;
       const { originData, rules } = this;
@@ -188,21 +183,22 @@ export default {
         }
         await updateByID({
           id,
-          data: updateInfo.data
+          data: updateInfo.data,
         });
         this.$message.info("已成功更新");
         this.goBack();
       } catch (err) {
-        this.$message.error(err.message);
+        this.$error(err.message);
       } finally {
         this.processing = false;
       }
     },
+    // 提交
     submit() {
       const { current } = this;
       const { id, fields } = this.$props;
       const data = Object.assign({}, current);
-      fields.forEach(item => {
+      fields.forEach((item) => {
         if (item.dataType === "number") {
           data[item.key] = Number(data[item.key]);
         }
@@ -215,7 +211,7 @@ export default {
     },
     goBack() {
       this.$router.back();
-    }
+    },
   },
   async beforeMount() {
     const { id, findByID } = this.$props;
@@ -228,14 +224,14 @@ export default {
       this.originData = data;
       Object.assign(this.current, data);
     } catch (err) {
-      this.$message.error(err.message);
+      this.$error(err.message);
     } finally {
       this.inited = true;
     }
-  }
-};
+  },
+});
 </script>
-<style lang="sass" scoped>
+<style lang="stylus" scoped>
 .baseEditor
   i
     margin-right: 5px

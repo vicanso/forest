@@ -1,67 +1,74 @@
-<template>
-  <div class="routerConcurrency">
-    <div v-if="!editMode">
-      <ConfigTable :category="category" name="路由并发配置" />
-      <div class="add">
-        <el-button class="addBtn" type="primary" @click="add">添加</el-button>
-      </div>
-    </div>
-    <ConfigEditor
-      name="添加/更新路由并发配置"
-      summary="配置针对各路由并发请求的限制"
+<template lang="pug">
+.routerConcurrency
+  div(
+    v-if="!editMode"
+  )
+    config-table(
       :category="category"
-      :defaultValue="defaultValue"
-      v-else
-    >
-      <template v-slot:data="configProps">
-        <RouterConcurrencyData
-          :data="configProps.form.data"
-          @change="configProps.form.data = $event"
-        />
-      </template>
-    </ConfigEditor>
-  </div>
+      name="路由并发配置"
+    )
+    .add: el-button.addBtn(
+      type="primary"
+      @click="add"
+    ) 添加
+  config-editor(
+    v-else
+    name="添加/更新路由并发配置"
+    summary="配置针对各路由并发请求的限制"
+    :category="category"
+    :defaultValue="defaultValue"
+  ): template(
+    #data="configProps"
+  ): router-concurrency-data(
+    :data="configProps.form.data"
+    @change.self="configProps.form.data = $event"
+  )
 </template>
-<script>
-import { ROUTER_CONCURRENCY } from "@/constants/config";
-import { CONFIG_EDIT_MODE } from "@/constants/route";
-import ConfigEditor from "@/components/configs/Editor.vue";
-import ConfigTable from "@/components/configs/Table.vue";
-import RouterConcurrencyData from "@/components/configs/RouterConcurrencyData.vue";
 
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import ConfigEditor from "../../components/configs/Editor.vue";
+import RouterConcurrencyData from "../../components/configs/RouterConcurrencyData.vue";
+import ConfigTable from "../../components/configs/Table.vue";
+import { ROUTER_CONCURRENCY, CONFIG_EDIT_MODE } from "../../constants/common";
+import { useConfigStore } from "../../store";
+
+export default defineComponent({
   name: "RouterConcurrency",
   components: {
-    ConfigEditor,
+    RouterConcurrencyData,
     ConfigTable,
-    RouterConcurrencyData
+    ConfigEditor,
   },
   data() {
     return {
       defaultValue: {
-        category: ROUTER_CONCURRENCY
+        category: ROUTER_CONCURRENCY,
       },
-      category: ROUTER_CONCURRENCY
+      category: ROUTER_CONCURRENCY,
     };
   },
   computed: {
     editMode() {
       return this.$route.query.mode === CONFIG_EDIT_MODE;
-    }
+    },
   },
   methods: {
+    change(data) {},
     add() {
       this.$router.push({
         query: {
-          mode: CONFIG_EDIT_MODE
-        }
+          mode: CONFIG_EDIT_MODE,
+        },
       });
-    }
-  }
-};
+    },
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+<style lang="stylus" scoped>
+@import "../../common";
+
 .add
   margin: $mainMargin
 .addBtn

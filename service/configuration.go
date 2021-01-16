@@ -43,6 +43,7 @@ type (
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
+		UpdatedAt          time.Time               `json:"updatedAt,omitempty"`
 		MockTime           string                  `json:"mockTime,omitempty"`
 		IPBlockList        []string                `json:"ipBlockList,omitempty"`
 		SignedKeys         []string                `json:"signedKeys,omitempty"`
@@ -54,10 +55,12 @@ type (
 
 var (
 	sessionSignedKeys = new(elton.RWMutexSignedKeys)
-
 	// sessionInterceptorConfig session拦截的配置
 	sessionInterceptorConfig = new(sync.Map)
 )
+
+// 配置刷新时间
+var configurationRefreshedAt time.Time
 
 const (
 	sessionInterceptorKey = "sessionInterceptor"
@@ -78,6 +81,7 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 	interData, _ := GetSessionInterceptorData()
 	result := &CurrentValidConfiguration{
+		UpdatedAt:         configurationRefreshedAt,
 		MockTime:          util.GetMockTime(),
 		IPBlockList:       GetIPBlockList(),
 		SignedKeys:        sessionSignedKeys.GetKeys(),
@@ -123,6 +127,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	if err != nil {
 		return
 	}
+	configurationRefreshedAt = time.Now()
 	var mockTimeConfig *ent.Configuration
 	routerConcurrencyConfigs := make([]string, 0)
 	routerConfigs := make([]string, 0)
