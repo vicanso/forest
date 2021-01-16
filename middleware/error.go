@@ -21,6 +21,8 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -55,17 +57,35 @@ func NewError() elton.Handler {
 		if he.Extra == nil {
 			he.Extra = make(map[string]interface{})
 		}
+		account := ""
+		tid := util.GetTrackID(c)
+		us := service.NewUserSession(c)
+		if us != nil && us.IsLogin() {
+			account = us.MustGetInfo().Account
+		}
+		ip := c.RealIP()
+		sid := util.GetSessionID(c)
+
 		he.Extra["route"] = c.Route
+		// 记录用户相关信息
 		fields := map[string]interface{}{
 			"statusCode": he.StatusCode,
 			"error":      he.Error(),
 			"uri":        uri,
 			"exception":  he.Exception,
+			"ip":         ip,
+			"sid":        sid,
+			"tid":        tid,
+		}
+		if account != "" {
+			fields["account"] = account
 		}
 		tags := map[string]string{
-			"method":   c.Request.Method,
-			"route":    c.Route,
-			"category": he.Category,
+			"method": c.Request.Method,
+			"route":  c.Route,
+		}
+		if he.Category != "" {
+			tags["category"] = he.Category
 		}
 
 		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, tags, fields)

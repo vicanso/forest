@@ -1,19 +1,19 @@
 <template lang="pug">
-el-card.trackers
+el-card.httpErrors
   template(
     #header
   )
     i.el-icon-user-solid
-    span 用户行为查询
+    span HTTP出错查询 
   div(
-    v-loading="trackers.processing"
+    v-loading="httpErrors.processing"
   )
     base-filter(
       :fields="filterFields"
       @filter="filter"
     )
     el-table(
-      :data="trackers.items"
+      :data="httpErrors.items"
       row-key="_time"
       stripe
       :default-sort="{ prop: '_time', order: 'descending' }"
@@ -25,49 +25,28 @@ el-card.trackers
         width="120"
       )
       el-table-column(
-        prop="action"
-        key="action"
-        label="类型"
+        prop="method"
+        key="method"
+        label="Method"
+        width="80"
+      )
+      el-table-column(
+        prop="route"
+        key="route"
+        label="路由"
         width="150"
       )
-      //- 状态筛选
       el-table-column(
-        label="状态"
+        prop="category"
+        key="category"
+        label="类型"
+        width="100"
+      )
+      el-table-column(
+        prop="statusCode"
+        key="statusCode"
+        label="状态码"
         width="80"
-        :filters="resultFilters"
-        :filter-method="filterResult"
-      ): template(
-        #default="scope"  
-      )
-        span(
-          v-if="scope.row.result === '0'"
-        ) 成功
-        span(
-          v-else
-        ) 失败
-      //- form参数
-      el-table-column(
-        label="Form"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.form"
-      )
-      //- query参数
-      el-table-column(
-        label="Query"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.query"
-      )
-      //- params参数
-      el-table-column(
-        label="Params"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.params"
       )
       //- session id
       el-table-column(
@@ -93,25 +72,28 @@ el-card.trackers
       )
       //- ip
       el-table-column(
+        prop="ip"
+        key="ip"
         label="IP"
+        width="100"
+      )
+      //- uri 
+      el-table-column(
+        label="URI"
         width="80"
       ): template(
         #default="scope"
       ): base-tooltip(
         icon="el-icon-info"
-        :content="scope.row.ip"
+        :content="scope.row.uri"
       )
-      //- 时间
+      //- error 
       el-table-column(
-        label="时间"
-        prop="_time"
-        key="_time"
-        width="120"
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row._time"
+        prop="error"
+        key="error"
+        label="Error"
       )
+
 </template>
 
 <script lang="ts">
@@ -189,16 +171,16 @@ export default defineComponent({
   mixins: [FilterTable],
   data() {
     return {
-      resultFilters: [
-        {
-          text: "成功",
-          value: "0",
-        },
-        {
-          text: "失败",
-          value: "1",
-        },
-      ],
+      // resultFilters: [
+      //   {
+      //     text: "成功",
+      //     value: "0",
+      //   },
+      //   {
+      //     text: "失败",
+      //     value: "1",
+      //   },
+      // ],
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
@@ -212,16 +194,16 @@ export default defineComponent({
   },
   computed: {
     trackIDFilters() {
-      return getUniqueKey(this.trackers.items, "tid");
+      return getUniqueKey(this.httpErrors.items, "tid");
     },
     sessionIDFilters() {
-      return getUniqueKey(this.trackers.items, "sid");
+      return getUniqueKey(this.httpErrors.items, "sid");
     },
   },
   methods: {
-    filterResult(value, row) {
-      return row.result == value;
-    },
+    // filterResult(value, row) {
+    //   return row.result == value;
+    // },
     filterTrack(value, row) {
       return row.tid == value;
     },
@@ -229,15 +211,11 @@ export default defineComponent({
       return row.sid == value;
     },
     async fetch() {
-      const { trackers, query } = this;
-      if (trackers.processing) {
+      const { httpErrors, query } = this;
+      if (httpErrors.processing) {
         return;
       }
       const params = Object.assign({}, query);
-      if (!params.account) {
-        this.$error("账号不能为空");
-        return;
-      }
       const value = params.dateRange;
       if (!value) {
         this.$erro("时间区间不能为空");
@@ -247,7 +225,7 @@ export default defineComponent({
       params.end = formatEnd(value[1]);
       delete params.dateRange;
       try {
-        await this.listTracker(params);
+        await this.listHTTPError(params);
       } catch (err) {
         this.$error(err);
       }
@@ -256,8 +234,8 @@ export default defineComponent({
   setup() {
     const fluxStore = useFluxStore();
     return {
-      trackers: fluxStore.state.trackers,
-      listTracker: (params) => fluxStore.dispatch("listTracker", params),
+      httpErrors: fluxStore.state.httpErrors,
+      listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
     };
   },
 });
@@ -265,7 +243,7 @@ export default defineComponent({
 
 <style lang="stylus" scoped>
 @import "../common";
-.trackers
+.httpErrors
   margin: $mainMargin
   i
     margin-right: 5px

@@ -61,6 +61,7 @@ import {
   getSessionInterceptorRouteName,
   getValidConfigurationRouteName,
   getOthersRouteName,
+  getHTTPErrorsRouteName,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
 import { useUserStore } from "../store";
@@ -88,6 +89,12 @@ const navs = [
       {
         name: "用户行为",
         route: getTrackersRouteName(),
+        roles: [],
+        groups: [],
+      },
+      {
+        name: "出错记录",
+        route: getHTTPErrorsRouteName(),
         roles: [],
         groups: [],
       },

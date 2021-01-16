@@ -6,6 +6,7 @@ import Register from "../views/Register.vue";
 import Logins from "../views/Logins.vue";
 import Users from "../views/Users.vue";
 import Trackers from "../views/Trackers.vue";
+import HTTPErrors from "../views/HTTPErrors.vue";
 import MockTime from "../views/configs/MockTime.vue";
 import BlockIP from "../views/configs/BlockIP.vue";
 import SignedKey from "../views/configs/SignedKey.vue";
@@ -21,6 +22,7 @@ const register = "register";
 const logins = "logins";
 const users = "users";
 const trackers = "trackers";
+const httpErrors = "httpErrors";
 const mockTime = "mockTime";
 const blockIP = "blockIP";
 const signedKey = "signedKey";
@@ -76,6 +78,11 @@ const router = createRouter({
       path: "/trackers",
       name: trackers,
       component: Trackers,
+    },
+    {
+      path: "/http-errors",
+      name: httpErrors,
+      component: HTTPErrors,
     },
     {
       path: "/mock-time",
@@ -137,6 +144,9 @@ export function getUsersRouteName(): string {
 }
 export function getTrackersRouteName(): string {
   return trackers;
+}
+export function getHTTPErrorsRouteName(): string {
+  return httpErrors;
 }
 export function getMockTimeRouteName(): string {
   return mockTime;

@@ -46,6 +46,13 @@ el-form.baseFilter(
         start-placeholder="开始日期"
         end-placeholder="结束日期"
       )
+      el-input(
+        v-else-if="field.type === 'number'"
+        v-model="current[field.key]"
+        type="number"
+        :placeholder="field.placeholder"
+        :default="field.defaultValue"
+      )
       //- 关键字搜索
       el-input(
         v-else

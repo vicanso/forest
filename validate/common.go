@@ -17,6 +17,8 @@ package validate
 func init() {
 	// 字符串，max表示字符串长度
 	AddAlias("xLimit", "number,min=1,max=2")
+	// 更大的数量限制，一般管理后台接口使用
+	AddAlias("xLargerLimit", "number,min=1,max=3")
 	AddAlias("xOffset", "number,min=0,max=5")
 	AddAlias("xOrder", "ascii,min=0,max=100")
 	AddAlias("xFields", "ascii,min=0,max=100")

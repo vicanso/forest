@@ -13,8 +13,12 @@ export const USERS_ROLES = "/users/v1/roles";
 export const USERS = "/users/v1";
 // 根据ID查询用户信息
 export const USERS_ID = "/users/v1/:id";
+
+// flux相关查询
 // 用户行为日志列表
-export const USERS_TRACKERS = "/users/v1/trackers";
+export const FLUXES_TRACKERS = "/fluxes/v1/trackers";
+// http出错列表
+export const FLUXES_HTTP_ERRORS = "/fluxes/v1/http-errors";
 
 // 通用接口相关url
 // 图形验证码
