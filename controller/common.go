@@ -172,14 +172,14 @@ func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
 	n, _ := strconv.Atoi(c.QueryParam("n"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 	if size < 1 {
-		size = 1
+		size = 10
 	}
 	if n < 1 {
-		n = 10
+		n = 1
 	}
-	result := make([]string, size)
-	for index := 0; index < size; index++ {
-		result[index] = util.RandomString(n)
+	result := make([]string, n)
+	for index := 0; index < n; index++ {
+		result[index] = util.RandomString(size)
 	}
 	c.Body = &randomKeysResp{
 		Keys: result,

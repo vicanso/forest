@@ -5,6 +5,7 @@ import {
   COMMONS_CAPTCHA,
   COMMONS_ROUTERS,
   COMMONS_STATUSES,
+  COMMONS_RANDOM_KEYS,
 } from "../../constants/url";
 
 const prefix = "common";
@@ -17,6 +18,10 @@ const prefixRouter = `${prefix}.router`;
 const mutationRouterListProcessing = `${prefixRouter}.processing`;
 const mutationRouterList = `${prefixRouter}.list`;
 
+const prefixRandomKey = `${prefix}.randomKey`;
+const mutationRandomKeyProcessing = `${prefixRandomKey}.processing`;
+const mutationRandomKeyDone = `${prefixRandomKey}.done`;
+
 interface RouterInfo {
   processing: boolean;
 }
@@ -28,10 +33,15 @@ interface CommonRouterList {
   processing: boolean;
   items: any[];
 }
+interface CommonRandomKeyList {
+  processing: boolean;
+  items: any[];
+}
 interface CommonState {
   routerInfo: RouterInfo;
   statuses: CommonStatusList;
   routers: CommonRouterList;
+  randomKeys: CommonRandomKeyList;
 }
 interface CaptchaData {
   data: string;
@@ -51,10 +61,15 @@ const routers: CommonRouterList = {
   processing: false,
   items: [],
 };
+const randomKeys: CommonRandomKeyList = {
+  processing: false,
+  items: [],
+};
 const state: CommonState = {
   routerInfo,
   statuses,
   routers,
+  randomKeys,
 };
 
 export const commonStore = createStore<CommonState>({
@@ -75,6 +90,14 @@ export const commonStore = createStore<CommonState>({
     // 设置路由列表
     [mutationRouterList](state: CommonState, data: { routers: any[] }) {
       state.routers.items = data.routers || [];
+    },
+    // 设置正在获取随机字符串
+    [mutationRandomKeyProcessing](state: CommonState, processing: boolean) {
+      state.randomKeys.processing = processing;
+    },
+    // 设置获取的随机字符串
+    [mutationRandomKeyDone](state: CommonState, data: { keys: any[] }) {
+      state.randomKeys.items = data.keys || [];
     },
   },
   actions: {
@@ -107,6 +130,21 @@ export const commonStore = createStore<CommonState>({
         context.commit(mutationRouterList, data);
       } finally {
         context.commit(mutationRouterListProcessing, false);
+      }
+    },
+    // listRandomKey 获取随机字符串
+    async listRandomKey(context: { commit: Commit }) {
+      context.commit(mutationRandomKeyProcessing, true);
+      try {
+        const { data } = await request.get(COMMONS_RANDOM_KEYS, {
+          params: {
+            size: 10,
+            n: 5,
+          },
+        });
+        context.commit(mutationRandomKeyDone, data);
+      } finally {
+        context.commit(mutationRandomKeyProcessing, false);
       }
     },
   },

@@ -60,6 +60,7 @@ import {
   getRouterConcurrencyRouteName,
   getSessionInterceptorRouteName,
   getValidConfigurationRouteName,
+  getOthersRouteName,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
 import { useUserStore } from "../store";
@@ -137,6 +138,20 @@ const navs = [
       {
         name: "Session拦截配置",
         route: getSessionInterceptorRouteName(),
+        roles: [],
+        groups: [],
+      },
+    ],
+  },
+  {
+    name: "其它",
+    icon: "el-icon-setting",
+    roles: [USER_SU],
+    groups: [],
+    children: [
+      {
+        name: "其它",
+        route: getOthersRouteName(),
         roles: [],
         groups: [],
       },

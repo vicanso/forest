@@ -13,6 +13,7 @@ import RouterMock from "../views/configs/Router.vue";
 import RouterConcurrency from "../views/configs/RouterConcurrency.vue";
 import SessionInterceptor from "../views/configs/SessionInterceptor.vue";
 import ValidConfiguration from "../views/configs/ValidConfiguration.vue";
+import Others from "../views/Others.vue";
 
 const home = "home";
 const login = "login";
@@ -27,6 +28,7 @@ const routerMock = "routerMock";
 const routerConcurrency = "routerConcurrency";
 const sessionInterceptor = "sessionInterceptor";
 const validConfiguration = "validConfiguration";
+const others = "others";
 
 interface Location {
   name: string;
@@ -110,6 +112,11 @@ const router = createRouter({
       name: validConfiguration,
       component: ValidConfiguration,
     },
+    {
+      path: "/others",
+      name: others,
+      component: Others,
+    },
   ],
 });
 
@@ -151,6 +158,9 @@ export function getSessionInterceptorRouteName(): string {
 }
 export function getValidConfigurationRouteName(): string {
   return validConfiguration;
+}
+export function getOthersRouteName(): string {
+  return others;
 }
 
 export function getCurrentLocation(): Location {

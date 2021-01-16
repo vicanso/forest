@@ -23,6 +23,8 @@ export const COMMONS_CAPTCHA = "/commons/captcha";
 export const COMMONS_STATUSES = "/commons/schema-statuses";
 // 路由列表
 export const COMMONS_ROUTERS = "/commons/routers";
+// 随机字符串
+export const COMMONS_RANDOM_KEYS = "/commons/random-keys";
 
 // 系统配置相关url
 // 配置列表
