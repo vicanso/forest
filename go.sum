@@ -176,8 +176,8 @@ github.com/hashicorp/mdns v1.0.0/go.mod h1:tL+uN++7HEJ6SQLQ2/p+z2pH24WQKWjBPkE0m
 github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2pPBoIllUwCN7I=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/iancoleman/strcase v0.1.2 h1:gnomlvw9tnV3ITTAxzKSgTF+8kFWcU/f+TgttpXGz1U=
-github.com/iancoleman/strcase v0.1.2/go.mod h1:SK73tn/9oHe+/Y0h39VT4UCxmurVJkR5NA7kMEAOgSE=
+github.com/iancoleman/strcase v0.1.3 h1:dJBk1m2/qjL1twPLf68JND55vvivMupZ4wIzE8CTdBw=
+github.com/iancoleman/strcase v0.1.3/go.mod h1:SK73tn/9oHe+/Y0h39VT4UCxmurVJkR5NA7kMEAOgSE=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influxdata/influxdb-client-go/v2 v2.2.1 h1:VSSQG8jGj05fz0HoNBKeCGdo2dtK7ShdmgGR+DQp4/8=
@@ -436,8 +436,9 @@ github.com/valyala/fasttemplate v1.1.0/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPU
 github.com/vicanso/count-warner v1.1.0 h1:InaYNIJIwxewkH88ZZH/MaYu2b7ri8UbzkxI/MdnKaE=
 github.com/vicanso/count-warner v1.1.0/go.mod h1:PMiTVSl1ngUQhXQiKbaoij0Tb64qGQMspWhMld4cFM4=
 github.com/vicanso/elton v1.2.1/go.mod h1:+xzbcB+AITdzOtmr/ye+3B3MDgRdr04tKKO2PN/SySU=
-github.com/vicanso/elton v1.2.3 h1:OOit5YpLoQy67yt+d519AxaPii1eRW96YdEXkUDKDcM=
 github.com/vicanso/elton v1.2.3/go.mod h1:z2NfIpj9rOh638susxWxgzxPmcp3/E6bAHEnY0S08+E=
+github.com/vicanso/elton v1.2.4 h1:dF1sJ0aLdJaVg7Snpkv9VRNxNXFtJ/VYNmZRu7caPMU=
+github.com/vicanso/elton v1.2.4/go.mod h1:ie+VMg84WDQXp0XSYq43p9zaYUo7akoKnjt5NrPHsZI=
 github.com/vicanso/elton-compress v1.1.0 h1:6f/W0p2zmsv47KPnkNUaMNJv377kuPyiJH28AJDyx48=
 github.com/vicanso/elton-compress v1.1.0/go.mod h1:xia/AtjYrsEVzGtjX6KvGy51QiShqrenqNq2qOrDUkk=
 github.com/vicanso/elton-session v1.1.0 h1:b1Ed0pbauJrqWRfsvAEACPw3r+Vci8rTw2kJU4WfXls=
@@ -452,8 +453,9 @@ github.com/vicanso/go-performance v0.0.3 h1:3h1L2Zq444gLwbM0ZRgRLzkfu+0FWWVW7gg8
 github.com/vicanso/go-performance v0.0.3/go.mod h1:9bIDhtTOkwEAkjWNqFgtV+Kbj6jGJeW3Bl80Jp1nbBw=
 github.com/vicanso/hes v0.2.3/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
 github.com/vicanso/hes v0.2.4/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
-github.com/vicanso/hes v0.3.0 h1:atgM8+nBBdti7Ru0R84I7yh4fY4Yy9Ykq0K5EhMk77c=
 github.com/vicanso/hes v0.3.0/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
+github.com/vicanso/hes v0.3.1 h1:fJP4+S6JO72w1lSOxwkjqkLekgFPSIifardbYtCWHnY=
+github.com/vicanso/hes v0.3.1/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
 github.com/vicanso/http-trace v1.0.3 h1:i66WhjPCvhQDPIahGw7w3+vz7FB/n/zkyCpmal3YHfE=
 github.com/vicanso/http-trace v1.0.3/go.mod h1:YveoMGxvLDDnQG56zNFNkUOOk8aOY8BkNoFVRhC47K0=
 github.com/vicanso/intranet-ip v0.0.1 h1:cYS+mExFsKqewWSuHtFwAqw/CO66GsheB/P1BPmSTx0=

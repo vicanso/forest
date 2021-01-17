@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"sync"
 	"syscall"
@@ -56,6 +57,14 @@ var closeDepends func()
 func init() {
 	// 启动出错中的caller记录
 	hes.EnableCaller(true)
+
+	// 替换出错信息中的file中的目录
+	basicConfig := config.GetBasicConfig()
+	reg := regexp.MustCompile(fmt.Sprintf(`\S*/%s/`, basicConfig.Name))
+	hes.SetFileConvertor(func(file string) string {
+		return reg.ReplaceAllString(file, "")
+	})
+
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
 		log.Default().Info(value)
