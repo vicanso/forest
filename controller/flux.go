@@ -39,6 +39,7 @@ type (
 		End         time.Time `json:"end,omitempty" validate:"required"`
 		Account     string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
 		Limit       string    `json:"limit,omitempty" validate:"required,xLargerLimit"`
+		Exception   string    `json:"exception,omitempty" validate:"omitempty,xBoolean"`
 	}
 )
 
@@ -80,8 +81,17 @@ func (params *fluxListParams) Query() string {
 		params.Measurement,
 		params.Limit,
 	)
+	// 账号
 	if params.Account != "" {
 		query += fmt.Sprintf(`|> filter(fn: (r) => r.account == "%s")`, params.Account)
+	}
+	// 异常
+	if params.Exception != "" {
+		value := "true"
+		if params.Exception == "0" {
+			value = "false"
+		}
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.exception == %s)`, value)
 	}
 	return query
 }

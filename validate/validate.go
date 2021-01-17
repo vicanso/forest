@@ -17,6 +17,7 @@ package validate
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/vicanso/hes"
@@ -38,6 +39,28 @@ func toString(fl validator.FieldLevel) (string, bool) {
 		return "", false
 	}
 	return value.String(), true
+}
+
+// newNumberRange 校验number是否>=min <=max
+func newNumberRange(min, max int) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		value := fl.Field()
+		// 如果是int
+		if value.Kind() == reflect.Int {
+			number := int(value.Int())
+			return number >= min && number <= max
+		}
+		// 如果是string
+		if value.Kind() == reflect.String {
+			number, err := strconv.Atoi(value.String())
+			// 如果无法转换为int，则不符合
+			if err != nil {
+				return false
+			}
+			return number >= min && number <= max
+		}
+		return false
+	}
 }
 
 // // isInt 判断是否int

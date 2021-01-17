@@ -48,6 +48,14 @@ el-card.httpErrors
         label="状态码"
         width="80"
       )
+      el-table-column(
+        prop="exception"
+        key="exception"
+        label="异常"
+        width="80"
+      ): template(
+        #default="scope"
+      ): span {{scope.row.exception? "是" : "否"}}
       //- session id
       el-table-column(
         label="Session ID"
@@ -116,7 +124,7 @@ const filterFields = [
     key: "account",
     placeholder: "请输入要查询的账号",
     clearable: true,
-    span: 6,
+    span: 8,
   },
   {
     label: "数量：",
@@ -125,7 +133,28 @@ const filterFields = [
     placeholder: "请输入最大数量",
     clearable: true,
     defaultValue: 100,
-    span: 6,
+    span: 8,
+  },
+  {
+    label: "异常：",
+    key: "exception",
+    type: "select",
+    placeholder: "请选择是否异常出错",
+    options: [
+      {
+        name: "全部",
+        value: "",
+      },
+      {
+        name: "是",
+        value: "1",
+      },
+      {
+        name: "否",
+        value: "0",
+      },
+    ],
+    span: 8,
   },
   {
     label: "时间：",
@@ -133,13 +162,13 @@ const filterFields = [
     type: "dateTimeRange",
     placeholder: ["开始日期", "结束日期"],
     defaultValue: defaultDateRange,
-    span: 9,
+    span: 16,
   },
   {
     label: "",
     type: "filter",
     labelWidth: "0px",
-    span: 3,
+    span: 8,
   },
 ];
 
@@ -180,6 +209,7 @@ export default defineComponent({
         offset: 0,
         limit: 100,
         account: "",
+        exception: false,
       },
     };
   },

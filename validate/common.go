@@ -15,11 +15,12 @@
 package validate
 
 func init() {
-	// 字符串，max表示字符串长度
-	AddAlias("xLimit", "number,min=1,max=2")
+	// 客户端使用的limit，最多只允许一次拉取100条
+	Add("xLimit", newNumberRange(1, 100))
 	// 更大的数量限制，一般管理后台接口使用
-	AddAlias("xLargerLimit", "number,min=1,max=3")
-	AddAlias("xOffset", "number,min=0,max=5")
+	Add("xLargerLimit", newNumberRange(1, 200))
+	// offset设置最多为1万已满足场景需要，如果有更多的处理再调整
+	Add("xOffset", newNumberRange(0, 10000))
 	AddAlias("xOrder", "ascii,min=0,max=100")
 	AddAlias("xFields", "ascii,min=0,max=100")
 	AddAlias("xKeyword", "min=1,max=10")
@@ -27,4 +28,6 @@ func init() {
 	AddAlias("xStatus", "numeric,min=1,max=2")
 	// path校验
 	AddAlias("xPath", "startswith=/")
+	// boolean的字符串形式，0: false, 1:true
+	AddAlias("xBoolean", "oneof=0 1")
 }
