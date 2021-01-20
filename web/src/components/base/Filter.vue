@@ -45,6 +45,7 @@ el-form.baseFilter(
         range-separator="至"
         start-placeholder="开始日期"
         end-placeholder="结束日期"
+        :shortcuts="field.shortcuts"
       )
       //- 日期筛选
       el-date-picker.dateRange.fullFill(
@@ -54,6 +55,7 @@ el-form.baseFilter(
         range-separator="至"
         start-placeholder="开始日期"
         end-placeholder="结束日期"
+        :shortcuts="field.shortcuts"
       )
       el-input(
         v-else-if="field.type === 'number'"
@@ -96,7 +98,7 @@ export default defineComponent({
   data() {
     const current = {};
     const { fields } = this.$props;
-    fields.forEach((item) => {
+    fields.forEach((item: any) => {
       const { type, key, defaultValue } = item;
       if (type === "filter") {
         return;

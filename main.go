@@ -98,12 +98,11 @@ func gracefulClose(e *elton.Elton) {
 
 // watchForClose 监听信号关闭程序
 func watchForClose(e *elton.Elton) {
-	logger := log.Default()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for s := range c {
-			logger.Info("server will be closed",
+			log.Default().Info("server will be closed",
 				zap.String("signal", s.String()),
 			)
 			closedByUser = true
@@ -160,11 +159,11 @@ func newOnErrorHandler(e *elton.Elton) {
 
 		// 记录exception
 		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
-			"category": "routeError",
-			"route":    c.Route,
+			cs.TagCategory: "routeError",
+			cs.TagRoute:    c.Route,
 		}, map[string]interface{}{
-			"ip":  ip,
-			"uri": uri,
+			cs.FieldIP:  ip,
+			cs.FieldURI: uri,
 		})
 
 		// 可以针对实际场景输出更多的日志信息

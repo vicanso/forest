@@ -52,6 +52,7 @@ type (
 	}
 	// configurationUpdateParams 更新配置参数
 	configurationUpdateParams struct {
+		Name      string              `json:"name,omitempty" validate:"omitempty,xConfigurationName"`
 		Status    schema.Status       `json:"status,omitempty" validate:"omitempty,xStatus"`
 		Category  confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
 		Data      string              `json:"data,omitempty" validate:"omitempty,xConfigurationData"`
@@ -182,6 +183,9 @@ func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int
 	}
 	if !params.EndedAt.IsZero() {
 		updateOne = updateOne.SetEndedAt(params.EndedAt)
+	}
+	if params.Name != "" {
+		updateOne = updateOne.SetName(params.Name)
 	}
 
 	if params.Status != 0 {

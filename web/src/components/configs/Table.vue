@@ -2,6 +2,7 @@
 el-card.configurationList
   template(
     #header
+    v-if="!$props.hiddenHeader"
   )
     i.el-icon-s-tools
     span {{ $props.name || "系统配置" }}
@@ -32,7 +33,7 @@ el-card.configurationList
       prop="name"
       key="name"
       label="名称"
-      width="120"
+      width="150"
     )
     //- 分类
     el-table-column(
@@ -107,6 +108,7 @@ el-card.configurationList
     el-table-column(
       fixed="right"
       label="操作"
+      v-if="!$props.hiddenOp"
     ): template(
       #default="scope"
     )
@@ -143,19 +145,33 @@ export default defineComponent({
   },
   props: {
     name: String,
+    // 是否隐藏header
+    hiddenHeader: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否隐藏操作栏
+    hiddenOp: {
+      type: Boolean,
+      default: false,
+    },
     category: {
       type: String,
       required: true,
     },
   },
   data() {
-    return {
+    const data = {
       expanded: false,
       available: false,
       query: {
         category: this.$props.category,
       },
     };
+    if (data.query.category === "*") {
+      data.query.category = "";
+    }
+    return data;
   },
   computed: {
     configWidth() {
@@ -193,7 +209,7 @@ export default defineComponent({
       try {
         await this.list(query);
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
     // generateModifyHandler 生成修改的处理函数

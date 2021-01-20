@@ -3,7 +3,7 @@
   //- 切换侧边栏
   a.toggleNav(
     href="#"
-    @click.preventDefault="toggleNav"
+    @click.prevent="toggleNav"
   )
     i(
       :class=`$props.shrinking ? "el-icon-s-unfold" : "el-icon-s-fold"`
@@ -59,7 +59,7 @@ import {
   getRouterMockRouteName,
   getRouterConcurrencyRouteName,
   getSessionInterceptorRouteName,
-  getValidConfigurationRouteName,
+  getConfigurationRouteName,
   getOthersRouteName,
   getHTTPErrorsRouteName,
 } from "../router";
@@ -107,8 +107,8 @@ const navs = [
     groups: [],
     children: [
       {
-        name: "当前生效配置",
-        route: getValidConfigurationRouteName(),
+        name: "所有配置",
+        route: getConfigurationRouteName(),
         roles: [],
         groups: [],
       },
@@ -253,6 +253,9 @@ export default defineComponent({
       this.updateActive(to.name);
     },
   },
+  beforeMount() {
+    this.updateActive(this.$route.name);
+  },
   setup() {
     const userStore = useUserStore();
     return {
@@ -282,6 +285,7 @@ h1
   color: $white
   padding-left: 20px
   font-size: 18px
+  margin-right: $mainNavShrinkingWidth
   i
     font-weight: bold
     margin-right: 5px

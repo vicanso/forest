@@ -21,6 +21,7 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
@@ -38,7 +39,7 @@ func NewError() elton.Handler {
 		he, ok := err.(*hes.Error)
 		if !ok {
 			// 如果不是以http error的形式返回的error则为非主动抛出错误
-			logger.Error("unexpected error",
+			log.Default().Error("unexpected error",
 				zap.String("method", c.Request.Method),
 				zap.String("route", c.Route),
 				zap.String("uri", uri),
@@ -69,23 +70,23 @@ func NewError() elton.Handler {
 		he.Extra["route"] = c.Route
 		// 记录用户相关信息
 		fields := map[string]interface{}{
-			"statusCode": he.StatusCode,
-			"error":      he.Error(),
-			"uri":        uri,
-			"exception":  he.Exception,
-			"ip":         ip,
-			"sid":        sid,
-			"tid":        tid,
+			cs.FieldStatus:    he.StatusCode,
+			cs.FieldError:     he.Error(),
+			cs.FieldURI:       uri,
+			cs.FieldException: he.Exception,
+			cs.FieldIP:        ip,
+			cs.FieldSID:       sid,
+			cs.FieldTID:       tid,
 		}
 		if account != "" {
-			fields["account"] = account
+			fields[cs.FieldAccount] = account
 		}
 		tags := map[string]string{
-			"method": c.Request.Method,
-			"route":  c.Route,
+			cs.TagMethod: c.Request.Method,
+			cs.TagRoute:  c.Route,
 		}
 		if he.Category != "" {
-			tags["category"] = he.Category
+			tags[cs.TagCategory] = he.Category
 		}
 
 		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, tags, fields)

@@ -54,7 +54,7 @@ type (
 
 func mustNewRedisClient() (*redis.Client, *redisHook) {
 	redisConfig := config.GetRedisConfig()
-	logger.Info("connect to redis",
+	log.Default().Info("connect to redis",
 		zap.String("addr", redisConfig.Addr),
 		zap.Int("db", redisConfig.DB),
 	)
@@ -69,9 +69,9 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		DB:       redisConfig.DB,
 		Limiter:  hook,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
-			logger.Info("redis new connection is established")
+			log.Default().Info("redis new connection is established")
 			GetInfluxSrv().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
-				"count": 1,
+				cs.FieldCount: 1,
 			})
 			return nil
 		},
@@ -85,17 +85,17 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 	t := ctx.Value(startedAtKey).(*time.Time)
 	d := time.Since(*t)
 	if d > rh.slow || err != "" {
-		logger.Info("redis process slow or error",
+		log.Default().Info("redis process slow or error",
 			zap.String("cmd", cmd),
 			zap.String("use", d.String()),
 			zap.String("error", err),
 		)
 		tags := map[string]string{
-			"cmd": cmd,
+			cs.TagOP: cmd,
 		}
 		fields := map[string]interface{}{
-			"use":   int(d.Milliseconds()),
-			"error": err,
+			cs.FieldUse:   int(d.Milliseconds()),
+			cs.FieldError: err,
 		}
 		GetInfluxSrv().Write(cs.MeasurementRedisStats, tags, fields)
 	}
@@ -170,11 +170,11 @@ func (rh *redisHook) Allow() error {
 // ReportResult 记录结果
 func (*redisHook) ReportResult(result error) {
 	if result != nil && !RedisIsNilError(result) {
-		logger.Error("redis process fail",
+		log.Default().Error("redis process fail",
 			zap.Error(result),
 		)
 		GetInfluxSrv().Write(cs.MeasurementRedisError, nil, map[string]interface{}{
-			"error": result.Error(),
+			cs.FieldError: result.Error(),
 		})
 	}
 }
@@ -194,15 +194,15 @@ func RedisStats() map[string]interface{} {
 	stats := RedisGetClient().PoolStats()
 	processing, pipeProcessing, total := defaultRedisHook.getProcessingAndTotal()
 	return map[string]interface{}{
-		"hits":           stats.Hits,
-		"missed":         stats.Misses,
-		"timeouts":       stats.Timeouts,
-		"totalConns":     stats.TotalConns,
-		"idleConns":      stats.IdleConns,
-		"staleConns":     stats.StaleConns,
-		"processing":     processing,
-		"pipeProcessing": pipeProcessing,
-		"total":          total,
+		cs.FieldHits:          int(stats.Hits),
+		cs.FieldMisses:        int(stats.Misses),
+		cs.FieldTimeouts:      int(stats.Timeouts),
+		cs.FieldTotalConns:    int(stats.TotalConns),
+		cs.FieldIdleConns:     int(stats.IdleConns),
+		cs.FieldStaleConns:    int(stats.StaleConns),
+		cs.FieldProcessing:    int(processing),
+		cs.FilePipeProcessing: int(pipeProcessing),
+		cs.FieldTotal:         total,
 	}
 }
 

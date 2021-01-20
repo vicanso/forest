@@ -81,6 +81,7 @@ export default defineComponent({
   components: {
     RouterSelector,
   },
+  emits: ["change"],
   props: {
     data: String,
   },

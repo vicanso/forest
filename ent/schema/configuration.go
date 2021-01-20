@@ -54,7 +54,6 @@ func (Configuration) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty().
 			Unique().
-			Immutable().
 			Comment("配置名称"),
 		field.Enum("category").
 			Values(

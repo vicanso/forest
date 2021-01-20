@@ -9,6 +9,7 @@ el-card.httpErrors
     v-loading="httpErrors.processing"
   )
     base-filter(
+      v-if="inited"
       :fields="filterFields"
       @filter="filter"
     )
@@ -107,7 +108,7 @@ el-card.httpErrors
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { today, formatBegin, formatEnd } from "../helpers/util";
+import { today, getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
@@ -118,13 +119,14 @@ import { useFluxStore } from "../store";
 
 // 最近一小时
 const defaultDateRange = [new Date(Date.now() - 60 * 60 * 1000), new Date()];
+const categories = [];
 const filterFields = [
   {
     label: "账号：",
     key: "account",
     placeholder: "请输入要查询的账号",
     clearable: true,
-    span: 8,
+    span: 6,
   },
   {
     label: "数量：",
@@ -133,7 +135,15 @@ const filterFields = [
     placeholder: "请输入最大数量",
     clearable: true,
     defaultValue: 100,
-    span: 8,
+    span: 6,
+  },
+  {
+    label: "类型：",
+    key: "category",
+    type: "select",
+    placeholder: "请选择出错类型",
+    options: categories,
+    span: 6,
   },
   {
     label: "异常：",
@@ -154,13 +164,14 @@ const filterFields = [
         value: "0",
       },
     ],
-    span: 8,
+    span: 6,
   },
   {
     label: "时间：",
     key: "dateRange",
     type: "dateTimeRange",
     placeholder: ["开始日期", "结束日期"],
+    shortcuts: getDateTimeShortcuts(["1h", "2h", "3h", "12h", "1d"]),
     defaultValue: defaultDateRange,
     span: 16,
   },
@@ -201,6 +212,7 @@ export default defineComponent({
   mixins: [FilterTable],
   data() {
     return {
+      inited: false,
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
@@ -222,9 +234,6 @@ export default defineComponent({
     },
   },
   methods: {
-    // filterResult(value, row) {
-    //   return row.result == value;
-    // },
     filterTrack(value, row) {
       return row.tid == value;
     },
@@ -238,12 +247,12 @@ export default defineComponent({
       }
       const params = Object.assign({}, query);
       const value = params.dateRange;
-      if (!value) {
+      if (!value || value.length !== 2) {
         this.$erro("时间区间不能为空");
         return;
       }
-      params.begin = formatBegin(value[0]);
-      params.end = formatEnd(value[1]);
+      params.begin = formatDateWithTZ(value[0]);
+      params.end = formatDateWithTZ(value[1]);
       delete params.dateRange;
       try {
         await this.listHTTPError(params);
@@ -252,11 +261,33 @@ export default defineComponent({
       }
     },
   },
+  async beforeMount() {
+    try {
+      await this.listHTTPErrorCategories();
+      categories.length = 0;
+      categories.push({
+        name: "全部",
+        value: "",
+      });
+      this.httpErrorCategories.items.forEach((element) => {
+        categories.push({
+          name: element,
+          value: element,
+        });
+      });
+      this.inited = true;
+    } catch (err) {
+      this.$error(err);
+    }
+  },
   setup() {
     const fluxStore = useFluxStore();
     return {
       httpErrors: fluxStore.state.httpErrors,
+      httpErrorCategories: fluxStore.state.httpErrorCategories,
       listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
+      listHTTPErrorCategories: () =>
+        fluxStore.dispatch("listHTTPErrorCategories"),
     };
   },
 });

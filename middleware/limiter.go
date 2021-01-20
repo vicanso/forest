@@ -22,6 +22,7 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cache"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -51,7 +52,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			done = func() {
 				err := redisDone()
 				if err != nil {
-					logger.Error("redis done fail",
+					log.Default().Error("redis done fail",
 						zap.String("key", k),
 						zap.Error(err),
 					)

@@ -9,6 +9,7 @@ el-card.trackers
     v-loading="trackers.processing"
   )
     base-filter(
+      v-if="inited"
       :fields="filterFields"
       @filter="filter"
     )
@@ -34,8 +35,6 @@ el-card.trackers
       el-table-column(
         label="状态"
         width="80"
-        :filters="resultFilters"
-        :filter-method="filterResult"
       ): template(
         #default="scope"  
       )
@@ -101,6 +100,16 @@ el-card.trackers
         icon="el-icon-info"
         :content="scope.row.ip"
       )
+      //- error
+      el-table-column(
+        label="Error"
+        width="80"
+      ): template(
+        #default="scope"
+      ): base-tooltip(
+        icon="el-icon-info"
+        :content="scope.row.error"
+      )
       //- 时间
       el-table-column(
         label="时间"
@@ -117,7 +126,12 @@ el-card.trackers
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { today, formatBegin, formatEnd } from "../helpers/util";
+import {
+  today,
+  getDateDayShortcuts,
+  formatBegin,
+  formatEnd,
+} from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
@@ -127,12 +141,42 @@ import FilterTable from "../mixins/FilterTable";
 import { useFluxStore } from "../store";
 
 const defaultDateRange = [today(), today()];
+const actionOptions = [];
 const filterFields = [
   {
     label: "账号：",
     key: "account",
     placeholder: "请输入要查询的账号",
     clearable: true,
+    span: 6,
+  },
+  {
+    label: "类型：",
+    key: "action",
+    type: "select",
+    placeholder: "请选择要筛选的分类",
+    options: actionOptions,
+    span: 6,
+  },
+  {
+    label: "结果：",
+    key: "result",
+    type: "select",
+    placeholder: "请选择要筛选的结果",
+    options: [
+      {
+        name: "全部",
+        value: "",
+      },
+      {
+        name: "成功",
+        value: "0",
+      },
+      {
+        name: "失败",
+        value: "1",
+      },
+    ],
     span: 6,
   },
   {
@@ -149,14 +193,15 @@ const filterFields = [
     key: "dateRange",
     type: "dateRange",
     placeholder: ["开始日期", "结束日期"],
+    shortcuts: getDateDayShortcuts(["1d", "2d", "3d", "7d"]),
     defaultValue: defaultDateRange,
-    span: 9,
+    span: 18,
   },
   {
     label: "",
     type: "filter",
     labelWidth: "0px",
-    span: 3,
+    span: 6,
   },
 ];
 
@@ -189,16 +234,7 @@ export default defineComponent({
   mixins: [FilterTable],
   data() {
     return {
-      resultFilters: [
-        {
-          text: "成功",
-          value: "0",
-        },
-        {
-          text: "失败",
-          value: "1",
-        },
-      ],
+      inited: false,
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
@@ -219,9 +255,6 @@ export default defineComponent({
     },
   },
   methods: {
-    filterResult(value, row) {
-      return row.result == value;
-    },
     filterTrack(value, row) {
       return row.tid == value;
     },
@@ -234,10 +267,6 @@ export default defineComponent({
         return;
       }
       const params = Object.assign({}, query);
-      if (!params.account) {
-        this.$error("账号不能为空");
-        return;
-      }
       const value = params.dateRange;
       if (!value) {
         this.$erro("时间区间不能为空");
@@ -253,11 +282,33 @@ export default defineComponent({
       }
     },
   },
+  async beforeMount() {
+    try {
+      await this.listActions();
+
+      actionOptions.length = 0;
+      actionOptions.push({
+        name: "全部",
+        value: "",
+      });
+      this.actions.items.forEach((element) => {
+        actionOptions.push({
+          name: element,
+          value: element,
+        });
+      });
+      this.inited = true;
+    } catch (err) {
+      this.$error(err);
+    }
+  },
   setup() {
     const fluxStore = useFluxStore();
     return {
       trackers: fluxStore.state.trackers,
+      actions: fluxStore.state.actions,
       listTracker: (params) => fluxStore.dispatch("listTracker", params),
+      listActions: () => fluxStore.dispatch("listActions"),
     };
   },
 });

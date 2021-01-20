@@ -171,7 +171,7 @@ export default defineComponent({
       try {
         await this.list(query);
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
   },
@@ -198,7 +198,7 @@ export default defineComponent({
 
       this.filterFields = filterFields;
     } catch (err) {
-      this.$error(err.message);
+      this.$error(err);
     } finally {
       this.inited = true;
     }

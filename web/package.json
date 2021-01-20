@@ -11,6 +11,7 @@
     "dayjs": "^1.10.3",
     "element-plus": "^1.0.1-beta.26",
     "localforage": "^1.9.0",
+    "pako": "^2.0.3",
     "vue": "^3.0.5",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0-rc.2"

@@ -3,20 +3,20 @@ import { diff } from "../helpers/util";
 
 export default {
   computed: {
-    currentPage() {
+    currentPage(): number {
       const { offset, limit } = this.query;
       return Math.floor(offset / limit) + 1;
     },
-    editMode() {
+    editMode(): boolean {
       return this.$route.query.mode === CONFIG_EDIT_MODE;
     },
   },
   methods: {
-    handleCurrentChange(page) {
+    handleCurrentChange(page: number) {
       this.query.offset = (page - 1) * this.query.limit;
       this.fetch();
     },
-    handleSizeChange(pageSize) {
+    handleSizeChange(pageSize: number) {
       this.query.limit = pageSize;
       this.query.offset = 0;
       this.fetch();
@@ -37,7 +37,7 @@ export default {
         },
       });
     },
-    modify(item) {
+    modify(item: any) {
       this.$router.push({
         query: {
           mode: CONFIG_EDIT_MODE,
@@ -45,14 +45,14 @@ export default {
         },
       });
     },
-    filter(params) {
+    filter(params: any) {
       Object.assign(this.query, params);
       this.query.offset = 0;
       this.fetch();
     },
   },
   watch: {
-    "$route.query"(query, prevQuery) {
+    "$route.query"(query: any, prevQuery: any) {
       // 如果路由已更换，则直接返回
       if (this.$route.name !== this._currentRoute) {
         return;

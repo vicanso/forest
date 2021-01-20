@@ -14,6 +14,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "SignedKeyData",
+  emits: ["change"],
   props: {
     data: String,
   },

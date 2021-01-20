@@ -25,6 +25,7 @@ import (
 	influxdbAPI "github.com/influxdata/influxdb-client-go/v2/api"
 	influxdbDomain "github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/log"
 	"go.uber.org/zap"
 )
 
@@ -55,7 +56,7 @@ func mustNewInfluxSrv() *InfluxSrv {
 		opts.SetFlushInterval(uint(v))
 	}
 	opts.SetUseGZip(influxdbConfig.Gzip)
-	logger.Info("new influxdb client",
+	log.Default().Info("new influxdb client",
 		zap.String("uri", influxdbConfig.URI),
 		zap.String("org", influxdbConfig.Org),
 		zap.String("bucket", influxdbConfig.Bucket),
@@ -77,7 +78,7 @@ func mustNewInfluxSrv() *InfluxSrv {
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
 func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
 	for err := range writer.Errors() {
-		logger.Error("influxdb write fail",
+		log.Default().Error("influxdb write fail",
 			zap.Error(err),
 		)
 	}
@@ -106,20 +107,13 @@ func (srv *InfluxSrv) Health() (err error) {
 	return
 }
 
-func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
-	if srv.client == nil {
-		return
-	}
-	query = fmt.Sprintf(`from(bucket: "%s")`, srv.config.Bucket) + query
+func (srv *InfluxSrv) query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
 	result, err := srv.client.QueryAPI(srv.config.Org).Query(ctx, query)
 	if err != nil {
 		return
 	}
 	items = make([]map[string]interface{}, 0)
 	for result.Next() {
-		if result.TableChanged() {
-			continue
-		}
 		items = append(items, result.Record().Values())
 	}
 	err = result.Err()
@@ -127,6 +121,42 @@ func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[stri
 		return
 	}
 
+	return
+}
+
+// Query query records
+func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+	if srv.client == nil {
+		return
+	}
+	query = fmt.Sprintf(`from(bucket: "%s")`, srv.config.Bucket) + query
+	return srv.query(ctx, query)
+}
+
+// ListTagValue list value of tag
+func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string) (values []string, err error) {
+	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
+
+	schema.measurementTagValues(
+	  bucket: "%s",
+	  measurement: "%s",
+	  tag: "%s"
+	)`, srv.config.Bucket, measurement, tag)
+	items, err := srv.query(ctx, query)
+	if err != nil {
+		return
+	}
+	for _, item := range items {
+		v, ok := item["_value"]
+		if !ok {
+			continue
+		}
+		value, ok := v.(string)
+		if !ok {
+			continue
+		}
+		values = append(values, value)
+	}
 	return
 }
 

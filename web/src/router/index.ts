@@ -13,7 +13,7 @@ import SignedKey from "../views/configs/SignedKey.vue";
 import RouterMock from "../views/configs/Router.vue";
 import RouterConcurrency from "../views/configs/RouterConcurrency.vue";
 import SessionInterceptor from "../views/configs/SessionInterceptor.vue";
-import ValidConfiguration from "../views/configs/ValidConfiguration.vue";
+import Configuration from "../views/configs/Configuration.vue";
 import Others from "../views/Others.vue";
 
 const home = "home";
@@ -29,7 +29,7 @@ const signedKey = "signedKey";
 const routerMock = "routerMock";
 const routerConcurrency = "routerConcurrency";
 const sessionInterceptor = "sessionInterceptor";
-const validConfiguration = "validConfiguration";
+const configuration = "configuration";
 const others = "others";
 
 interface Location {
@@ -115,9 +115,9 @@ const router = createRouter({
       component: SessionInterceptor,
     },
     {
-      path: "/valid-configuration",
-      name: validConfiguration,
-      component: ValidConfiguration,
+      path: "/configuration",
+      name: configuration,
+      component: Configuration,
     },
     {
       path: "/others",
@@ -166,8 +166,8 @@ export function getRouterConcurrencyRouteName(): string {
 export function getSessionInterceptorRouteName(): string {
   return sessionInterceptor;
 }
-export function getValidConfigurationRouteName(): string {
-  return validConfiguration;
+export function getConfigurationRouteName(): string {
+  return configuration;
 }
 export function getOthersRouteName(): string {
   return others;

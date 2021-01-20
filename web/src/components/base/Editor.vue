@@ -131,7 +131,7 @@ export default defineComponent({
     const { id, fields } = this.$props;
     const submitText = id ? "更新" : "添加";
     const current = {};
-    fields.forEach((item) => {
+    fields.forEach((item: any) => {
       current[item.key] = null;
     });
 
@@ -161,7 +161,7 @@ export default defineComponent({
         this.$message.info("已成功添加");
         this.goBack();
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       } finally {
         this.processing = false;
       }
@@ -188,7 +188,7 @@ export default defineComponent({
         this.$message.info("已成功更新");
         this.goBack();
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       } finally {
         this.processing = false;
       }
@@ -224,7 +224,7 @@ export default defineComponent({
       this.originData = data;
       Object.assign(this.current, data);
     } catch (err) {
-      this.$error(err.message);
+      this.$error(err);
     } finally {
       this.inited = true;
     }

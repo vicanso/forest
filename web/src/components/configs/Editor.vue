@@ -187,7 +187,7 @@ export default defineComponent({
         }
         this.goBack();
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
     goBack() {
@@ -217,7 +217,7 @@ export default defineComponent({
         this.originalValue = config;
         Object.assign(this.form, config);
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       } finally {
         this.fetching = false;
       }

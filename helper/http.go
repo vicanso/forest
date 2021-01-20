@@ -25,6 +25,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
@@ -53,51 +54,51 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		}
 
 		tags := map[string]string{
-			"service": serviceName,
-			"route":   conf.Route,
-			"method":  conf.Method,
+			cs.TagService: serviceName,
+			cs.TagRoute:   conf.Route,
+			cs.TagMethod:  conf.Method,
 		}
 		fields := map[string]interface{}{
-			"url":    conf.URL,
-			"status": status,
-			"addr":   addr,
+			cs.FieldURI:    conf.URL,
+			cs.FieldStatus: status,
+			cs.FieldIP:     addr,
 		}
 		if ht != nil {
 			reused = ht.Reused
 			addr = ht.Addr
 			timelineStats := ht.Stats()
 			use = timelineStats.String()
-			fields["reused"] = reused
-			fields["use"] = timelineStats.Total.Milliseconds()
+			fields[cs.FieldReused] = reused
+			fields[cs.FieldUse] = int(timelineStats.Total.Milliseconds())
 			dns := timelineStats.DNSLookup.Milliseconds()
 			if dns != 0 {
-				fields["dns"] = dns
+				fields[cs.FieldDNSUse] = int(dns)
 			}
 			tcp := timelineStats.TCPConnection.Milliseconds()
 			if tcp != 0 {
-				fields["tcp"] = tcp
+				fields[cs.FieldTCPUse] = int(tcp)
 			}
 			tls := timelineStats.TLSHandshake.Milliseconds()
 			if tls != 0 {
-				fields["tls"] = tls
+				fields[cs.FieldTLSUse] = int(tls)
 			}
 			serverProcessing := timelineStats.ServerProcessing.Milliseconds()
 			if serverProcessing != 0 {
-				fields["serverProcessing"] = serverProcessing
+				fields[cs.FieldProcessingUse] = int(serverProcessing)
 			}
 			contentTransfer := timelineStats.ContentTransfer.Milliseconds()
 			if contentTransfer != 0 {
-				fields["contentTransfer"] = contentTransfer
+				fields[cs.FieldTransferUse] = int(contentTransfer)
 			}
 		}
 		message := ""
 		if err != nil {
 			he := hes.Wrap(err)
 			message = he.Error()
-			fields["error"] = message
+			fields[cs.FieldError] = message
 			errCategory := he.Category
 			if errCategory != "" {
-				fields["errCategory"] = errCategory
+				fields[cs.FieldCategory] = errCategory
 			}
 		}
 		// 输出响应数据，如果响应数据为隐私数据可不输出
@@ -105,7 +106,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		if resp != nil {
 			data = resp.UnmarshalData
 		}
-		logger.Info("http request stats",
+		log.Default().Info("http request stats",
 			zap.String("service", serviceName),
 			zap.String("method", conf.Method),
 			zap.String("route", conf.Route),
@@ -113,6 +114,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			zap.Any("params", conf.Params),
 			zap.Any("query", conf.Query),
 			zap.Any("data", data),
+			zap.Int("size", len(resp.Data)),
 			zap.Int("status", status),
 			zap.String("addr", addr),
 			zap.Bool("reused", reused),

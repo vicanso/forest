@@ -27,6 +27,7 @@ import (
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"go.uber.org/zap"
 )
@@ -167,7 +168,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		interData := &SessionInterceptorData{}
 		err := json.Unmarshal([]byte(sessionInterceptorValue), interData)
 		if err != nil {
-			logger.Error("session interceptor config is invalid",
+			log.Default().Error("session interceptor config is invalid",
 				zap.Error(err),
 			)
 			AlarmError("session interceptor config is invalid:" + err.Error())

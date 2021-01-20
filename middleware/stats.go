@@ -26,7 +26,6 @@ import (
 )
 
 func NewStats() elton.Handler {
-	logger := log.Default()
 	return M.NewStats(M.StatsConfig{
 		OnStats: func(info *M.StatsInfo, c *elton.Context) {
 			// ping 的日志忽略
@@ -37,7 +36,7 @@ func NewStats() elton.Handler {
 			// 此处记录的session id，需要从客户登录记录中获取对应的session id
 			// us := service.NewUserSession(c)
 			sid := util.GetSessionID(c)
-			logger.Info("access log",
+			log.Default().Info("access log",
 				// 由客户端设置的uuid
 				zap.String("uuid", c.GetRequestHeader("X-UUID")),
 				zap.String("ip", info.IP),
@@ -52,17 +51,17 @@ func NewStats() elton.Handler {
 				zap.Int("bytes", info.Size),
 			)
 			tags := map[string]string{
-				"method": info.Method,
-				"route":  info.Route,
+				cs.TagMethod: info.Method,
+				cs.TagRoute:  info.Route,
 			}
 			fields := map[string]interface{}{
-				"ip":         info.IP,
-				"sid":        sid,
-				"uri":        info.URI,
-				"statusCode": info.Status,
-				"use":        info.Consuming.Milliseconds(),
-				"size":       info.Size,
-				"connecting": info.Connecting,
+				cs.FieldIP:         info.IP,
+				cs.FieldSID:        sid,
+				cs.FieldURI:        info.URI,
+				cs.FieldStatus:     info.Status,
+				cs.FieldUse:        int(info.Consuming.Milliseconds()),
+				cs.FieldSize:       info.Size,
+				cs.FieldProcessing: info.Connecting,
 			}
 			helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 		},

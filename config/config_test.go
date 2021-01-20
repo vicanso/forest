@@ -80,7 +80,7 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert.Equal("http://127.0.0.1:8086", influxdbConfig.URI)
 	assert.Equal("forest", influxdbConfig.Bucket)
 	assert.Equal("bigTree", influxdbConfig.Org)
-	assert.Equal("19jSvAU60NZJJFtWKIQno6Hkx18ja2nlEHl42yVCYCqSjdfOLCrwQ2e-E0m74YztN8-Nt1grbtG96396UN9NkA==", influxdbConfig.Token)
+	assert.Equal("YcAmMWPl0XR_OKJYNIozsiBI0qBGIe4-Y_rWKUcNbQ8sYobWFrsMCgY_t0FRlpAMkVNgghhcQ1TgDixt92Qe6w==", influxdbConfig.Token)
 	assert.Equal(uint(100), influxdbConfig.BatchSize)
 	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
 	assert.False(influxdbConfig.Disabled)

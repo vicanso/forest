@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/log"
 	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
 )
@@ -54,7 +55,7 @@ func newMailDialer() *gomail.Dialer {
 
 // AlarmError 发送出错警告
 func AlarmError(message string) {
-	logger.Error(message,
+	log.Default().Error(message,
 		zap.String("app", basicInfo.Name),
 		zap.String("category", "alarm-error"),
 	)
@@ -73,7 +74,7 @@ func AlarmError(message string) {
 			defer sendingMailMutex.Unlock()
 			err := d.DialAndSend(m)
 			if err != nil {
-				logger.Error("send mail fail",
+				log.Default().Error("send mail fail",
 					zap.Error(err),
 				)
 			}

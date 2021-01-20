@@ -10,7 +10,9 @@ el-card.logins
       :fields="filterFields"
       @filter="filter"
     )
-    el-table(
+    div(
+      v-loading="logins.processing"
+    ): el-table(
       :data="logins.items"
       row-key="id"
       stripe
@@ -102,7 +104,12 @@ el-card.logins
 import { defineComponent } from "vue";
 
 import { useUserStore } from "../store";
-import { today, formatBegin, formatEnd } from "../helpers/util";
+import {
+  today,
+  getDateDayShortcuts,
+  formatBegin,
+  formatEnd,
+} from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
@@ -123,6 +130,7 @@ const filterFields = [
     key: "dateRange",
     type: "dateRange",
     placeholder: ["开始日期", "结束日期"],
+    shortcuts: getDateDayShortcuts(["1d", "2d", "3d", "7d"]),
     defaultValue: defaultDateRange,
     span: 12,
   },
@@ -171,7 +179,7 @@ export default defineComponent({
       try {
         await this.listLogin(params);
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
   },

@@ -24,6 +24,7 @@ import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
@@ -123,7 +124,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		logger.Info("404",
+		log.Default().Info("404",
 			zap.String("ip", ip),
 			zap.String("method", req.Method),
 			zap.String("uri", req.RequestURI),
@@ -133,7 +134,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 		resp.WriteHeader(status)
 		_, err := resp.Write(notFoundErrBytes)
 		if err != nil {
-			logger.Info("404 response fail",
+			log.Default().Info("404 response fail",
 				zap.String("ip", ip),
 				zap.String("uri", req.RequestURI),
 				zap.Error(err),
@@ -142,12 +143,12 @@ func NewNotFoundHandler() http.HandlerFunc {
 		warner404.Inc(ip, 1)
 
 		tags := map[string]string{
-			"method": req.Method,
+			cs.TagMethod: req.Method,
 		}
 		fields := map[string]interface{}{
-			"ip":         ip,
-			"uri":        req.RequestURI,
-			"statusCode": status,
+			cs.FieldIP:     ip,
+			cs.FieldURI:    req.RequestURI,
+			cs.FieldStatus: status,
 		}
 		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
@@ -162,7 +163,7 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		logger.Info("method not allowed",
+		log.Default().Info("method not allowed",
 			zap.String("ip", ip),
 			zap.String("method", req.Method),
 			zap.String("uri", req.RequestURI),
@@ -172,19 +173,19 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 		resp.WriteHeader(status)
 		_, err := resp.Write(methodNotAllowedErrBytes)
 		if err != nil {
-			logger.Info("method not allowed response fail",
+			log.Default().Info("method not allowed response fail",
 				zap.String("ip", ip),
 				zap.String("uri", req.RequestURI),
 				zap.Error(err),
 			)
 		}
 		tags := map[string]string{
-			"method": req.Method,
+			cs.TagMethod: req.Method,
 		}
 		fields := map[string]interface{}{
-			"ip":         ip,
-			"uri":        req.RequestURI,
-			"statusCode": status,
+			cs.FieldIP:     ip,
+			cs.FieldURI:    req.RequestURI,
+			cs.FieldStatus: status,
 		}
 		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}

@@ -6,6 +6,7 @@
   main-header.header
   //- 主导航
   main-nav.nav(
+    v-if="inited"
     :shrinking="shrinking"
     @toggle="toggleNav"
   )
@@ -27,6 +28,7 @@ import MainNav from "./components/MainNav.vue";
 
 import { useUserStore } from "./store";
 import { getLoginRouteName } from "./router";
+import { loadSetting, getSetting, saveSetting } from "./services/setting";
 
 export default defineComponent({
   name: "App",
@@ -44,6 +46,9 @@ export default defineComponent({
   methods: {
     toggleNav() {
       this.shrinking = !this.shrinking;
+      const setting = getSetting();
+      setting.mainNavShrinking = this.shrinking;
+      saveSetting(setting);
     },
     async fetch() {
       const { userInfo, $router } = this;
@@ -56,11 +61,20 @@ export default defineComponent({
           });
         }
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       } finally {
         this.inited = true;
       }
     },
+  },
+  async beforeMount() {
+    try {
+      await loadSetting();
+      const setting = getSetting();
+      this.shrinking = setting.mainNavShrinking;
+    } catch (err) {
+      this.$error(err);
+    }
   },
   mounted() {
     this.fetch();

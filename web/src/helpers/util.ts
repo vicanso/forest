@@ -3,7 +3,8 @@ import dayjs from "dayjs";
 import { sha256 } from "./crypto";
 
 const hash = "JT";
-const oneDayMS = 24 * 3600 * 1000;
+const oneHourMS = 3600 * 1000;
+const oneDayMS = 24 * oneHourMS;
 
 export function generatePassword(pass: string): string {
   return sha256(hash + sha256(pass + hash));
@@ -47,15 +48,108 @@ export function tomorrow(): Date {
   return new Date(today().getTime() + oneDayMS);
 }
 
+// getDaysAgo 获取多少天前
+export function getDaysAgo(days: number): Date {
+  return new Date(today().getTime() - days * oneDayMS);
+}
+
+// getHoursAge 获取多少小时前
+export function getHoursAge(hours: number): Date {
+  return new Date(Date.now() - hours * oneHourMS);
+}
+
 // today 获取当天0点时间
 export function yesterday(): Date {
-  return new Date(today().getTime() - oneDayMS);
+  return getDaysAgo(1);
+}
+
+// formatDateWithTZ 格式化日期（带时区）
+export function formatDateWithTZ(date: Date) {
+  return dayjs(date).format("YYYY-MM-DDTHH:mm:ssZ");
 }
 export function formatBegin(begin: Date): string {
-  return begin.toISOString();
+  return formatDateWithTZ(begin);
 }
 export function formatEnd(end: Date): string {
-  return new Date(end.getTime() + 24 * 3600 * 1000 - 1).toISOString();
+  return formatDateWithTZ(new Date(end.getTime() + 24 * 3600 * 1000 - 1));
+}
+
+// getDateDayShortcuts 获取时间快捷选择，此返回的时间只到天，在处理的时候应该处理为开始时间的00:00，结束时间的23:59
+export function getDateDayShortcuts(ranges: string[]): any[] {
+  const shortcuts: any[] = [];
+  ranges.forEach((element) => {
+    switch (element) {
+      case "1d":
+        shortcuts.push({
+          text: "今天",
+          value: [today(), today()],
+        });
+        break;
+      case "2d":
+        shortcuts.push({
+          text: "最近2天",
+          value: [getDaysAgo(1), today()],
+        });
+        break;
+      case "3d":
+        shortcuts.push({
+          text: "最近3天",
+          value: [getDaysAgo(2), today()],
+        });
+        break;
+      case "7d":
+        shortcuts.push({
+          text: "最近7天",
+          value: [getDaysAgo(6), today()],
+        });
+        break;
+      default:
+        break;
+    }
+  });
+  return shortcuts;
+}
+
+// getDateTimeShortcuts 获取时间快捷选择
+export function getDateTimeShortcuts(ranges: string[]): any[] {
+  const shortcuts: any[] = [];
+  ranges.forEach((element) => {
+    switch (element) {
+      case "1h":
+        shortcuts.push({
+          text: "最近1小时",
+          value: [getHoursAge(1), new Date()],
+        });
+        break;
+      case "2h":
+        shortcuts.push({
+          text: "最近2小时",
+          value: [getHoursAge(2), new Date()],
+        });
+        break;
+      case "3h":
+        shortcuts.push({
+          text: "最近3小时",
+          value: [getHoursAge(3), new Date()],
+        });
+        break;
+      case "12h":
+        shortcuts.push({
+          text: "最近12小时",
+          value: [getHoursAge(12), new Date()],
+        });
+        break;
+      case "1d":
+        shortcuts.push({
+          text: "今天",
+          value: [today(), new Date()],
+        });
+        break;
+      default:
+        break;
+    }
+  });
+  return shortcuts;
 }
 
 function isEqual(value: any, originalValue: any) {
@@ -82,7 +176,7 @@ export function diff(current: any, original: any) {
 
 // validateForm validate form
 export function validateForm(form: any) {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     form.validate((valid: any, rules: any) => {
       if (valid) {
         return resolve();
@@ -90,7 +184,7 @@ export function validateForm(form: any) {
       const messagesArr: string[] = [];
       Object.keys(rules).forEach((key) => {
         const arr = rules[key];
-        arr.forEach((item) => {
+        arr.forEach((item: any) => {
           messagesArr.push(item.message);
         });
       });
@@ -114,7 +208,7 @@ export function omitNil(data: any) {
 // getFieldRules get field rules
 export function getFieldRules(fields: any) {
   const rules: any = {};
-  fields.forEach((field) => {
+  fields.forEach((field: any) => {
     if (field.rules) {
       rules[field.key] = field.rules;
     }

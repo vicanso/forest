@@ -63,7 +63,7 @@ export default defineComponent({
           name: getHomeRouteName(),
         });
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
   },

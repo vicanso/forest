@@ -13,9 +13,3 @@
 // limitations under the License.
 
 package middleware
-
-import "github.com/vicanso/forest/log"
-
-var (
-	logger = log.Default()
-)

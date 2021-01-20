@@ -14,6 +14,7 @@ el-col(
 import { defineComponent } from "vue";
 export default defineComponent({
   name: "MockTimeData",
+  emits: ["change"],
   props: {
     data: String,
   },

@@ -49,6 +49,12 @@ func (cu *ConfigurationUpdate) AddStatus(s schema.Status) *ConfigurationUpdate {
 	return cu
 }
 
+// SetName sets the "name" field.
+func (cu *ConfigurationUpdate) SetName(s string) *ConfigurationUpdate {
+	cu.mutation.SetName(s)
+	return cu
+}
+
 // SetCategory sets the "category" field.
 func (cu *ConfigurationUpdate) SetCategory(c configuration.Category) *ConfigurationUpdate {
 	cu.mutation.SetCategory(c)
@@ -157,6 +163,11 @@ func (cu *ConfigurationUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
+	if v, ok := cu.mutation.Name(); ok {
+		if err := configuration.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
 	if v, ok := cu.mutation.Category(); ok {
 		if err := configuration.CategoryValidator(v); err != nil {
 			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
@@ -212,6 +223,13 @@ func (cu *ConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeInt8,
 			Value:  value,
 			Column: configuration.FieldStatus,
+		})
+	}
+	if value, ok := cu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: configuration.FieldName,
 		})
 	}
 	if value, ok := cu.mutation.Category(); ok {
@@ -285,6 +303,12 @@ func (cuo *ConfigurationUpdateOne) SetNillableStatus(s *schema.Status) *Configur
 // AddStatus adds s to the "status" field.
 func (cuo *ConfigurationUpdateOne) AddStatus(s schema.Status) *ConfigurationUpdateOne {
 	cuo.mutation.AddStatus(s)
+	return cuo
+}
+
+// SetName sets the "name" field.
+func (cuo *ConfigurationUpdateOne) SetName(s string) *ConfigurationUpdateOne {
+	cuo.mutation.SetName(s)
 	return cuo
 }
 
@@ -396,6 +420,11 @@ func (cuo *ConfigurationUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
+	if v, ok := cuo.mutation.Name(); ok {
+		if err := configuration.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
 	if v, ok := cuo.mutation.Category(); ok {
 		if err := configuration.CategoryValidator(v); err != nil {
 			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
@@ -449,6 +478,13 @@ func (cuo *ConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *Configur
 			Type:   field.TypeInt8,
 			Value:  value,
 			Column: configuration.FieldStatus,
+		})
+	}
+	if value, ok := cuo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: configuration.FieldName,
 		})
 	}
 	if value, ok := cuo.mutation.Category(); ok {

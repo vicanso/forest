@@ -18,6 +18,7 @@ import { useCommonStore } from "../../store";
 
 export default defineComponent({
   name: "RouterSelector",
+  emits: ["change"],
   props: {
     router: String,
   },
@@ -34,7 +35,7 @@ export default defineComponent({
       try {
         await this.listRouter();
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
   },

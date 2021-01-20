@@ -1,4 +1,4 @@
-// Copyright 2020 tree xie
+// Copyright 2021 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
+package validate
 
-type ContextKey struct{}
-
-var (
-	// 记录命令开始时间
-	startedAtKey *ContextKey = &ContextKey{}
-)
+func init() {
+	// influxdb measurement
+	AddAlias("xMeasurement", "ascii,min=1,max=20")
+	// influxdb tag
+	AddAlias("xTag", "ascii,min=1,max=20")
+}

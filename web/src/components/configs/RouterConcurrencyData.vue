@@ -1,7 +1,10 @@
 <template lang="pug">
+el-col(
+  :span="8"
+)
 //- 路由选择
 el-col(
-  :span="12"
+  :span="8"
 ): el-form-item(
   label="路由选择："
 ): router-selector.selector(
@@ -10,13 +13,23 @@ el-col(
 ) 
 //- 最大并发
 el-col(
-  :span="12"
+  :span="8"
 ): el-form-item(
   label="最大并发："
 ): el-input(
   type="number"
   placeholder="请输入最大并发限制"
   v-model="max"
+)
+//- 频率限制
+el-col(
+  :span="8"
+): el-form-item(
+  label="频率限制"
+): el-input(
+  placeholder="请输入限制频率，如：100/s" 
+  v-model="rateLimit"
+  clearable
 )
 </template>
 <script lang="ts">
@@ -29,6 +42,7 @@ export default defineComponent({
   components: {
     RouterSelector,
   },
+  emits: ["change"],
   props: {
     data: String,
   },
@@ -37,6 +51,7 @@ export default defineComponent({
       router: "",
       method: "",
       route: "",
+      rateLimit: "",
       max: null,
     };
     if (this.$props.data) {
@@ -49,6 +64,9 @@ export default defineComponent({
     max() {
       this.handleChange();
     },
+    rateLimit() {
+      this.handleChange();
+    },
   },
   methods: {
     handleChangeRouter(value) {
@@ -56,13 +74,14 @@ export default defineComponent({
       this.handleChange();
     },
     handleChange() {
-      const { router, max } = this;
+      const { router, max, rateLimit } = this;
       let value = "";
       if (router) {
         const [method, route] = router.split(" ");
         value = JSON.stringify({
           method,
           route,
+          rateLimit,
           max: Number(max || "0"),
         });
       }

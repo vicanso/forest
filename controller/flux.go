@@ -40,6 +40,15 @@ type (
 		Account     string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
 		Limit       string    `json:"limit,omitempty" validate:"required,xLargerLimit"`
 		Exception   string    `json:"exception,omitempty" validate:"omitempty,xBoolean"`
+		// 用户行为类型筛选
+		Action   string `json:"action,omitempty" validate:"omitempty,xTag"`
+		Result   string `json:"result,omitempty" validate:"omitempty,xTag"`
+		Category string `json:"category,omitempty" validate:"omitempty,xTag"`
+	}
+	// fluxListTagValuesParams flux tag values查询参数
+	fluxListTagValuesParams struct {
+		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
+		Tag         string `json:"tag,omitempty" validate:"required,xTag"`
 	}
 )
 
@@ -60,8 +69,15 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listHTTPError,
 	)
+	// 获取tag的值
+	g.GET(
+		"/v1/tag-values/{measurement}/{tag}",
+		shouldBeAdmin,
+		ctrl.listTagValue,
+	)
 }
 
+// Query get flux query string
 func (params *fluxListParams) Query() string {
 	start := util.FormatTime(params.Begin)
 	stop := util.FormatTime(params.End)
@@ -81,6 +97,17 @@ func (params *fluxListParams) Query() string {
 		params.Measurement,
 		params.Limit,
 	)
+	// 用户行为类型
+	if params.Action != "" {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.action == "%s")`, params.Action)
+	}
+	// 结果
+	if params.Result != "" {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.result == "%s")`, params.Result)
+	}
+	if params.Category != "" {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.category == "%s")`, params.Category)
+	}
 	// 账号
 	if params.Account != "" {
 		query += fmt.Sprintf(`|> filter(fn: (r) => r.account == "%s")`, params.Account)
@@ -107,6 +134,23 @@ func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interf
 		delete(item, "_start")
 		delete(item, "_stop")
 		delete(item, "table")
+	}
+	return
+}
+
+// listValue get the values of tag
+func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
+	params := fluxListTagValuesParams{}
+	err = validate.Do(&params, c.Params.ToMap())
+	if err != nil {
+		return
+	}
+	values, err := getInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
+	if err != nil {
+		return
+	}
+	c.Body = map[string][]string{
+		"values": values,
 	}
 	return
 }

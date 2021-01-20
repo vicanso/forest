@@ -34,6 +34,7 @@ import (
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/hook"
 	"github.com/vicanso/forest/ent/migrate"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
@@ -80,7 +81,7 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 			maskURI = strings.ReplaceAll(maskURI, pass, "***")
 		}
 	}
-	logger.Info("connect postgres",
+	log.Default().Info("connect postgres",
 		zap.String("uri", maskURI),
 	)
 	db, err := sql.Open("pgx", postgresConfig.URI)
@@ -213,12 +214,12 @@ func initSchemaHooks(c *ent.Client) {
 			op := m.Op().String()
 
 			startedAt := time.Now()
-			result := 0
+			result := cs.ResultSuccess
 			message := ""
 			mutateResult, err := next.Mutate(ctx, m)
 			// 如果失败，则记录出错信息
 			if err != nil {
-				result = 1
+				result = cs.ResultFail
 				message = err.Error()
 			}
 			data := make(map[string]interface{})
@@ -249,7 +250,7 @@ func initSchemaHooks(c *ent.Client) {
 			}
 
 			d := time.Since(startedAt)
-			logger.Info("ent stats",
+			log.Default().Info("ent stats",
 				zap.String("schema", schemaType),
 				zap.String("op", op),
 				zap.Int("result", result),
@@ -260,16 +261,18 @@ func initSchemaHooks(c *ent.Client) {
 				zap.String("message", message),
 			)
 			fields := map[string]interface{}{
-				"processing":      processing,
-				"totalProcessing": totalProcessing,
-				"use":             int(d.Milliseconds()),
-				"data":            data,
-				"message":         message,
+				cs.FieldProcessing:      int(processing),
+				cs.FieldTotalProcessing: int(totalProcessing),
+				cs.FieldUse:             int(d.Milliseconds()),
+				cs.FieldData:            data,
+			}
+			if message != "" {
+				fields[cs.FieldError] = message
 			}
 			tags := map[string]string{
-				"schema": schemaType,
-				"op":     op,
-				"result": strconv.Itoa(result),
+				cs.TagSchema: schemaType,
+				cs.TagOP:     op,
+				cs.TagResult: strconv.Itoa(result),
 			}
 			GetInfluxSrv().Write(cs.MeasurementEntOP, tags, fields)
 			return mutateResult, err
@@ -281,15 +284,15 @@ func initSchemaHooks(c *ent.Client) {
 func EntGetStats() map[string]interface{} {
 	info := defaultEntDriver.DB().Stats()
 	stats := map[string]interface{}{
-		"maxOpenConnections": info.MaxOpenConnections,
-		"openConnections":    info.OpenConnections,
-		"inUse":              info.InUse,
-		"idle":               info.Idle,
-		"waitCount":          info.WaitCount,
-		"waitDuration":       info.WaitDuration.Milliseconds(),
-		"maxIdleClosed":      info.MaxIdleClosed,
-		"maxIdleTimeClosed":  info.MaxIdleTimeClosed,
-		"maxLifetimeClosed":  info.MaxLifetimeClosed,
+		cs.FieldMaxOpenConns:      info.MaxOpenConnections,
+		cs.FieldOpenConns:         info.OpenConnections,
+		cs.FieldInUseConns:        info.InUse,
+		cs.FieldIdleConns:         info.Idle,
+		cs.FieldWaitCount:         int(info.WaitCount),
+		cs.FieldWaitDuration:      int(info.WaitDuration.Milliseconds()),
+		cs.FieldMaxIdleClosed:     int(info.MaxIdleClosed),
+		cs.FieldMaxIdleTimeClosed: int(info.MaxIdleTimeClosed),
+		cs.FieldMaxLifetimeClosed: int(info.MaxLifetimeClosed),
 	}
 	for name, p := range currentEntProcessingStats.data {
 		stats[strcase.ToLowerCamel(name)] = p.Load()

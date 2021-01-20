@@ -36,7 +36,6 @@ import (
 type listParams = helper.EntListParams
 
 var (
-	logger       = log.Default()
 	getEntClient = helper.EntGetClient
 	now          = util.NowString
 
@@ -165,30 +164,31 @@ func newTrackerMiddleware(action string) elton.Handler {
 				zap.Int("result", info.Result),
 			)
 			fields := map[string]interface{}{
-				"account": account,
-				"ip":      ip,
-				"sid":     sid,
-				"tid":     tid,
+				cs.FieldAccount: account,
+				cs.FieldIP:      ip,
+				cs.FieldSID:     sid,
+				cs.FieldTID:     tid,
 			}
 			if len(info.Query) != 0 {
 				zapFields = append(zapFields, zap.Any("query", info.Query))
-				fields["query"] = marshalString(info.Query)
+				fields[cs.FieldQuery] = marshalString(info.Query)
 			}
 			if len(info.Params) != 0 {
 				zapFields = append(zapFields, zap.Any("params", info.Params))
-				fields["params"] = marshalString(info.Params)
+				fields[cs.FieldParams] = marshalString(info.Params)
 			}
 			if len(info.Form) != 0 {
 				zapFields = append(zapFields, zap.Any("form", info.Form))
-				fields["form"] = marshalString(info.Form)
+				fields[cs.FieldForm] = marshalString(info.Form)
 			}
 			if info.Err != nil {
 				zapFields = append(zapFields, zap.Error(info.Err))
+				fields[cs.FieldError] = info.Err.Error()
 			}
-			logger.Info("tracker", zapFields...)
+			log.Default().Info("tracker", zapFields...)
 			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
-				"action": action,
-				"result": strconv.Itoa(info.Result),
+				cs.TagAction: action,
+				cs.TagResult: strconv.Itoa(info.Result),
 			}, fields)
 		},
 	})

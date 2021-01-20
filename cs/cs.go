@@ -32,3 +32,10 @@ const (
 	// MagicalCaptcha magical captcha(for test only)
 	MagicalCaptcha = "0145"
 )
+
+const (
+	// ResultSuccess result success
+	ResultSuccess = iota
+	// ResultFail result fail
+	ResultFail
+)

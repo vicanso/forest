@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// 可通过zap.RegisterSink添加更多的sink实现不同方式的日志传输
+
 package log
 
 import (
@@ -25,7 +27,7 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-var defaultLogger = mustNewLogger()
+var defaultLogger = mustNewLogger("")
 
 type httpServerLogger struct{}
 
@@ -45,7 +47,7 @@ func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface
 }
 
 // mustNewLogger 初始化logger
-func mustNewLogger() *zap.Logger {
+func mustNewLogger(outputPath string) *zap.Logger {
 
 	if util.IsDevelopment() {
 		c := zap.NewDevelopmentConfig()
@@ -56,6 +58,14 @@ func mustNewLogger() *zap.Logger {
 		return l
 	}
 	c := zap.NewProductionConfig()
+	if outputPath != "" {
+		c.OutputPaths = []string{
+			outputPath,
+		}
+		c.ErrorOutputPaths = []string{
+			outputPath,
+		}
+	}
 
 	// 在一秒钟内, 如果某个级别的日志输出量超过了 Initial, 那么在超过之后, 每 Thereafter 条日志才会输出一条, 其余的日志都将被删除
 	c.Sampling.Initial = 1000
@@ -69,6 +79,11 @@ func mustNewLogger() *zap.Logger {
 		panic(err)
 	}
 	return l
+}
+
+// SetOutputPath 设置日志的输出目录，在程序初始化时使用
+func SetOutputPath(outputPath string) {
+	defaultLogger = mustNewLogger(outputPath)
 }
 
 // Default 获取默认的logger

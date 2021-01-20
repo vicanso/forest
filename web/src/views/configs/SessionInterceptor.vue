@@ -65,7 +65,7 @@ export default defineComponent({
         }
       }
     } catch (err) {
-      this.$error(err.message);
+      this.$error(err);
     } finally {
       this.processing = false;
     }

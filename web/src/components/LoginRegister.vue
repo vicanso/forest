@@ -110,7 +110,7 @@ export default defineComponent({
         const data = await this.getCaptcha();
         this.captchaData = data;
       } catch (err) {
-        this.$error(err.message);
+        this.$error(err);
       }
     },
     async onSubmit() {
@@ -139,7 +139,7 @@ export default defineComponent({
         }
       } catch (err) {
         this.refreshCaptcha();
-        this.$error(err.message);
+        this.$error(err);
       }
     },
   },

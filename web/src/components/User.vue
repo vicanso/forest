@@ -102,7 +102,7 @@ export default defineComponent({
 
       this.fields = fields;
     } catch (err) {
-      this.$error(err.message);
+      this.$error(err);
     } finally {
       this.processing = false;
     }

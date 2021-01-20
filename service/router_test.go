@@ -50,7 +50,8 @@ func TestRouterLimiter(t *testing.T) {
 		`{
 			"route": "/",
 			"method": "GET",
-			"max": 10
+			"max": 10,
+			"rateLimit": "100/s"
 		}`,
 	})
 	count, max = rc.IncConcurrency(key)

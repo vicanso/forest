@@ -16,11 +16,8 @@ package service
 
 import (
 	"github.com/vicanso/forest/cache"
-	"github.com/vicanso/forest/log"
 )
 
 var (
-	logger = log.Default()
-
 	redisSrv = cache.GetRedisCache()
 )

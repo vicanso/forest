@@ -34,6 +34,7 @@ import (
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/ent/userlogin"
+	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
@@ -521,19 +522,19 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 
 		ip := c.RealIP()
 		fields := map[string]interface{}{
-			"userAgent": c.GetRequestHeader("User-Agent"),
-			"trackID":   uid,
-			"ip":        ip,
+			cs.FieldUserAgent: c.GetRequestHeader("User-Agent"),
+			cs.FieldTID:       uid,
+			cs.FieldIP:        ip,
 		}
 
 		// 记录创建user track
 		go func() {
 			location, _ := service.GetLocationByIP(ip, nil)
 			if location.IP != "" {
-				fields["country"] = location.Country
-				fields["province"] = location.Province
-				fields["city"] = location.City
-				fields["isp"] = location.ISP
+				fields[cs.FieldCountry] = location.Country
+				fields[cs.FieldProvince] = location.Province
+				fields[cs.FieldCity] = location.City
+				fields[cs.FieldISP] = location.ISP
 			}
 			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
@@ -615,11 +616,11 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
 	go func() {
 		fields := map[string]interface{}{
-			"account":   account,
-			"userAgent": userAgent,
-			"ip":        ip,
-			"tid":       tid,
-			"sid":       sid,
+			cs.FieldAccount:   account,
+			cs.FieldUserAgent: userAgent,
+			cs.FieldIP:        ip,
+			cs.FieldTID:       tid,
+			cs.FieldSID:       sid,
 		}
 		location, _ := service.GetLocationByIP(ip, nil)
 		country := ""
@@ -631,10 +632,10 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			province = location.Province
 			city = location.City
 			isp = location.ISP
-			fields["country"] = country
-			fields["province"] = province
-			fields["city"] = city
-			fields["isp"] = isp
+			fields[cs.FieldCountry] = country
+			fields[cs.FieldProvince] = province
+			fields[cs.FieldCity] = city
+			fields[cs.FieldISP] = isp
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
@@ -652,7 +653,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			SetIsp(isp).
 			Save(ctx)
 		if err != nil {
-			logger.Error("save user login fail",
+			log.Default().Error("save user login fail",
 				zap.Error(err),
 			)
 		}
@@ -793,13 +794,13 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
 		fields := map[string]interface{}{
-			"account": account,
-			"route":   item.Route,
-			"path":    item.Path,
+			cs.FieldAccount: account,
+			cs.FieldRoute:   item.Route,
+			cs.FieldPath:    item.Path,
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
-			"category": item.Category,
+			cs.TagCategory: item.Category,
 		}, fields, t)
 	}
 	c.Body = map[string]int{
