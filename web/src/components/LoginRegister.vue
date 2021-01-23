@@ -63,11 +63,8 @@
       //- 确认按钮
       el-form-item: ex-button(
         :onClick="onSubmit"
-        category="confirm"
-      )
-        el-button.submit(
-          type="primary"
-        ) {{ submitText }}
+        :extra="exBtnExtra"
+      ) {{submitText}}
 
 </template>
 
@@ -76,6 +73,7 @@ import { defineComponent } from "vue";
 
 import { useUserStore, useCommonStore } from "../store";
 import { getLoginRouteName } from "../router";
+import { LOGIN, REGISTER } from "../services/action";
 
 const registerType = "register";
 
@@ -101,14 +99,19 @@ export default defineComponent({
     const { type } = this.$props;
     let title = "用户登录";
     let submitText = "立即登录";
+    let category = LOGIN;
     if (type === registerType) {
       title = "用户注册";
       submitText = "立即注册";
+      category = REGISTER;
     }
     return {
       title,
       submitText,
       captchaData: null,
+      exBtnExtra: {
+        category,
+      },
       form: {
         account: "",
         password: "",
@@ -129,11 +132,12 @@ export default defineComponent({
         this.$error(err);
       }
     },
-    async onSubmit() {
+    async onSubmit(): Promise<boolean> {
+      let isSuccess = false;
       const { account, password, captcha } = this.form;
       if (!account || !password || !captcha) {
         this.$message.warning("账号、密码以及验证码不能为空");
-        return;
+        return isSuccess;
       }
       const params = {
         account,
@@ -153,10 +157,12 @@ export default defineComponent({
           await this.login(params);
           this.$router.back();
         }
+        isSuccess = true;
       } catch (err) {
         this.refreshCaptcha();
         this.$error(err);
       }
+      return isSuccess;
     },
   },
 });

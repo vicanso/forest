@@ -11,9 +11,6 @@
 
     ex-button(
       :onClick="listRandomKey"
-      category="confirm"
-    ): el-button.btn(
-      type="primary"
     ) 生成随机字符串
 
 </template>

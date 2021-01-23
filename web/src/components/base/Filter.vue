@@ -29,13 +29,9 @@ el-form.baseFilter(
         )
       //- 点击筛选
       ex-button(
-        category="confirm"
         v-else-if="field.type === 'filter'"
         :onClick="filter"
-      ): el-button.btn(
-        :loading="processing"
         icon="el-icon-search"
-        type="primary"
       ) 筛选
       //- 日期时间筛选
       el-date-picker.dateRange.fullFill(

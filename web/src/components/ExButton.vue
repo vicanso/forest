@@ -1,16 +1,37 @@
 <template lang="pug">
-.exButton(
-  @click.preventDefault="handleClick"
-  :class="{ isProcessing: processing}"
+template(
+  v-if=`$props.category === "primary"`
 )
-  slot
+  el-button.btn(
+    type="primary"
+    :icon="$props.icon"
+    @click="handleClick"
+    :class="{ isProcessing: processing}"
+  )
+    slot
+    i.el-icon-loading.loading(
+      v-if="processing"
+    )
+template(
+  v-else-if=`$props.category === "smallText"`
+)
+  el-button(
+    type="text"
+    size="small"
+    @click="handleClick"
+    :class="{ isProcessing: processing}"
+  )
+    slot
+    span(
+      v-if="processing"
+    ) ...
 </template>
 <script lang="ts">
 // 此button的扩展可记录用户行为，防止重复点击等
 import { defineComponent } from "vue";
 
 import { getCurrentLocation } from "../router";
-import { addUserAction } from "../services/action";
+import { addUserAction, SUCCESS, FAIL, CLICK } from "../services/action";
 
 export default defineComponent({
   name: "ExButton",
@@ -21,7 +42,11 @@ export default defineComponent({
     },
     category: {
       type: String,
-      required: true,
+      default: "primary",
+    },
+    icon: {
+      type: String,
+      default: "",
     },
     extra: {
       type: Object,
@@ -38,21 +63,32 @@ export default defineComponent({
   },
   methods: {
     async handleClick() {
-      if (this.processing) {
+      const { processing, $props } = this;
+      if (processing) {
         return;
       }
-      const currentLocation = getCurrentLocation();
-      const data = {
-        category: this.$props.category,
-        route: currentLocation.name,
-        path: currentLocation.path,
-        time: Math.floor(Date.now() / 1000),
-        extra: this.$props.extra,
-      };
       this.processing = true;
+      const currentLocation = getCurrentLocation();
+      const data = Object.assign(
+        {
+          route: currentLocation.name,
+          path: currentLocation.path,
+          time: Math.floor(Date.now() / 1000),
+        },
+        $props.extra
+      );
+      // 如果未设置分类，则设置为click
+      if (!data.category) {
+        data.category = CLICK;
+      }
       // 由于在onClick会捕获异常处理，因此在此处无法判断是否成功
+      data.result = SUCCESS;
       try {
-        await this.$props.onClick();
+        const isSuccess = await $props.onClick();
+        // 如果onclick返回fail，则表示失败，其它均表示成功
+        if (isSuccess === false) {
+          data.result = FAIL;
+        }
       } finally {
         this.processing = false;
       }
@@ -62,6 +98,11 @@ export default defineComponent({
 });
 </script>
 <style lang="stylus" scoped>
-.exButton.isProcessing
+.isProcessing
   opacity: 0.5
+.btn
+  width: 100%
+.loading
+  margin-left: 10px
+  font-weight: 900
 </style>

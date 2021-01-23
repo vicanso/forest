@@ -84,10 +84,7 @@ el-card.baseEditor(
     el-col(
       :span="12"
     ): el-form-item: ex-button(
-      category="confirm"
       :onClick="submit"
-    ): el-button.btn(
-      type="primary"
     ) {{ submitText }}
     //- 返回
     el-col(
@@ -180,10 +177,11 @@ export default defineComponent({
       this.current.files = files;
     },
     // 添加
-    async handleAdd(data) {
+    async handleAdd(data): Promise<boolean> {
       const { add } = this.$props;
       const { rules } = this;
       this.processing = true;
+      let isSuccess = false;
       try {
         if (rules) {
           await validateForm(this.$refs.baseEditorForm);
@@ -191,20 +189,23 @@ export default defineComponent({
         await add(data);
         this.$message.info("已成功添加");
         this.goBack();
+        isSuccess = true;
       } catch (err) {
         this.$error(err);
       } finally {
         this.processing = false;
       }
+      return isSuccess;
     },
     // 更新
-    async handleUpdate(data) {
+    async handleUpdate(data): Promise<boolean> {
+      let isSuccess = false;
       const { id, updateByID } = this.$props;
       const { originData, rules } = this;
       const updateInfo = diff(omitNil(data), originData);
       if (updateInfo.modifiedCount === 0) {
         this.$message.warning("请先修改要更新的信息");
-        return;
+        return isSuccess;
       }
 
       this.processing = true;
@@ -218,14 +219,16 @@ export default defineComponent({
         });
         this.$message.info("已成功更新");
         this.goBack();
+        isSuccess = true;
       } catch (err) {
         this.$error(err);
       } finally {
         this.processing = false;
       }
+      return isSuccess;
     },
     // 提交
-    submit() {
+    async submit(): Promise<boolean> {
       const { current } = this;
       const { id, fields } = this.$props;
       const data = Object.assign({}, current);
@@ -235,10 +238,9 @@ export default defineComponent({
         }
       });
       if (!id) {
-        this.handleAdd(data);
-        return;
+        return await this.handleAdd(data);
       }
-      this.handleUpdate(data);
+      return await this.handleUpdate(data);
     },
     goBack() {
       this.$router.back();

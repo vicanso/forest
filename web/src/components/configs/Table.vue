@@ -116,11 +116,8 @@ el-card.configurationList
         v-if="scope.row.owner === userInfo.account"
       )
         ex-button(
-          category="confirm"
+          category="smallText"
           :onClick="generateModifyHandler(scope.row)"
-        ): el-button.op(
-          type="text"
-          size="small"
         ) 编辑
       span(
         v-else

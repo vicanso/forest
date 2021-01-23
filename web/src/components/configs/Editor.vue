@@ -81,10 +81,7 @@
       el-col(
         :span="primarySpan"
       ): el-form-item: ex-button(
-        category="confirm"
         :onClick="submit"
-      ): el-button.submit(
-        type="primary"
       ) {{ submitText }}
       //- 返回
       el-col(
@@ -177,11 +174,12 @@ export default defineComponent({
     this.fetchCurrent();
   },
   methods: {
-    async submit() {
+    async submit(): Promise<boolean> {
+      let isSuccess = false;
       const { name, category, status, startedAt, endedAt, data } = this.form;
       if (!name || !status || !startedAt || !endedAt || !data) {
         this.$message.warning("名称、状态、开始结束日期以及配置数据均不能为空");
-        return;
+        return isSuccess;
       }
       const { id } = this;
       try {
@@ -204,13 +202,14 @@ export default defineComponent({
           const info = diff(config, this.originalValue);
           if (!info.modifiedCount) {
             this.$message.warning("未修改配置无法更新");
-            return;
+            return isSuccess;
           }
           await this.updateByID({
             id,
             data: info.data,
           });
           this.$message.info("修改配置成功");
+          isSuccess = true;
         } else {
           await this.add(config);
           this.$message.info("添加配置成功");
@@ -219,6 +218,7 @@ export default defineComponent({
       } catch (err) {
         this.$error(err);
       }
+      return isSuccess;
     },
     goBack() {
       if (this.$props.back) {
