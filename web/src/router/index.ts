@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
+import { addUserAction, ROUTE_CHANGE, SUCCESS } from "../services/action";
+
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
@@ -186,6 +188,13 @@ router.beforeEach((to, from) => {
     currentLocation.name = to.name.toString();
     currentLocation.path = to.fullPath;
   }
+  addUserAction({
+    category: ROUTE_CHANGE,
+    route: currentLocation.name,
+    path: currentLocation.path,
+    result: SUCCESS,
+    time: Math.floor(Date.now() / 1000),
+  });
 });
 
 export default router;

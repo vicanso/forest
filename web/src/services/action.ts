@@ -68,6 +68,8 @@ export const CLICK = "click";
 export const LOGIN = "login";
 // 注册
 export const REGISTER = "register";
+// 路由跳转
+export const ROUTE_CHANGE = "routeChange";
 
 export function addUserAction(data: UserActionData): void {
   // 每次添加新的action时，清空定时器

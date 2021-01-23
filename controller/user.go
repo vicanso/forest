@@ -116,6 +116,8 @@ type (
 			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
 			// Path 触发时的完整路径
 			Path string `json:"path,omitempty" validate:"required,xPath"`
+			// Result 操作结果，0:成功 1:失败
+			Result int `json:"result,omitempty"`
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
 			// Extra 其它额外信息
@@ -801,6 +803,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		fields = util.MergeMapStringInterface(fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
 			cs.TagCategory: item.Category,
+			cs.TagResult:   strconv.Itoa(item.Result),
 		}, fields, t)
 	}
 	c.Body = map[string]int{
