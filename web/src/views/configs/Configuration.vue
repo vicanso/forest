@@ -31,10 +31,20 @@ export default defineComponent({
   components: {
     ConfigTable,
   },
+  setup() {
+    const configStore = useConfigStore();
+    return {
+      currentValid: configStore.state.currentValid,
+      getCurrentValid: () => configStore.dispatch("getCurrentValid"),
+    };
+  },
   data() {
     return {
       active: "all",
     };
+  },
+  beforeMount() {
+    this.fetch();
   },
   methods: {
     async fetch() {
@@ -44,16 +54,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  beforeMount() {
-    this.fetch();
-  },
-  setup() {
-    const configStore = useConfigStore();
-    return {
-      currentValid: configStore.state.currentValid,
-      getCurrentValid: () => configStore.dispatch("getCurrentValid"),
-    };
   },
 });
 </script>

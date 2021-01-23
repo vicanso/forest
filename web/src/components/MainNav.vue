@@ -131,7 +131,7 @@ const navs = [
         groups: [],
       },
       {
-        name: "路由配置",
+        name: "路由Mock配置",
         route: getRouterMockRouteName(),
         roles: [],
         groups: [],
@@ -169,8 +169,22 @@ const navs = [
 export default defineComponent({
   name: "MainNav",
   props: {
-    shrinking: Boolean,
-    onToggle: Function,
+    shrinking: {
+      type: Boolean,
+      default: false,
+    },
+    onToggle: {
+      type: Function,
+      default: null,
+    },
+  },
+  emits: ["toggle"],
+
+  setup() {
+    const userStore = useUserStore();
+    return {
+      user: userStore.state.info,
+    };
   },
   data() {
     return {
@@ -217,32 +231,6 @@ export default defineComponent({
       return filterNavs;
     },
   },
-  methods: {
-    toggleNav() {
-      this.$emit("toggle");
-    },
-    goTo({ route }) {
-      if (!route || this.$route.name === route) {
-        return;
-      }
-      this.$router.push({
-        name: route,
-      });
-    },
-    // 查询定位当前选中菜单
-    updateActive(name: string) {
-      const { navs } = this;
-      let active = "";
-      navs.forEach((nav, i) => {
-        nav.children.forEach((item, j) => {
-          if (item.route === name) {
-            active = `${i}-${j}`;
-          }
-        });
-      });
-      this.active = active;
-    },
-  },
   watch: {
     // 如果nav变化时，根据当前route定位
     navs() {
@@ -256,11 +244,31 @@ export default defineComponent({
   beforeMount() {
     this.updateActive(this.$route.name);
   },
-  setup() {
-    const userStore = useUserStore();
-    return {
-      user: userStore.state.info,
-    };
+  methods: {
+    toggleNav() {
+      this.$emit("toggle");
+    },
+    goTo({ route }) {
+      if (!route || this.$route.name === route) {
+        return;
+      }
+      this.$router.push({
+        name: route,
+      });
+    },
+    // 查询定位当前选中菜单
+    updateActive(name) {
+      const { navs } = this;
+      let active = "";
+      navs.forEach((nav, i) => {
+        nav.children.forEach((item, j) => {
+          if (item.route === name) {
+            active = `${i}-${j}`;
+          }
+        });
+      });
+      this.active = active;
+    },
   },
 });
 </script>

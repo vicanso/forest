@@ -14,6 +14,13 @@
 
 package validate
 
+import (
+	"net/url"
+	"regexp"
+
+	"github.com/go-playground/validator/v10"
+)
+
 func init() {
 	// 客户端使用的limit，最多只允许一次拉取100条
 	Add("xLimit", newNumberRange(1, 100))
@@ -30,4 +37,26 @@ func init() {
 	AddAlias("xPath", "startswith=/")
 	// boolean的字符串形式，0: false, 1:true
 	AddAlias("xBoolean", "oneof=0 1")
+	// http(s)校验
+	Add("xHTTP", func(fl validator.FieldLevel) bool {
+		v, ok := toString(fl)
+		if !ok {
+			return false
+		}
+		urlInfo, err := url.ParseRequestURI(v)
+		if err != nil {
+			return false
+		}
+		if urlInfo.Scheme != "http" &&
+			urlInfo.Scheme != "https" {
+			return false
+		}
+		return urlInfo.Host != "" && urlInfo.Path != ""
+	})
+	// duration配置
+	durationReg := regexp.MustCompile(`^\d+(ms|s|m)$`)
+	Add("xDuration", func(fl validator.FieldLevel) bool {
+		v, _ := toString(fl)
+		return durationReg.MatchString(v)
+	})
 }

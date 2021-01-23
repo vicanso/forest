@@ -1,4 +1,4 @@
-.PHONY: default test test-cover dev generate hooks
+.PHONY: default test test-cover dev generate hooks lint-web
 
 # for dev
 dev:
@@ -34,6 +34,9 @@ clean:
 
 lint:
 	golangci-lint run --timeout 2m --skip-dirs web
+
+lint-web:
+	cd web && yarn lint 
 
 hooks:
 	cp hooks/* .git/hooks/

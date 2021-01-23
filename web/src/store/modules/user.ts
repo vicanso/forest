@@ -11,7 +11,7 @@ import {
   USERS,
   USERS_ID,
 } from "../../constants/url";
-import { generatePassword, formatDate } from "../../helpers/util";
+import { generatePassword } from "../../helpers/util";
 
 const prefix = "user";
 const mutationProcessing = `${prefix}.processing`;
@@ -139,8 +139,9 @@ export const userStore = createStore<UserState>({
       state: UserState,
       data: { count: number; userLogins: any[] }
     ) {
-      if (data.count >= 0) {
-        state.logins.count = data.count;
+      const count = data.count || 0;
+      if (count >= 0) {
+        state.logins.count = count;
       }
       data.userLogins?.forEach((element) => {
         // element.createdAtDesc = formatDate(element.createdAt);
@@ -171,8 +172,9 @@ export const userStore = createStore<UserState>({
       state: UserState,
       data: { users: any[]; count: number }
     ) {
-      if (data.count >= 0) {
-        state.users.count = data.count;
+      const count = data.count || 0;
+      if (count >= 0) {
+        state.users.count = count;
       }
       state.users.items = data.users || [];
     },

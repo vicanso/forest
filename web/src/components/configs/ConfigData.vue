@@ -42,7 +42,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    content: String,
+    content: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return formatJSON(this.$props.content);

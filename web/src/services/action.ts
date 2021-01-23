@@ -9,6 +9,14 @@ const userActions: any[] = [];
 const flushInterval = 60 * 1000;
 let timer: number;
 
+interface UserActionData {
+  category: string;
+  route: string;
+  path: string;
+  time: number;
+  extra: any;
+}
+
 async function loadFromStore() {
   const data = await store.getItem(userActionKey);
   if (!data) {
@@ -28,7 +36,7 @@ async function flush() {
   });
 }
 
-export function addUserAction(data: any) {
+export function addUserAction(data: UserActionData): void {
   // 每次添加新的action时，清空定时器
   clearTimeout(timer);
   userActions.push(data);

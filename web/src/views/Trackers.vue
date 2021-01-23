@@ -232,6 +232,15 @@ export default defineComponent({
     BaseJson,
   },
   mixins: [FilterTable],
+  setup() {
+    const fluxStore = useFluxStore();
+    return {
+      trackers: fluxStore.state.trackers,
+      actions: fluxStore.state.actions,
+      listTracker: (params) => fluxStore.dispatch("listTracker", params),
+      listActions: () => fluxStore.dispatch("listActions"),
+    };
+  },
   data() {
     return {
       inited: false,
@@ -253,6 +262,26 @@ export default defineComponent({
     sessionIDFilters() {
       return getUniqueKey(this.trackers.items, "sid");
     },
+  },
+  async beforeMount() {
+    try {
+      await this.listActions();
+
+      actionOptions.length = 0;
+      actionOptions.push({
+        name: "全部",
+        value: "",
+      });
+      this.actions.items.forEach((element) => {
+        actionOptions.push({
+          name: element,
+          value: element,
+        });
+      });
+      this.inited = true;
+    } catch (err) {
+      this.$error(err);
+    }
   },
   methods: {
     filterTrack(value, row) {
@@ -281,35 +310,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  async beforeMount() {
-    try {
-      await this.listActions();
-
-      actionOptions.length = 0;
-      actionOptions.push({
-        name: "全部",
-        value: "",
-      });
-      this.actions.items.forEach((element) => {
-        actionOptions.push({
-          name: element,
-          value: element,
-        });
-      });
-      this.inited = true;
-    } catch (err) {
-      this.$error(err);
-    }
-  },
-  setup() {
-    const fluxStore = useFluxStore();
-    return {
-      trackers: fluxStore.state.trackers,
-      actions: fluxStore.state.actions,
-      listTracker: (params) => fluxStore.dispatch("listTracker", params),
-      listActions: () => fluxStore.dispatch("listActions"),
-    };
   },
 });
 </script>

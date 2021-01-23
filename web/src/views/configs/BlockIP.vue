@@ -33,7 +33,6 @@ import ConfigEditor from "../../components/configs/Editor.vue";
 import BlockIPData from "../../components/configs/BlockIPData.vue";
 import ConfigTable from "../../components/configs/Table.vue";
 import { BLOCK_IP, CONFIG_EDIT_MODE } from "../../constants/common";
-import { useConfigStore } from "../../store";
 
 export default defineComponent({
   name: "BlockIP",
@@ -56,7 +55,6 @@ export default defineComponent({
     },
   },
   methods: {
-    change(data) {},
     add() {
       this.$router.push({
         query: {

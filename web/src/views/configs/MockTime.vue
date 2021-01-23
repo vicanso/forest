@@ -29,6 +29,13 @@ export default defineComponent({
     MockTimeData,
     ConfigEditor,
   },
+  setup() {
+    const configStore = useConfigStore();
+    return {
+      configs: configStore.state.configs,
+      list: (params) => configStore.dispatch("list", params),
+    };
+  },
   data() {
     return {
       defaultValue: {
@@ -39,9 +46,6 @@ export default defineComponent({
       currentID: 0,
       category: MOCK_TIME,
     };
-  },
-  methods: {
-    noop() {},
   },
   async mounted() {
     const { $route, $router } = this;
@@ -69,12 +73,11 @@ export default defineComponent({
       this.processing = false;
     }
   },
-  setup() {
-    const configStore = useConfigStore();
-    return {
-      configs: configStore.state.configs,
-      list: (params) => configStore.dispatch("list", params),
-    };
+  methods: {
+    // 无操作
+    noop() {
+      return;
+    },
   },
 });
 </script>

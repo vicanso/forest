@@ -14,10 +14,13 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "SignedKeyData",
-  emits: ["change"],
   props: {
-    data: String,
+    data: {
+      type: String,
+      default: "",
+    },
   },
+  emits: ["change"],
   data() {
     return {
       key: this.$props.data || "",

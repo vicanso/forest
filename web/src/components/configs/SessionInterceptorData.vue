@@ -24,10 +24,13 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "SessionInterceptorData",
-  emits: ["change"],
   props: {
-    data: String,
+    data: {
+      type: String,
+      default: "",
+    },
   },
+  emits: ["change"],
   data() {
     const form = {
       message: "",

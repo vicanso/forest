@@ -16,7 +16,7 @@ const request = axios.create({
         return;
       }
       header["Content-Type"] = "application/json;charset=UTF-8";
-      let postData = JSON.stringify(data);
+      const postData = JSON.stringify(data);
       // 如果数据较小或者不支持压缩
       if (postData.length < compressMinLength || !supportGzip) {
         return postData;

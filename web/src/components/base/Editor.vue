@@ -109,7 +109,10 @@ export default defineComponent({
     ExButton,
   },
   props: {
-    icon: String,
+    icon: {
+      type: String,
+      default: "",
+    },
     title: {
       type: String,
       required: true,
@@ -122,16 +125,28 @@ export default defineComponent({
       type: Array,
       required: true,
     },
-    id: Number,
-    findByID: Function,
-    updateByID: Function,
-    add: Function,
+    id: {
+      type: Number,
+      default: 0,
+    },
+    findByID: {
+      type: Function,
+      default: null,
+    },
+    updateByID: {
+      type: Function,
+      default: null,
+    },
+    add: {
+      type: Function,
+      default: null,
+    },
   },
   data() {
     const { id, fields } = this.$props;
     const submitText = id ? "更新" : "添加";
     const current = {};
-    fields.forEach((item: any) => {
+    fields.forEach((item) => {
       current[item.key] = null;
     });
 
@@ -143,6 +158,22 @@ export default defineComponent({
       current,
       rules: getFieldRules(fields),
     };
+  },
+  async beforeMount() {
+    const { id, findByID } = this.$props;
+    if (!id) {
+      this.inited = true;
+      return;
+    }
+    try {
+      const data = await findByID(id);
+      this.originData = data;
+      Object.assign(this.current, data);
+    } catch (err) {
+      this.$error(err);
+    } finally {
+      this.inited = true;
+    }
   },
   methods: {
     handleUpload(files) {
@@ -212,22 +243,6 @@ export default defineComponent({
     goBack() {
       this.$router.back();
     },
-  },
-  async beforeMount() {
-    const { id, findByID } = this.$props;
-    if (!id) {
-      this.inited = true;
-      return;
-    }
-    try {
-      const data = await findByID(id);
-      this.originData = data;
-      Object.assign(this.current, data);
-    } catch (err) {
-      this.$error(err);
-    } finally {
-      this.inited = true;
-    }
   },
 });
 </script>

@@ -25,6 +25,9 @@ export default defineComponent({
     },
     extra: {
       type: Object,
+      default: function () {
+        return {};
+      },
     },
   },
   data() {

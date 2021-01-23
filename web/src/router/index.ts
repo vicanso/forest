@@ -37,11 +37,11 @@ interface Location {
   path: string;
 }
 
-let currentLocation: Location = {
+const currentLocation: Location = {
   name: "",
   path: "",
 };
-let prevLocation: Location = {
+const prevLocation: Location = {
   name: "",
   path: "",
 };

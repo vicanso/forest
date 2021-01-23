@@ -14,10 +14,13 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "BlockIPData",
-  emits: ["change"],
   props: {
-    data: String,
+    data: {
+      type: String,
+      default: "",
+    },
   },
+  emits: ["change"],
   data() {
     return {
       ip: this.$props.data || "",

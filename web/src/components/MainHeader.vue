@@ -48,6 +48,13 @@ import {
 
 export default defineComponent({
   name: "MainHeader",
+  setup() {
+    const userStore = useUserStore();
+    return {
+      user: userStore.state.info,
+      logout: () => userStore.dispatch("logout"),
+    };
+  },
   data() {
     return {
       profileRoute: getHomeRouteName(),
@@ -66,13 +73,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  setup() {
-    const userStore = useUserStore();
-    return {
-      user: userStore.state.info,
-      logout: () => userStore.dispatch("logout"),
-    };
   },
 });
 </script>

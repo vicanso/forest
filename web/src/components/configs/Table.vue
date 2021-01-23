@@ -144,7 +144,10 @@ export default defineComponent({
     ExButton,
   },
   props: {
-    name: String,
+    name: {
+      type: String,
+      default: "",
+    },
     // 是否隐藏header
     hiddenHeader: {
       type: Boolean,
@@ -159,6 +162,24 @@ export default defineComponent({
       type: String,
       required: true,
     },
+  },
+  setup() {
+    const configStore = useConfigStore();
+    const userStore = useUserStore();
+    return {
+      userInfo: userStore.state.info,
+      configs: configStore.state.configs,
+      list: (params) => configStore.dispatch("list", params),
+      getStatusDesc: (status) => {
+        let desc = "";
+        configStore.state.statuses.forEach((item) => {
+          if (item.value === status) {
+            desc = item.label;
+          }
+        });
+        return desc;
+      },
+    };
   },
   data() {
     const data = {
@@ -202,6 +223,9 @@ export default defineComponent({
       return arr;
     },
   },
+  beforeMount() {
+    this.fetch();
+  },
   methods: {
     // 拉取数据
     async fetch() {
@@ -225,27 +249,6 @@ export default defineComponent({
         },
       });
     },
-  },
-  beforeMount() {
-    this.fetch();
-  },
-  setup() {
-    const configStore = useConfigStore();
-    const userStore = useUserStore();
-    return {
-      userInfo: userStore.state.info,
-      configs: configStore.state.configs,
-      list: (params) => configStore.dispatch("list", params),
-      getStatusDesc: (status) => {
-        let desc = "";
-        configStore.state.statuses.forEach((item) => {
-          if (item.value === status) {
-            desc = item.label;
-          }
-        });
-        return desc;
-      },
-    };
   },
 });
 </script>

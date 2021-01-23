@@ -18,14 +18,27 @@ import { useCommonStore } from "../../store";
 
 export default defineComponent({
   name: "RouterSelector",
-  emits: ["change"],
   props: {
-    router: String,
+    router: {
+      type: String,
+      default: "",
+    },
+  },
+  emits: ["change"],
+  setup() {
+    const commonStore = useCommonStore();
+    return {
+      routers: commonStore.state.routers,
+      listRouter: () => commonStore.dispatch("listRouter"),
+    };
   },
   data() {
     return {
       currentRouter: this.$props.router || "",
     };
+  },
+  beforeMount() {
+    this.fetch();
   },
   methods: {
     handleChange(value) {
@@ -38,16 +51,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  beforeMount() {
-    this.fetch();
-  },
-  setup() {
-    const commonStore = useCommonStore();
-    return {
-      routers: commonStore.state.routers,
-      listRouter: () => commonStore.dispatch("listRouter"),
-    };
   },
 });
 </script>

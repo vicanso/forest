@@ -13,7 +13,7 @@ let currentUserSetting: UserSetting = {
   mainNavShrinking: false,
 };
 
-export async function loadSetting() {
+export async function loadSetting(): void {
   const data = await store.getItem(userSettingKey);
   if (!data) {
     return;
@@ -25,7 +25,7 @@ export function getSetting(): UserSetting {
   return currentUserSetting;
 }
 
-export async function saveSetting(setting: UserSetting) {
+export async function saveSetting(setting: UserSetting): void {
   await store.setItem(userSettingKey, JSON.stringify(setting));
   currentUserSetting = setting;
 }

@@ -9,7 +9,10 @@ import { formatDate } from "../helpers/util";
 export default defineComponent({
   name: "TimeFormater",
   props: {
-    time: String,
+    time: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     let value = "--";

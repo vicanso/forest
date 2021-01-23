@@ -11,7 +11,7 @@ import "./main.styl";
 const app = createApp(App);
 
 // 全局注册组件
-app.component("ex-button", ExButton);
+app.component("ExButton", ExButton);
 
 stores.forEach(app.use);
 

@@ -108,7 +108,7 @@ el-card.httpErrors
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { today, getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
+import { getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
@@ -210,6 +210,16 @@ export default defineComponent({
     BaseJson,
   },
   mixins: [FilterTable],
+  setup() {
+    const fluxStore = useFluxStore();
+    return {
+      httpErrors: fluxStore.state.httpErrors,
+      httpErrorCategories: fluxStore.state.httpErrorCategories,
+      listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
+      listHTTPErrorCategories: () =>
+        fluxStore.dispatch("listHTTPErrorCategories"),
+    };
+  },
   data() {
     return {
       inited: false,
@@ -232,6 +242,25 @@ export default defineComponent({
     sessionIDFilters() {
       return getUniqueKey(this.httpErrors.items, "sid");
     },
+  },
+  async beforeMount() {
+    try {
+      await this.listHTTPErrorCategories();
+      categories.length = 0;
+      categories.push({
+        name: "全部",
+        value: "",
+      });
+      this.httpErrorCategories.items.forEach((element) => {
+        categories.push({
+          name: element,
+          value: element,
+        });
+      });
+      this.inited = true;
+    } catch (err) {
+      this.$error(err);
+    }
   },
   methods: {
     filterTrack(value, row) {
@@ -260,35 +289,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  async beforeMount() {
-    try {
-      await this.listHTTPErrorCategories();
-      categories.length = 0;
-      categories.push({
-        name: "全部",
-        value: "",
-      });
-      this.httpErrorCategories.items.forEach((element) => {
-        categories.push({
-          name: element,
-          value: element,
-        });
-      });
-      this.inited = true;
-    } catch (err) {
-      this.$error(err);
-    }
-  },
-  setup() {
-    const fluxStore = useFluxStore();
-    return {
-      httpErrors: fluxStore.state.httpErrors,
-      httpErrorCategories: fluxStore.state.httpErrorCategories,
-      listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
-      listHTTPErrorCategories: () =>
-        fluxStore.dispatch("listHTTPErrorCategories"),
-    };
   },
 });
 </script>

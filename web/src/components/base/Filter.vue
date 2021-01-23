@@ -95,10 +95,11 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ["filter"],
   data() {
     const current = {};
     const { fields } = this.$props;
-    fields.forEach((item: any) => {
+    fields.forEach((item) => {
       const { type, key, defaultValue } = item;
       if (type === "filter") {
         return;

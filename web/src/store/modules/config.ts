@@ -93,8 +93,9 @@ export const configStore = createStore<ConfigState>({
       state: ConfigState,
       data: { count: number; configurations: any[] }
     ) {
-      if (data.count >= 0) {
-        state.configs.count = data.count;
+      const count = data.count || 0;
+      if (count >= 0) {
+        state.configs.count = count;
       }
       state.configs.items = data.configurations || [];
     },

@@ -27,7 +27,10 @@ const formatJSON = (data) => {
 export default defineComponent({
   name: "BaseJson",
   props: {
-    content: String,
+    content: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return formatJSON(this.$props.content);

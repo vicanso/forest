@@ -36,12 +36,31 @@ export default defineComponent({
     MainHeader,
     MainNav,
   },
+  setup() {
+    const userStore = useUserStore();
+    return {
+      userInfo: userStore.state.info,
+      fetchUserInfo: () => userStore.dispatch("fetch"),
+    };
+  },
   data() {
     return {
       shrinking: false,
       // 是否初始化完成
       inited: false,
     };
+  },
+  async beforeMount() {
+    try {
+      await loadSetting();
+      const setting = getSetting();
+      this.shrinking = setting.mainNavShrinking;
+    } catch (err) {
+      this.$error(err);
+    }
+  },
+  mounted() {
+    this.fetch();
   },
   methods: {
     toggleNav() {
@@ -66,25 +85,6 @@ export default defineComponent({
         this.inited = true;
       }
     },
-  },
-  async beforeMount() {
-    try {
-      await loadSetting();
-      const setting = getSetting();
-      this.shrinking = setting.mainNavShrinking;
-    } catch (err) {
-      this.$error(err);
-    }
-  },
-  mounted() {
-    this.fetch();
-  },
-  setup() {
-    const userStore = useUserStore();
-    return {
-      userInfo: userStore.state.info,
-      fetchUserInfo: () => userStore.dispatch("fetch"),
-    };
   },
 });
 </script>

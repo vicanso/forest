@@ -21,7 +21,7 @@ import { defineComponent } from "vue";
 
 import ConfigEditor from "../../components/configs/Editor.vue";
 import SessionInterceptorData from "../../components/configs/SessionInterceptorData.vue";
-import { SESSION_INTERCEPTOR, CONFIG_EDIT_MODE } from "../../constants/common";
+import { SESSION_INTERCEPTOR } from "../../constants/common";
 import { useConfigStore } from "../../store";
 
 export default defineComponent({
@@ -29,6 +29,13 @@ export default defineComponent({
   components: {
     SessionInterceptorData,
     ConfigEditor,
+  },
+  setup() {
+    const configStore = useConfigStore();
+    return {
+      configs: configStore.state.configs,
+      list: (params) => configStore.dispatch("list", params),
+    };
   },
   data() {
     return {
@@ -40,9 +47,6 @@ export default defineComponent({
       processing: true,
       currentID: 0,
     };
-  },
-  methods: {
-    noop() {},
   },
   async mounted() {
     const { $route, $router } = this;
@@ -70,12 +74,11 @@ export default defineComponent({
       this.processing = false;
     }
   },
-  setup() {
-    const configStore = useConfigStore();
-    return {
-      configs: configStore.state.configs,
-      list: (params) => configStore.dispatch("list", params),
-    };
+  methods: {
+    // eslint-disable-next-line
+    noop() {
+      return;
+    },
   },
 });
 </script>

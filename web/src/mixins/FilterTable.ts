@@ -11,33 +11,40 @@ export default {
       return this.$route.query.mode === CONFIG_EDIT_MODE;
     },
   },
+  beforeMount(): void {
+    this._currentRoute = this.$route.name;
+    if (!this.editMode && !this.disableBeforeMountFetch) {
+      this.fetch();
+    }
+  },
   methods: {
-    handleCurrentChange(page: number) {
+    handleCurrentChange(page: number): void {
       this.query.offset = (page - 1) * this.query.limit;
       this.fetch();
     },
-    handleSizeChange(pageSize: number) {
+    handleSizeChange(pageSize: number): void {
       this.query.limit = pageSize;
       this.query.offset = 0;
       this.fetch();
     },
-    handleSortChange({ prop, order }) {
-      let key = prop.replace("Desc", "");
-      if (order === "descending") {
+    handleSortChange(params: { prop: string; order: string }): void {
+      let key = params.prop.replace("Desc", "");
+      if (params.order === "descending") {
         key = `-${key}`;
       }
       this.query.order = key;
       this.query.offset = 0;
       this.fetch();
     },
-    add() {
+    add(): void {
       this.$router.push({
         query: {
           mode: CONFIG_EDIT_MODE,
         },
       });
     },
-    modify(item: any) {
+    // eslint-disable-next-line
+    modify(item: any): void {
       this.$router.push({
         query: {
           mode: CONFIG_EDIT_MODE,
@@ -45,14 +52,16 @@ export default {
         },
       });
     },
-    filter(params: any) {
+    // eslint-disable-next-line
+    filter(params: any): void {
       Object.assign(this.query, params);
       this.query.offset = 0;
       this.fetch();
     },
   },
   watch: {
-    "$route.query"(query: any, prevQuery: any) {
+    // eslint-disable-next-line
+    "$route.query"(query: any, prevQuery: any): void {
       // 如果路由已更换，则直接返回
       if (this.$route.name !== this._currentRoute) {
         return;
@@ -65,11 +74,5 @@ export default {
         this.fetch();
       }
     },
-  },
-  beforeMount() {
-    this._currentRoute = this.$route.name;
-    if (!this.editMode && !this.disableBeforeMountFetch) {
-      this.fetch();
-    }
   },
 };

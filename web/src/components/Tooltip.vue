@@ -21,8 +21,14 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "BaseTooltip",
   props: {
-    icon: String,
-    content: String,
+    icon: {
+      type: String,
+      default: "",
+    },
+    content: {
+      type: String,
+      default: "",
+    },
     viewSize: {
       type: Number,
       default: 5,

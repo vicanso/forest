@@ -75,6 +75,30 @@ export default defineComponent({
   components: {
     BaseEditor,
   },
+  setup() {
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
+    return {
+      findByID: (id) =>
+        userStore.dispatch("findByID", {
+          id,
+        }),
+      updateByID: (params) => userStore.dispatch("updateByID", params),
+      listRole: () => userStore.dispatch("listRole"),
+      listStatus: () => commonStore.dispatch("listStatus"),
+      userRoles: userStore.state.roles,
+      statuses: commonStore.state.statuses,
+      getStatusDesc: (status) => {
+        let desc = "";
+        commonStore.state.statuses.items.forEach((item) => {
+          if (item.value === status) {
+            desc = item.name;
+          }
+        });
+        return desc;
+      },
+    };
+  },
   data() {
     return {
       fields: null,
@@ -106,30 +130,6 @@ export default defineComponent({
     } finally {
       this.processing = false;
     }
-  },
-  setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
-    return {
-      findByID: (id) =>
-        userStore.dispatch("findByID", {
-          id,
-        }),
-      updateByID: (params) => userStore.dispatch("updateByID", params),
-      listRole: () => userStore.dispatch("listRole"),
-      listStatus: () => commonStore.dispatch("listStatus"),
-      userRoles: userStore.state.roles,
-      statuses: commonStore.state.statuses,
-      getStatusDesc: (status: number): string => {
-        let desc = "";
-        commonStore.state.statuses.items.forEach((item) => {
-          if (item.value === status) {
-            desc = item.name;
-          }
-        });
-        return desc;
-      },
-    };
   },
 });
 </script>

@@ -150,6 +150,13 @@ export default defineComponent({
     TimeFormater,
   },
   mixins: [FilterTable],
+  setup() {
+    const userStore = useUserStore();
+    return {
+      listLogin: (params) => userStore.dispatch("listLogin", params),
+      logins: userStore.state.logins,
+    };
+  },
   data() {
     return {
       filterFields,
@@ -182,13 +189,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  setup() {
-    const userStore = useUserStore();
-    return {
-      listLogin: (params) => userStore.dispatch("listLogin", params),
-      logins: userStore.state.logins,
-    };
   },
 });
 </script>

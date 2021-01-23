@@ -64,7 +64,7 @@ export function yesterday(): Date {
 }
 
 // formatDateWithTZ 格式化日期（带时区）
-export function formatDateWithTZ(date: Date) {
+export function formatDateWithTZ(date: Date): string {
   return dayjs(date).format("YYYY-MM-DDTHH:mm:ssZ");
 }
 export function formatBegin(begin: Date): string {
@@ -74,9 +74,14 @@ export function formatEnd(end: Date): string {
   return formatDateWithTZ(new Date(end.getTime() + 24 * 3600 * 1000 - 1));
 }
 
+interface Shortcut {
+  text: string;
+  value: Date[];
+}
+
 // getDateDayShortcuts 获取时间快捷选择，此返回的时间只到天，在处理的时候应该处理为开始时间的00:00，结束时间的23:59
-export function getDateDayShortcuts(ranges: string[]): any[] {
-  const shortcuts: any[] = [];
+export function getDateDayShortcuts(ranges: string[]): Shortcut[] {
+  const shortcuts: Shortcut[] = [];
   ranges.forEach((element) => {
     switch (element) {
       case "1d":
@@ -111,8 +116,8 @@ export function getDateDayShortcuts(ranges: string[]): any[] {
 }
 
 // getDateTimeShortcuts 获取时间快捷选择
-export function getDateTimeShortcuts(ranges: string[]): any[] {
-  const shortcuts: any[] = [];
+export function getDateTimeShortcuts(ranges: string[]): Shortcut[] {
+  const shortcuts: Shortcut[] = [];
   ranges.forEach((element) => {
     switch (element) {
       case "1h":
@@ -152,13 +157,18 @@ export function getDateTimeShortcuts(ranges: string[]): any[] {
   return shortcuts;
 }
 
-function isEqual(value: any, originalValue: any) {
+function isEqual(value: any, originalValue: any): boolean {
   // 使用json stringify对比是否相同
   return JSON.stringify(value) == JSON.stringify(originalValue);
 }
 
+interface DiffInfo {
+  modifiedCount: number;
+  data: any;
+}
 // diff  对比两个object的差异
-export function diff(current: any, original: any) {
+// eslint-disable-next-line
+export function diff(current: any, original: any): DiffInfo {
   const data: any = {};
   let modifiedCount = 0;
   Object.keys(current).forEach((key) => {
@@ -175,6 +185,7 @@ export function diff(current: any, original: any) {
 }
 
 // validateForm validate form
+// eslint-disable-next-line
 export function validateForm(form: any) {
   return new Promise<void>((resolve, reject) => {
     form.validate((valid: any, rules: any) => {
@@ -194,7 +205,8 @@ export function validateForm(form: any) {
 }
 
 // omitNil omit nil(undefined null)
-export function omitNil(data: any) {
+// eslint-disable-next-line
+export function omitNil(data: any): any {
   const params: any = {};
   Object.keys(data).forEach((key) => {
     const value = data[key];
@@ -206,6 +218,7 @@ export function omitNil(data: any) {
 }
 
 // getFieldRules get field rules
+// eslint-disable-next-line
 export function getFieldRules(fields: any) {
   const rules: any = {};
   fields.forEach((field: any) => {

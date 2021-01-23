@@ -32,7 +32,6 @@ import ConfigEditor from "../../components/configs/Editor.vue";
 import RouterData from "../../components/configs/RouterData.vue";
 import ConfigTable from "../../components/configs/Table.vue";
 import { ROUTER, CONFIG_EDIT_MODE } from "../../constants/common";
-import { useConfigStore } from "../../store";
 
 export default defineComponent({
   name: "Router",
@@ -55,7 +54,6 @@ export default defineComponent({
     },
   },
   methods: {
-    change(data) {},
     add() {
       this.$router.push({
         query: {

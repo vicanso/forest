@@ -6,15 +6,13 @@
 
 ## 特性
 
-### 简单易用的应用配置
+### 简单的应用配置
 
 - 应用配置通过加载default.yml + 当前GO_ENV所对应的yml组合生成，简化配置
 - 支持配置参数的校验，保证应用启动时的参数准确性
 - 支持优先从ENV中获取配置参数，若获取失败再使用yml配置
 
-
-
-### 简单易用的缓存模块
+### 多类缓存模块
 
 缓存模块支持三类缓存：LRU+TTL的高速缓存，redis+ttl的共有缓存以及redis+lru+ttl的多级缓存
 
@@ -26,6 +24,14 @@ err := cache.GetRedisCache().SetStruct(context.Background(), "key", &map[string]
 data := make(map[string]string)
 err = cache.GetRedisCache().GetStruct(context.Background(), "key", &data)
 ```
+
+### 支持多类自定义配置
+
+- 黑名单IP配置，允许设置黑名单IP禁止访问
+- 路由Mock配置，允许自定义路由的响应
+- 路由并发配置，允许限制路由的最大并发数及访问频率
+- Session拦截配置，允许将session的读取拦截，返回出错信息，用于系统禁止客户使用
+
 ### 详尽的性能指标
 
 性能指标中包括以下的相关指标：
@@ -105,3 +111,5 @@ docker run -d --restart=always \
 ## 规范
 
 - 所有自定义的error都必须为hes.Error
+- 数值类的展示需要使用专用组件
+- 用户点击类的操作需要使用专用组件

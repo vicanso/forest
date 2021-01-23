@@ -81,10 +81,13 @@ export default defineComponent({
   components: {
     RouterSelector,
   },
-  emits: ["change"],
   props: {
-    data: String,
+    data: {
+      type: String,
+      default: "",
+    },
   },
+  emits: ["change"],
   data() {
     const form = {
       router: "",

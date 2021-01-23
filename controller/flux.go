@@ -79,8 +79,8 @@ func init() {
 
 // Query get flux query string
 func (params *fluxListParams) Query() string {
-	start := util.FormatTime(params.Begin)
-	stop := util.FormatTime(params.End)
+	start := util.FormatTime(params.Begin.UTC())
+	stop := util.FormatTime(params.End.UTC())
 	query := fmt.Sprintf(`
 		|> range(start: %s, stop: %s)
 		|> filter(fn: (r) => r["_measurement"] == "%s")

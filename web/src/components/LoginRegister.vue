@@ -82,7 +82,20 @@ const registerType = "register";
 export default defineComponent({
   name: "LoginRegister",
   props: {
-    type: String,
+    type: {
+      type: String,
+      default: "login",
+    },
+  },
+  setup() {
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
+    return {
+      user: userStore.state.info,
+      getCaptcha: () => commonStore.dispatch("getCaptcha"),
+      login: (params) => userStore.dispatch("login", params),
+      register: (params) => userStore.dispatch("register", params),
+    };
   },
   data() {
     const { type } = this.$props;
@@ -102,6 +115,9 @@ export default defineComponent({
         captcha: "",
       },
     };
+  },
+  mounted() {
+    this.refreshCaptcha();
   },
   methods: {
     async refreshCaptcha() {
@@ -142,19 +158,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  },
-  mounted() {
-    this.refreshCaptcha();
-  },
-  setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
-    return {
-      user: userStore.state.info,
-      getCaptcha: () => commonStore.dispatch("getCaptcha"),
-      login: (params) => userStore.dispatch("login", params),
-      register: (params) => userStore.dispatch("register", params),
-    };
   },
 });
 </script>

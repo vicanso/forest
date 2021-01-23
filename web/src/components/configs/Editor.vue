@@ -96,7 +96,6 @@
 </template>
 
 <script lang="ts">
-import { config } from "localforage";
 import { defineComponent } from "vue";
 import { diff } from "../../helpers/util";
 import { useConfigStore } from "../../store";
@@ -119,11 +118,34 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    name: String,
-    summary: String,
+    name: {
+      type: String,
+      default: "",
+    },
+    summary: {
+      type: String,
+      default: "",
+    },
     // 返回函数
-    back: Function,
-    backDisabled: Boolean,
+    back: {
+      type: Function,
+      default: null,
+    },
+    backDisabled: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup() {
+    const configStore = useConfigStore();
+    return {
+      statuses: configStore.state.statuses,
+      configs: configStore.state.configs,
+      current: configStore.state.current,
+      findByID: (id) => configStore.dispatch("findByID", id),
+      add: (data) => configStore.dispatch("add", data),
+      updateByID: (params) => configStore.dispatch("updateByID", params),
+    };
   },
   data() {
     const { $props, $route } = this;
@@ -145,6 +167,14 @@ export default defineComponent({
         data: "",
       },
     };
+  },
+  watch: {
+    $route() {
+      this.fetchCurrent();
+    },
+  },
+  beforeMount() {
+    this.fetchCurrent();
   },
   methods: {
     async submit() {
@@ -223,25 +253,6 @@ export default defineComponent({
       }
       this.id = currentID;
     },
-  },
-  watch: {
-    $route() {
-      this.fetchCurrent();
-    },
-  },
-  beforeMount() {
-    this.fetchCurrent();
-  },
-  setup() {
-    const configStore = useConfigStore();
-    return {
-      statuses: configStore.state.statuses,
-      configs: configStore.state.configs,
-      current: configStore.state.current,
-      findByID: (id) => configStore.dispatch("findByID", id),
-      add: (data) => configStore.dispatch("add", data),
-      updateByID: (params) => configStore.dispatch("updateByID", params),
-    };
   },
 });
 </script>

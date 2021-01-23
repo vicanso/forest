@@ -150,6 +150,27 @@ export default defineComponent({
     User,
   },
   mixins: [FilterTable],
+  setup() {
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
+    return {
+      users: userStore.state.users,
+      list: (params) => userStore.dispatch("list", params),
+      listRole: () => userStore.dispatch("listRole"),
+      listStatus: () => commonStore.dispatch("listStatus"),
+      userRoles: userStore.state.roles,
+      statuses: commonStore.state.statuses,
+      getStatusDesc: (status: number): string => {
+        let desc = "";
+        commonStore.state.statuses.items.forEach((item) => {
+          if (item.value === status) {
+            desc = item.name;
+          }
+        });
+        return desc;
+      },
+    };
+  },
   data() {
     return {
       inited: false,
@@ -161,19 +182,6 @@ export default defineComponent({
         order: "-updatedAt",
       },
     };
-  },
-  methods: {
-    async fetch() {
-      const { users, query } = this;
-      if (users.processing) {
-        return;
-      }
-      try {
-        await this.list(query);
-      } catch (err) {
-        this.$error(err);
-      }
-    },
   },
   async beforeMount() {
     try {
@@ -203,26 +211,18 @@ export default defineComponent({
       this.inited = true;
     }
   },
-  setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
-    return {
-      users: userStore.state.users,
-      list: (params) => userStore.dispatch("list", params),
-      listRole: () => userStore.dispatch("listRole"),
-      listStatus: () => commonStore.dispatch("listStatus"),
-      userRoles: userStore.state.roles,
-      statuses: commonStore.state.statuses,
-      getStatusDesc: (status: number): string => {
-        let desc = "";
-        commonStore.state.statuses.items.forEach((item) => {
-          if (item.value === status) {
-            desc = item.name;
-          }
-        });
-        return desc;
-      },
-    };
+  methods: {
+    async fetch() {
+      const { users, query } = this;
+      if (users.processing) {
+        return;
+      }
+      try {
+        await this.list(query);
+      } catch (err) {
+        this.$error(err);
+      }
+    },
   },
 });
 </script>
