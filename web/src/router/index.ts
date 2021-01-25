@@ -8,7 +8,10 @@ import Register from "../views/Register.vue";
 import Logins from "../views/Logins.vue";
 import Users from "../views/Users.vue";
 import Trackers from "../views/Trackers.vue";
+import Actions from "../views/Actions.vue";
 import HTTPErrors from "../views/HTTPErrors.vue";
+
+// 系统配置
 import MockTime from "../views/configs/MockTime.vue";
 import BlockIP from "../views/configs/BlockIP.vue";
 import SignedKey from "../views/configs/SignedKey.vue";
@@ -24,7 +27,10 @@ const register = "register";
 const logins = "logins";
 const users = "users";
 const trackers = "trackers";
+const actions = "actions";
 const httpErrors = "httpErrors";
+
+// 系统配置
 const mockTime = "mockTime";
 const blockIP = "blockIP";
 const signedKey = "signedKey";
@@ -80,6 +86,11 @@ const router = createRouter({
       path: "/trackers",
       name: trackers,
       component: Trackers,
+    },
+    {
+      path: "/actions",
+      name: actions,
+      component: Actions,
     },
     {
       path: "/http-errors",
@@ -147,9 +158,13 @@ export function getUsersRouteName(): string {
 export function getTrackersRouteName(): string {
   return trackers;
 }
+export function getActionsRouteName(): string {
+  return actions;
+}
 export function getHTTPErrorsRouteName(): string {
   return httpErrors;
 }
+
 export function getMockTimeRouteName(): string {
   return mockTime;
 }

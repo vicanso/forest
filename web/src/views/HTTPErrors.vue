@@ -102,6 +102,17 @@ el-card.httpErrors
         key="error"
         label="Error"
       )
+      //- 时间
+      el-table-column(
+        label="时间"
+        prop="_time"
+        key="_time"
+        width="120"
+      ): template(
+        #default="scope"
+      ): time-formater(
+        :time="scope.row._time"
+      )
 
 </template>
 
@@ -216,8 +227,7 @@ export default defineComponent({
       httpErrors: fluxStore.state.httpErrors,
       httpErrorCategories: fluxStore.state.httpErrorCategories,
       listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
-      listHTTPErrorCategories: () =>
-        fluxStore.dispatch("listHTTPErrorCategories"),
+      listHTTPErrorCategory: () => fluxStore.dispatch("listHTTPErrorCategory"),
     };
   },
   data() {
@@ -245,7 +255,7 @@ export default defineComponent({
   },
   async beforeMount() {
     try {
-      await this.listHTTPErrorCategories();
+      await this.listHTTPErrorCategory();
       categories.length = 0;
       categories.push({
         name: "全部",

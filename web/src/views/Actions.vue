@@ -1,12 +1,12 @@
 <template lang="pug">
-el-card.trackers
+el-card.actions
   template(
     #header
   )
-    i.el-icon-user-solid
-    span 用户行为查询
+    i.el-icon-info
+    span 客户端行为查询
   div(
-    v-loading="trackers.processing"
+    v-loading="userActions.processing"
   )
     base-filter(
       v-if="inited"
@@ -14,7 +14,7 @@ el-card.trackers
       @filter="filter"
     )
     el-table(
-      :data="trackers.items"
+      :data="userActions.items"
       row-key="_time"
       stripe
       :default-sort="{ prop: '_time', order: 'descending' }"
@@ -23,15 +23,16 @@ el-card.trackers
         prop="account"
         key="account"
         label="账户"
-        width="120"
+        width="150"
       )
+      //- 记录类型
       el-table-column(
-        prop="action"
-        key="action"
+        prop="category"
+        key="category"
         label="类型"
         width="150"
       )
-      //- 状态筛选
+      //- 记录状态
       el-table-column(
         label="状态"
         width="80"
@@ -44,71 +45,39 @@ el-card.trackers
         span(
           v-else
         ) 失败
-      //- form参数
+      //- 触发记录时所有route
       el-table-column(
-        label="Form"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.form"
+        label="路由"
+        prop="route"
+        key="route"
       )
-      //- query参数
-      el-table-column(
-        label="Query"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.query"
-      )
-      //- params参数
-      el-table-column(
-        label="Params"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.params"
-      )
-      //- session id
-      el-table-column(
-        label="Session ID"
-        :filters="sessionIDFilters"
-        :filter-method="filterSession"
-        width="110"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.sid"
-      )
-      //- track id
+      //- tid
       el-table-column(
         label="Track ID"
-        :filters="trackIDFilters"
-        :filter-method="filterTrack"
-        width="90"
       ): template(
         #default="scope"
       ): base-tooltip(
         :content="scope.row.tid"
       )
-      //- ip
+      //- full path
       el-table-column(
-        label="IP"
+        label="完整路径"
         width="80"
       ): template(
         #default="scope"
       ): base-tooltip(
         icon="el-icon-info"
-        :content="scope.row.ip"
+        :content="scope.row.path"
       )
       //- error
       el-table-column(
-        label="Error"
+        label="error"
         width="80"
       ): template(
         #default="scope"
       ): base-tooltip(
         icon="el-icon-info"
-        :content="scope.row.error"
+        :content="scope.row.message"
       )
       //- 时间
       el-table-column(
@@ -122,10 +91,8 @@ el-card.trackers
         :time="scope.row._time"
       )
 </template>
-
 <script lang="ts">
 import { defineComponent } from "vue";
-
 import {
   today,
   getDateDayShortcuts,
@@ -141,7 +108,7 @@ import FilterTable from "../mixins/FilterTable";
 import { useFluxStore } from "../store";
 
 const defaultDateRange = [today(), today()];
-const actionOptions = [];
+const categoryOptions = [];
 const filterFields = [
   {
     label: "账号：",
@@ -152,10 +119,10 @@ const filterFields = [
   },
   {
     label: "类型：",
-    key: "action",
+    key: "category",
     type: "select",
     placeholder: "请选择要筛选的分类",
-    options: actionOptions,
+    options: categoryOptions,
     span: 6,
   },
   {
@@ -205,26 +172,8 @@ const filterFields = [
   },
 ];
 
-function getUniqueKey(data: any[], key: string) {
-  if (!data || !data.length) {
-    return [];
-  }
-  const keys = {};
-  data.forEach((item) => {
-    if (item[key]) {
-      keys[item[key]] = true;
-    }
-  });
-  return Object.keys(keys).map((item) => {
-    return {
-      text: item,
-      value: item,
-    };
-  });
-}
-
 export default defineComponent({
-  name: "Trackers",
+  name: "Actions",
   components: {
     BaseFilter,
     BaseTooltip,
@@ -235,10 +184,11 @@ export default defineComponent({
   setup() {
     const fluxStore = useFluxStore();
     return {
-      trackers: fluxStore.state.trackers,
-      trackerActions: fluxStore.state.trackerActions,
-      listTracker: (params) => fluxStore.dispatch("listTracker", params),
-      listTrackerActions: () => fluxStore.dispatch("listTrackerActions"),
+      userActionCategories: fluxStore.state.userActionCategories,
+      userActions: fluxStore.state.userActions,
+      listAction: (params) => fluxStore.dispatch("listAction", params),
+      listUserActionCategory: () =>
+        fluxStore.dispatch("listUserActionCategory"),
     };
   },
   data() {
@@ -255,25 +205,17 @@ export default defineComponent({
       },
     };
   },
-  computed: {
-    trackIDFilters() {
-      return getUniqueKey(this.trackers.items, "tid");
-    },
-    sessionIDFilters() {
-      return getUniqueKey(this.trackers.items, "sid");
-    },
-  },
   async beforeMount() {
     try {
-      await this.listTrackerActions();
+      await this.listUserActionCategory();
 
-      actionOptions.length = 0;
-      actionOptions.push({
+      categoryOptions.length = 0;
+      categoryOptions.push({
         name: "全部",
         value: "",
       });
-      this.trackerActions.items.forEach((element) => {
-        actionOptions.push({
+      this.userActionCategories.items.forEach((element) => {
+        categoryOptions.push({
           name: element,
           value: element,
         });
@@ -284,15 +226,9 @@ export default defineComponent({
     }
   },
   methods: {
-    filterTrack(value, row) {
-      return row.tid == value;
-    },
-    filterSession(value, row) {
-      return row.sid == value;
-    },
     async fetch() {
-      const { trackers, query } = this;
-      if (trackers.processing) {
+      const { userActions, query } = this;
+      if (userActions.processing) {
         return;
       }
       const params = Object.assign({}, query);
@@ -305,7 +241,7 @@ export default defineComponent({
       params.end = formatEnd(value[1]);
       delete params.dateRange;
       try {
-        await this.listTracker(params);
+        await this.listAction(params);
       } catch (err) {
         this.$error(err);
       }
@@ -316,7 +252,7 @@ export default defineComponent({
 
 <style lang="stylus" scoped>
 @import "../common";
-.trackers
+.actions
   margin: $mainMargin
   i
     margin-right: 5px

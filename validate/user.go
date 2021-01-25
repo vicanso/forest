@@ -34,6 +34,7 @@ func init() {
 		"login",
 		"register",
 		"routeChange",
+		"error",
 	}))
 	// 用户行为触发所在路由
 	AddAlias("xUserActionRoute", "max=50")

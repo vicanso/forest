@@ -127,17 +127,20 @@ func performanceStats() {
 	doStatsTask("performance stats", func() map[string]interface{} {
 		data := service.GetPerformance()
 		fields := map[string]interface{}{
-			cs.FieldGoMaxProcs:   data.GoMaxProcs,
-			cs.FieldProcessing:   int(data.Concurrency),
-			cs.FieldThreadCount:  int(data.ThreadCount),
-			cs.FieldMemSys:       data.MemSys,
-			cs.FieldMemHeapSys:   data.MemHeapSys,
-			cs.FieldMemHeapInuse: data.MemHeapInuse,
-			cs.FieldMemFrees:     int(data.MemFrees - prevMemFrees),
-			cs.FieldRoutineCount: data.RoutineCount,
-			cs.FieldCpuUsage:     int(data.CPUUsage),
-			cs.FieldNumGC:        int(data.NumGC - prevNumGC),
-			cs.FieldPauseNS:      int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
+			cs.FieldGoMaxProcs:       data.GoMaxProcs,
+			cs.FieldProcessing:       int(data.Concurrency),
+			cs.FieldThreadCount:      int(data.ThreadCount),
+			cs.FieldMemSys:           data.MemSys,
+			cs.FieldMemHeapSys:       data.MemHeapSys,
+			cs.FieldMemHeapInuse:     data.MemHeapInuse,
+			cs.FieldMemFrees:         int(data.MemFrees - prevMemFrees),
+			cs.FieldRoutineCount:     data.RoutineCount,
+			cs.FieldCpuUsage:         int(data.CPUUsage),
+			cs.FieldNumGC:            int(data.NumGC - prevNumGC),
+			cs.FieldPauseNS:          int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
+			cs.FieldConnProcessing:   int(data.ConnProcessing),
+			cs.FieldConnAlive:        int(data.ConnAlive),
+			cs.FieldConnCreatedCount: int(data.ConnCreatedCount),
 		}
 		prevMemFrees = data.MemFrees
 		prevNumGC = data.NumGC

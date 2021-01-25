@@ -238,7 +238,6 @@ func init() {
 	// 添加用户行为
 	g.POST(
 		"/v1/actions",
-		shouldBeLogin,
 		ctrl.addUserAction,
 	)
 
@@ -775,6 +774,13 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 
 // addUserAction add user action
 func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
+	tid := util.GetTrackID(c)
+	// 如果没有tid，则直接返回
+	if tid == "" {
+		c.NoContent()
+		return
+	}
+
 	params := userActionAddParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -782,7 +788,10 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	}
 	now := time.Now().Unix()
 	us := getUserSession(c)
-	account := us.MustGetInfo().Account
+	account := ""
+	if us.IsLogin() {
+		account = us.MustGetInfo().Account
+	}
 
 	count := 0
 	for _, item := range params.Actions {
@@ -796,9 +805,12 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
 		fields := map[string]interface{}{
-			cs.FieldAccount: account,
-			cs.FieldRoute:   item.Route,
-			cs.FieldPath:    item.Path,
+			cs.FieldRoute: item.Route,
+			cs.FieldPath:  item.Path,
+			cs.FieldTID:   tid,
+		}
+		if account != "" {
+			fields[cs.FieldAccount] = account
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{

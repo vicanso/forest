@@ -19,6 +19,8 @@ export const USERS_ID = "/users/v1/:id";
 export const FLUXES_TRACKERS = "/fluxes/v1/trackers";
 // http出错列表
 export const FLUXES_HTTP_ERRORS = "/fluxes/v1/http-errors";
+// 客户端上传的action日志列表
+export const FLUXES_ACTIONS = "/fluxes/v1/actions";
 // tag value列表
 export const FLUXES_TAG_VALUES = "/fluxes/v1/tag-values/:measurement/:tag";
 

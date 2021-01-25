@@ -62,6 +62,7 @@ import {
   getConfigurationRouteName,
   getOthersRouteName,
   getHTTPErrorsRouteName,
+  getActionsRouteName,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
 import { useUserStore } from "../store";
@@ -96,6 +97,12 @@ const navs = [
         name: "出错记录",
         route: getHTTPErrorsRouteName(),
         roles: [],
+        groups: [],
+      },
+      {
+        name: "客户端行为记录",
+        route: getActionsRouteName(),
+        roules: [],
         groups: [],
       },
     ],
