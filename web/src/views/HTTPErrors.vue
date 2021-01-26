@@ -44,8 +44,8 @@ el-card.httpErrors
         width="100"
       )
       el-table-column(
-        prop="statusCode"
-        key="statusCode"
+        prop="status"
+        key="status"
         label="状态码"
         width="80"
       )
@@ -107,7 +107,7 @@ el-card.httpErrors
         label="时间"
         prop="_time"
         key="_time"
-        width="120"
+        width="160"
       ): template(
         #default="scope"
       ): time-formater(

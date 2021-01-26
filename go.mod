@@ -9,7 +9,7 @@ require (
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/go-redis/redis/v8 v8.4.8
+	github.com/go-redis/redis/v8 v8.4.11
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.2
@@ -30,7 +30,7 @@ require (
 	github.com/vicanso/go-axios v0.2.0
 	github.com/vicanso/go-cache v0.0.3
 	github.com/vicanso/go-performance v0.0.3
-	github.com/vicanso/hes v0.3.1
+	github.com/vicanso/hes v0.3.2
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.3.2
 	github.com/vicanso/viperx v0.1.3

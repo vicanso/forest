@@ -14,7 +14,7 @@ const app = createApp(App);
 // 全局出错处理
 app.config.errorHandler = (err: any, vm, info) => {
   // 处理错误
-  let message: string = "";
+  let message = "";
   if (err && err.message) {
     message = err.message;
   }
