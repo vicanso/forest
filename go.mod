@@ -14,7 +14,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.2
 	github.com/iancoleman/strcase v0.1.3
-	github.com/influxdata/influxdb-client-go/v2 v2.2.1
+	github.com/influxdata/influxdb-client-go/v2 v2.2.2
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/jinzhu/now v1.1.1
 	github.com/minio/minio-go/v7 v7.0.7
@@ -30,10 +30,10 @@ require (
 	github.com/vicanso/go-axios v0.2.0
 	github.com/vicanso/go-cache v0.0.3
 	github.com/vicanso/go-performance v0.0.3
-	github.com/vicanso/hes v0.3.2
+	github.com/vicanso/hes v0.3.4
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.3.2
-	github.com/vicanso/viperx v0.1.3
+	github.com/vicanso/viperx v0.1.4
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
 	go.uber.org/ratelimit v0.1.0
