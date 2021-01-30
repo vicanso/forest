@@ -44,6 +44,7 @@ import {
   getHomeRouteName,
   getLoginRouteName,
   getRegisterRouteName,
+  getProfileRouteName,
 } from "../router";
 
 export default defineComponent({
@@ -57,7 +58,7 @@ export default defineComponent({
   },
   data() {
     return {
-      profileRoute: getHomeRouteName(),
+      profileRoute: getProfileRouteName(),
       loginRoute: getLoginRouteName(),
       registerRoute: getRegisterRouteName(),
     };

@@ -1,6 +1,8 @@
 // 用户相关url
 // 用户信息
 export const USERS_ME = "/users/v1/me";
+// 用户详细信息
+export const USERS_ME_DETAIL = "/users/v1/detail";
 // 用户登录
 export const USERS_LOGIN = "/users/v1/me/login";
 // 用户行为

@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import { addUserAction, ROUTE_CHANGE, SUCCESS } from "../services/action";
 
 import Home from "../views/Home.vue";
+import Profile from "../views/Profile.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import Logins from "../views/Logins.vue";
@@ -22,6 +23,7 @@ import Configuration from "../views/configs/Configuration.vue";
 import Others from "../views/Others.vue";
 
 const home = "home";
+const profile = "profile";
 const login = "login";
 const register = "register";
 const logins = "logins";
@@ -61,6 +63,11 @@ const router = createRouter({
       path: "/",
       name: home,
       component: Home,
+    },
+    {
+      path: "/profile",
+      name: profile,
+      component: Profile,
     },
     {
       path: "/login",
@@ -142,6 +149,9 @@ const router = createRouter({
 
 export function getHomeRouteName(): string {
   return home;
+}
+export function getProfileRouteName(): string {
+  return profile;
 }
 export function getLoginRouteName(): string {
   return login;

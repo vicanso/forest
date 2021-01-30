@@ -178,6 +178,13 @@ func init() {
 		ctrl.me,
 	)
 
+	// 获取用户信息
+	g.GET(
+		"/v1/detail",
+		shouldBeLogin,
+		ctrl.detail,
+	)
+
 	// 用户注册
 	g.POST(
 		"/v1/me",
@@ -545,6 +552,18 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		return
 	}
 	c.Body = &resp
+	return
+}
+
+// detail 详细信息
+func (*userCtrl) detail(c *elton.Context) (err error) {
+	us := getUserSession(c)
+	user, err := getEntClient().User.Get(c.Context(), us.MustGetInfo().ID)
+	if err != nil {
+		return
+	}
+
+	c.Body = user
 	return
 }
 
