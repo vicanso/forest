@@ -19,7 +19,7 @@
 import { defineComponent } from "vue";
 
 import ExButton from "../components/ExButton.vue";
-import { useCommonStore } from "../store";
+import useCommonState, { commonListRandomKey } from "../store/common";
 
 export default defineComponent({
   name: "Others",
@@ -27,10 +27,10 @@ export default defineComponent({
     ExButton,
   },
   setup() {
-    const commonStore = useCommonStore();
+    const commonState = useCommonState();
     return {
-      randomKeys: commonStore.state.randomKeys,
-      listRandomKey: () => commonStore.dispatch("listRandomKey"),
+      randomKeys: commonState.randomKeys,
+      listRandomKey: commonListRandomKey,
     };
   },
 });

@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { useConfigStore } from "../../store";
+import useConfigState, { configListValid } from "../../store/config";
 import ConfigTable from "../../components/configs/Table.vue";
 
 export default defineComponent({
@@ -32,10 +32,9 @@ export default defineComponent({
     ConfigTable,
   },
   setup() {
-    const configStore = useConfigStore();
+    const configState = useConfigState();
     return {
-      currentValid: configStore.state.currentValid,
-      getCurrentValid: () => configStore.dispatch("getCurrentValid"),
+      currentValid: configState.currentValidConfig,
     };
   },
   data() {
@@ -49,7 +48,7 @@ export default defineComponent({
   methods: {
     async fetch() {
       try {
-        await this.getCurrentValid();
+        await configListValid();
       } catch (err) {
         this.$error(err);
       }

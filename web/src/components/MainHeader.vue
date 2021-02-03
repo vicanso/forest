@@ -39,7 +39,7 @@ header.header
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { useUserStore } from "../store";
+import useUserState, { userLogout } from "../store/user";
 import {
   getHomeRouteName,
   getLoginRouteName,
@@ -50,23 +50,18 @@ import {
 export default defineComponent({
   name: "MainHeader",
   setup() {
-    const userStore = useUserStore();
-    return {
-      user: userStore.state.info,
-      logout: () => userStore.dispatch("logout"),
-    };
-  },
-  data() {
+    const userState = useUserState();
     return {
       profileRoute: getProfileRouteName(),
       loginRoute: getLoginRouteName(),
       registerRoute: getRegisterRouteName(),
+      user: userState.info,
     };
   },
   methods: {
     async onLogout() {
       try {
-        await this.logout();
+        await userLogout();
         this.$router.push({
           name: getHomeRouteName(),
         });

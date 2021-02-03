@@ -65,7 +65,7 @@ import {
   getActionsRouteName,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
-import { useUserStore } from "../store";
+import useUserState from "../store/user";
 import { isAllowedUser } from "../helpers/util";
 
 const navs = [
@@ -188,9 +188,9 @@ export default defineComponent({
   emits: ["toggle"],
 
   setup() {
-    const userStore = useUserStore();
+    const userState = useUserState();
     return {
-      user: userStore.state.info,
+      user: userState.info,
     };
   },
   data() {

@@ -29,7 +29,7 @@ import { defineComponent } from "vue";
 import MainHeader from "./components/MainHeader.vue";
 import MainNav from "./components/MainNav.vue";
 
-import { useUserStore } from "./store";
+import useUserState, { userFetchInfo, userUpdate } from "./store/user";
 import { getLoginRouteName } from "./router";
 import { loadSetting, getSetting, saveSetting } from "./services/setting";
 
@@ -40,11 +40,9 @@ export default defineComponent({
     MainNav,
   },
   setup() {
-    const userStore = useUserStore();
+    const userState = useUserState();
     return {
-      userInfo: userStore.state.info,
-      fetchUserInfo: () => userStore.dispatch("fetch"),
-      updateUserInfo: (params) => userStore.dispatch("update", params),
+      userInfo: userState.info,
     };
   },
   data() {
@@ -80,7 +78,7 @@ export default defineComponent({
     async fetch() {
       const { userInfo, $router } = this;
       try {
-        await this.fetchUserInfo();
+        await userFetchInfo();
         // 如果未登录则跳转至登录
         if (!userInfo.account) {
           $router.push({
@@ -88,7 +86,7 @@ export default defineComponent({
           });
         } else {
           // 如果已登录，刷新cookie有效期（不关注刷新是否成功，因此不用await）
-          this.updateUserInfo({});
+          userUpdate({});
         }
       } catch (err) {
         this.$error(err);

@@ -101,9 +101,9 @@ el-card.logins
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onUnmounted } from "vue";
 
-import { useUserStore } from "../store";
+import useUserState, { userListLogin, userLoginClear } from "../store/user";
 import {
   today,
   getDateDayShortcuts,
@@ -151,10 +151,13 @@ export default defineComponent({
   },
   mixins: [FilterTable],
   setup() {
-    const userStore = useUserStore();
+    // 必须以这种方式才会调用
+    onUnmounted(() => {
+      userLoginClear();
+    });
+    const userState = useUserState();
     return {
-      listLogin: (params) => userStore.dispatch("listLogin", params),
-      logins: userStore.state.logins,
+      logins: userState.logins,
     };
   },
   data() {
@@ -184,7 +187,7 @@ export default defineComponent({
       }
       delete params.dateRange;
       try {
-        await this.listLogin(params);
+        await userListLogin(params);
       } catch (err) {
         this.$error(err);
       }

@@ -22,7 +22,7 @@ import { defineComponent } from "vue";
 import ConfigEditor from "../../components/configs/Editor.vue";
 import SessionInterceptorData from "../../components/configs/SessionInterceptorData.vue";
 import { SESSION_INTERCEPTOR } from "../../constants/common";
-import { useConfigStore } from "../../store";
+import useConfigState, { configList } from "../../store/config";
 
 export default defineComponent({
   name: "BlockIP",
@@ -31,10 +31,9 @@ export default defineComponent({
     ConfigEditor,
   },
   setup() {
-    const configStore = useConfigStore();
+    const configState = useConfigState();
     return {
-      configs: configStore.state.configs,
-      list: (params) => configStore.dispatch("list", params),
+      configs: configState.configs,
     };
   },
   data() {
@@ -49,12 +48,13 @@ export default defineComponent({
     };
   },
   async mounted() {
-    const { $route, $router } = this;
+    const { $route, $router, configs } = this;
     this.processing = true;
     try {
-      const { configurations } = await this.list({
+      await configList({
         name: SESSION_INTERCEPTOR,
       });
+      const configurations = configs.items;
       if (configurations && configurations.length !== 0) {
         let currentID = null;
         if ($route.query.id) {

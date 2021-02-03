@@ -117,7 +117,7 @@ el-card.httpErrors
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onUnmounted } from "vue";
 
 import { getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
@@ -126,7 +126,11 @@ import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
-import { useFluxStore } from "../store";
+import useFluxState, {
+  fluxListHTTPCategory,
+  fluxListHTTPError,
+  fluxListHTTPErrorClear,
+} from "../store/flux";
 
 // 最近一小时
 const defaultDateRange = [new Date(Date.now() - 60 * 60 * 1000), new Date()];
@@ -222,12 +226,13 @@ export default defineComponent({
   },
   mixins: [FilterTable],
   setup() {
-    const fluxStore = useFluxStore();
+    onUnmounted(() => {
+      fluxListHTTPErrorClear();
+    });
+    const fluxState = useFluxState();
     return {
-      httpErrors: fluxStore.state.httpErrors,
-      httpErrorCategories: fluxStore.state.httpErrorCategories,
-      listHTTPError: (params) => fluxStore.dispatch("listHTTPError", params),
-      listHTTPErrorCategory: () => fluxStore.dispatch("listHTTPErrorCategory"),
+      httpErrors: fluxState.httpErrors,
+      httpErrorCategories: fluxState.httpErrorCategories,
     };
   },
   data() {
@@ -255,7 +260,7 @@ export default defineComponent({
   },
   async beforeMount() {
     try {
-      await this.listHTTPErrorCategory();
+      await fluxListHTTPCategory();
       categories.length = 0;
       categories.push({
         name: "全部",
@@ -294,7 +299,7 @@ export default defineComponent({
       params.end = formatDateWithTZ(value[1]);
       delete params.dateRange;
       try {
-        await this.listHTTPError(params);
+        await fluxListHTTPError(params);
       } catch (err) {
         this.$error(err);
       }

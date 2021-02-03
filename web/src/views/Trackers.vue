@@ -124,7 +124,7 @@ el-card.trackers
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onUnmounted } from "vue";
 
 import {
   today,
@@ -138,7 +138,11 @@ import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
-import { useFluxStore } from "../store";
+import userFluxState, {
+  fluxListUserTrackAction,
+  fluxListUserTracker,
+  fluxListUserTrackerClear,
+} from "../store/flux";
 
 const defaultDateRange = [today(), today()];
 const actionOptions = [];
@@ -233,12 +237,13 @@ export default defineComponent({
   },
   mixins: [FilterTable],
   setup() {
-    const fluxStore = useFluxStore();
+    onUnmounted(() => {
+      fluxListUserTrackerClear();
+    });
+    const fluxState = userFluxState();
     return {
-      trackers: fluxStore.state.trackers,
-      trackerActions: fluxStore.state.trackerActions,
-      listTracker: (params) => fluxStore.dispatch("listTracker", params),
-      listTrackerActions: () => fluxStore.dispatch("listTrackerActions"),
+      trackers: fluxState.userTrackers,
+      trackerActions: fluxState.userTrackerActions,
     };
   },
   data() {
@@ -265,7 +270,7 @@ export default defineComponent({
   },
   async beforeMount() {
     try {
-      await this.listTrackerActions();
+      await fluxListUserTrackAction();
 
       actionOptions.length = 0;
       actionOptions.push({
@@ -305,7 +310,7 @@ export default defineComponent({
       params.end = formatEnd(value[1]);
       delete params.dateRange;
       try {
-        await this.listTracker(params);
+        await fluxListUserTracker(params);
       } catch (err) {
         this.$error(err);
       }

@@ -93,14 +93,17 @@
   user(
     v-else
   )
-
-
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onUnmounted } from "vue";
 
-import { useUserStore, useCommonStore } from "../store";
+import useUserState, {
+  userList,
+  userListRole,
+  userListClear,
+} from "../store/user";
+import useCommonState, { commonListStatus } from "../store/common";
 
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
@@ -151,18 +154,19 @@ export default defineComponent({
   },
   mixins: [FilterTable],
   setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
+    const commonState = useCommonState();
+    const userState = useUserState();
+    // 清理数据减少内存占用
+    onUnmounted(() => {
+      userListClear();
+    });
     return {
-      users: userStore.state.users,
-      list: (params) => userStore.dispatch("list", params),
-      listRole: () => userStore.dispatch("listRole"),
-      listStatus: () => commonStore.dispatch("listStatus"),
-      userRoles: userStore.state.roles,
-      statuses: commonStore.state.statuses,
+      users: userState.users,
+      userRoles: userState.roles,
+      statuses: commonState.statuses,
       getStatusDesc: (status: number): string => {
         let desc = "";
-        commonStore.state.statuses.items.forEach((item) => {
+        commonState.statuses.items.forEach((item) => {
           if (item.value === status) {
             desc = item.name;
           }
@@ -185,8 +189,8 @@ export default defineComponent({
   },
   async beforeMount() {
     try {
-      await this.listRole();
-      await this.listStatus();
+      await userListRole();
+      await commonListStatus();
 
       // 重置
       roleSelectList.length = 0;
@@ -218,7 +222,7 @@ export default defineComponent({
         return;
       }
       try {
-        await this.list(query);
+        await userList(query);
       } catch (err) {
         this.$error(err);
       }

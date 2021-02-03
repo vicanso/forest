@@ -14,7 +14,7 @@ el-select(
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { useCommonStore } from "../../store";
+import useCommonState, { commonListRouter } from "../../store/common";
 
 export default defineComponent({
   name: "RouterSelector",
@@ -26,10 +26,9 @@ export default defineComponent({
   },
   emits: ["change"],
   setup() {
-    const commonStore = useCommonStore();
+    const commonState = useCommonState();
     return {
-      routers: commonStore.state.routers,
-      listRouter: () => commonStore.dispatch("listRouter"),
+      routers: commonState.routers,
     };
   },
   data() {
@@ -46,7 +45,7 @@ export default defineComponent({
     },
     async fetch() {
       try {
-        await this.listRouter();
+        await commonListRouter();
       } catch (err) {
         this.$error(err);
       }

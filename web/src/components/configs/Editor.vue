@@ -7,7 +7,7 @@
     span {{ $props.name || "添加/更新配置" }}
   el-form(
     label-width="90px"
-    v-loading="current.processing"
+    v-loading="configs.processing"
     v-if="!fetching"
   )
     p
@@ -47,7 +47,7 @@
         v-model="form.status"
         placeholder="请选择配置状态"
       ): el-option(
-        v-for="item in statuses"
+        v-for="item in statuses.items"
         :key="item.value"
         :label="item.label"
         :value="item.value"
@@ -95,7 +95,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { diff } from "../../helpers/util";
-import { useConfigStore } from "../../store";
+import useConfigState, {
+  configFindByID,
+  configAdd,
+  configUpdateByID,
+} from "../../store/config";
 
 import ExButton from "../ExButton.vue";
 
@@ -134,14 +138,14 @@ export default defineComponent({
     },
   },
   setup() {
-    const configStore = useConfigStore();
+    const configState = useConfigState();
     return {
-      statuses: configStore.state.statuses,
-      configs: configStore.state.configs,
-      current: configStore.state.current,
-      findByID: (id) => configStore.dispatch("findByID", id),
-      add: (data) => configStore.dispatch("add", data),
-      updateByID: (params) => configStore.dispatch("updateByID", params),
+      statuses: configState.statuses,
+      configs: configState.configs,
+      current: configState.configs.current,
+      // findByID: (id) => configStore.dispatch("findByID", id),
+      // add: (data) => configStore.dispatch("add", data),
+      // updateByID: (params) => configStore.dispatch("updateByID", params),
     };
   },
   data() {
@@ -204,14 +208,14 @@ export default defineComponent({
             this.$message.warning("未修改配置无法更新");
             return isSuccess;
           }
-          await this.updateByID({
+          await configUpdateByID({
             id,
             data: info.data,
           });
           this.$message.info("修改配置成功");
           isSuccess = true;
         } else {
-          await this.add(config);
+          await configAdd(config);
           this.$message.info("添加配置成功");
         }
         this.goBack();
@@ -239,7 +243,7 @@ export default defineComponent({
       }
       this.fetching = true;
       try {
-        const data = await this.findByID(currentID);
+        const data = await configFindByID(currentID);
         const config = {};
         Object.keys(this.form).forEach((key) => {
           config[key] = data[key];

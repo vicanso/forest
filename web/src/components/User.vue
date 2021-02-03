@@ -14,7 +14,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { useUserStore, useCommonStore } from "../store";
+import useUserState, {
+  userFindByID,
+  userUpdateByID,
+  userListRole,
+} from "../store/user";
+import useCommonState, { commonListStatus } from "../store/common";
 import BaseEditor from "./base/Editor.vue";
 
 const roleSelectList = [];
@@ -76,21 +81,16 @@ export default defineComponent({
     BaseEditor,
   },
   setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
+    const userState = useUserState();
+    const commonState = useCommonState();
     return {
-      findByID: (id) =>
-        userStore.dispatch("findByID", {
-          id,
-        }),
-      updateByID: (params) => userStore.dispatch("updateByID", params),
-      listRole: () => userStore.dispatch("listRole"),
-      listStatus: () => commonStore.dispatch("listStatus"),
-      userRoles: userStore.state.roles,
-      statuses: commonStore.state.statuses,
+      findByID: userFindByID,
+      updateByID: userUpdateByID,
+      userRoles: userState.roles,
+      statuses: commonState.statuses,
       getStatusDesc: (status) => {
         let desc = "";
-        commonStore.state.statuses.items.forEach((item) => {
+        commonState.statuses.items.forEach((item) => {
           if (item.value === status) {
             desc = item.name;
           }
@@ -113,8 +113,8 @@ export default defineComponent({
       this.id = Number(id);
     }
     try {
-      await this.listRole();
-      await this.listStatus();
+      await userListRole();
+      await commonListStatus();
 
       // 重置
       roleSelectList.length = 0;

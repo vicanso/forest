@@ -2,20 +2,19 @@
   "name": "web",
   "version": "0.0.0",
   "scripts": {
-    "format": "node node_modules/.bin/prettier --write src/*.ts src/*.vue src/**/*.ts src/**/*.vue src/**/**/*.ts src/**/**/*.vue",
-    "lint": "yarn eslint . --ext .js,.vue,.ts",
+    "format": "prettier --write src/*.ts src/*.vue src/**/*.ts src/**/*.vue src/**/**/*.ts src/**/**/*.vue",
+    "lint": "eslint . --ext .js,.vue,.ts",
     "dev": "vite",
     "build": "vuedx-typecheck . && vite build"
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "dayjs": "^1.10.3",
-    "element-plus": "^1.0.1-beta.26",
+    "dayjs": "^1.10.4",
+    "element-plus": "^1.0.2-beta.31",
     "localforage": "^1.9.0",
     "pako": "^2.0.3",
     "vue": "^3.0.5",
-    "vue-router": "^4.0.3",
-    "vuex": "^4.0.0-rc.2"
+    "vue-router": "^4.0.3"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.14.0",
@@ -30,6 +29,6 @@
     "pug": "^3.0.0",
     "stylus": "^0.54.8",
     "typescript": "^4.1.3",
-    "vite": "^2.0.0-beta.29"
+    "vite": "^2.0.0-beta.62"
   }
 }

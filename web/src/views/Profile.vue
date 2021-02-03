@@ -77,21 +77,13 @@ el-card.profile
 import { defineComponent } from "vue";
 
 import ExButton from "../components/ExButton.vue";
-import { useUserStore } from "../store";
+import { userUpdate, userFetchDetail, userLogout } from "../store/user";
 import { getLoginRouteName } from "../router";
 
 export default defineComponent({
   name: "Profile",
   components: {
     ExButton,
-  },
-  setup() {
-    const userStore = useUserStore();
-    return {
-      fetchDetail: () => userStore.dispatch("fetchDetail"),
-      update: (params) => userStore.dispatch("update", params),
-      logout: () => userStore.dispatch("logout"),
-    };
   },
   data() {
     return {
@@ -111,7 +103,7 @@ export default defineComponent({
     async fetch() {
       this.processing = true;
       try {
-        const data = await this.fetchDetail();
+        const data = await userFetchDetail();
         this.email = data.email;
         this.roles = data.roles;
       } catch (err) {
@@ -158,9 +150,9 @@ export default defineComponent({
       }
       this.processing = true;
       try {
-        await this.update(updateData);
+        await userUpdate(updateData);
         if (updateData.newPassword) {
-          await this.logout();
+          await userLogout();
           this.$message.info("已成功更新，需要重新登录");
           this.$router.replace({
             name: getLoginRouteName(),

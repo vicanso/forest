@@ -131,7 +131,8 @@ import { defineComponent } from "vue";
 import TimeFormater from "../TimeFormater.vue";
 import BaseJson from "../base/JSON.vue";
 import ExButton from "../ExButton.vue";
-import { useConfigStore, useUserStore } from "../../store";
+import useConfigState, { configList } from "../../store/config";
+import useUserState from "../../store/user";
 import { CONFIG_ENABLED, CONFIG_EDIT_MODE } from "../../constants/common";
 
 export default defineComponent({
@@ -162,15 +163,16 @@ export default defineComponent({
     },
   },
   setup() {
-    const configStore = useConfigStore();
-    const userStore = useUserStore();
+    // const configStore = useConfigStore();
+    const configState = useConfigState();
+    const userState = useUserState();
     return {
-      userInfo: userStore.state.info,
-      configs: configStore.state.configs,
-      list: (params) => configStore.dispatch("list", params),
+      userInfo: userState.info,
+      configs: configState.configs,
+      // list: (params) => configStore.dispatch("list", params),
       getStatusDesc: (status) => {
         let desc = "";
-        configStore.state.statuses.forEach((item) => {
+        configState.statuses.items.forEach((item) => {
           if (item.value === status) {
             desc = item.label;
           }
@@ -229,7 +231,7 @@ export default defineComponent({
     async fetch() {
       const { query } = this;
       try {
-        await this.list(query);
+        await configList(query);
       } catch (err) {
         this.$error(err);
       }

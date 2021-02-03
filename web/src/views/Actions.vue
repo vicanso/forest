@@ -92,7 +92,7 @@ el-card.actions
       )
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onUnmounted } from "vue";
 import {
   today,
   getDateDayShortcuts,
@@ -105,7 +105,11 @@ import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
-import { useFluxStore } from "../store";
+import useFluxState, {
+  fluxListClientActionCategory,
+  fluxListClientAction,
+  fluxListClientActionClear,
+} from "../store/flux";
 
 const defaultDateRange = [today(), today()];
 const categoryOptions = [];
@@ -182,13 +186,13 @@ export default defineComponent({
   },
   mixins: [FilterTable],
   setup() {
-    const fluxStore = useFluxStore();
+    onUnmounted(() => {
+      fluxListClientActionClear();
+    });
+    const fluxState = useFluxState();
     return {
-      userActionCategories: fluxStore.state.userActionCategories,
-      userActions: fluxStore.state.userActions,
-      listAction: (params) => fluxStore.dispatch("listAction", params),
-      listUserActionCategory: () =>
-        fluxStore.dispatch("listUserActionCategory"),
+      userActionCategories: fluxState.clientActionCategories,
+      userActions: fluxState.clientActions,
     };
   },
   data() {
@@ -207,7 +211,7 @@ export default defineComponent({
   },
   async beforeMount() {
     try {
-      await this.listUserActionCategory();
+      await fluxListClientActionCategory();
 
       categoryOptions.length = 0;
       categoryOptions.push({
@@ -241,7 +245,7 @@ export default defineComponent({
       params.end = formatEnd(value[1]);
       delete params.dateRange;
       try {
-        await this.listAction(params);
+        await fluxListClientAction(params);
       } catch (err) {
         this.$error(err);
       }

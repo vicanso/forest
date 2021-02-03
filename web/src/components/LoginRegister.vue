@@ -71,7 +71,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { useUserStore, useCommonStore } from "../store";
+import { commonGetCaptcha } from "../store/common";
+import useUserState, { userLogin, userRegister } from "../store/user";
 import { getLoginRouteName } from "../router";
 import { LOGIN, REGISTER } from "../services/action";
 
@@ -86,13 +87,9 @@ export default defineComponent({
     },
   },
   setup() {
-    const userStore = useUserStore();
-    const commonStore = useCommonStore();
+    const userState = useUserState();
     return {
-      user: userStore.state.info,
-      getCaptcha: () => commonStore.dispatch("getCaptcha"),
-      login: (params) => userStore.dispatch("login", params),
-      register: (params) => userStore.dispatch("register", params),
+      user: userState.info,
     };
   },
   data() {
@@ -127,7 +124,7 @@ export default defineComponent({
     async refreshCaptcha() {
       try {
         this.captchaData = null;
-        const data = await this.getCaptcha();
+        const data = await commonGetCaptcha();
         this.captchaData = data;
       } catch (err) {
         this.$error(err);
@@ -153,13 +150,13 @@ export default defineComponent({
         const { type } = this.$props;
         // 注册
         if (type == registerType) {
-          await this.register(params);
+          await userRegister(params);
           this.$router.replace({
             name: getLoginRouteName(),
           });
         } else {
           // 登录
-          await this.login(params);
+          await userLogin(params);
           this.$router.back();
         }
         isSuccess = true;
