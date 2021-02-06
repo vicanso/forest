@@ -69,3 +69,5 @@ class LocalStore {
 export const userActions = new LimitStore("userActions", 50);
 // userSettings 用户设置
 export const userSettings = new LocalStore("userSettings");
+// httpRequests http请求记录，测试环境使用
+export const httpRequests = new LimitStore("httpRequests", 20);

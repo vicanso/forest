@@ -1,30 +1,26 @@
 <template lang="pug">
-template(
+el-button.btn(
   v-if=`$props.category === "primary"`
+  type="primary"
+  :icon="$props.icon"
+  @click="handleClick"
+  :class="{ isProcessing: processing}"
 )
-  el-button.btn(
-    type="primary"
-    :icon="$props.icon"
-    @click="handleClick"
-    :class="{ isProcessing: processing}"
+  slot
+  i.el-icon-loading.loading(
+    v-if="processing"
   )
-    slot
-    i.el-icon-loading.loading(
-      v-if="processing"
-    )
-template(
+el-button(
   v-else-if=`$props.category === "smallText"`
+  type="text"
+  size="small"
+  @click="handleClick"
+  :class="{ isProcessing: processing}"
 )
-  el-button(
-    type="text"
-    size="small"
-    @click="handleClick"
-    :class="{ isProcessing: processing}"
-  )
-    slot
-    span(
-      v-if="processing"
-    ) ...
+  slot
+  span(
+    v-if="processing"
+  ) ...
 </template>
 <script lang="ts">
 // 此button的扩展可记录用户行为，防止重复点击等

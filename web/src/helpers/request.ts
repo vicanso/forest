@@ -1,8 +1,9 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { gzip } from "pako";
 
 import HTTPError from "./http-error";
-import { isDevelopment } from "../constants/env";
+import { isDevelopment, isProduction } from "../constants/env";
+import { httpRequests } from "../store";
 
 const requestedAt = "X-Requested-At";
 // 最小压缩长度
@@ -50,11 +51,35 @@ request.interceptors.request.use(
   }
 );
 
+// addRequestStats 添加http请求的相关记录
+function addRequestStats(
+  config: AxiosRequestConfig | undefined,
+  res: AxiosResponse | undefined,
+  he: HTTPError | undefined
+): void {
+  const data: Record<string, unknown> = {};
+  if (config) {
+    data.method = config.method;
+    data.url = config.url;
+    data.data = config.data;
+    const value = config.headers[requestedAt];
+    data.use = Date.now() - Number(value);
+  }
+  if (res) {
+    data.status = res.status;
+  }
+  if (he) {
+    data.message = he.message;
+  }
+  httpRequests.add(data);
+}
+
 // 设置接口最少要x ms才完成，能让客户看到loading
 const minUse = 300;
 const timeoutErrorCodes = ["ECONNABORTED", "ECONNREFUSED", "ECONNRESET"];
 request.interceptors.response.use(
   async (res) => {
+    addRequestStats(res.config, res, undefined);
     // 根据请求开始时间计算耗时，并判断是否需要延时响应
     const value = res.config.headers[requestedAt];
     if (value) {
@@ -86,6 +111,7 @@ request.interceptors.response.use(
       }
       he.extra = response.data?.extra;
     }
+    addRequestStats(response?.config, response, he);
     return Promise.reject(he);
   }
 );
