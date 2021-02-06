@@ -6,22 +6,23 @@ import App from "./App.vue";
 import ExButton from "./components/ExButton.vue";
 import Router, { getCurrentLocation } from "./router";
 import "./main.styl";
-import { addUserAction, ERROR, FAIL } from "./services/action";
+import { actionAdd, ERROR, FAIL } from "./states/action";
 import { isDevelopment } from "./constants/env";
+import HTTPError from "./helpers/http-error";
 
 const app = createApp(App);
 // 全局出错处理
-app.config.errorHandler = (err: any, vm, info) => {
+app.config.errorHandler = (err: unknown, vm, info) => {
   // 处理错误
-  let message = "";
-  if (err && err.message) {
+  let message = "未知错误";
+  if (err instanceof Error) {
     message = err.message;
   }
   if (info) {
     message += ` [${info}]`;
   }
   const currentLocation = getCurrentLocation();
-  addUserAction({
+  actionAdd({
     category: ERROR,
     route: currentLocation.name,
     path: currentLocation.path,
@@ -31,30 +32,29 @@ app.config.errorHandler = (err: any, vm, info) => {
   throw err;
 };
 // 自定义全局出错提示
-app.config.globalProperties.$error = function (err: any) {
-  if (!(err instanceof Error)) {
-    ElMessage.error(err);
-    return;
-  }
-  let message = err.message;
-  if (err.category) {
-    message += ` [${err.category.toUpperCase()}]`;
-  }
-  if (err.code) {
-    message += ` [${err.code}]`;
+app.config.globalProperties.$error = function (err: Error | HTTPError) {
+  let message = err.toString();
+  if (err instanceof HTTPError) {
+    message = err.message;
+    if (err.category) {
+      message += ` [${err.category.toUpperCase()}]`;
+    }
+    if (err.code) {
+      message += ` [${err.code}]`;
+    }
+    // 如果是异常（客户端异常，如请求超时，中断等），则上报user action
+    if (err.exception) {
+      const currentLocation = getCurrentLocation();
+      actionAdd({
+        category: ERROR,
+        route: currentLocation.name,
+        path: currentLocation.path,
+        result: FAIL,
+        message,
+      });
+    }
   }
   ElMessage.error(message);
-  // 如果是异常（客户端异常，如请求超时，中断等），则上报user action
-  if (err.exception) {
-    const currentLocation = getCurrentLocation();
-    addUserAction({
-      category: ERROR,
-      route: currentLocation.name,
-      path: currentLocation.path,
-      result: FAIL,
-      message,
-    });
-  }
   if (isDevelopment()) {
     console.error(err);
   }

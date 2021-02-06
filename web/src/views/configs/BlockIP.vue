@@ -69,7 +69,7 @@ export default defineComponent({
 @import "../../common";
 
 .add
-  margin: $mainMargin
+  margin $mainMargin
 .addBtn
-  width: 100%
+  width 100%
 </style>

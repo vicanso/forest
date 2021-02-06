@@ -21,7 +21,7 @@ import { defineComponent } from "vue";
 import ConfigEditor from "../../components/configs/Editor.vue";
 import MockTimeData from "../../components/configs/MockTimeData.vue";
 import { MOCK_TIME } from "../../constants/common";
-import useConfigState, { configList } from "../../store/config";
+import useConfigState, { configList } from "../../states/config";
 
 export default defineComponent({
   name: "MockTime",

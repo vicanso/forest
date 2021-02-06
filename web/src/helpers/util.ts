@@ -157,6 +157,7 @@ export function getDateTimeShortcuts(ranges: string[]): Shortcut[] {
   return shortcuts;
 }
 
+// eslint-disable-next-line
 function isEqual(value: any, originalValue: any): boolean {
   // 使用json stringify对比是否相同
   return JSON.stringify(value) == JSON.stringify(originalValue);
@@ -164,12 +165,15 @@ function isEqual(value: any, originalValue: any): boolean {
 
 interface DiffInfo {
   modifiedCount: number;
-  data: any;
+  data: Record<string, unknown>;
 }
 // diff  对比两个object的差异
 // eslint-disable-next-line
-export function diff(current: any, original: any): DiffInfo {
-  const data: any = {};
+export function diff(
+  current: Record<string, unknown>,
+  original: Record<string, unknown>
+): DiffInfo {
+  const data: Record<string, unknown> = {};
   let modifiedCount = 0;
   Object.keys(current).forEach((key) => {
     const value = current[key];
@@ -188,6 +192,7 @@ export function diff(current: any, original: any): DiffInfo {
 // eslint-disable-next-line
 export function validateForm(form: any) {
   return new Promise<void>((resolve, reject) => {
+    // eslint-disable-next-line
     form.validate((valid: any, rules: any) => {
       if (valid) {
         return resolve();
@@ -195,7 +200,7 @@ export function validateForm(form: any) {
       const messagesArr: string[] = [];
       Object.keys(rules).forEach((key) => {
         const arr = rules[key];
-        arr.forEach((item: any) => {
+        arr.forEach((item: Error) => {
           messagesArr.push(item.message);
         });
       });
@@ -205,9 +210,10 @@ export function validateForm(form: any) {
 }
 
 // omitNil omit nil(undefined null)
-// eslint-disable-next-line
-export function omitNil(data: any): any {
-  const params: any = {};
+export function omitNil(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  const params: Record<string, unknown> = {};
   Object.keys(data).forEach((key) => {
     const value = data[key];
     if (value !== undefined && value !== null) {
@@ -220,7 +226,8 @@ export function omitNil(data: any): any {
 // getFieldRules get field rules
 // eslint-disable-next-line
 export function getFieldRules(fields: any) {
-  const rules: any = {};
+  const rules: Record<string, unknown> = {};
+  // eslint-disable-next-line
   fields.forEach((field: any) => {
     if (field.rules) {
       rules[field.key] = field.rules;

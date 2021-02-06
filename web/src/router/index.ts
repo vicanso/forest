@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
-import { addUserAction, ROUTE_CHANGE, SUCCESS } from "../services/action";
+import { actionAdd, ROUTE_CHANGE, SUCCESS } from "../states/action";
 
 import Home from "../views/Home.vue";
 import Profile from "../views/Profile.vue";
@@ -22,25 +22,25 @@ import SessionInterceptor from "../views/configs/SessionInterceptor.vue";
 import Configuration from "../views/configs/Configuration.vue";
 import Others from "../views/Others.vue";
 
-const home = "home";
-const profile = "profile";
-const login = "login";
-const register = "register";
-const logins = "logins";
-const users = "users";
-const trackers = "trackers";
-const actions = "actions";
-const httpErrors = "httpErrors";
+export const ROUTE_HOME = "home";
+export const ROUTE_PROFILE = "profile";
+export const ROUTE_LOGIN = "login";
+export const ROUTE_REGISTER = "register";
+export const ROUTE_LOGINS = "logins";
+export const ROUTE_USERS = "users";
+export const ROUTE_TRACKERS = "trackers";
+export const ROUTE_ACTIONS = "actions";
+export const ROUTE_HTTP_ERRORS = "httpErrors";
 
 // 系统配置
-const mockTime = "mockTime";
-const blockIP = "blockIP";
-const signedKey = "signedKey";
-const routerMock = "routerMock";
-const routerConcurrency = "routerConcurrency";
-const sessionInterceptor = "sessionInterceptor";
-const configuration = "configuration";
-const others = "others";
+export const ROUTE_MOCK_TIME = "mockTime";
+export const ROUTE_BLOCK_IP = "blockIP";
+export const ROUTE_SIGNED_KEY = "signedKey";
+export const ROUTE_ROUTER_MOCK = "routerMock";
+export const ROUTE_ROUTER_CONCURRENCY = "routerConcurrency";
+export const ROUTE_SESSION_INTERCEPTOR = "sessionInterceptor";
+export const ROUTE_CONFIGURATION = "configuration";
+export const ROUTE_OTHERS = "others";
 
 interface Location {
   name: string;
@@ -61,144 +61,91 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: home,
+      name: ROUTE_HOME,
       component: Home,
     },
     {
       path: "/profile",
-      name: profile,
+      name: ROUTE_PROFILE,
       component: Profile,
     },
     {
       path: "/login",
-      name: login,
+      name: ROUTE_LOGIN,
       component: Login,
     },
     {
       path: "/register",
-      name: register,
+      name: ROUTE_REGISTER,
       component: Register,
     },
     {
       path: "/users",
-      name: users,
+      name: ROUTE_USERS,
       component: Users,
     },
     {
       path: "/logins",
-      name: logins,
+      name: ROUTE_LOGINS,
       component: Logins,
     },
     {
       path: "/trackers",
-      name: trackers,
+      name: ROUTE_TRACKERS,
       component: Trackers,
     },
     {
       path: "/actions",
-      name: actions,
+      name: ROUTE_ACTIONS,
       component: Actions,
     },
     {
       path: "/http-errors",
-      name: httpErrors,
+      name: ROUTE_HTTP_ERRORS,
       component: HTTPErrors,
     },
     {
       path: "/mock-time",
-      name: mockTime,
+      name: ROUTE_MOCK_TIME,
       component: MockTime,
     },
     {
       path: "/block-ip",
-      name: blockIP,
+      name: ROUTE_BLOCK_IP,
       component: BlockIP,
     },
     {
       path: "/signed-key",
-      name: signedKey,
+      name: ROUTE_SIGNED_KEY,
       component: SignedKey,
     },
     {
       path: "/router-mock",
-      name: routerMock,
+      name: ROUTE_ROUTER_MOCK,
       component: RouterMock,
     },
     {
       path: "/router-concurrency",
-      name: routerConcurrency,
+      name: ROUTE_ROUTER_CONCURRENCY,
       component: RouterConcurrency,
     },
     {
       path: "/session-interceptor",
-      name: sessionInterceptor,
+      name: ROUTE_SESSION_INTERCEPTOR,
       component: SessionInterceptor,
     },
     {
       path: "/configuration",
-      name: configuration,
+      name: ROUTE_CONFIGURATION,
       component: Configuration,
     },
     {
       path: "/others",
-      name: others,
+      name: ROUTE_OTHERS,
       component: Others,
     },
   ],
 });
-
-export function getHomeRouteName(): string {
-  return home;
-}
-export function getProfileRouteName(): string {
-  return profile;
-}
-export function getLoginRouteName(): string {
-  return login;
-}
-export function getRegisterRouteName(): string {
-  return register;
-}
-export function getLoginsRouteName(): string {
-  return logins;
-}
-export function getUsersRouteName(): string {
-  return users;
-}
-export function getTrackersRouteName(): string {
-  return trackers;
-}
-export function getActionsRouteName(): string {
-  return actions;
-}
-export function getHTTPErrorsRouteName(): string {
-  return httpErrors;
-}
-
-export function getMockTimeRouteName(): string {
-  return mockTime;
-}
-export function getBlockIPRouteName(): string {
-  return blockIP;
-}
-export function getSignedKeyRouteName(): string {
-  return signedKey;
-}
-export function getRouterMockRouteName(): string {
-  return routerMock;
-}
-export function getRouterConcurrencyRouteName(): string {
-  return routerConcurrency;
-}
-export function getSessionInterceptorRouteName(): string {
-  return sessionInterceptor;
-}
-export function getConfigurationRouteName(): string {
-  return configuration;
-}
-export function getOthersRouteName(): string {
-  return others;
-}
 
 export function getCurrentLocation(): Location {
   return currentLocation;
@@ -213,7 +160,7 @@ router.beforeEach((to, from) => {
     currentLocation.name = to.name.toString();
     currentLocation.path = to.fullPath;
   }
-  addUserAction({
+  actionAdd({
     category: ROUTE_CHANGE,
     route: currentLocation.name,
     path: currentLocation.path,

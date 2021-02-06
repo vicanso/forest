@@ -39,12 +39,12 @@ header.header
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import useUserState, { userLogout } from "../store/user";
+import useUserState, { userLogout } from "../states/user";
 import {
-  getHomeRouteName,
-  getLoginRouteName,
-  getRegisterRouteName,
-  getProfileRouteName,
+  ROUTE_HOME,
+  ROUTE_LOGIN,
+  ROUTE_REGISTER,
+  ROUTE_PROFILE,
 } from "../router";
 
 export default defineComponent({
@@ -52,9 +52,9 @@ export default defineComponent({
   setup() {
     const userState = useUserState();
     return {
-      profileRoute: getProfileRouteName(),
-      loginRoute: getLoginRouteName(),
-      registerRoute: getRegisterRouteName(),
+      profileRoute: ROUTE_PROFILE,
+      loginRoute: ROUTE_LOGIN,
+      registerRoute: ROUTE_REGISTER,
       user: userState.info,
     };
   },
@@ -63,7 +63,7 @@ export default defineComponent({
       try {
         await userLogout();
         this.$router.push({
-          name: getHomeRouteName(),
+          name: ROUTE_HOME,
         });
       } catch (err) {
         this.$error(err);
@@ -76,19 +76,19 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .header
-  height: $mainHeaderHeight
-  background-color: $white
-  padding: 5px 0
-  line-height: $mainHeaderHeight - 10
-  color: $darkBlue
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08)
+  height $mainHeaderHeight
+  background-color $white
+  padding 5px 0
+  line-height $mainHeaderHeight - 10
+  color $darkBlue
+  box-shadow 0 1px 4px rgba(0, 21, 41, 0.08)
 .userInfo
-  float: right
-  font-size: 13px
-  margin-right: $mainMargin
+  float right
+  font-size 13px
+  margin-right $mainMargin
   i
-    margin-right: 3px
-    font-weight: bold
+    margin-right 3px
+    font-weight bold
 .divided
-  margin: 0 15px
+  margin 0 15px
 </style>

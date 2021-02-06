@@ -31,7 +31,7 @@ template(
 import { defineComponent } from "vue";
 
 import { getCurrentLocation } from "../router";
-import { addUserAction, SUCCESS, FAIL, CLICK } from "../services/action";
+import { actionAdd, SUCCESS, FAIL, CLICK } from "../states/action";
 
 export default defineComponent({
   name: "ExButton",
@@ -67,7 +67,6 @@ export default defineComponent({
       if (processing) {
         return;
       }
-      this.processing = true;
       const currentLocation = getCurrentLocation();
       const data = Object.assign(
         {
@@ -83,6 +82,7 @@ export default defineComponent({
       // 由于在onClick会捕获异常处理，因此在此处无法判断是否成功
       data.result = SUCCESS;
       try {
+        this.processing = true;
         const isSuccess = await $props.onClick();
         // 如果onclick返回fail，则表示失败，其它均表示成功
         if (isSuccess === false) {
@@ -91,17 +91,17 @@ export default defineComponent({
       } finally {
         this.processing = false;
       }
-      addUserAction(data);
+      actionAdd(data);
     },
   },
 });
 </script>
 <style lang="stylus" scoped>
 .isProcessing
-  opacity: 0.5
+  opacity 0.5
 .btn
-  width: 100%
+  width 100%
 .loading
-  margin-left: 10px
-  font-weight: 900
+  margin-left 10px
+  font-weight 900
 </style>

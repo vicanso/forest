@@ -99,7 +99,7 @@ import useConfigState, {
   configFindByID,
   configAdd,
   configUpdateByID,
-} from "../../store/config";
+} from "../../states/config";
 
 import ExButton from "../ExButton.vue";
 
@@ -264,13 +264,13 @@ export default defineComponent({
 @import "../../common";
 
 .configurationEditor
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 3px
+    margin-right 3px
   p
-    color: $darkGray
-    font-size: 13px
-    margin: 0 0 15px 0
+    color $darkGray
+    font-size 13px
+    margin 0 0 15px 0
   .selector, .datePicker, .submit
-    width: 100%
+    width 100%
 </style>

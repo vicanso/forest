@@ -1,5 +1,7 @@
 <template lang="pug">
-.user: base-editor(
+.user(
+  v-loading="processing"
+): base-editor(
   v-if="!processing && fields"
   title="更新用户信息"
   icon="el-icon-user"
@@ -18,8 +20,8 @@ import useUserState, {
   userFindByID,
   userUpdateByID,
   userListRole,
-} from "../store/user";
-import useCommonState, { commonListStatus } from "../store/common";
+} from "../states/user";
+import useCommonState, { commonListStatus } from "../states/common";
 import BaseEditor from "./base/Editor.vue";
 
 const roleSelectList = [];
@@ -107,12 +109,12 @@ export default defineComponent({
     };
   },
   async beforeMount() {
-    this.processing = true;
     const { id } = this.$route.query;
     if (id) {
       this.id = Number(id);
     }
     try {
+      this.processing = true;
       await userListRole();
       await commonListStatus();
 

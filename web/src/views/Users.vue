@@ -102,8 +102,8 @@ import useUserState, {
   userList,
   userListRole,
   userListClear,
-} from "../store/user";
-import useCommonState, { commonListStatus } from "../store/common";
+} from "../states/user";
+import useCommonState, { commonListStatus } from "../states/common";
 
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
@@ -234,15 +234,15 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .users
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 5px
+    margin-right 5px
   ul
     li
-      list-style: inside
+      list-style inside
 .selector, .submit
-  width: 100%
+  width 100%
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

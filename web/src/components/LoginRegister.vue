@@ -71,10 +71,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { commonGetCaptcha } from "../store/common";
-import useUserState, { userLogin, userRegister } from "../store/user";
-import { getLoginRouteName } from "../router";
-import { LOGIN, REGISTER } from "../services/action";
+import { commonGetCaptcha } from "../states/common";
+import useUserState, { userLogin, userRegister } from "../states/user";
+import { ROUTE_LOGIN } from "../router";
+import { LOGIN, REGISTER } from "../states/action";
 
 const registerType = "register";
 
@@ -132,11 +132,10 @@ export default defineComponent({
     },
     async onSubmit(): Promise<boolean> {
       let isSuccess = false;
-      const { account, password, captcha, submitting } = this.form;
-      if (submitting) {
+      const { account, password, captcha } = this.form;
+      if (this.submitting) {
         return isSuccess;
       }
-      this.submitting = true;
       if (!account || !password || !captcha) {
         this.$message.warning("账号、密码以及验证码不能为空");
         return isSuccess;
@@ -147,12 +146,13 @@ export default defineComponent({
         captcha: `${this.captchaData.id}:${captcha}`,
       };
       try {
+        this.submitting = true;
         const { type } = this.$props;
         // 注册
         if (type == registerType) {
           await userRegister(params);
           this.$router.replace({
-            name: getLoginRouteName(),
+            name: ROUTE_LOGIN,
           });
         } else {
           // 登录
@@ -175,17 +175,17 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .loginRegister
-  margin: 100px auto
-  max-width: 600px
+  margin 100px auto
+  max-width 600px
   i
-    margin-right: 5px
+    margin-right 5px
 .captcha
-  cursor: pointer
-  overflow: hidden
-  height: 40px
-  text-align: center
+  cursor pointer
+  overflow hidden
+  height 40px
+  text-align center
 .code
-  width: 100%
+  width 100%
 .submit
-  width: 100%
+  width 100%
 </style>

@@ -68,5 +68,5 @@ export default defineComponent({
 </script>
 <style lang="stylus" scoped>
 .sessionInterceptorData
-  width: 100%
+  width 100%
 </style>

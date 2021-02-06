@@ -128,8 +128,8 @@ export async function fluxListUserTracker(params: {
   if (userTrackers.processing) {
     return;
   }
-  userTrackers.processing = true;
   try {
+    userTrackers.processing = true;
     const { data } = await request.get(FLUXES_TRACKERS, {
       params,
     });
@@ -149,8 +149,8 @@ export async function fluxListUserTrackAction(): Promise<void> {
   if (userTrackerActions.processing || userTrackerActions.items.length !== 0) {
     return;
   }
-  userTrackerActions.processing = true;
   try {
+    userTrackerActions.processing = true;
     const url = FLUXES_TAG_VALUES.replace(
       ":measurement",
       "userTracker"
@@ -170,8 +170,8 @@ export async function fluxListHTTPCategory(): Promise<void> {
   ) {
     return;
   }
-  httpErrorCategories.processing = true;
   try {
+    httpErrorCategories.processing = true;
     const url = FLUXES_TAG_VALUES.replace(":measurement", "httpError").replace(
       ":tag",
       "category"
@@ -196,8 +196,8 @@ export async function fluxListHTTPError(params: {
   if (httpErrors.processing) {
     return;
   }
-  httpErrors.processing = true;
   try {
+    httpErrors.processing = true;
     const { data } = await request.get(FLUXES_HTTP_ERRORS, {
       params,
     });
@@ -220,8 +220,8 @@ export async function fluxListClientActionCategory(): Promise<void> {
   ) {
     return;
   }
-  clientActionCategories.processing = true;
   try {
+    clientActionCategories.processing = true;
     const url = FLUXES_TAG_VALUES.replace(":measurement", "userAction").replace(
       ":tag",
       "category"
@@ -246,8 +246,8 @@ export async function fluxListClientAction(params: {
   if (clientActions.processing) {
     return;
   }
-  clientActions.processing = true;
   try {
+    clientActions.processing = true;
     const { data } = await request.get(FLUXES_ACTIONS, {
       params,
     });
@@ -262,13 +262,14 @@ export function fluxListClientActionClear(): void {
   clientActions.items.length = 0;
 }
 
+const state = {
+  userTrackers: readonly(userTrackers),
+  userTrackerActions: readonly(userTrackerActions),
+  httpErrorCategories: readonly(httpErrorCategories),
+  httpErrors: readonly(httpErrors),
+  clientActions: readonly(clientActions),
+  clientActionCategories: readonly(clientActionCategories),
+};
 export default function useFluxState(): ReadonlyFluxState {
-  return {
-    userTrackers: readonly(userTrackers),
-    userTrackerActions: readonly(userTrackerActions),
-    httpErrorCategories: readonly(httpErrorCategories),
-    httpErrors: readonly(httpErrors),
-    clientActions: readonly(clientActions),
-    clientActionCategories: readonly(clientActionCategories),
-  };
+  return state;
 }

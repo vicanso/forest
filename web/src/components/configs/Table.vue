@@ -131,8 +131,8 @@ import { defineComponent } from "vue";
 import TimeFormater from "../TimeFormater.vue";
 import BaseJson from "../base/JSON.vue";
 import ExButton from "../ExButton.vue";
-import useConfigState, { configList } from "../../store/config";
-import useUserState from "../../store/user";
+import useConfigState, { configList } from "../../states/config";
+import useUserState from "../../states/user";
 import { CONFIG_ENABLED, CONFIG_EDIT_MODE } from "../../constants/common";
 
 export default defineComponent({
@@ -256,11 +256,11 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../../common";
 .configurationList
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 3px
+    margin-right 3px
   .op
-    margin: 0 10px
+    margin 0 10px
   .filters
-    margin-left: 20px
+    margin-left 20px
 </style>

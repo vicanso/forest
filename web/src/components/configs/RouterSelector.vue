@@ -14,7 +14,7 @@ el-select(
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import useCommonState, { commonListRouter } from "../../store/common";
+import useCommonState, { commonListRouter } from "../../states/common";
 
 export default defineComponent({
   name: "RouterSelector",

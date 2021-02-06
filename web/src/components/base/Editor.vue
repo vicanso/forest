@@ -1,6 +1,6 @@
 <template lang="pug">
 el-card.baseEditor(
-  v-loading="processing"  
+  v-loading="!inited || processing"  
 )
   template(
     #header
@@ -180,9 +180,9 @@ export default defineComponent({
     async handleAdd(data): Promise<boolean> {
       const { add } = this.$props;
       const { rules } = this;
-      this.processing = true;
       let isSuccess = false;
       try {
+        this.processing = true;
         if (rules) {
           await validateForm(this.$refs.baseEditorForm);
         }
@@ -208,8 +208,8 @@ export default defineComponent({
         return isSuccess;
       }
 
-      this.processing = true;
       try {
+        this.processing = true;
         if (rules) {
           await validateForm(this.$refs.baseEditorForm);
         }
@@ -251,9 +251,9 @@ export default defineComponent({
 <style lang="stylus" scoped>
 .baseEditor
   i
-    margin-right: 5px
+    margin-right 5px
   .select, .btn
-    width: 100%
+    width 100%
   .inputSelect
-    min-width: 60px
+    min-width 60px
 </style>

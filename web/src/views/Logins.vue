@@ -103,7 +103,7 @@ el-card.logins
 <script lang="ts">
 import { defineComponent, onUnmounted } from "vue";
 
-import useUserState, { userListLogin, userLoginClear } from "../store/user";
+import useUserState, { userListLogin, userLoginClear } from "../states/user";
 import {
   today,
   getDateDayShortcuts,
@@ -200,10 +200,10 @@ export default defineComponent({
 @import "../common";
 
 .logins
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 5px
+    margin-right 5px
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

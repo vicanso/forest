@@ -3,7 +3,7 @@
   //- 切换侧边栏
   a.toggleNav(
     href="#"
-    @click.prevent="toggleNav"
+    @click.stop="toggleNav"
   )
     i(
       :class=`$props.shrinking ? "el-icon-s-unfold" : "el-icon-s-fold"`
@@ -49,23 +49,23 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {
-  getHomeRouteName,
-  getLoginsRouteName,
-  getUsersRouteName,
-  getTrackersRouteName,
-  getMockTimeRouteName,
-  getBlockIPRouteName,
-  getSignedKeyRouteName,
-  getRouterMockRouteName,
-  getRouterConcurrencyRouteName,
-  getSessionInterceptorRouteName,
-  getConfigurationRouteName,
-  getOthersRouteName,
-  getHTTPErrorsRouteName,
-  getActionsRouteName,
+  ROUTE_HOME,
+  ROUTE_LOGINS,
+  ROUTE_USERS,
+  ROUTE_TRACKERS,
+  ROUTE_MOCK_TIME,
+  ROUTE_BLOCK_IP,
+  ROUTE_SIGNED_KEY,
+  ROUTE_ROUTER_MOCK,
+  ROUTE_ROUTER_CONCURRENCY,
+  ROUTE_SESSION_INTERCEPTOR,
+  ROUTE_CONFIGURATION,
+  ROUTE_OTHERS,
+  ROUTE_HTTP_ERRORS,
+  ROUTE_ACTIONS,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
-import useUserState from "../store/user";
+import useUserState from "../states/user";
 import { isAllowedUser } from "../helpers/util";
 
 const navs = [
@@ -77,31 +77,31 @@ const navs = [
     children: [
       {
         name: "用户列表",
-        route: getUsersRouteName(),
+        route: ROUTE_USERS,
         roles: [],
         groups: [],
       },
       {
         name: "登录记录",
-        route: getLoginsRouteName(),
+        route: ROUTE_LOGINS,
         roles: [],
         groups: [],
       },
       {
         name: "用户行为",
-        route: getTrackersRouteName(),
+        route: ROUTE_TRACKERS,
         roles: [],
         groups: [],
       },
       {
         name: "出错记录",
-        route: getHTTPErrorsRouteName(),
+        route: ROUTE_HTTP_ERRORS,
         roles: [],
         groups: [],
       },
       {
         name: "客户端行为记录",
-        route: getActionsRouteName(),
+        route: ROUTE_ACTIONS,
         roules: [],
         groups: [],
       },
@@ -115,43 +115,43 @@ const navs = [
     children: [
       {
         name: "所有配置",
-        route: getConfigurationRouteName(),
+        route: ROUTE_CONFIGURATION,
         roles: [],
         groups: [],
       },
       {
         name: "MockTime配置",
-        route: getMockTimeRouteName(),
+        route: ROUTE_MOCK_TIME,
         roles: [],
         groups: [],
       },
       {
         name: "黑名单IP",
-        route: getBlockIPRouteName(),
+        route: ROUTE_BLOCK_IP,
         roles: [],
         groups: [],
       },
       {
         name: "SignedKey配置",
-        route: getSignedKeyRouteName(),
+        route: ROUTE_SIGNED_KEY,
         roles: [],
         groups: [],
       },
       {
         name: "路由Mock配置",
-        route: getRouterMockRouteName(),
+        route: ROUTE_ROUTER_MOCK,
         roles: [],
         groups: [],
       },
       {
         name: "路由并发配置",
-        route: getRouterConcurrencyRouteName(),
+        route: ROUTE_ROUTER_CONCURRENCY,
         roles: [],
         groups: [],
       },
       {
         name: "Session拦截配置",
-        route: getSessionInterceptorRouteName(),
+        route: ROUTE_SESSION_INTERCEPTOR,
         roles: [],
         groups: [],
       },
@@ -159,13 +159,13 @@ const navs = [
   },
   {
     name: "其它",
-    icon: "el-icon-setting",
+    icon: "el-icon-set-up",
     roles: [USER_SU],
     groups: [],
     children: [
       {
         name: "其它",
-        route: getOthersRouteName(),
+        route: ROUTE_OTHERS,
         roles: [],
         groups: [],
       },
@@ -195,7 +195,7 @@ export default defineComponent({
   },
   data() {
     return {
-      homeRoute: getHomeRouteName(),
+      homeRoute: ROUTE_HOME,
       active: "",
     };
   },
@@ -284,32 +284,32 @@ export default defineComponent({
 @import "../common";
 $mainNavColor = #000c17
 .mainNav
-  min-height: 100vh
-  overflow-y: auto
-  background-color: $mainNavColor
+  min-height 100vh
+  overflow-y auto
+  background-color $mainNavColor
 .toggleNav
-  height: $mainHeaderHeight
-  line-height: $mainHeaderHeight
-  display: block
-  float: right
-  width: $mainNavShrinkingWidth
-  text-align: center
+  height $mainHeaderHeight
+  line-height $mainHeaderHeight
+  display block
+  float right
+  width $mainNavShrinkingWidth
+  text-align center
 h1
-  height: $mainHeaderHeight
-  line-height: $mainHeaderHeight
-  color: $white
-  padding-left: 20px
-  font-size: 18px
-  margin-right: $mainNavShrinkingWidth
+  height $mainHeaderHeight
+  line-height $mainHeaderHeight
+  color $white
+  padding-left 20px
+  font-size 18px
+  margin-right $mainNavShrinkingWidth
   i
-    font-weight: bold
-    margin-right: 5px
+    font-weight bold
+    margin-right 5px
 nav
-  border-top: 1px solid rgba($white, 0.3)
+  border-top 1px solid rgba($white, 0.3)
 .menu
-  border-right: 1px solid $mainNavColor
+  border-right 1px solid $mainNavColor
 .menuItem
-  color: rgba($white, 0.65)
+  color rgba($white, 0.65)
   &.is-active
-    background-color: $darkBlue !important
+    background-color $darkBlue !important
 </style>

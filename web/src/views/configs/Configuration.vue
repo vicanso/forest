@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import useConfigState, { configListValid } from "../../store/config";
+import useConfigState, { configListValid } from "../../states/config";
 import ConfigTable from "../../components/configs/Table.vue";
 
 export default defineComponent({
@@ -59,9 +59,9 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../../common";
 .configuration
-  margin: $mainMargin
-  padding: 20px 30px
-  background-color: $white
+  margin $mainMargin
+  padding 20px 30px
+  background-color $white
 pre
-  margin: 20px
+  margin 20px
 </style>

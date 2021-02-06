@@ -77,8 +77,8 @@ el-card.profile
 import { defineComponent } from "vue";
 
 import ExButton from "../components/ExButton.vue";
-import { userUpdate, userFetchDetail, userLogout } from "../store/user";
-import { getLoginRouteName } from "../router";
+import { userUpdate, userFetchDetail, userLogout } from "../states/user";
+import { ROUTE_LOGIN } from "../router";
 
 export default defineComponent({
   name: "Profile",
@@ -128,7 +128,7 @@ export default defineComponent({
       if (processing) {
         return isSuccess;
       }
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (enableUpdatePassword) {
         if (!newPassword || !password) {
           this.$error("原密码与新密码不能为空");
@@ -148,14 +148,14 @@ export default defineComponent({
         this.$error("请修改数据再更新");
         return isSuccess;
       }
-      this.processing = true;
       try {
+        this.processing = true;
         await userUpdate(updateData);
         if (updateData.newPassword) {
           await userLogout();
           this.$message.info("已成功更新，需要重新登录");
           this.$router.replace({
-            name: getLoginRouteName(),
+            name: ROUTE_LOGIN,
           });
         } else {
           this.$message.info("成功更新");
@@ -175,10 +175,10 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .profile
-  margin: $mainMargin
+  margin $mainMargin
 .btn
-  width: 100%
+  width 100%
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

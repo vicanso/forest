@@ -176,5 +176,5 @@ export default defineComponent({
 </script>
 <style lang="stylus" scoped>
 .selector
-  width: 100%
+  width 100%
 </style>

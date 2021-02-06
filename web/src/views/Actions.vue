@@ -109,7 +109,7 @@ import useFluxState, {
   fluxListClientActionCategory,
   fluxListClientAction,
   fluxListClientActionClear,
-} from "../store/flux";
+} from "../states/flux";
 
 const defaultDateRange = [today(), today()];
 const categoryOptions = [];
@@ -257,10 +257,10 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .actions
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 5px
+    margin-right 5px
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

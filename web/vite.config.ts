@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-  // base: "/static",
+  base: process.env.STATIC || "/",
   plugins: [vue({
     template: {
       preprocessOptions: {
@@ -10,6 +10,28 @@ export default defineConfig({
       },
     },
   })],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          common: [
+            "vue",
+            "vue-router",
+            "axios",
+            "dayjs",
+            "localforage",
+            "pako",
+          ],
+          plus: [
+            "element-plus",
+          ],
+          pluscss: [
+            "element-plus/lib/theme-chalk/index.css",
+          ],
+        },
+      },
+    },
+  },
   optimizeDeps: {
     include: [
       "dayjs",

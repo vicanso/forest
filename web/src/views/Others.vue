@@ -19,7 +19,7 @@
 import { defineComponent } from "vue";
 
 import ExButton from "../components/ExButton.vue";
-import useCommonState, { commonListRandomKey } from "../store/common";
+import useCommonState, { commonListRandomKey } from "../states/common";
 
 export default defineComponent({
   name: "Others",
@@ -39,12 +39,11 @@ export default defineComponent({
 @import "../common";
 
 .others
-  margin: $mainMargin
-
+  margin $mainMargin
 .randomKeys
-  padding: 10px
-  line-height: 2em
-  height: 150px
+  padding 10px
+  line-height 2em
+  height 150px
 .btn
-  width: 100%
+  width 100%
 </style>

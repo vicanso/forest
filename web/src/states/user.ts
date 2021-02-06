@@ -49,7 +49,7 @@ interface UserAccount {
   account: string;
   groups: string[];
   roles: string[];
-  email: string[];
+  email: string;
   status: number;
 }
 // 用户账户列表
@@ -113,8 +113,8 @@ export async function userFetchInfo(): Promise<void> {
   if (info.processing) {
     return;
   }
-  info.processing = true;
   try {
+    info.processing = true;
     const { data } = await request.get(USERS_ME);
     fillUserInfo(<UserInfo>data);
   } finally {
@@ -137,8 +137,8 @@ export async function userLogin(params: {
   if (info.processing) {
     return;
   }
-  info.processing = true;
   try {
+    info.processing = true;
     const resp = await request.get(USERS_LOGIN);
     const { token } = resp.data;
     const { data } = await request.post(
@@ -169,6 +169,7 @@ export async function userRegister(params: {
     return;
   }
   try {
+    info.processing = true;
     await request.post(
       USERS_ME,
       {
@@ -191,8 +192,8 @@ export async function userLogout(): Promise<void> {
   if (info.processing) {
     return;
   }
-  info.processing = true;
   try {
+    info.processing = true;
     await request.delete(USERS_ME);
     fillUserInfo({
       account: "",
@@ -215,8 +216,8 @@ export async function userUpdate(params: {
   if (info.processing) {
     return;
   }
-  info.processing = true;
   try {
+    info.processing = true;
     const data = Object.assign({}, params);
     if (data.password) {
       data.password = generatePassword(data.password);
@@ -242,8 +243,8 @@ export async function userListLogin(params: {
   if (logins.processing) {
     return;
   }
-  logins.processing = true;
   try {
+    logins.processing = true;
     const { data } = await request.get(USERS_LOGINS, {
       params,
     });
@@ -275,8 +276,8 @@ export async function userList(params: {
   if (users.processing) {
     return;
   }
-  users.processing = true;
   try {
+    users.processing = true;
     const { data } = await request.get(USERS, {
       params,
     });
@@ -305,17 +306,18 @@ export async function userFindByID(id: number): Promise<UserAccount> {
 // userUpdateByID 通过ID更新用户
 export async function userUpdateByID(params: {
   id: number;
-  data: any;
+  data: Record<string, unknown>;
 }): Promise<void> {
   if (users.processing) {
     return;
   }
-  users.processing = true;
   const data = Object.assign({}, params.data);
   try {
+    users.processing = true;
     // 如果groups未设置，则清空
     ["groups"].forEach((key) => {
-      if (data[key] && data[key].length === 0) {
+      const value = data[key];
+      if (value && Array.isArray(value) && value.length === 0) {
         delete data[key];
       }
     });
@@ -337,8 +339,8 @@ export async function userListRole(): Promise<void> {
   if (roles.processing || roles.items.length !== 0) {
     return;
   }
-  roles.processing = true;
   try {
+    roles.processing = true;
     const { data } = await request.get(USERS_ROLES);
     roles.items = data.userRoles || [];
   } finally {
@@ -346,12 +348,13 @@ export async function userListRole(): Promise<void> {
   }
 }
 
+const state = {
+  info: readonly(info),
+  logins: readonly(logins),
+  users: readonly(users),
+  roles: readonly(roles),
+};
 // useUserState 使用用户state
 export default function useUserState(): ReadonlyUserState {
-  return {
-    info: readonly(info),
-    logins: readonly(logins),
-    users: readonly(users),
-    roles: readonly(roles),
-  };
+  return state;
 }

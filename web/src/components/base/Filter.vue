@@ -117,5 +117,5 @@ export default defineComponent({
 <style lang="stylus" scoped>
 .baseFilter
   .select, .btn, .dateRange
-    width: 100%
+    width 100%
 </style>

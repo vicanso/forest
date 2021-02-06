@@ -22,7 +22,7 @@ import { defineComponent } from "vue";
 import ConfigEditor from "../../components/configs/Editor.vue";
 import SessionInterceptorData from "../../components/configs/SessionInterceptorData.vue";
 import { SESSION_INTERCEPTOR } from "../../constants/common";
-import useConfigState, { configList } from "../../store/config";
+import useConfigState, { configList } from "../../states/config";
 
 export default defineComponent({
   name: "BlockIP",
@@ -49,8 +49,8 @@ export default defineComponent({
   },
   async mounted() {
     const { $route, $router, configs } = this;
-    this.processing = true;
     try {
+      this.processing = true;
       await configList({
         name: SESSION_INTERCEPTOR,
       });
@@ -86,7 +86,7 @@ export default defineComponent({
 @import "../../common";
 
 .add
-  margin: $mainMargin
+  margin $mainMargin
 .addBtn
-  width: 100%
+  width 100%
 </style>

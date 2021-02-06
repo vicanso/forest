@@ -142,7 +142,7 @@ import userFluxState, {
   fluxListUserTrackAction,
   fluxListUserTracker,
   fluxListUserTrackerClear,
-} from "../store/flux";
+} from "../states/flux";
 
 const defaultDateRange = [today(), today()];
 const actionOptions = [];
@@ -209,14 +209,14 @@ const filterFields = [
   },
 ];
 
-function getUniqueKey(data: any[], key: string) {
+function getUniqueKey(data: Record<string, unknown>[], key: string) {
   if (!data || !data.length) {
     return [];
   }
   const keys = {};
   data.forEach((item) => {
     if (item[key]) {
-      keys[item[key]] = true;
+      keys[`${item[key]}`] = true;
     }
   });
   return Object.keys(keys).map((item) => {
@@ -322,10 +322,10 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../common";
 .trackers
-  margin: $mainMargin
+  margin $mainMargin
   i
-    margin-right: 5px
+    margin-right 5px
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

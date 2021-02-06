@@ -69,8 +69,8 @@ export async function commonListStatus(): Promise<void> {
   if (statuses.processing || statuses.items.length !== 0) {
     return;
   }
-  statuses.processing = true;
   try {
+    statuses.processing = true;
     const { data } = await request.get(COMMONS_STATUSES);
     statuses.items = data.statuses || [];
   } finally {
@@ -83,8 +83,8 @@ export async function commonListRouter(): Promise<void> {
   if (routers.processing || routers.items.length !== 0) {
     return;
   }
-  routers.processing = true;
   try {
+    routers.processing = true;
     const { data } = await request.get(COMMONS_ROUTERS);
     routers.items = data.routers || [];
   } finally {
@@ -97,8 +97,8 @@ export async function commonListRandomKey(): Promise<void> {
   if (randomKeys.processing) {
     return;
   }
-  randomKeys.processing = true;
   try {
+    randomKeys.processing = true;
     const { data } = await request.get(COMMONS_RANDOM_KEYS, {
       params: {
         size: 10,
@@ -111,11 +111,12 @@ export async function commonListRandomKey(): Promise<void> {
   }
 }
 
+const state = {
+  statuses: readonly(statuses),
+  routers: readonly(routers),
+  randomKeys: readonly(randomKeys),
+};
 // useCommonState 使用通用state
 export default function useCommonState(): ReadonlyCommonState {
-  return {
-    statuses: readonly(statuses),
-    routers: readonly(routers),
-    randomKeys: readonly(randomKeys),
-  };
+  return state;
 }

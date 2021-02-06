@@ -77,6 +77,7 @@ func init() {
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
 			helper.EntGetClient().Close()
+			helper.RedisGetClient().Close()
 		})
 	}
 }
@@ -112,12 +113,14 @@ func watchForClose(e *elton.Elton) {
 }
 
 // exitForDev 开发环境退出
-func exitForDev() {
+func exitForDev(e *elton.Elton) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGUSR2)
 	go func() {
 		for range c {
-			os.Exit(0)
+			closeDepends()
+			e.Close()
+			os.Exit(1)
 		}
 	}()
 }
@@ -201,6 +204,7 @@ func main() {
 	e.Server.ErrorLog = log.NewHTTPServerLogger()
 
 	logger := log.Default()
+
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("panic error",
@@ -212,24 +216,23 @@ func main() {
 		}
 	}()
 
+	basicConfig := config.GetBasicConfig()
 	defer closeDepends()
 	// 非开发环境，监听信号退出
 	if !util.IsDevelopment() {
 		watchForClose(e)
+		go func() {
+			pidData := []byte(strconv.Itoa(os.Getpid()))
+			err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
+			if err != nil {
+				logger.Error("create pid file fail",
+					zap.Error(err),
+				)
+			}
+		}()
 	} else {
-		exitForDev()
+		exitForDev(e)
 	}
-
-	basicConfig := config.GetBasicConfig()
-	go func() {
-		pidData := []byte(strconv.Itoa(os.Getpid()))
-		err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
-		if err != nil {
-			logger.Error("create pid file fail",
-				zap.Error(err),
-			)
-		}
-	}()
 
 	newOnErrorHandler(e)
 	// 启用耗时跟踪

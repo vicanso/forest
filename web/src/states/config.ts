@@ -79,8 +79,8 @@ export async function configAdd(params: {
   if (configs.processing) {
     return;
   }
-  configs.processing = true;
   try {
+    configs.processing = true;
     const { data } = await request.post(CONFIGS, params);
     configs.current = <Config>data;
   } finally {
@@ -101,8 +101,8 @@ export async function configList(params: {
   if (!params.limit) {
     params.limit = 50;
   }
-  configs.processing = true;
   try {
+    configs.processing = true;
     const { data } = await request.get(CONFIGS, {
       params,
     });
@@ -121,8 +121,8 @@ export async function configListValid(): Promise<void> {
   if (currentValidConfig.processing) {
     return;
   }
-  currentValidConfig.processing = true;
   try {
+    currentValidConfig.processing = true;
     const { data } = await request.get(CONFIGS_CURRENT_VALID);
     currentValidConfig.data = JSON.stringify(data, null, 2);
   } finally {
@@ -140,13 +140,13 @@ export async function configFindByID(id: number): Promise<Config> {
 // configUpdateByID 通过ID更新config
 export async function configUpdateByID(params: {
   id: number;
-  data: any;
+  data: Record<string, unknown>;
 }): Promise<void> {
   if (configs.processing) {
     return;
   }
-  configs.processing = true;
   try {
+    configs.processing = true;
     const url = CONFIGS_ID.replace(":id", `${params.id}`);
     const { data } = await request.patch(url, params.data);
     const items = configs.items.slice(0);
@@ -161,11 +161,11 @@ export async function configUpdateByID(params: {
     configs.processing = false;
   }
 }
-
+const state = {
+  configs: readonly(configs),
+  currentValidConfig: readonly(currentValidConfig),
+  statuses: readonly(statues),
+};
 export default function useConfigState(): ReadonlyConfigState {
-  return {
-    configs: readonly(configs),
-    currentValidConfig: readonly(currentValidConfig),
-    statuses: readonly(statues),
-  };
+  return state;
 }

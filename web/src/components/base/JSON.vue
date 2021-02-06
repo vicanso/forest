@@ -73,5 +73,5 @@ export default defineComponent({
 </script>
 <style lang="stylus" scoped>
 .jsonView
-  overflow-x: scroll
+  overflow-x scroll
 </style>
