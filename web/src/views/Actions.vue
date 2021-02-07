@@ -11,7 +11,7 @@ el-card.actions
     base-filter(
       v-if="inited"
       :fields="filterFields"
-      @filter="filter"
+      :filter="filter"
     )
     el-table(
       :data="userActions.items"

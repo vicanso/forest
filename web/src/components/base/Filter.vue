@@ -30,7 +30,7 @@ el-form.baseFilter(
       //- 点击筛选
       ex-button(
         v-else-if="field.type === 'filter'"
-        :onClick="filter"
+        :onClick="doFilter"
         icon="el-icon-search"
       ) 筛选
       //- 日期时间筛选
@@ -63,7 +63,7 @@ el-form.baseFilter(
       //- 关键字搜索
       el-input(
         v-else
-        @keyup.enter.native="filter"
+        @keyup.enter.native="doFilter"
         :clearable="field.clearable"
         v-model="current[field.key]"
         :disabled="field.disabled || false"
@@ -90,8 +90,11 @@ export default defineComponent({
       type: Array,
       required: true,
     },
+    filter: {
+      type: Function,
+      required: true,
+    },
   },
-  emits: ["filter"],
   data() {
     const current = {};
     const { fields } = this.$props;
@@ -108,8 +111,8 @@ export default defineComponent({
     };
   },
   methods: {
-    filter() {
-      this.$emit("filter", this.current);
+    doFilter(): Promise<void> {
+      return this.$props.filter(this.current);
     },
   },
 });

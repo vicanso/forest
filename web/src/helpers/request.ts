@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { gzip } from "pako";
 
 import HTTPError from "./http-error";
-import { isDevelopment, isProduction } from "../constants/env";
+import { isDevelopment } from "../constants/env";
 import { httpRequests } from "../store";
 
 const requestedAt = "X-Requested-At";

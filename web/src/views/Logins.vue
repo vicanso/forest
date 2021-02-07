@@ -8,7 +8,7 @@ el-card.logins
   div 
     base-filter(
       :fields="filterFields"
-      @filter="filter"
+      :filter="filter"
     )
     div(
       v-loading="logins.processing"

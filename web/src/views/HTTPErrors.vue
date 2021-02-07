@@ -11,7 +11,7 @@ el-card.httpErrors
     base-filter(
       v-if="inited"
       :fields="filterFields"
-      @filter="filter"
+      :filter="filter"
     )
     el-table(
       :data="httpErrors.items"

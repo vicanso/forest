@@ -53,10 +53,10 @@ export default {
       });
     },
     // eslint-disable-next-line
-    filter(params: any): void {
+    async filter(params: any): Promise<void> {
       Object.assign(this.query, params);
       this.query.offset = 0;
-      this.fetch();
+      await this.fetch();
     },
   },
   watch: {

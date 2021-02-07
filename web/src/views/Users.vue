@@ -14,7 +14,7 @@
     base-filter(
       :fields="filterFields"
       v-if="inited"
-      @filter="filter"
+      :filter="filter"
     )
     div(
       v-loading="users.processing"
