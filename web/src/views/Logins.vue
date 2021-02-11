@@ -1,4 +1,99 @@
 <template lang="pug">
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="120"
+  )
+
+mixin IPColumn
+  el-table-column(
+    prop="ip"
+    key="ip"
+    label="IP"
+    width="120"
+  )
+
+mixin LocationColumn
+  el-table-column(
+    prop="location"
+    key="location"
+    label="定位"
+    width="180"
+  )
+
+mixin ISPColumn
+  el-table-column(
+    label="运营商"
+    width="80"
+  ): template(
+    #default="scope"
+  ) {{ scope.row.isp || "--" }}
+
+mixin SessionColumn
+  el-table-column(
+    label="Session ID"
+    width="100"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.sessionID"
+  )
+
+mixin TrackIDColumn
+  el-table-column(
+    label="Track ID"
+    width="100"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.trackID"
+  )
+
+mixin ForwardedForColumn
+  el-table-column(
+    label="Forwarded For"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.xForwardedFor"
+  )
+
+mixin UserAgentColumn
+  el-table-column(
+    label="User Agent"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-mobile-phone"
+    :content="scope.row.userAgent"
+  )
+
+mixin CreatedAtColumn
+  el-table-column(
+    prop="createdAt"
+    key="createdAt"
+    label="时间"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.createdAt"
+  )
+
+mixin Pagination
+  el-pagination.pagination(
+    layout="prev, pager, next, sizes"
+    :current-page="currentPage"
+    :page-size="query.limit"
+    :page-sizes="pageSizes"
+    :total="logins.count"
+    @size-change="handleSizeChange"
+    @current-change="handleCurrentChange"
+  )
+
 el-card.logins
   template(
     #header
@@ -17,87 +112,35 @@ el-card.logins
       row-key="id"
       stripe
     )
-      el-table-column(
-        prop="account"
-        key="account"
-        label="账户"
-        width="120"
-      )
-      el-table-column(
-        prop="ip"
-        key="ip"
-        label="IP"
-        width="120"
-      )
-      el-table-column(
-        prop="location"
-        key="location"
-        label="定位"
-        width="180"
-      )
+      //- 账号
+      +AccountColumn
+
+      //- IP
+      +IPColumn
+
+      //- location
+      +LocationColumn
+
       //- isp
-      el-table-column(
-        label="运营商"
-        width="80"
-      ): template(
-        #default="scope"
-      ) {{ scope.row.isp || "--" }}
+      +ISPColumn
+      
       //- session id
-      el-table-column(
-        label="Session ID"
-        width="100"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.sessionID"
-      )
+      +SessionColumn
+      
       //- track id
-      el-table-column(
-        label="Track ID"
-        width="100"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.trackID"
-      )
+      +TrackIDColumn
+
       //- forwarded for
-      el-table-column(
-        label="Forwarded For"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.xForwardedFor"
-      )
+      +ForwardedForColumn
+
       //- user agent
-      el-table-column(
-        label="User Agent"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-mobile-phone"
-        :content="scope.row.userAgent"
-      )
+      +UserAgentColumn
+
       //- 创建时间
-      el-table-column(
-        prop="createdAt"
-        key="createdAt"
-        label="时间"
-        width="160"
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row.createdAt"
-      )
-    el-pagination.pagination(
-      layout="prev, pager, next, sizes"
-      :current-page="currentPage"
-      :page-size="query.limit"
-      :page-sizes="pageSizes"
-      :total="logins.count"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    )
+      +CreatedAtColumn
+
+    //- 分页
+    +Pagination
 </template>
 
 <script lang="ts">

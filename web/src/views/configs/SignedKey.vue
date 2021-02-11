@@ -1,18 +1,17 @@
 <template lang="pug">
-.signedKey
-  div(
-    v-if="!editMode"
+//- 配置列表
+mixin Table
+  config-table(
+    :category="category"
+    name="SignedKey配置"
   )
-    config-table(
-      :category="category"
-      name="SignedKey配置"
-    )
-    .add: el-button.addBtn(
-      type="primary"
-      @click="add"
-    ) 添加
+  .add: el-button.addBtn(
+    type="primary"
+    @click="add"
+  ) 添加
+//- 编辑
+mixin Editor
   config-editor(
-    v-else
     name="添加/更新SignedKey配置"
     summary="用于配置session中使用的signed key"
     :category="category"
@@ -23,6 +22,18 @@
     :data="configProps.form.data"
     @change.self="configProps.form.data = $event"
   )
+
+.signedKey
+  div(
+    v-if="!editMode"
+  )
+    +Table
+
+  //- 编辑 
+  template(
+    v-else
+  )
+    +Editor 
 </template>
 
 <script lang="ts">

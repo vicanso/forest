@@ -1,4 +1,116 @@
 <template lang="pug">
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="120"
+  )
+
+mixin MethodColumn
+  el-table-column(
+    prop="method"
+    key="method"
+    label="Method"
+    width="80"
+  )
+
+mixin RouteColumn
+  el-table-column(
+    prop="route"
+    key="route"
+    label="路由"
+    width="150"
+  )
+
+mixin CategoryColumn
+  el-table-column(
+    prop="category"
+    key="category"
+    label="类型"
+    width="100"
+  )
+
+mixin StatusColumn
+  el-table-column(
+    prop="status"
+    key="status"
+    label="状态码"
+    width="80"
+  )
+
+mixin ExceptionColumn
+  el-table-column(
+    prop="exception"
+    key="exception"
+    label="异常"
+    width="80"
+  ): template(
+    #default="scope"
+  ): span {{scope.row.exception? "是" : "否"}}
+
+mixin SessionColumn
+  el-table-column(
+    label="Session ID"
+    :filters="sessionIDFilters"
+    :filter-method="filterSession"
+    width="110"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.sid"
+  )
+
+mixin TrackIDColumn
+  el-table-column(
+    label="Track ID"
+    :filters="trackIDFilters"
+    :filter-method="filterTrack"
+    width="90"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.tid"
+  )
+
+mixin IPColumn
+  el-table-column(
+    prop="ip"
+    key="ip"
+    label="IP"
+    width="100"
+  )
+
+mixin URIColumn
+  el-table-column(
+    label="URI"
+    width="80"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.uri"
+  )
+
+mixin ErrorColumn
+  el-table-column(
+    prop="error"
+    key="error"
+    label="Error"
+  )
+
+mixin TimeColumn
+  el-table-column(
+    label="时间"
+    prop="_time"
+    key="_time"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row._time"
+  )
+
 el-card.httpErrors
   template(
     #header
@@ -19,100 +131,42 @@ el-card.httpErrors
       stripe
       :default-sort="{ prop: '_time', order: 'descending' }"
     )
-      el-table-column(
-        prop="account"
-        key="account"
-        label="账户"
-        width="120"
-      )
-      el-table-column(
-        prop="method"
-        key="method"
-        label="Method"
-        width="80"
-      )
-      el-table-column(
-        prop="route"
-        key="route"
-        label="路由"
-        width="150"
-      )
-      el-table-column(
-        prop="category"
-        key="category"
-        label="类型"
-        width="100"
-      )
-      el-table-column(
-        prop="status"
-        key="status"
-        label="状态码"
-        width="80"
-      )
-      el-table-column(
-        prop="exception"
-        key="exception"
-        label="异常"
-        width="80"
-      ): template(
-        #default="scope"
-      ): span {{scope.row.exception? "是" : "否"}}
+      //- 账号
+      +AccountColumn
+
+      //- http method
+      +MethodColumn
+
+      //- http route
+      +RouteColumn
+
+      //- 分类
+      +CategoryColumn
+
+      //- 状态
+      +StatusColumn
+
+      //- 是否异常
+      +ExceptionColumn
+
       //- session id
-      el-table-column(
-        label="Session ID"
-        :filters="sessionIDFilters"
-        :filter-method="filterSession"
-        width="110"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.sid"
-      )
+      +SessionColumn
+
       //- track id
-      el-table-column(
-        label="Track ID"
-        :filters="trackIDFilters"
-        :filter-method="filterTrack"
-        width="90"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.tid"
-      )
+      +TrackIDColumn
+ 
       //- ip
-      el-table-column(
-        prop="ip"
-        key="ip"
-        label="IP"
-        width="100"
-      )
+      +IPColumn
+      
       //- uri 
-      el-table-column(
-        label="URI"
-        width="80"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.uri"
-      )
+      +URIColumn
+
       //- error 
-      el-table-column(
-        prop="error"
-        key="error"
-        label="Error"
-      )
+      +ErrorColumn      
+
       //- 时间
-      el-table-column(
-        label="时间"
-        prop="_time"
-        key="_time"
-        width="160"
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row._time"
-      )
+      +TimeColumn
+
 
 </template>
 

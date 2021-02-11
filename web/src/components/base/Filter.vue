@@ -1,4 +1,66 @@
 <template lang="pug">
+//- 列表选择
+mixin Select
+  el-select.select(
+    :placeholder="field.placeholder"
+    v-model="current[field.key]"
+    :multiple="field.multiple || false"
+  )
+    el-option(
+      v-for="item in field.options"
+      :key="item.key || item.value"
+      :label="item.label || item.name"
+      :value="item.value"
+    )
+
+//- 筛选按钮
+mixin Filter
+  ex-button(
+    :onClick="doFilter"
+    icon="el-icon-search"
+  ) 筛选
+
+//- 日期时间选择
+mixin DateTimeRangePicker
+  el-date-picker.dateRange.fullFill(
+    v-model="current[field.key]"
+    type="datetimerange"
+    range-separator="至"
+    start-placeholder="开始日期"
+    end-placeholder="结束日期"
+    :shortcuts="field.shortcuts"
+  )
+
+//- 日期选择
+mixin DateRangePicker
+  el-date-picker.dateRange.fullFill(
+    v-model="current[field.key]"
+    type="daterange"
+    range-separator="至"
+    start-placeholder="开始日期"
+    end-placeholder="结束日期"
+    :shortcuts="field.shortcuts"
+  )
+
+//- 数字输入
+mixin NumberInput
+  el-input(
+    v-model="current[field.key]"
+    type="number"
+    :placeholder="field.placeholder"
+    :default="field.defaultValue"
+  )
+
+//- 关键字输入
+mixin KeywordInput
+  el-input(
+    @keyup.enter.native="doFilter"
+    :clearable="field.clearable"
+    v-model="current[field.key]"
+    :disabled="field.disabled || false"
+    :placeholder="field.placeholder"
+  )
+
 el-form.baseFilter(
   :label-width="$props.labelWidth"
 ): el-row(
@@ -15,60 +77,40 @@ el-form.baseFilter(
       :class="field.itemClass"
     )
       //- 列表选择
-      el-select.select(
+      template(
         v-if="field.type === 'select'"
-        :placeholder="field.placeholder"
-        v-model="current[field.key]"
-        :multiple="field.multiple || false"
       )
-        el-option(
-          v-for="item in field.options"
-          :key="item.key || item.value"
-          :label="item.label || item.name"
-          :value="item.value"
-        )
+        +Select
+
       //- 点击筛选
-      ex-button(
+      template(
         v-else-if="field.type === 'filter'"
-        :onClick="doFilter"
-        icon="el-icon-search"
-      ) 筛选
+      )
+        +Filter
+      
       //- 日期时间筛选
-      el-date-picker.dateRange.fullFill(
+      template(
         v-else-if="field.type === 'dateTimeRange'"
-        v-model="current[field.key]"
-        type="datetimerange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        :shortcuts="field.shortcuts"
       )
+        +DateTimeRangePicker
+      
       //- 日期筛选
-      el-date-picker.dateRange.fullFill(
+      template(
         v-else-if="field.type === 'dateRange'"
-        v-model="current[field.key]"
-        type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        :shortcuts="field.shortcuts"
       )
-      el-input(
+        +DateRangePicker
+
+      //- 数字输入
+      template(
         v-else-if="field.type === 'number'"
-        v-model="current[field.key]"
-        type="number"
-        :placeholder="field.placeholder"
-        :default="field.defaultValue"
       )
+        +NumberInput
+
       //- 关键字搜索
-      el-input(
+      template(
         v-else
-        @keyup.enter.native="doFilter"
-        :clearable="field.clearable"
-        v-model="current[field.key]"
-        :disabled="field.disabled || false"
-        :placeholder="field.placeholder"
       )
+        +KeywordInput
 </template>
 
 <script lang="ts">

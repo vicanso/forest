@@ -1,4 +1,75 @@
 <template lang="pug">
+//- 用户角色
+mixin Roles
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户角色："
+  ): span {{roles}}
+
+//- 邮箱
+mixin Email
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户邮箱："
+  ): el-input(
+    placeholder="请输入您的邮箱地址："
+    v-model="email"
+    clearable
+  )
+
+//- 原密码
+mixin OriginalPassword
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户原密码："
+  ): el-input(
+    type="password"
+    :disabled="!enableUpdatePassword"
+    placeholder="请输入您的原密码："
+    v-model="password"
+    clearable
+  )
+
+//- 新密码
+mixin NewPassword
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户新密码："
+  ): el-input(
+    type="password"
+    :disabled="!enableUpdatePassword"
+    placeholder="请输入您的新密码："
+    v-model="newPassword"
+    clearable
+  )
+
+//- 启用更新密码
+mixin EnableUpdatePassword
+  el-col(
+    :span="4"
+  ): el-form-item(
+    label="更新密码："
+  )
+    el-checkbox(
+      v-model="enableUpdatePassword"
+    )
+
+//- 提交与返回
+mixin SubmitAndBack
+  el-col(
+    :span="12"
+  ): el-form-item: ex-button(
+    :onClick="submit"
+  ) 更新 
+  el-col(
+    :span="12"
+  ): el-form-item: el-button.btn(
+    @click="goBack"
+  ) 返回
 el-card.profile
   template(
     #header
@@ -12,64 +83,23 @@ el-card.profile
     :gutter="15"
   )
     //- 用户角色
-    el-col(
-      :span="10"
-    ): el-form-item(
-      label="用户角色："
-    ): span {{roles}}
+    +Roles 
+
     //- 邮箱地址
-    el-col(
-      :span="10"
-    ): el-form-item(
-      label="用户邮箱："
-    ): el-input(
-      placeholder="请输入您的邮箱地址："
-      v-model="email"
-      clearable
-    )
-    //- 密码更新
-    el-col(
-      :span="10"
-    ): el-form-item(
-      label="用户原密码："
-    ): el-input(
-      type="password"
-      :disabled="!enableUpdatePassword"
-      placeholder="请输入您的原密码："
-      v-model="password"
-      clearable
-    )
-    el-col(
-      :span="10"
-    ): el-form-item(
-      label="用户新密码："
-    ): el-input(
-      type="password"
-      :disabled="!enableUpdatePassword"
-      placeholder="请输入您的新密码："
-      v-model="newPassword"
-      clearable
-    )
-    el-col(
-      :span="4"
-    ): el-form-item(
-      label="更新密码："
-    )
-      el-checkbox(
-        v-model="enableUpdatePassword"
-      )
-       //- 提交
-    el-col(
-      :span="12"
-    ): el-form-item: ex-button(
-      :onClick="submit"
-    ) 更新 
-    //- 返回
-    el-col(
-      :span="12"
-    ): el-form-item: el-button.btn(
-      @click="goBack"
-    ) 返回
+    +Email
+
+
+    //- 原密码
+    +OriginalPassword
+
+    //- 新密码
+    +NewPassword
+    
+    //- 是否启用更新密码
+    +EnableUpdatePassword
+
+    //- 提交与返回
+    +SubmitAndBack
 
 </template>
 

@@ -1,11 +1,79 @@
 <template lang="pug">
-.configurationEditor: el-card
+//- 配置名称输入
+mixin NameInput
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="名称："
+  ): el-input(
+    placeholder="请输入配置名称"
+    v-model="form.name"
+    clearable
+    :disabled="!!$props.defaultValue.name"
+  )
+
+//- 配置分类输入
+mixin CategoryInput
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="分类："
+  ): el-input(
+    placeholder="请输入配置分类（可选）"
+    v-model="form.category"
+    clearable
+    :disabled="!!$props.defaultValue.category"
+  )
+
+//- 配置状态选择
+mixin StatusSelect
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="是否启用："
+  ): el-select.selector(
+    v-model="form.status"
+    placeholder="请选择配置状态"
+  ): el-option(
+    v-for="item in statuses.items"
+    :key="item.value"
+    :label="item.label"
+    :value="item.value"
+  )
+
+//- 配置开始时间选择
+mixin StartedSelect
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="开始时间："
+  ): el-date-picker.datePicker.fullFill(
+    v-model="form.startedAt"
+    type="datetime"
+    placeholder="选择开始时间"
+  )
+
+//- 配置结束时间选择
+mixin EndedSelect
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="结束时间："
+  ): el-date-picker.datePicker.fullFill(
+    v-model="form.endedAt"
+    type="datetime"
+    placeholder="选择结束时间"
+  )
+
+.configurationEditor: el-card(
+  v-loading="fetching"
+)
   template(
     #header
   )
     i.el-icon-s-tools
     span {{ $props.name || "添加/更新配置" }}
-  el-form(
+  el-form.form(
     label-width="90px"
     v-loading="configs.processing"
     v-if="!fetching"
@@ -17,61 +85,20 @@
       :gutter="15"
     )
       //- 配置名称
-      el-col(
-        :span="8"
-      ): el-form-item(
-        label="名称："
-      ): el-input(
-        placeholder="请输入配置名称"
-        v-model="form.name"
-        clearable
-        :disabled="!!$props.defaultValue.name"
-      )
+      +NameInput
+ 
       //- 配置分类
-      el-col(
-        :span="8"
-      ): el-form-item(
-        label="分类："
-      ): el-input(
-        placeholder="请输入配置分类（可选）"
-        v-model="form.category"
-        clearable
-        :disabled="!!$props.defaultValue.category"
-      )
+      +CategoryInput
+
       //- 是否启用
-      el-col(
-        :span="8"
-      ): el-form-item(
-        label="是否启用："
-      ): el-select.selector(
-        v-model="form.status"
-        placeholder="请选择配置状态"
-      ): el-option(
-        v-for="item in statuses.items"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value"
-      )
+      +StatusSelect
+
       //- 开始时间
-      el-col(
-        :span="8"
-      ): el-form-item(
-        label="开始时间："
-      ): el-date-picker.datePicker.fullFill(
-        v-model="form.startedAt"
-        type="datetime"
-        placeholder="选择开始时间"
-      )
+      +StartedSelect
+ 
       //- 结束时间
-      el-col(
-        :span="8"
-      ): el-form-item(
-        label="结束时间："
-      ): el-date-picker.datePicker.fullFill(
-        v-model="form.endedAt"
-        type="datetime"
-        placeholder="选择结束时间"
-      )
+      +EndedSelect
+
       //- 配置内容
       slot(
         :form="form"
@@ -143,9 +170,6 @@ export default defineComponent({
       statuses: configState.statuses,
       configs: configState.configs,
       current: configState.configs.current,
-      // findByID: (id) => configStore.dispatch("findByID", id),
-      // add: (data) => configStore.dispatch("add", data),
-      // updateByID: (params) => configStore.dispatch("updateByID", params),
     };
   },
   data() {
@@ -271,6 +295,6 @@ export default defineComponent({
     color $darkGray
     font-size 13px
     margin 0 0 15px 0
-  .selector, .datePicker, .submit
-    width 100%
+.selector, .datePicker, .submit
+  width 100%
 </style>

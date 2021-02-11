@@ -1,6 +1,6 @@
 <template lang="pug">
-.mainNav
-  //- 切换侧边栏
+//- 切换侧边栏
+mixin ToggleNav
   a.toggleNav(
     href="#"
     @click.stop="toggleNav"
@@ -8,15 +8,19 @@
     i(
       :class=`$props.shrinking ? "el-icon-s-unfold" : "el-icon-s-fold"`
     )
-  //- 应用图标
+
+//- 应用图标
+mixin HomeLogo
   h1
     router-link(
       v-if="!$props.shrinking"
       :to='{name: homeRoute}'
     )
-      i.el-icon-eleme
+      i.el-icon-cpu
       | Forest
-  //- 菜单栏
+
+//- 菜单栏
+mixin Menu
   nav: el-menu.menu(
     :collapse="$props.shrinking"
     :default-active="active"
@@ -44,6 +48,16 @@
         @click="goTo(subItem)"
       )
         span {{subItem.name}}
+.mainNav
+  //- 切换侧边栏
+  +ToggleNav
+
+  //- 应用图标
+  +HomeLogo
+
+  //- 菜单栏
+  +Menu
+
 </template>
 
 <script lang="ts">

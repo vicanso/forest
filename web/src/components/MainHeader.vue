@@ -1,4 +1,43 @@
 <template lang="pug">
+//- 登录后的用户相关功能
+mixin UserFunctions
+  router-link(
+    :to="{ name: profileRoute }"
+  )
+    i.el-icon-user
+    span {{user.account}}
+  span.divided |
+  a.logout(
+    href="#"
+    title="退出登录"
+    @click.preventDefault="onLogout"
+  )
+    i.el-icon-switch-button
+
+//- 登录与注册
+mixin LoginAndRegister
+  router-link.login(
+    :to="{ name: loginRoute }"
+  )
+    i.el-icon-user
+    | 登录
+  span.divided |
+  router-link.register(
+    :to="{ name: registerRoute }"
+  )
+    i.el-icon-circle-plus
+    | 注册
+
+//- 页图标
+mixin HomeLogo
+  h1(
+    v-if="$props.shrinking"
+  ): router-link(
+    :to='{name: homeRoute}'
+  )
+    i.el-icon-cpu
+    | Forest
+
 header.header
   //- 用户信息
   .userInfo
@@ -8,32 +47,14 @@ header.header
     .functions(
       v-else-if="user.account"
     )
-      router-link(
-        :to="{ name: profileRoute }"
-      )
-        i.el-icon-user
-        span {{user.account}}
-      span.divided |
-      a.logout(
-        href="#"
-        title="退出登录"
-        @click.preventDefault="onLogout"
-      )
-        i.el-icon-switch-button
+      +UserFunctions
     div(
       v-else
     )
-      router-link.login(
-        :to="{ name: loginRoute }"
-      )
-        i.el-icon-user
-        | 登录
-      span.divided |
-      router-link.register(
-        :to="{ name: registerRoute }"
-      )
-        i.el-icon-circle-plus
-        | 注册
+      +LoginAndRegister
+
+  +HomeLogo
+
 </template>
 
 <script lang="ts">
@@ -48,10 +69,17 @@ import {
 } from "../router";
 
 export default defineComponent({
+  props: {
+    shrinking: {
+      type: Boolean,
+      default: false,
+    },
+  },
   name: "MainHeader",
   setup() {
     const userState = useUserState();
     return {
+      homeRoute: ROUTE_HOME,
       profileRoute: ROUTE_PROFILE,
       loginRoute: ROUTE_LOGIN,
       registerRoute: ROUTE_REGISTER,
@@ -91,4 +119,11 @@ export default defineComponent({
     font-weight bold
 .divided
   margin 0 15px
+h1
+  font-size 18px
+  margin-left 10px
+  a
+    color $dark
+  i
+    margin-right 5px
 </style>

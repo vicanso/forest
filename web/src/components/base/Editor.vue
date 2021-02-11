@@ -1,4 +1,59 @@
 <template lang="pug">
+//- 列表选择
+mixin Select
+  el-select.select(
+    :placeholder="field.placeholder"
+    v-model="current[field.key]"
+    :multiple="field.multiple || false"
+  ): el-option(
+    v-for="item in field.options"
+    :key="item.key || item.value"
+    :label="item.label || item.name"
+    :value="item.value"
+  )
+
+//- 带单位的输入
+mixin UnitInput
+  el-input(
+    :placeholder="field.placeholder"
+    v-model="current[field.key]"
+    :clearable="field.clearable"
+  ): el-select.inputSelect(
+    #append
+    v-model="current[field.selectKey]"
+    :placeholder="field.selectPlaceholder"
+  ): el-option(
+    v-for="item in field.options"
+    :key="item.name"
+    :label="item.name"
+    :value="item.value"
+  )
+
+//- textare
+mixin TextArea
+  el-input(
+    type="textarea"
+    v-model="current[field.key]"
+    :placeholder="field.placeholder"
+    :autosize="field.autosize"
+  )
+
+//- 日期选择
+mixin DatePciker
+  el-date-picker(
+    v-model="current[field.key]"
+    :type="field.pickerType || 'date'"
+    :placeholder="field.placeholder"
+  )
+
+//- 普通输入框
+mixin Input
+  el-input(
+    v-model="current[field.key]"
+    :clearable="field.clearable"
+    :disabled="field.disabled || false"
+    :placeholder="field.placeholder"
+  )
 el-card.baseEditor(
   v-loading="!inited || processing"  
 )
@@ -30,56 +85,35 @@ el-card.baseEditor(
       :prop="field.key"
     )
       //- 选择列表
-      el-select.select(
+      template(
         v-if="field.type === 'select'"
-        :placeholder="field.placeholder"
-        v-model="current[field.key]"
-        :multiple="field.multiple || false"
-      ): el-option(
-        v-for="item in field.options"
-        :key="item.key || item.value"
-        :label="item.label || item.name"
-        :value="item.value"
       )
+        +Select
+      
       //- 带单位选择的输入框
-      el-input(
+      template(
         v-else-if="field.type === 'specsUnit'"
-        :placeholder="field.placeholder"
-        v-model="current[field.key]"
-        :clearable="field.clearable"
-      ): el-select.inputSelect(
-        #append
-        v-model="current[field.selectKey]"
-        :placeholder="field.selectPlaceholder"
-      ): el-option(
-        v-for="item in field.options"
-        :key="item.name"
-        :label="item.name"
-        :value="item.value"
       )
+        +UnitInput
+
       //- 输入区域textarea
-      el-input(
-        type="textarea"
+      template(
         v-else-if="field.type === 'textarea'"
-        v-model="current[field.key]"
-        :placeholder="field.placeholder"
-        :autosize="field.autosize"
       )
+        +TextArea
+
       //- 日期选择
-      el-date-picker(
+      template(
         v-else-if="field.type === 'datePicker'"
-        v-model="current[field.key]"
-        :type="field.pickerType || 'date'"
-        :placeholder="field.placeholder"
       )
+        +DatePciker
+
       //- 输入框
-      el-input(
+      template(
         v-else
-        v-model="current[field.key]"
-        :clearable="field.clearable"
-        :disabled="field.disabled || false"
-        :placeholder="field.placeholder"
       )
+        +Input
+
     //- 提交
     el-col(
       :span="12"

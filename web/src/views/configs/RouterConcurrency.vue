@@ -1,18 +1,17 @@
 <template lang="pug">
-.routerConcurrency
-  div(
-    v-if="!editMode"
+//- 配置列表
+mixin Table
+  config-table(
+    :category="category"
+    name="路由并发配置"
   )
-    config-table(
-      :category="category"
-      name="路由并发配置"
-    )
-    .add: el-button.addBtn(
-      type="primary"
-      @click="add"
-    ) 添加
+  .add: el-button.addBtn(
+    type="primary"
+    @click="add"
+  ) 添加
+//- 配置编辑
+mixin Editor
   config-editor(
-    v-else
     name="添加/更新路由并发配置"
     summary="配置针对各路由并发请求的限制"
     :category="category"
@@ -23,6 +22,20 @@
     :data="configProps.form.data"
     @change.self="configProps.form.data = $event"
   )
+
+.routerConcurrency
+  //- 配置表格
+  div(
+    v-if="!editMode"
+  )
+    +Table
+  
+  //- 编辑
+  template(
+    v-else
+  )
+    +Editor
+
 </template>
 
 <script lang="ts">

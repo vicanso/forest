@@ -1,23 +1,34 @@
 <template lang="pug">
+//- 所有配置
+mixin AllSetting
+  el-tab-pane(
+    label="所有配置"
+    name="all"
+  )
+    config-table(
+      category="*"
+      :hiddenHeader="true"
+      :hiddenOp="true"
+      name="所有配置"
+    )
+
+//- 生效配置
+mixin ActiveSetting
+  el-tab-pane(
+    label="当前生效配置"
+    name="currentValid"
+  )
+    pre {{currentValid.data}}
 .configuration
   el-tabs(
     v-model="active"
   )
-    el-tab-pane(
-      label="所有配置"
-      name="all"
-    )
-      config-table(
-        category="*"
-        :hiddenHeader="true"
-        :hiddenOp="true"
-        name="所有配置"
-      )
-    el-tab-pane(
-      label="当前生效配置"
-      name="currentValid"
-    )
-      pre {{currentValid.data}}
+    //- 所有配置
+    +AllSetting
+
+    //- 生效配置
+    +ActiveSetting
+
 
 </template>
 <script lang="ts">

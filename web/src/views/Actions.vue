@@ -1,4 +1,84 @@
 <template lang="pug">
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="150"
+  )
+
+mixin CategoryColumn
+  el-table-column(
+    prop="category"
+    key="category"
+    label="类型"
+    width="150"
+  )
+
+mixin StatusColumn
+  el-table-column(
+    label="状态"
+    width="80"
+  ): template(
+    #default="scope"  
+  )
+    span(
+      v-if="scope.row.result === '0'"
+    ) 成功
+    span(
+      v-else
+    ) 失败
+
+mixin RouteColumn
+  el-table-column(
+    label="路由"
+    prop="route"
+    key="route"
+  )
+
+mixin TIDColumn
+  el-table-column(
+    label="Track ID"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.tid"
+  )
+
+mixin FullPathColumn
+  el-table-column(
+    label="完整路径"
+    width="80"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.path"
+  )
+
+mixin ErrorColumn
+  el-table-column(
+    label="error"
+    width="80"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.message"
+  )
+
+mixin TimeColumn
+  el-table-column(
+    label="时间"
+    prop="_time"
+    key="_time"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row._time"
+  )
+
 el-card.actions
   template(
     #header
@@ -19,77 +99,30 @@ el-card.actions
       stripe
       :default-sort="{ prop: '_time', order: 'descending' }"
     )
-      el-table-column(
-        prop="account"
-        key="account"
-        label="账户"
-        width="150"
-      )
+      //- 账号
+      +AccountColumn
+
       //- 记录类型
-      el-table-column(
-        prop="category"
-        key="category"
-        label="类型"
-        width="150"
-      )
+      +CategoryColumn
+
       //- 记录状态
-      el-table-column(
-        label="状态"
-        width="80"
-      ): template(
-        #default="scope"  
-      )
-        span(
-          v-if="scope.row.result === '0'"
-        ) 成功
-        span(
-          v-else
-        ) 失败
+      +StatusColumn
+
       //- 触发记录时所有route
-      el-table-column(
-        label="路由"
-        prop="route"
-        key="route"
-      )
+      +RouteColumn
+
       //- tid
-      el-table-column(
-        label="Track ID"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.tid"
-      )
+      +TIDColumn
+
       //- full path
-      el-table-column(
-        label="完整路径"
-        width="80"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.path"
-      )
+      +FullPathColumn
+
       //- error
-      el-table-column(
-        label="error"
-        width="80"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.message"
-      )
+      +ErrorColumn
+
       //- 时间
-      el-table-column(
-        label="时间"
-        prop="_time"
-        key="_time"
-        width="160"
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row._time"
-      )
+      +TimeColumn
+
 </template>
 <script lang="ts">
 import { defineComponent, onUnmounted } from "vue";
@@ -224,9 +257,10 @@ export default defineComponent({
           value: element,
         });
       });
-      this.inited = true;
     } catch (err) {
       this.$error(err);
+    } finally {
+      this.inited = true;
     }
   },
   methods: {

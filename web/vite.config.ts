@@ -1,15 +1,17 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   base: process.env.STATIC || "/",
-  plugins: [vue({
-    template: {
-      preprocessOptions: {
-        doctype: "html",
+  plugins: [
+    vue({
+      template: {
+        preprocessOptions: {
+          doctype: "html",
+        },
       },
-    },
-  })],
+    }),
+  ],
   build: {
     rollupOptions: {
       output: {
@@ -22,29 +24,21 @@ export default defineConfig({
             "localforage",
             "pako",
           ],
-          plus: [
-            "element-plus",
-          ],
-          pluscss: [
-            "element-plus/lib/theme-chalk/index.css",
-          ],
+          plus: ["element-plus"],
+          pluscss: ["element-plus/lib/theme-chalk/index.css"],
         },
       },
     },
   },
   optimizeDeps: {
-    include: [
-      "dayjs",
-      "localforage",
-      "pako",
-    ],
+    include: ["dayjs", "localforage", "pako"],
   },
   server: {
     proxy: {
       "/api": {
         target: "http://localhost:7001",
-        rewrite: path => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
-    }
+    },
   },
 });

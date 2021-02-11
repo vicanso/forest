@@ -227,7 +227,7 @@ export async function fluxListClientActionCategory(): Promise<void> {
       "category"
     );
     const { data } = await request.get(url);
-    clientActionCategories.items = data.value || [];
+    clientActionCategories.items = data.values || [];
   } finally {
     clientActionCategories.processing = false;
   }

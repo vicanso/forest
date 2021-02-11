@@ -1,4 +1,126 @@
 <template lang="pug">
+//- ID
+mixin IDColumn
+  el-table-column(
+    prop="id"
+    key="id"
+    label="ID"
+    width="80"
+  )
+
+//- 名称
+mixin NameColumn
+  el-table-column(
+    prop="name"
+    key="name"
+    label="名称"
+    width="150"
+  )
+
+//- 分类
+mixin CategoryColumn
+  el-table-column(
+    prop="category"
+    key="category"
+    label="分类"
+    width="150"
+  )
+
+//- 状态
+mixin StatusColumn
+  el-table-column(
+    sortable
+    prop="status"
+    key="status"
+  ): template(
+    #default="scope"
+  ) {{ getStatusDesc(scope.row.status) }}
+
+//- 开始时间
+mixin StartedAtColumn
+  el-table-column(
+    sortable
+    prop="startedAt"
+    key="startedAt"
+    label="开始时间"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.startedAt"
+  )
+
+//- 结束时间
+mixin EndedAtColumn
+  el-table-column(
+    sortable
+    prop="endedAt"
+    key="endedAt"
+    label="结束时间"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.endedAt"
+  )
+
+//- 配置数据
+mixin DataColumn
+  el-table-column(
+    prop="data"
+    key="data"
+    label="配置数据"
+    :width="configWidth"
+  ): template(
+    #default="scope"
+  ): base-json(
+    :content="scope.row.data"
+    icon="el-icon-info"
+  )
+
+//- 创建者
+mixin OwnerColumn
+  el-table-column(
+    prop="owner"
+    key="owner"
+    label="创建者"
+    width="150"
+  )
+
+//- 更新时间
+mixin UpdatedAtColumn
+  el-table-column(
+    sortable
+    prop="updatedAt"
+    key="updatedAt"
+    label="更新时间"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.updatedAt"
+  )
+
+//- 操作
+mixin OpColumn
+  el-table-column(
+    fixed="right"
+    label="操作"
+    v-if="!$props.hiddenOp"
+  ): template(
+    #default="scope"
+  )
+    div(
+      v-if="scope.row.owner === userInfo.account"
+    )
+      ex-button(
+        category="smallText"
+        :onClick="generateModifyHandler(scope.row)"
+      ) 编辑
+    span(
+      v-else
+    ) --
+
 el-card.configurationList
   template(
     #header
@@ -22,107 +144,36 @@ el-card.configurationList
     stripe
     :default-sort="{ prop: 'updatedAt', order: 'descending'}"
   )
-    el-table-column(
-      prop="id"
-      key="id"
-      label="ID"
-      width="80"
-    )
+    //- ID
+    +IDColumn
+
     //- 名称
-    el-table-column(
-      prop="name"
-      key="name"
-      label="名称"
-      width="150"
-    )
+    +NameColumn
+
     //- 分类
-    el-table-column(
-      prop="category"
-      key="category"
-      label="分类"
-      width="150"
-    )
+    +CategoryColumn
+
     //- 状态
-    el-table-column(
-      sortable
-      prop="status"
-      key="status"
-    ): template(
-      #default="scope"
-    ) {{ getStatusDesc(scope.row.status) }}
+    +StatusColumn
+
     //- 开始时间
-    el-table-column(
-      sortable
-      prop="startedAt"
-      key="startedAt"
-      label="开始时间"
-      width="160"
-    ): template(
-      #default="scope"
-    ): time-formater(
-      :time="scope.row.startedAt"
-    )
+    +StartedAtColumn
+
     //- 结束时间
-    el-table-column(
-      sortable
-      prop="endedAt"
-      key="endedAt"
-      label="结束时间"
-      width="160"
-    ): template(
-      #default="scope"
-    ): time-formater(
-      :time="scope.row.endedAt"
-    )
+    +EndedAtColumn
+
     //- 配置数据
-    el-table-column(
-      prop="data"
-      key="data"
-      label="配置数据"
-      :width="configWidth"
-    ): template(
-      #default="scope"
-    ): base-json(
-      :content="scope.row.data"
-      icon="el-icon-info"
-    )
+    +DataColumn
+
     //- 创建者
-    el-table-column(
-      prop="owner"
-      key="owner"
-      label="创建者"
-      width="150"
-    )
+    +OwnerColumn
+
     //- 更新时间
-    el-table-column(
-      sortable
-      prop="updatedAt"
-      key="updatedAt"
-      label="更新时间"
-      width="160"
-    ): template(
-      #default="scope"
-    ): time-formater(
-      :time="scope.row.updatedAt"
-    )
+    +UpdatedAtColumn
+
     //- 操作
-    el-table-column(
-      fixed="right"
-      label="操作"
-      v-if="!$props.hiddenOp"
-    ): template(
-      #default="scope"
-    )
-      div(
-        v-if="scope.row.owner === userInfo.account"
-      )
-        ex-button(
-          category="smallText"
-          :onClick="generateModifyHandler(scope.row)"
-        ) 编辑
-      span(
-        v-else
-      ) --
+    +OpColumn
+
 </template>
 
 <script lang="ts">

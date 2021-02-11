@@ -5,6 +5,7 @@
 )
   //- 主头部
   main-header.header(
+    :shrinking="setting.mainNavShrinking"
     v-if="!loadingSetting"
   )
   //- 主导航

@@ -1,4 +1,119 @@
 <template lang="pug">
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="120"
+  )
+
+mixin CategoryColumn
+  el-table-column(
+    prop="action"
+    key="action"
+    label="类型"
+    width="150"
+  )
+
+mixin StatusColumn
+  el-table-column(
+    label="状态"
+    width="80"
+  ): template(
+    #default="scope"  
+  )
+    span(
+      v-if="scope.row.result === '0'"
+    ) 成功
+    span(
+      v-else
+    ) 失败
+
+mixin FormColumn
+  el-table-column(
+    label="Form"
+  ): template(
+    #default="scope"
+  ): base-json(
+    :content="scope.row.form"
+  )
+
+mixin QueryColumn
+  el-table-column(
+    label="Query"
+  ): template(
+    #default="scope"
+  ): base-json(
+    :content="scope.row.query"
+  )
+
+mixin ParamsColumn
+  el-table-column(
+    label="Params"
+  ): template(
+    #default="scope"
+  ): base-json(
+    :content="scope.row.params"
+  )
+
+mixin SessionIDColumn
+  el-table-column(
+    label="Session ID"
+    :filters="sessionIDFilters"
+    :filter-method="filterSession"
+    width="110"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.sid"
+  )
+
+mixin TrackIDColumn
+  el-table-column(
+    label="Track ID"
+    :filters="trackIDFilters"
+    :filter-method="filterTrack"
+    width="90"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    :content="scope.row.tid"
+  )
+
+mixin IPColumn
+  el-table-column(
+    label="IP"
+    width="80"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.ip"
+  )
+
+mixin ErrorColumn
+  el-table-column(
+    label="Error"
+    width="80"
+  ): template(
+    #default="scope"
+  ): base-tooltip(
+    icon="el-icon-info"
+    :content="scope.row.error"
+  )
+
+mixin TimeColumn
+  el-table-column(
+    label="时间"
+    prop="_time"
+    key="_time"
+    width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row._time"
+  )
+
 el-card.trackers
   template(
     #header
@@ -19,108 +134,39 @@ el-card.trackers
       stripe
       :default-sort="{ prop: '_time', order: 'descending' }"
     )
-      el-table-column(
-        prop="account"
-        key="account"
-        label="账户"
-        width="120"
-      )
-      el-table-column(
-        prop="action"
-        key="action"
-        label="类型"
-        width="150"
-      )
+      //- 账号
+      +AccountColumn
+
+      //- 类别
+      +CategoryColumn
+
       //- 状态筛选
-      el-table-column(
-        label="状态"
-        width="80"
-      ): template(
-        #default="scope"  
-      )
-        span(
-          v-if="scope.row.result === '0'"
-        ) 成功
-        span(
-          v-else
-        ) 失败
+      +StatusColumn
+      
       //- form参数
-      el-table-column(
-        label="Form"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.form"
-      )
+      +FormColumn
+      
       //- query参数
-      el-table-column(
-        label="Query"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.query"
-      )
+      +QueryColumn
+      
       //- params参数
-      el-table-column(
-        label="Params"
-      ): template(
-        #default="scope"
-      ): base-json(
-        :content="scope.row.params"
-      )
+      +ParamsColumn
+      
       //- session id
-      el-table-column(
-        label="Session ID"
-        :filters="sessionIDFilters"
-        :filter-method="filterSession"
-        width="110"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.sid"
-      )
+      +SessionIDColumn
+
       //- track id
-      el-table-column(
-        label="Track ID"
-        :filters="trackIDFilters"
-        :filter-method="filterTrack"
-        width="90"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        :content="scope.row.tid"
-      )
+      +TrackIDColumn
+
       //- ip
-      el-table-column(
-        label="IP"
-        width="80"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.ip"
-      )
+      +IPColumn
+
       //- error
-      el-table-column(
-        label="Error"
-        width="80"
-      ): template(
-        #default="scope"
-      ): base-tooltip(
-        icon="el-icon-info"
-        :content="scope.row.error"
-      )
+      +ErrorColumn
+
       //- 时间
-      el-table-column(
-        label="时间"
-        prop="_time"
-        key="_time"
-        width="160"
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row._time"
-      )
+      +TimeColumn
+
 </template>
 
 <script lang="ts">

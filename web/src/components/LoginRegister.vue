@@ -1,4 +1,60 @@
 <template lang="pug">
+//- 账号输入
+mixin AccountInput
+  el-form-item(
+    label="账号："
+  ): el-input(
+    placeholder="请输入账号"
+    v-model="form.account"
+    autofocus="true"
+    clearable
+  )
+
+//- 密码输入
+mixin PasswordInput
+  el-form-item(
+    label="密码："
+  ): el-input(
+    v-model="form.password"
+    show-password
+    placeholder="请输入密码"
+  )
+
+//- 图形验证码
+mixin CaptchaInput
+  el-form-item(
+    label="验证码："
+  ): el-row
+    //- 验证码输入框
+    el-col(
+      :span="18"
+    ): el-input.code(
+      v-model="form.captcha"
+      maxlength="4"
+      clearable
+      @keyup.enter.native="onSubmit"
+      placeholder="请输入验证码"
+    )
+    //- 验证码图片
+    el-col(
+      :span="6"
+    ): .captcha(
+      @click="refreshCaptcha"
+    )
+      img(
+        v-if="captchaData"
+        :src="`data:image/${captchaData.type};base64,${captchaData.data}`"
+      )
+      span(
+        v-else
+      ) ...
+
+//- 确认按钮
+mixin Confirm
+  el-form-item: ex-button(
+    :onClick="onSubmit"
+    :extra="exBtnExtra"
+  ) {{submitText}}
 .loginRegister
   el-card
     //- 头部
@@ -17,54 +73,15 @@
       label-width="80px"
     )
       //- 账号
-      el-form-item(
-        label="账号："
-      ): el-input(
-        placeholder="请输入账号"
-        v-model="form.account"
-        autofocus="true"
-        clearable
-      )
+      +AccountInput
       //- 密码
-      el-form-item(
-        label="密码："
-      ): el-input(
-        v-model="form.password"
-        show-password
-        placeholder="请输入密码"
-      )
+      +PasswordInput
+
       //- 验证码
-      el-form-item(
-        label="验证码："
-      ): el-row
-        //- 验证码输入框
-        el-col(
-          :span="18"
-        ): el-input.code(
-          v-model="form.captcha"
-          maxlength="4"
-          clearable
-          @keyup.enter.native="onSubmit"
-          placeholder="请输入验证码"
-        )
-        //- 验证码图片
-        el-col(
-          :span="6"
-        ): .captcha(
-          @click="refreshCaptcha"
-        )
-          img(
-            v-if="captchaData"
-            :src="`data:image/${captchaData.type};base64,${captchaData.data}`"
-          )
-          span(
-            v-else
-          ) ...
+      +CaptchaInput
+
       //- 确认按钮
-      el-form-item: ex-button(
-        :onClick="onSubmit"
-        :extra="exBtnExtra"
-      ) {{submitText}}
+      +Confirm
 
 </template>
 

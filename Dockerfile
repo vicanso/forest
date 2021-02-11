@@ -2,8 +2,8 @@ FROM node:14-alpine as webbuilder
 
 COPY . /forest
 RUN cd /forest/web \
-  && yarn \
-  && yarn build \
+  && npm i \
+  && npm run build \
   && rm -rf node_module
 
 FROM golang:1.15-alpine as builder

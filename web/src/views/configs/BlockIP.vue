@@ -1,29 +1,39 @@
 <template lang="pug">
-.blockIP
-  div(
-    v-if="!editMode"
+//- 表格
+mixin Table
+  config-table(
+    :category="category"
+    name="黑名单IP配置"
   )
-    config-table(
-      :category="category"
-      name="黑名单IP配置"
-    )
-    .add
-      el-button.addBtn(
-        type="primary"
-        @click="add"
-      ) 添加
+  .add
+    el-button.addBtn(
+      type="primary"
+      @click="add"
+    ) 添加
+//- 配置编辑
+mixin Editor
   config-editor(
     name="添加/更新IP黑名单配置"
     summary="用于拦截访问IP"
     :category="category"
     :defaultValue="defaultValue"
-    v-else
   ): template(
     #data="configProps"
   ): block-iP-data(
     :data="configProps.form.data"
     @change.self="configProps.form.data = $event"
   )
+.blockIP
+  div(
+    v-if="!editMode"
+  )
+    +Table
+
+  //- 编辑
+  template(
+    v-else
+  )
+    +Editor
 </template>
 
 <script lang="ts">

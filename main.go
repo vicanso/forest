@@ -115,7 +115,7 @@ func watchForClose(e *elton.Elton) {
 // exitForDev 开发环境退出
 func exitForDev(e *elton.Elton) {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGUSR2)
+	signal.Notify(c, syscall.SIGINT)
 	go func() {
 		for range c {
 			closeDepends()

@@ -1,4 +1,76 @@
 <template lang="pug">
+mixin IDColumn
+  el-table-column(
+    prop="id"
+    key="id"
+    label="ID"
+    width="80"
+    sortable
+  )
+
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="120"
+  )
+
+mixin StatusColumn
+  el-table-column(
+    label="状态"
+    width="100"
+  ): template(
+    #default="scope"
+  ) {{ getStatusDesc(scope.row.status) }}
+
+mixin RolesColumn
+  el-table-column(
+    label="角色"
+  ): template(
+    #default="scope"
+  ): ul
+    li(
+      v-for="role in scope.row.roles"
+      :key="role"
+    ) {{ role }}
+
+mixin UpdatedAtColumn
+  el-table-column(
+    prop="updatedAt"
+    key="updatedAt"
+    label="更新于"
+    width="160"
+    sortable
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.updatedAt"
+  )
+
+mixin OpColumn
+  el-table-column(
+    label="操作"
+    width="120"
+  ): template(
+    #default="scope"
+  ): el-button.op(
+    type="text"
+    size="small"
+    @click="modify(scope.row)"
+  ) 编辑
+
+mixin Pagination
+  el-pagination.pagination(
+    layout="prev, pager, next, sizes"
+    :current-page="currentPage"
+    :page-size="query.limit"
+    :page-sizes="pageSizes"
+    :total="users.count"
+    @size-change="handleSizeChange"
+    @current-change="handleCurrentChange"
+  )
+
 .users(
   v-loading="!inited"
 )
@@ -25,70 +97,24 @@
       @sort-change="handleSortChange"
     )
       //- 用户ID
-      el-table-column(
-        prop="id"
-        key="id"
-        label="ID"
-        width="80"
-        sortable
-      )
+      +IDColumn
       //- 用户账号
-      el-table-column(
-        prop="account"
-        key="account"
-        label="账户"
-        width="120"
-      )
+      +AccountColumn
+
       //- 用户状态
-      el-table-column(
-        label="状态"
-        width="100"
-      ): template(
-        #default="scope"
-      ) {{ getStatusDesc(scope.row.status) }}
+      +StatusColumn
+
       //- 用户角色
-      el-table-column(
-        label="角色"
-      ): template(
-        #default="scope"
-      ): ul
-        li(
-          v-for="role in scope.row.roles"
-          :key="role"
-        ) {{ role }}
+      +RolesColumn
+
       //- 更新时间
-      el-table-column(
-        prop="updatedAt"
-        key="updatedAt"
-        label="更新于"
-        width="160"
-        sortable
-      ): template(
-        #default="scope"
-      ): time-formater(
-        :time="scope.row.updatedAt"
-      )
+      +UpdatedAtColumn
+      
       //- 操作
-      el-table-column(
-        label="操作"
-        width="120"
-      ): template(
-        #default="scope"
-      ): el-button.op(
-        type="text"
-        size="small"
-        @click="modify(scope.row)"
-      ) 编辑
+      +OpColumn
+
     //- 分页
-    el-pagination.pagination(
-      layout="prev, pager, next, sizes"
-      :current-page="currentPage"
-      :page-size="query.limit"
-      :page-sizes="pageSizes"
-      :total="users.count"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    )
+    +Pagination
   //- 用户编辑
   user(
     v-else

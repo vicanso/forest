@@ -1,18 +1,17 @@
 <template lang="pug">
-.router
-  div(
-    v-if="!editMode"
+mixin Table
+  config-table(
+    :category="category"
+    name="路由配置"
   )
-    config-table(
-      :category="category"
-      name="路由配置"
-    )
-    .add: el-button.addBtn(
-      type="primary"
-      @click="add"
-    ) 添加
+  .add: el-button.addBtn(
+    type="primary"
+    @click="add"
+  ) 添加
+
+//- 编辑
+mixin Editor
   config-editor(
-    v-else
     name="添加/更新路由配置"
     summary="配置针对各路由响应的Mock"
     :category="category"
@@ -23,6 +22,20 @@
     :data="configProps.form.data"
     @change.self="configProps.form.data = $event"
   )
+
+.router
+  div(
+    v-if="!editMode"
+  )
+    //- 配置列表
+    +Table
+
+  //- 编辑
+  template(
+    v-else
+  )
+    +Editor
+
 </template>
 
 <script lang="ts">
