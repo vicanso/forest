@@ -69,13 +69,13 @@ import {
 } from "../router";
 
 export default defineComponent({
+  name: "MainHeader",
   props: {
     shrinking: {
       type: Boolean,
       default: false,
     },
   },
-  name: "MainHeader",
   setup() {
     const userState = useUserState();
     return {
