@@ -63,7 +63,7 @@ export default defineComponent({
     "form.allowAccounts": function () {
       this.handleChange();
     },
-    "form.allowRoutes": function() {
+    "form.allowRoutes": function () {
       this.handleChange();
     },
   },

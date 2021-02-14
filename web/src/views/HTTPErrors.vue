@@ -5,6 +5,7 @@ mixin AccountColumn
     key="account"
     label="账户"
     width="120"
+    fixed="left"
   )
 
 mixin MethodColumn
@@ -20,7 +21,7 @@ mixin RouteColumn
     prop="route"
     key="route"
     label="路由"
-    width="150"
+    width="180"
   )
 
 mixin CategoryColumn
@@ -28,7 +29,7 @@ mixin CategoryColumn
     prop="category"
     key="category"
     label="类型"
-    width="100"
+    width="200"
   )
 
 mixin StatusColumn
@@ -97,7 +98,17 @@ mixin ErrorColumn
     prop="error"
     key="error"
     label="Error"
+    width="300"
+  ): template(
+    #default="scope"
   )
+    p(
+      v-if="scope.row.error"
+      v-html=`scope.row.error.split(",").map(item => item.trim()).join("<br />")`
+    )
+    span(
+      v-else
+    ) --
 
 mixin TimeColumn
   el-table-column(
@@ -105,6 +116,7 @@ mixin TimeColumn
     prop="_time"
     key="_time"
     width="160"
+    fixed="right"
   ): template(
     #default="scope"
   ): time-formater(

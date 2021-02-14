@@ -1,7 +1,7 @@
 <template lang="pug">
 el-button.btn(
-  v-if=`$props.category === "primary"`
-  type="primary"
+  v-if=`$props.category === "button"`
+  :type="$props.buttonCategory"
   :icon="$props.icon"
   @click="handleClick"
   :class="{ isProcessing: processing}"
@@ -37,6 +37,10 @@ export default defineComponent({
       required: true,
     },
     category: {
+      type: String,
+      default: "button",
+    },
+    buttonCategory: {
       type: String,
       default: "primary",
     },

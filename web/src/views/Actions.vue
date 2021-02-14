@@ -5,6 +5,7 @@ mixin AccountColumn
     key="account"
     label="账户"
     width="150"
+    fixed="left"
   )
 
 mixin CategoryColumn
@@ -12,7 +13,7 @@ mixin CategoryColumn
     prop="category"
     key="category"
     label="类型"
-    width="150"
+    width="200"
   )
 
 mixin StatusColumn
@@ -39,6 +40,7 @@ mixin RouteColumn
 mixin TIDColumn
   el-table-column(
     label="Track ID"
+    width="100"
   ): template(
     #default="scope"
   ): base-tooltip(
@@ -73,6 +75,7 @@ mixin TimeColumn
     prop="_time"
     key="_time"
     width="160"
+    fixed="right"
   ): template(
     #default="scope"
   ): time-formater(

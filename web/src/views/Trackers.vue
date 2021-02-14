@@ -5,6 +5,7 @@ mixin AccountColumn
     key="account"
     label="账户"
     width="120"
+    fixed="left"
   )
 
 mixin CategoryColumn
@@ -12,7 +13,7 @@ mixin CategoryColumn
     prop="action"
     key="action"
     label="类型"
-    width="150"
+    width="200"
   )
 
 mixin StatusColumn
@@ -32,6 +33,7 @@ mixin StatusColumn
 mixin FormColumn
   el-table-column(
     label="Form"
+    width="300"
   ): template(
     #default="scope"
   ): base-json(
@@ -41,6 +43,7 @@ mixin FormColumn
 mixin QueryColumn
   el-table-column(
     label="Query"
+    width="200"
   ): template(
     #default="scope"
   ): base-json(
@@ -50,6 +53,7 @@ mixin QueryColumn
 mixin ParamsColumn
   el-table-column(
     label="Params"
+    width="200"
   ): template(
     #default="scope"
   ): base-json(
@@ -108,6 +112,7 @@ mixin TimeColumn
     prop="_time"
     key="_time"
     width="160"
+    fixed="right"
   ): template(
     #default="scope"
   ): time-formater(
