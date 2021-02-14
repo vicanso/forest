@@ -10,12 +10,21 @@ el-row.sessionInterceptorData
     clearable
   )
   el-col(
-    :span="16"
+    :span="8"
   ): el-form-item(
     label="允许账号："
   ): el-input(
     placeholder="请输入允许的账号列表，多个账号以,分割"
     v-model="form.allowAccounts"
+    clearable
+  )
+  el-col(
+    :span="8"
+  ): el-form-item(
+    label="允许路由："
+  ): el-input(
+    placeholder="请输入允许的路由列表，多个路由以,分割"
+    v-model="form.allowRoutes"
     clearable
   )
 </template>
@@ -35,11 +44,13 @@ export default defineComponent({
     const form = {
       message: "",
       allowAccounts: "",
+      allowRoutes: "",
     };
     if (this.$props.data) {
       const data = JSON.parse(this.$props.data);
       form.message = data.message;
       form.allowAccounts = (data.allowAccounts || []).join(",");
+      form.allowRoutes = (data.allowRoutes || []).join(",");
     }
     return {
       form,
@@ -52,6 +63,9 @@ export default defineComponent({
     "form.allowAccounts": function () {
       this.handleChange();
     },
+    "form.allowRoutes": function() {
+      this.handleChange();
+    },
   },
   methods: {
     handleChange() {
@@ -60,6 +74,7 @@ export default defineComponent({
         JSON.stringify({
           message: this.form.message,
           allowAccounts: this.form.allowAccounts.split(","),
+          allowRoutes: this.form.allowRoutes.split(","),
         })
       );
     },

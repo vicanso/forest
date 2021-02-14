@@ -222,6 +222,11 @@ func sessionInterceptorMiddleware(c *elton.Context) error {
 	if account != "" && util.ContainsString(interData.AllowAccounts, account) {
 		return c.Next()
 	}
+	// 如果路由配置允许
+	if util.ContainsString(interData.AllowRoutes, c.Route) {
+		return c.Next()
+	}
+
 	// 如果有配置拦截信息，则以出错返回
 	he := hes.New(interData.Message)
 	he.Category = "sessionInterceptorMiddleware"

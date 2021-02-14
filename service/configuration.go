@@ -40,6 +40,7 @@ type (
 	SessionInterceptorData struct {
 		Message       string   `json:"message,omitempty"`
 		AllowAccounts []string `json:"allowAccounts,omitempty"`
+		AllowRoutes   []string `json:"allowRoutes,omitempty"`
 	}
 
 	// CurrentValidConfiguration 当前有效配置
