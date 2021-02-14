@@ -30,4 +30,7 @@ const (
 	ActionConfigurationAdd = "addConfiguration"
 	// ActionConfigurationUpdate update configuration
 	ActionConfigurationUpdate = "updateConfiguration"
+
+	// ActionAdminCleanSession clean session
+	ActionAdminCleanSession = "cleanSession"
 )

@@ -19,6 +19,7 @@ package controller
 import (
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cache"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/router"
 )
 
@@ -42,6 +43,7 @@ func init() {
 	// 清空session数据
 	g.DELETE(
 		"/v1/sessions/{id}",
+		newTrackerMiddleware(cs.ActionAdminCleanSession),
 		ctrl.cleanSessionByID,
 	)
 }
