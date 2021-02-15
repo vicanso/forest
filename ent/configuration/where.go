@@ -5,7 +5,7 @@ package configuration
 import (
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/vicanso/forest/ent/predicate"
 	"github.com/vicanso/forest/ent/schema"
 )

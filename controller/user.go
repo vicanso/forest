@@ -23,8 +23,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqljson"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/ent/user"
 )
@@ -18,23 +18,23 @@ type User struct {
 	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
+	// 创建时间，添加记录时由程序自动生成
 	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
-	// UpdatedAt holds the value of the "updated_at" field.
+	// 更新时间，更新记录时由程序自动生成
 	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
-	// Status holds the value of the "status" field.
+	// 状态，默认为启用状态
 	Status schema.Status `json:"status,omitempty"`
-	// Account holds the value of the "account" field.
+	// 用户账户信息
 	Account string `json:"account,omitempty"`
-	// Password holds the value of the "password" field.
+	// 用户密码，保存hash之后的值
 	Password string `json:"-" sql:"-"`
-	// Name holds the value of the "name" field.
+	// 用户名称
 	Name string `json:"name,omitempty"`
-	// Roles holds the value of the "roles" field.
+	// 用户角色，由管理员分配
 	Roles []string `json:"roles,omitempty"`
-	// Groups holds the value of the "groups" field.
+	// 用户分组，按用户职能分配至不同的分组
 	Groups []string `json:"groups,omitempty"`
-	// Email holds the value of the "email" field.
+	// 用户邮箱
 	Email string `json:"email,omitempty"`
 }
 

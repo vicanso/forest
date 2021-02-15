@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/ent/predicate"
 )
@@ -261,7 +261,7 @@ func (cq *ConfigurationQuery) GroupBy(field string, fields ...string) *Configura
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.sqlQuery(), nil
+		return cq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -384,7 +384,7 @@ func (cq *ConfigurationQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *ConfigurationQuery) sqlQuery() *sql.Selector {
+func (cq *ConfigurationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(configuration.Table)
 	selector := builder.Select(t1.Columns(configuration.Columns...)...).From(t1)
@@ -679,7 +679,7 @@ func (cs *ConfigurationSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.ConfigurationQuery.sqlQuery()
+	cs.sql = cs.ConfigurationQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
 }
 
