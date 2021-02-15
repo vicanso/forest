@@ -16,6 +16,7 @@ package controller
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -30,6 +31,7 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+	intranetip "github.com/vicanso/intranet-ip"
 	"go.uber.org/zap"
 )
 
@@ -231,4 +233,12 @@ func sessionInterceptorMiddleware(c *elton.Context) error {
 	he := hes.New(interData.Message)
 	he.Category = "sessionInterceptorMiddleware"
 	return he
+}
+
+// isIntranet 判断是否内网访问
+func isIntranet(c *elton.Context) error {
+	if intranetip.Is(net.ParseIP(c.ClientIP())) {
+		return c.Next()
+	}
+	return hes.NewWithStatusCode("Forbidden", 403)
 }

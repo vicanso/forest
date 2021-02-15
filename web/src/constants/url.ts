@@ -5,6 +5,7 @@ export const USERS_ME = "/users/v1/me";
 export const USERS_ME_DETAIL = "/users/v1/detail";
 // 用户登录
 export const USERS_LOGIN = "/users/v1/me/login";
+export const USERS_INNER_LOGIN = "/users/inner/v1/me/login";
 // 用户行为
 export const USERS_ACTIONS = "/users/v1/actions";
 // 用户登录记录

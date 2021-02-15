@@ -218,6 +218,14 @@ func init() {
 		}),
 		ctrl.login,
 	)
+	// 内部登录
+	g.POST(
+		"/inner/v1/me/login",
+		newTrackerMiddleware(cs.ActionLogin),
+		captchaValidate,
+		isIntranet,
+		ctrl.login,
+	)
 
 	// 刷新user session的ttl或更新客户信息
 	g.PATCH(

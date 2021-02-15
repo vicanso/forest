@@ -5,6 +5,7 @@ import { sha256 } from "../helpers/crypto";
 import {
   USERS_ME,
   USERS_LOGIN,
+  USERS_INNER_LOGIN,
   USERS_LOGINS,
   USERS_ROLES,
   USERS,
@@ -142,7 +143,7 @@ export async function userLogin(params: {
     const resp = await request.get(USERS_LOGIN);
     const { token } = resp.data;
     const { data } = await request.post(
-      USERS_LOGIN,
+      USERS_INNER_LOGIN,
       {
         account: params.account,
         password: sha256(generatePassword(params.password) + token),

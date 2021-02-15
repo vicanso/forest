@@ -31,6 +31,7 @@ require (
 	github.com/vicanso/go-cache v0.0.3
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.4
+	github.com/vicanso/intranet-ip v0.0.1
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.3.2
 	github.com/vicanso/viperx v0.1.4
