@@ -34,10 +34,15 @@ func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 		defer exitFn()
 		if c.ID != "" {
 			c.SetHeader(xResponseID, c.ID)
-			tracer.SetTracerInfo(tracer.TracerInfo{
-				TraceID: c.ID,
-			})
 		}
+		deviceID := c.GetRequestHeader("X-Device-ID")
+		if deviceID == "" {
+			deviceID = util.GetTrackID(c)
+		}
+		tracer.SetTracerInfo(tracer.TracerInfo{
+			TraceID:  c.ID,
+			DeviceID: deviceID,
+		})
 		// 测试环境返回x-forwarded-for，方便确认链路
 		if !util.IsProduction() {
 			c.SetHeader(elton.HeaderXForwardedFor, c.GetRequestHeader(elton.HeaderXForwardedFor))

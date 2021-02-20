@@ -160,7 +160,6 @@ func newTrackerMiddleware(action string) elton.Handler {
 				zap.String("action", action),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
-				zap.String("tid", tid),
 				zap.Int("result", info.Result),
 			)
 			fields := map[string]interface{}{
@@ -218,11 +217,8 @@ func sessionHandle(c *elton.Context) error {
 
 	// 设置账号信息
 	info := tracer.GetTracerInfo()
-	if info == nil {
-		info = &tracer.TracerInfo{}
-	}
 	info.Account = account
-	tracer.SetTracerInfo(*info)
+	tracer.SetTracerInfo(info)
 
 	// 如果无配置，则直接跳过
 	if interData == nil {

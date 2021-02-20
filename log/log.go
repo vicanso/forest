@@ -53,12 +53,14 @@ type logger struct {
 
 func (l *logger) getFields(fields []zap.Field) []zap.Field {
 	info := tracer.GetTracerInfo()
-	if info == nil {
+	// 如果无trace id，则表示获取失败
+	if info.TraceID == "" {
 		return fields
 	}
 	return append([]zap.Field{
-		zap.String("account", info.Account),
+		zap.String("deviceID", info.DeviceID),
 		zap.String("traceID", info.TraceID),
+		zap.String("account", info.Account),
 	}, fields...)
 }
 func (l *logger) Debug(msg string, fields ...zap.Field) {

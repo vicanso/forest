@@ -27,28 +27,31 @@ import (
 )
 
 type TracerInfo struct {
-	Account string
-	TraceID string
+	DeviceID string
+	Account  string
+	TraceID  string
 }
 
 // 设置缓存，根据系统的访问量调整，需要比request limit大
 var tracerInfoCache = lruttl.New(1024*10, 2*time.Minute)
 
+var emptyTracerInfo TracerInfo
+
 // GetTracerInfo 获取tracer信息
-func GetTracerInfo() *TracerInfo {
+func GetTracerInfo() TracerInfo {
 	p := g.G()
 	if p == nil {
-		return nil
+		return emptyTracerInfo
 	}
 	value, ok := tracerInfoCache.Get(p)
 	if !ok {
-		return nil
+		return emptyTracerInfo
 	}
 	info, ok := value.(*TracerInfo)
 	if !ok {
-		return nil
+		return emptyTracerInfo
 	}
-	return info
+	return *info
 }
 
 // SetTracerInfo 设置tracer信息
