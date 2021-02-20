@@ -43,7 +43,7 @@ func GetTracerInfo() TracerInfo {
 	if p == nil {
 		return emptyTracerInfo
 	}
-	value, ok := tracerInfoCache.Get(p)
+	value, ok := tracerInfoCache.Peek(p)
 	if !ok {
 		return emptyTracerInfo
 	}

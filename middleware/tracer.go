@@ -1,4 +1,4 @@
-// Copyright 2020 tree xie
+// Copyright 2021 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,32 +16,22 @@ package middleware
 
 import (
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 )
 
-const (
-	xResponseID = "X-Response-Id"
-)
-
-type EntryFunc func() int32
-type ExitFunc func() int32
-
-// NewEntry create an entry middleware
-func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
-	return func(c *elton.Context) (err error) {
-		entryFn()
-		defer exitFn()
-		if c.ID != "" {
-			c.SetHeader(xResponseID, c.ID)
+// NewTracer create a tracer middleware
+func NewTracer() elton.Handler {
+	return func(c *elton.Context) error {
+		deviceID := c.GetRequestHeader("X-Device-ID")
+		if deviceID == "" {
+			deviceID = util.GetTrackID(c)
 		}
-		// 测试环境返回x-forwarded-for，方便确认链路
-		if !util.IsProduction() {
-			c.SetHeader(elton.HeaderXForwardedFor, c.GetRequestHeader(elton.HeaderXForwardedFor))
-		}
-
-		// 设置所有的请求响应默认都为no cache
-		c.NoCache()
-
+		// 设置tracer的信息
+		tracer.SetTracerInfo(tracer.TracerInfo{
+			TraceID:  c.ID,
+			DeviceID: deviceID,
+		})
 		return c.Next()
 	}
 }
