@@ -28,6 +28,7 @@ import (
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
@@ -41,7 +42,7 @@ var (
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(middleware.NewSession(), sessionInterceptorMiddleware)
+	loadUserSession = elton.Compose(middleware.NewSession(), sessionHandle)
 	// 判断用户是否登录
 	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录
@@ -157,7 +158,6 @@ func newTrackerMiddleware(action string) elton.Handler {
 			zapFields = append(
 				zapFields,
 				zap.String("action", action),
-				zap.String("account", account),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
 				zap.String("tid", tid),
@@ -206,18 +206,29 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 	return
 }
 
-// sessionInterceptorMiddleware session的拦截
-func sessionInterceptorMiddleware(c *elton.Context) error {
+// sessionHandle session的相关处理
+func sessionHandle(c *elton.Context) error {
 	interData, _ := service.GetSessionInterceptorData()
-	// 如果无配置，则直接跳过
-	if interData == nil {
-		return c.Next()
-	}
+
 	us := service.NewUserSession(c)
 	account := ""
 	if us.IsLogin() {
 		account = us.MustGetInfo().Account
 	}
+
+	// 设置账号信息
+	info := tracer.GetTracerInfo()
+	if info == nil {
+		info = &tracer.TracerInfo{}
+	}
+	info.Account = account
+	tracer.SetTracerInfo(*info)
+
+	// 如果无配置，则直接跳过
+	if interData == nil {
+		return c.Next()
+	}
+
 	// 如果配置该账号允许
 	if account != "" && util.ContainsString(interData.AllowAccounts, account) {
 		return c.Next()

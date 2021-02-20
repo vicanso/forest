@@ -74,10 +74,11 @@ func init() {
 	closeOnce := sync.Once{}
 	closeDepends = func() {
 		closeOnce.Do(func() {
+			_ = log.Default().Sync()
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
-			helper.EntGetClient().Close()
-			helper.RedisGetClient().Close()
+			_ = helper.EntGetClient().Close()
+			_ = helper.RedisGetClient().Close()
 		})
 	}
 }
@@ -152,7 +153,7 @@ func newOnErrorHandler(e *elton.Elton) {
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
 	// exception的warner只有一个key，因此无需定时清除
-	warnerException := warner.NewWarner(60*time.Second, 5)
+	warnerException := warner.NewWarner(60*time.Second, 60)
 	warnerException.ResetOnWarn = true
 	warnerException.On(func(_ string, _ warner.Count) {
 		service.AlarmError("too many uncaught exception")
@@ -244,6 +245,10 @@ func main() {
 		// 设置server timing
 		c.ServerTiming(infos, "forest-")
 	})
+	// 若需要唯一值，可使用ulid或uuid
+	e.GenerateID = func() string {
+		return util.RandomString(6)
+	}
 
 	// 自定义404与405的处理
 	e.NotFoundHandler = middleware.NewNotFoundHandler()

@@ -20,7 +20,6 @@ import (
 	"strings"
 	"time"
 
-	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
@@ -104,19 +103,6 @@ func NewNoCacheWithCondition(key, value string) elton.Handler {
 // NewNotFoundHandler 创建404 not found的处理函数
 func NewNotFoundHandler() http.HandlerFunc {
 	// 对于404的请求，不会执行中间件，一般都是因为攻击之类才会导致大量出现404，
-	// 因此可在此处汇总出错IP，针对较频繁出错IP，增加告警信息
-	// 如果1分钟同一个IP出现60次404
-	warner404 := warner.NewWarner(60*time.Second, 60)
-	warner404.ResetOnWarn = true
-	warner404.On(func(ip string, _ warner.Count) {
-		service.AlarmError("too many 404 request, client ip:" + ip)
-	})
-	go func() {
-		// 因为404是根据IP来告警，因此可能存在大量不同的key，因此定时清除过期数据
-		for range time.NewTicker(5 * time.Minute).C {
-			warner404.ClearExpired()
-		}
-	}()
 	notFoundErrBytes := (&hes.Error{
 		Message:    "Not Found",
 		StatusCode: http.StatusNotFound,
@@ -140,7 +126,6 @@ func NewNotFoundHandler() http.HandlerFunc {
 				zap.Error(err),
 			)
 		}
-		warner404.Inc(ip, 1)
 
 		tags := map[string]string{
 			cs.TagMethod: req.Method,

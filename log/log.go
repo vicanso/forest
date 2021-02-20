@@ -24,6 +24,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 )
 
@@ -46,18 +47,66 @@ func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface
 	)
 }
 
-// mustNewLogger 初始化logger
-func mustNewLogger(outputPath string) *zap.Logger {
+type logger struct {
+	zapLogger *zap.Logger
+}
 
-	if util.IsDevelopment() {
-		c := zap.NewDevelopmentConfig()
-		l, err := c.Build(zap.AddStacktrace(zap.ErrorLevel))
-		if err != nil {
-			panic(err)
-		}
-		return l
+func (l *logger) getFields(fields []zap.Field) []zap.Field {
+	info := tracer.GetTracerInfo()
+	if info == nil {
+		return fields
 	}
-	c := zap.NewProductionConfig()
+	return append([]zap.Field{
+		zap.String("account", info.Account),
+		zap.String("traceID", info.TraceID),
+	}, fields...)
+}
+func (l *logger) Debug(msg string, fields ...zap.Field) {
+	l.zapLogger.Debug(msg, l.getFields(fields)...)
+}
+func (l *logger) Info(msg string, fields ...zap.Field) {
+	l.zapLogger.Info(msg, l.getFields(fields)...)
+}
+func (l *logger) Warn(msg string, fields ...zap.Field) {
+	l.zapLogger.Warn(msg, l.getFields(fields)...)
+}
+func (l *logger) Error(msg string, fields ...zap.Field) {
+	l.zapLogger.Error(msg, l.getFields(fields)...)
+}
+func (l *logger) DPanic(msg string, fields ...zap.Field) {
+	l.zapLogger.DPanic(msg, l.getFields(fields)...)
+}
+func (l *logger) Panic(msg string, fields ...zap.Field) {
+	l.zapLogger.Panic(msg, l.getFields(fields)...)
+}
+func (l *logger) Fatal(msg string, fields ...zap.Field) {
+	l.zapLogger.Fatal(msg, l.getFields(fields)...)
+}
+func (l *logger) Sync() error {
+	return l.zapLogger.Sync()
+}
+
+// mustNewLogger 初始化logger
+func mustNewLogger(outputPath string) *logger {
+
+	var c zap.Config
+	opts := make([]zap.Option, 0)
+	if util.IsDevelopment() {
+		c = zap.NewDevelopmentConfig()
+		opts = append(opts, zap.AddStacktrace(zap.ErrorLevel))
+	} else {
+		c = zap.NewProductionConfig()
+		// 在一秒钟内, 如果某个级别的日志输出量超过了 Initial, 那么在超过之后, 每 Thereafter 条日志才会输出一条, 其余的日志都将被删除
+		c.Sampling.Initial = 1000
+		// 如果不希望任何日志丢失，则设置为nil
+		// c.Sampling = nil
+
+		c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+		// 只针对panic 以上的日志增加stack trace
+		opts = append(opts, zap.AddStacktrace(zap.DPanicLevel))
+	}
+
 	if outputPath != "" {
 		c.OutputPaths = []string{
 			outputPath,
@@ -67,27 +116,26 @@ func mustNewLogger(outputPath string) *zap.Logger {
 		}
 	}
 
-	// 在一秒钟内, 如果某个级别的日志输出量超过了 Initial, 那么在超过之后, 每 Thereafter 条日志才会输出一条, 其余的日志都将被删除
-	c.Sampling.Initial = 1000
-	// 如果不希望任何日志丢失，则设置为nil
-	// c.Sampling = nil
+	l, err := c.Build(opts...)
 
-	c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	// 只针对panic 以上的日志增加stack trace
-	l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
 	if err != nil {
 		panic(err)
 	}
-	return l
+	return &logger{
+		zapLogger: l,
+	}
 }
 
 // SetOutputPath 设置日志的输出目录，在程序初始化时使用
 func SetOutputPath(outputPath string) {
+	if defaultLogger != nil {
+		_ = defaultLogger.Sync()
+	}
 	defaultLogger = mustNewLogger(outputPath)
 }
 
 // Default 获取默认的logger
-func Default() *zap.Logger {
+func Default() *logger {
 	return defaultLogger
 }
 

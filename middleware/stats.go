@@ -38,7 +38,7 @@ func NewStats() elton.Handler {
 			sid := util.GetSessionID(c)
 			log.Default().Info("access log",
 				// 由客户端设置的uuid
-				zap.String("uuid", c.GetRequestHeader("X-UUID")),
+				// zap.String("uuid", c.GetRequestHeader("X-UUID")),
 				zap.String("ip", info.IP),
 				zap.String("sid", sid),
 				zap.String("method", info.Method),

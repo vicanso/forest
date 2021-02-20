@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 )
 
@@ -33,6 +34,9 @@ func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 		defer exitFn()
 		if c.ID != "" {
 			c.SetHeader(xResponseID, c.ID)
+			tracer.SetTracerInfo(tracer.TracerInfo{
+				TraceID: c.ID,
+			})
 		}
 		// 测试环境返回x-forwarded-for，方便确认链路
 		if !util.IsProduction() {

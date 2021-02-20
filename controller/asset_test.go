@@ -33,19 +33,16 @@ const testHTMLContent = `<!DOCTYPE html>
 
 func TestStaticFile(t *testing.T) {
 	assert := assert.New(t)
-	sf := &staticFile{
-		box: assetBox,
-	}
-	assert.True(sf.Exists("index.html"))
-	assert.False(sf.Exists("test.html"))
+	assert.True(assetFS.Exists("index.html"))
+	assert.False(assetFS.Exists("test.html"))
 
-	buf, err := sf.Get("index.html")
+	buf, err := assetFS.Get("index.html")
 	assert.Nil(err)
 	assert.Equal(testHTMLContent, string(buf))
 
-	assert.Nil(sf.Stat("index.html"))
+	assert.Nil(assetFS.Stat("index.html"))
 
-	r, err := sf.NewReader("index.html")
+	r, err := assetFS.NewReader("index.html")
 	assert.Nil(err)
 	assert.NotNil(r)
 	buf, err = ioutil.ReadAll(r)

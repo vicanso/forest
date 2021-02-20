@@ -6,14 +6,15 @@ RUN cd /forest/web \
   && npm run build \
   && rm -rf node_module
 
-FROM golang:1.15-alpine as builder
+FROM golang:1.16-alpine as builder
 
 COPY --from=webbuilder /forest /forest
 
 RUN apk update \
   && apk add git make \
-  && go get -u github.com/gobuffalo/packr/v2/packr2 \
   && cd /forest \
+  && rm -rf asset/dist \
+  && cp -rf web/dist asset/dist \
   && make build
 
 FROM alpine 
