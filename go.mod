@@ -12,6 +12,7 @@ require (
 	github.com/go-redis/redis/v8 v8.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.2
+	github.com/hashicorp/golang-lru v0.5.4
 	github.com/huandu/go-tls v1.0.1
 	github.com/iancoleman/strcase v0.1.3
 	github.com/influxdata/influxdb-client-go/v2 v2.2.2

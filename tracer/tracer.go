@@ -20,10 +20,8 @@
 package tracer
 
 import (
-	"time"
-
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/huandu/go-tls/g"
-	lruttl "github.com/vicanso/lru-ttl"
 )
 
 type TracerInfo struct {
@@ -32,24 +30,30 @@ type TracerInfo struct {
 	TraceID  string
 }
 
-// 设置缓存，根据系统的访问量调整，需要比request limit大
-var tracerInfoCache = lruttl.New(1024*10, 2*time.Minute)
+var tracerInfoCache = mustNewTracerCache()
 
-var emptyTracerInfo TracerInfo
+func mustNewTracerCache() *lru.Cache {
+	// 设置缓存，根据系统的访问量调整，需要比request limit大
+	l, err := lru.New(1024 * 10)
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
 
 // GetTracerInfo 获取tracer信息
 func GetTracerInfo() TracerInfo {
 	p := g.G()
 	if p == nil {
-		return emptyTracerInfo
+		return TracerInfo{}
 	}
 	value, ok := tracerInfoCache.Peek(p)
 	if !ok {
-		return emptyTracerInfo
+		return TracerInfo{}
 	}
 	info, ok := value.(*TracerInfo)
 	if !ok {
-		return emptyTracerInfo
+		return TracerInfo{}
 	}
 	return *info
 }
