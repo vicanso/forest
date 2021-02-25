@@ -33,7 +33,7 @@ var defaultLogger = mustNewLogger("")
 type httpServerLogger struct{}
 
 func (hsl *httpServerLogger) Write(p []byte) (int, error) {
-	defaultLogger.Info(string(p),
+	Default().Info(string(p),
 		zap.String("category", "httpServerLogger"),
 	)
 	return len(p), nil
@@ -42,7 +42,7 @@ func (hsl *httpServerLogger) Write(p []byte) (int, error) {
 type redisLogger struct{}
 
 func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
-	defaultLogger.Info(fmt.Sprintf(format, v...),
+	Default().Info(fmt.Sprintf(format, v...),
 		zap.String("category", "redisLogger"),
 	)
 }
