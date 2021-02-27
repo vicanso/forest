@@ -22,6 +22,7 @@ import (
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/util"
 
 	"go.uber.org/zap"
 )
@@ -45,6 +46,10 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", performanceStats)
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
 	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
+	// 如果是开发环境，则不执行定时任务
+	if util.IsDevelopment() {
+		return
+	}
 	c.Start()
 }
 

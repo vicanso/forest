@@ -91,7 +91,8 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 
 	// Create an ent.Driver from `db`.
 	driver := entsql.OpenDB(dialect.Postgres, db)
-	c := ent.NewClient(ent.Driver(driver))
+	entLogger := log.NewEntLogger()
+	c := ent.NewClient(ent.Driver(driver), ent.Log(entLogger.Log))
 
 	ctx := context.Background()
 	if err := c.Schema.Create(ctx); err != nil {

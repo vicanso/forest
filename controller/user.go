@@ -38,6 +38,7 @@ import (
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
@@ -544,7 +545,9 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		}
 
 		// 记录创建user track
+		tracerInfo := tracer.GetTracerInfo()
 		go func() {
+			tracer.SetTracerInfo(tracerInfo)
 			location, _ := service.GetLocationByIP(ip, nil)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
@@ -642,7 +645,9 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	userAgent := c.GetRequestHeader("User-Agent")
 
 	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
+	tracerInfo := tracer.GetTracerInfo()
 	go func() {
+		tracer.SetTracerInfo(tracerInfo)
 		fields := map[string]interface{}{
 			cs.FieldAccount:   account,
 			cs.FieldUserAgent: userAgent,

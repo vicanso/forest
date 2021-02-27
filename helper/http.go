@@ -108,6 +108,10 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			data = resp.UnmarshalData
 			size = len(resp.Data)
 		}
+		// 由于http请求是较频繁的操作，因此判断是否启用debug再输出
+		if log.DebugEnabled() {
+			log.Default().Debug(conf.CURL())
+		}
 		log.Default().Info("http request stats",
 			zap.String("service", serviceName),
 			zap.String("method", conf.Method),

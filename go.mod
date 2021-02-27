@@ -11,7 +11,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-redis/redis/v8 v8.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/golang/snappy v0.0.2
+	github.com/golang/snappy v0.0.3
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/huandu/go-tls v1.0.1
 	github.com/iancoleman/strcase v0.1.3
@@ -29,7 +29,7 @@ require (
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.2.1
-	github.com/vicanso/go-cache v0.1.0
+	github.com/vicanso/go-cache v0.1.1
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.5
 	github.com/vicanso/ips v1.1.0

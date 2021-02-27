@@ -3,6 +3,8 @@
 # for dev
 dev:
 	air -c .air.toml	
+dev-debug:
+	LOG_LEVEL=-1 make dev
 doc:
 	swagger generate spec -o ./api.yml && swagger validate ./api.yml 
 
