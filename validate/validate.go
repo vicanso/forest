@@ -16,6 +16,7 @@ package validate
 
 import (
 	"encoding/json"
+	"net/http"
 	"reflect"
 	"strconv"
 
@@ -184,6 +185,7 @@ func Do(s interface{}, data interface{}) (err error) {
 		if he.Category == "" {
 			he.Category = errCategory
 		}
+		he.StatusCode = http.StatusBadRequest
 		err = he
 	}
 	return

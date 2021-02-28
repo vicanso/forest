@@ -29,11 +29,11 @@ require (
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.2.1
-	github.com/vicanso/go-cache v0.1.1
+	github.com/vicanso/go-cache v0.2.0
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.5
 	github.com/vicanso/ips v1.1.0
-	github.com/vicanso/lru-ttl v0.4.0
+	github.com/vicanso/lru-ttl v0.4.1
 	github.com/vicanso/viperx v0.1.4
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.4.0
