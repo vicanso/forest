@@ -24,6 +24,8 @@ export const FLUXES_TRACKERS = "/fluxes/v1/trackers";
 export const FLUXES_HTTP_ERRORS = "/fluxes/v1/http-errors";
 // 客户端上传的action日志列表
 export const FLUXES_ACTIONS = "/fluxes/v1/actions";
+// 后端HTTP调用列表
+export const FLUXES_REQUESTS = "/fluxes/v1/requests";
 // tag value列表
 export const FLUXES_TAG_VALUES = "/fluxes/v1/tag-values/:measurement/:tag";
 

@@ -11,6 +11,7 @@ import Users from "../views/Users.vue";
 import Trackers from "../views/Trackers.vue";
 import Actions from "../views/Actions.vue";
 import HTTPErrors from "../views/HTTPErrors.vue";
+import Requests from "../views/Requests.vue";
 
 // 系统配置
 import MockTime from "../views/configs/MockTime.vue";
@@ -31,6 +32,7 @@ export const ROUTE_USERS = "users";
 export const ROUTE_TRACKERS = "trackers";
 export const ROUTE_ACTIONS = "actions";
 export const ROUTE_HTTP_ERRORS = "httpErrors";
+export const ROUTE_REQUESTS = "requests";
 
 // 系统配置
 export const ROUTE_MOCK_TIME = "mockTime";
@@ -103,6 +105,11 @@ const router = createRouter({
       path: "/http-errors",
       name: ROUTE_HTTP_ERRORS,
       component: HTTPErrors,
+    },
+    {
+      path: "/requests",
+      name: ROUTE_REQUESTS,
+      component: Requests,
     },
     {
       path: "/mock-time",

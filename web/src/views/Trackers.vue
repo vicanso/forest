@@ -101,9 +101,8 @@ mixin ErrorColumn
     width="80"
   ): template(
     #default="scope"
-  ): base-tooltip(
-    icon="el-icon-info"
-    :content="scope.row.error"
+  ): HTTPErrorFormater(
+    :message="scope.row.error"
   )
 
 mixin TimeColumn
@@ -189,6 +188,7 @@ import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
+import HTTPErrorFormater from "../components/HTTPErrorFormater.vue";
 import userFluxState, {
   fluxListUserTrackAction,
   fluxListUserTracker,
@@ -284,6 +284,7 @@ export default defineComponent({
     BaseFilter,
     BaseTooltip,
     TimeFormater,
+    HTTPErrorFormater,
     BaseJson,
   },
   mixins: [FilterTable],

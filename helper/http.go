@@ -19,6 +19,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -53,15 +54,19 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			status = conf.Response.Status
 		}
 
+		result := cs.ResultSuccess
+		if err != nil {
+			result = cs.ResultFail
+		}
 		tags := map[string]string{
 			cs.TagService: serviceName,
 			cs.TagRoute:   conf.Route,
 			cs.TagMethod:  conf.Method,
+			cs.TagResult:  strconv.Itoa(result),
 		}
 		fields := map[string]interface{}{
-			cs.FieldURI:    conf.URL,
+			cs.FieldURI:    conf.GetURL(),
 			cs.FieldStatus: status,
-			cs.FieldIP:     addr,
 		}
 		if ht != nil {
 			reused = ht.Reused
@@ -91,6 +96,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 				fields[cs.FieldTransferUse] = int(contentTransfer)
 			}
 		}
+		fields[cs.FieldAddr] = addr
 		message := ""
 		if err != nil {
 			he := hes.Wrap(err)
@@ -98,7 +104,10 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			fields[cs.FieldError] = message
 			errCategory := he.Category
 			if errCategory != "" {
-				fields[cs.FieldCategory] = errCategory
+				fields[cs.FieldErrCategory] = errCategory
+			}
+			if he.Exception {
+				fields[cs.FieldException] = true
 			}
 		}
 		// 输出响应数据，如果响应数据为隐私数据可不输出
@@ -136,17 +145,22 @@ func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
+			exception := false
 			if message == "" {
 				message = string(resp.Data)
+				// 如果出错响应不符合，则认为是异常响应
+				exception = true
 			}
-			return hes.NewWithStatusCode(message, resp.Status)
+			he := hes.NewWithStatusCode(message, resp.Status)
+			he.Exception = exception
+			return he
 		}
 		return
 	}
 }
 
 // getHTTPErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
-func getHTTPErrorCategory(err error, defaultCategory string) string {
+func getHTTPErrorCategory(err error) string {
 
 	netErr, ok := err.(net.Error)
 	if ok && netErr.Timeout() {
@@ -164,7 +178,7 @@ func getHTTPErrorCategory(err error, defaultCategory string) string {
 
 	opErr, ok := netErr.(*net.OpError)
 	if !ok {
-		return defaultCategory
+		return ""
 	}
 	switch e := opErr.Err.(type) {
 	// 针对以下几种系统调用返回对应类型
@@ -183,7 +197,7 @@ func getHTTPErrorCategory(err error, defaultCategory string) string {
 		}
 	}
 
-	return defaultCategory
+	return ""
 }
 
 // newHTTPOnError 新建error的处理函数
@@ -197,6 +211,10 @@ func newHTTPOnError(serviceName string) axios.OnError {
 		if code >= http.StatusBadRequest {
 			he.StatusCode = code
 		}
+		// 如果状态码>500，认为是异常（一般nginx之类才会使用502 503之类的状态码）
+		if code > http.StatusInternalServerError {
+			he.Exception = true
+		}
 		// 如果未设置http响应码，则设置为500
 		if he.StatusCode < http.StatusBadRequest {
 			he.StatusCode = http.StatusInternalServerError
@@ -208,7 +226,12 @@ func newHTTPOnError(serviceName string) axios.OnError {
 
 		// 如果为空，则通过error获取
 		if he.Category == "" {
-			he.Category = getHTTPErrorCategory(err, serviceName)
+			he.Category = getHTTPErrorCategory(err)
+			// 如果返回错误类型，则认为异常
+			// 因为返回出错均是网络连接上的异常
+			if he.Category != "" {
+				he.Exception = true
+			}
 		}
 
 		if !util.IsProduction() {

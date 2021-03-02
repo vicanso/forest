@@ -77,6 +77,7 @@ import {
   ROUTE_OTHERS,
   ROUTE_HTTP_ERRORS,
   ROUTE_ACTIONS,
+  ROUTE_REQUESTS,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
 import useUserState from "../states/user";
@@ -105,18 +106,6 @@ const navs = [
         name: "用户行为",
         route: ROUTE_TRACKERS,
         roles: [],
-        groups: [],
-      },
-      {
-        name: "出错记录",
-        route: ROUTE_HTTP_ERRORS,
-        roles: [],
-        groups: [],
-      },
-      {
-        name: "客户端行为记录",
-        route: ROUTE_ACTIONS,
-        roules: [],
         groups: [],
       },
     ],
@@ -177,6 +166,24 @@ const navs = [
     roles: [USER_SU],
     groups: [],
     children: [
+      {
+        name: "响应出错记录",
+        route: ROUTE_HTTP_ERRORS,
+        roles: [],
+        groups: [],
+      },
+      {
+        name: "后端HTTP调用",
+        route: ROUTE_REQUESTS,
+        roles: [],
+        groups: [],
+      },
+      {
+        name: "客户端行为记录",
+        route: ROUTE_ACTIONS,
+        roules: [],
+        groups: [],
+      },
       {
         name: "其它",
         route: ROUTE_OTHERS,

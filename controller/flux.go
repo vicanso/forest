@@ -41,9 +41,12 @@ type (
 		Limit       string    `json:"limit,omitempty" validate:"required,xLargerLimit"`
 		Exception   string    `json:"exception,omitempty" validate:"omitempty,xBoolean"`
 		// 用户行为类型筛选
-		Action   string `json:"action,omitempty" validate:"omitempty,xTag"`
-		Result   string `json:"result,omitempty" validate:"omitempty,xTag"`
-		Category string `json:"category,omitempty" validate:"omitempty,xTag"`
+		Action      string `json:"action,omitempty" validate:"omitempty,xTag"`
+		Result      string `json:"result,omitempty" validate:"omitempty,xTag"`
+		Category    string `json:"category,omitempty" validate:"omitempty,xTag"`
+		ErrCategory string `json:"errCategory,omitempty" validate:"omitempty,xTag"`
+		Route       string `json:"route,omitempty" validate:"omitempty,xTag"`
+		Service     string `json:"service,omitempty" validate:"omitempty,xTag"`
 	}
 	// fluxListTagValuesParams flux tag values查询参数
 	fluxListTagValuesParams struct {
@@ -75,6 +78,12 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listAction,
 	)
+	// 获取request相关调用统计
+	g.GET(
+		"/v1/requests",
+		shouldBeAdmin,
+		ctrl.listRequest,
+	)
 	// 获取tag的值
 	g.GET(
 		"/v1/tag-values/{measurement}/{tag}",
@@ -103,20 +112,26 @@ func (params *fluxListParams) Query() string {
 		params.Measurement,
 		params.Limit,
 	)
+	addStrQuery := func(key, value string) {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == "%s")`, key, value)
+	}
+	addQuery := func(key string, value interface{}) {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == %s)`, key, value)
+	}
 	// 用户行为类型
 	if params.Action != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.action == "%s")`, params.Action)
+		addStrQuery("action", params.Action)
 	}
 	// 结果
 	if params.Result != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.result == "%s")`, params.Result)
+		addStrQuery("result", params.Result)
 	}
 	if params.Category != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.category == "%s")`, params.Category)
+		addStrQuery("category", params.Category)
 	}
 	// 账号
 	if params.Account != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.account == "%s")`, params.Account)
+		addStrQuery("account", params.Account)
 	}
 	// 异常
 	if params.Exception != "" {
@@ -124,8 +139,25 @@ func (params *fluxListParams) Query() string {
 		if params.Exception == "0" {
 			value = "false"
 		}
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.exception == %s)`, value)
+		addQuery("exception", value)
 	}
+
+	// service
+	if params.Service != "" {
+		addStrQuery("service", params.Service)
+	}
+
+	// route
+	if params.Route != "" {
+		addStrQuery("route", params.Route)
+	}
+
+	// 出错类型
+	if params.ErrCategory != "" {
+		addStrQuery("errCategory", params.ErrCategory)
+
+	}
+
 	return query
 }
 
@@ -188,4 +220,9 @@ func (ctrl fluxCtrl) listTracker(c *elton.Context) (err error) {
 // listAction list user action
 func (ctrl fluxCtrl) listAction(c *elton.Context) (err error) {
 	return ctrl.list(c, cs.MeasurementUserAction, "actions")
+}
+
+// listRequest list request
+func (ctrl fluxCtrl) listRequest(c *elton.Context) (err error) {
+	return ctrl.list(c, cs.MeasurementHTTPRequest, "requests")
 }

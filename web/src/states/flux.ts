@@ -4,6 +4,7 @@ import {
   FLUXES_HTTP_ERRORS,
   FLUXES_TAG_VALUES,
   FLUXES_ACTIONS,
+  FLUXES_REQUESTS,
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
 
@@ -72,6 +73,7 @@ const clientActions: ClientActions = reactive({
   items: [],
 });
 
+// HTTPError 客户端HTTP请求出错记录
 interface HTTPError {
   _time: string;
   account: string;
@@ -106,11 +108,64 @@ const httpErrorCategories: HTTPErrorCategories = reactive({
   items: [],
 });
 
+// 后端HTTP请求记录
+interface Request {
+  _time: string;
+  hostname: string;
+  addr: string;
+  service: string;
+  method: string;
+  route: string;
+  uri: string;
+  status: number;
+  reused: boolean;
+  dnsUse: number;
+  tcpUse: number;
+  tlsUse: number;
+  processingUse: number;
+  use: number;
+  result: string;
+  errCategory: string;
+  error: string;
+  exception: boolean;
+}
+interface Requests {
+  processing: boolean;
+  items: Request[];
+}
+const requests: Requests = reactive({
+  processing: false,
+  items: [],
+});
+
+// request 服务名称
+interface RequestServices {
+  processing: boolean;
+  items: string[];
+}
+const requestServices: RequestServices = reactive({
+  processing: false,
+  items: [],
+});
+
+// RequestRoutes 请求路由
+interface RequestRoutes {
+  processing: boolean;
+  items: string[];
+}
+const requestRoutes: RequestRoutes = reactive({
+  processing: false,
+  items: [],
+});
+
 interface ReadonlyFluxState {
   userTrackers: DeepReadonly<UserTrackers>;
   userTrackerActions: DeepReadonly<UserTrackerActions>;
   httpErrorCategories: DeepReadonly<HTTPErrorCategories>;
   httpErrors: DeepReadonly<HTTPErrors>;
+  requests: DeepReadonly<Requests>;
+  requestServices: DeepReadonly<RequestServices>;
+  requestRoutes: DeepReadonly<RequestRoutes>;
   clientActions: DeepReadonly<ClientActions>;
   clientActionCategories: DeepReadonly<ClientActionCategories>;
 }
@@ -262,11 +317,80 @@ export function fluxListClientActionClear(): void {
   clientActions.items.length = 0;
 }
 
+// fluxListRequest 查询后端请求记录
+export async function fluxListRequest(params: {
+  route?: string;
+  service?: string;
+  errCategory?: string;
+  begin: string;
+  end: string;
+  exception?: string;
+  limit: number;
+  offset: number;
+}): Promise<void> {
+  if (requests.processing) {
+    return;
+  }
+  try {
+    requests.processing = true;
+    const { data } = await request.get(FLUXES_REQUESTS, {
+      params,
+    });
+    requests.items = data.requests || [];
+  } finally {
+    requests.processing = false;
+  }
+}
+
+// fluxListRequestClear 清除request列表
+export function fluxListRequestClear(): void {
+  requests.items.length = 0;
+}
+
+// fluxListRequestService 获取request中的service列表
+export async function fluxListRequestService(): Promise<void> {
+  if (requestServices.processing || requestServices.items.length !== 0) {
+    return;
+  }
+  try {
+    requestServices.processing = true;
+    const url = FLUXES_TAG_VALUES.replace(
+      ":measurement",
+      "httpRequest"
+    ).replace(":tag", "service");
+    const { data } = await request.get(url);
+    requestServices.items = data.values || [];
+  } finally {
+    requestServices.processing = false;
+  }
+}
+
+// fluxListRequestRoute 获取request中的route列表
+export async function fluxListRequestRoute(): Promise<void> {
+  if (requestRoutes.processing || requestRoutes.items.length !== 0) {
+    return;
+  }
+  try {
+    requestRoutes.processing = true;
+    const url = FLUXES_TAG_VALUES.replace(
+      ":measurement",
+      "httpRequest"
+    ).replace(":tag", "route");
+    const { data } = await request.get(url);
+    requestRoutes.items = data.values || [];
+  } finally {
+    requestRoutes.processing = false;
+  }
+}
+
 const state = {
   userTrackers: readonly(userTrackers),
   userTrackerActions: readonly(userTrackerActions),
   httpErrorCategories: readonly(httpErrorCategories),
   httpErrors: readonly(httpErrors),
+  requests: readonly(requests),
+  requestServices: readonly(requestServices),
+  requestRoutes: readonly(requestRoutes),
   clientActions: readonly(clientActions),
   clientActionCategories: readonly(clientActionCategories),
 };
