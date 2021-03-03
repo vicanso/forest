@@ -6,7 +6,7 @@ dev:
 dev-debug:
 	LOG_LEVEL=-1 make dev
 doc:
-	swagger generate spec -o ./api.yml && swagger validate ./api.yml 
+	swagger generate spec -o ./asset/api.yml && swagger validate ./asset/api.yml 
 
 test:
 	go test -race -cover ./...
@@ -31,7 +31,7 @@ build:
 
 
 lint:
-	golangci-lint run --timeout 2m --skip-dirs web
+	golangci-lint run
 
 lint-web:
 	cd web && yarn lint 

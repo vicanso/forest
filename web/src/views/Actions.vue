@@ -6,7 +6,15 @@ mixin AccountColumn
     label="账户"
     width="150"
     fixed="left"
+  ): template(
+    #default="scope"
   )
+    template(
+      v-if="scope.row.account"
+    ) {{scope.row.account}}
+    template(
+      v-else
+    ) --
 
 mixin CategoryColumn
   el-table-column(

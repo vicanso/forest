@@ -112,6 +112,7 @@ func init() {
 
 // validateBeforeSave 保存前校验
 func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (err error) {
+	// schema中有唯一限制，也可不校验
 	exists, err := getEntClient().Configuration.Query().
 		Where(configuration.Name(params.Name)).
 		Exist(ctx)

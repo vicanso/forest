@@ -20,7 +20,7 @@ import (
 	"embed"
 )
 
-//go:embed dist/*
+//go:embed *
 var assetFS embed.FS
 
 // GetFS get asset embed fs

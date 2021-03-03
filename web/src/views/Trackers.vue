@@ -98,7 +98,7 @@ mixin IPColumn
 mixin ErrorColumn
   el-table-column(
     label="Error"
-    width="80"
+    width="200"
   ): template(
     #default="scope"
   ): HTTPErrorFormater(

@@ -2,11 +2,18 @@
 
 mixin AddrColumn
   el-table-column(
-    prop="addr"
-    key="addr"
-    label="Addr"
+    label="地址"
     width="140"
+  ): template(
+    #default="scope"  
   )
+    template(
+      v-if="scope.row.addr"
+    ) {{scope.row.addr}}
+    template(
+      v-else
+    ) --
+
 
 mixin HostnameColumn
   el-table-column(
@@ -58,19 +65,23 @@ mixin UseColumn
     width="100"
   ): template(
     #default="scope"
-  ): el-tooltip(
-    placement="bottom" 
-    v-if="scope.row.use"
   )
-    template(
-      #content
+    el-tooltip(
+      placement="bottom" 
+      v-if="scope.row.use"
     )
-      ul
-        li dns: {{scope.row.dnsUse}}ms
-        li tcp: {{scope.row.tcpUse}}ms
-        li tls: {{scope.row.tlsUse}}ms
-        li processing: {{scope.row.processingUse}}ms
-    span {{scope.row.use}}ms
+      template(
+        #content
+      )
+        ul
+          li dns: {{scope.row.dnsUse}}ms
+          li tcp: {{scope.row.tcpUse}}ms
+          li tls: {{scope.row.tlsUse}}ms
+          li processing: {{scope.row.processingUse}}ms
+      span {{scope.row.use}}ms
+    template(
+      v-else
+    ) --
 
 mixin ResultColumn
   el-table-column(
@@ -90,9 +101,16 @@ mixin ErrCategoryColumn
   el-table-column(
     label="出错类型"
     width="120"
-    prop="errCategory"
-    key="errCategory"
+  ): template(
+    #default="scope"
   )
+    span(
+      v-if="scope.row.errCategory"
+    ) {{scope.row.errCategory}}
+    span(
+      v-else
+    ) --
+
 
 mixin ErrExceptionColumn
   el-table-column(

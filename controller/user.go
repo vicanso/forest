@@ -50,6 +50,8 @@ type (
 
 	// userInfoResp 用户信息响应
 	userInfoResp struct {
+		// 当前日期
+		// Example: 2021-03-03T21:12:11+08:00
 		Date string `json:"date,omitempty"`
 		service.UserSessionInfo
 	}
@@ -523,7 +525,12 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	return
 }
 
-// me 获取用户信息
+// swagger:route GET /users/v1/me users usersMe
+// getUserInfo
+//
+// 返回用户登录信息
+// Responses:
+// 	default: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	// ulid的长度为26

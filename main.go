@@ -12,6 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+Package main Forest
+
+	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码"}，
+	其中category与code字段为可选，当处理出错时，HTTP的响应状态码为`4xx`与`5xx`。
+
+
+	常见出错类别：
+	`validate`：表示参数校验失败，接口传参不符合约束条件
+
+
+Host: 127.0.0.1:7001
+Version: 1.0.0
+Schemes: http
+
+Consumes:
+- application/json
+
+Produces:
+- application/json
+
+swagger:meta
+*/
 package main
 
 import (
@@ -193,7 +216,8 @@ func newOnErrorHandler(e *elton.Elton) {
 		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
 			service.AlarmError("panic recover:" + string(he.ToJSON()))
-			gracefulClose(e)
+			// 由于此处的error由请求触发的，因为要另外启动一个goroutine重启，避免影响当前处理
+			go gracefulClose(e)
 		}
 	})
 }

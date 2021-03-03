@@ -15,6 +15,8 @@ RUN apk update \
   && cd /forest \
   && rm -rf asset/dist \
   && cp -rf web/dist asset/dist \
+  && ./download-swagger.sh \
+  && make doc \
   && make build
 
 FROM alpine 

@@ -25,6 +25,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/asset"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/router"
@@ -94,6 +95,11 @@ func init() {
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.getProf,
+	)
+	// 获取接口文档
+	g.GET(
+		"/api",
+		ctrl.getAPI,
 	)
 }
 
@@ -204,5 +210,18 @@ func (*commonCtrl) getProf(c *elton.Context) (err error) {
 	c.SetHeader(elton.HeaderContentType, elton.MIMEBinary)
 	c.SetHeader("Content-Disposition", `attachment; filename="gprof"`)
 	c.BodyBuffer = result
+	return
+}
+
+// getAPI 获取API信息
+func (*commonCtrl) getAPI(c *elton.Context) (err error) {
+	file := "api.yml"
+	buf, err := asset.GetFS().ReadFile(file)
+	if err != nil {
+		return
+	}
+	c.SetHeader(elton.HeaderContentType, "text/vnd.yaml;charset=utf-8")
+
+	c.BodyBuffer = bytes.NewBuffer(buf)
 	return
 }

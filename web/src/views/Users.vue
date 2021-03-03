@@ -29,11 +29,17 @@ mixin RolesColumn
     label="角色"
   ): template(
     #default="scope"
-  ): ul
-    li(
-      v-for="role in scope.row.roles"
-      :key="role"
-    ) {{ role }}
+  )
+    ul(
+      v-if="scope.row.roles && scope.row.roles.length"
+    )
+      li(
+        v-for="role in scope.row.roles"
+        :key="role"
+      ) {{ role }}
+    template(
+      v-else
+    ) --
 
 mixin UpdatedAtColumn
   el-table-column(

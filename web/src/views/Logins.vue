@@ -17,11 +17,18 @@ mixin IPColumn
 
 mixin LocationColumn
   el-table-column(
-    prop="location"
-    key="location"
     label="定位"
     width="180"
+  ): template(
+    #default="scope"
   )
+    template(
+      v-if="scope.row.location"
+    ) {{scope.row.location}}
+    template(
+      v-else
+    ) --
+  
 
 mixin ISPColumn
   el-table-column(
