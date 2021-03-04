@@ -44,7 +44,7 @@ func TestHTTPStats(t *testing.T) {
 
 func TestConvertResponseToError(t *testing.T) {
 	assert := assert.New(t)
-	fn := newHTTPConvertResponseToError("test")
+	fn := newHTTPConvertResponseToError()
 	data := []byte(`{
 		"message": "error message"
 	}`)
@@ -61,7 +61,7 @@ func TestConvertResponseToError(t *testing.T) {
 	})
 	defer done()
 	resp, err := ins.Get("/")
-	assert.Equal("statusCode=400, category=test, message=error message", err.Error())
+	assert.Equal("statusCode=400, message=error message", err.Error())
 	assert.Equal(400, resp.Status)
 	assert.Equal(data, resp.Data)
 }
@@ -81,7 +81,7 @@ func TestOnError(t *testing.T) {
 	})
 	done()
 	he := hes.Wrap(err)
-	assert.Equal(`{"statusCode":400,"category":"test","message":"error message","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
+	assert.Equal(`{"statusCode":400,"message":"error message","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
 
 	data = []byte("abc")
@@ -94,7 +94,7 @@ func TestOnError(t *testing.T) {
 	})
 	done()
 	he = hes.Wrap(err)
-	assert.Equal(`{"statusCode":400,"category":"test","message":"abc","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
+	assert.Equal(`{"statusCode":400,"message":"abc","exception":true,"extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
 }
 

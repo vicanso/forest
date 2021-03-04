@@ -58,6 +58,7 @@ import (
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
+	"github.com/vicanso/forest/profiler"
 	"github.com/vicanso/forest/router"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
@@ -223,6 +224,7 @@ func newOnErrorHandler(e *elton.Elton) {
 }
 
 func main() {
+	profiler.StartPyroscope()
 	e := elton.New()
 	// 记录server中连接的状态变化
 	e.Server.ConnState = service.GetHTTPServerConnState()

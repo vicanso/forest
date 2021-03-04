@@ -1,4 +1,6 @@
-// Copyright 2020 tree xie
+// +build pyroscope
+
+// Copyright 2021 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,31 +13,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package service
+package profiler
 
 import (
-	"bytes"
-	"errors"
-	"time"
-
-	"github.com/felixge/fgprof"
+	pyroscopeProfiler "github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
+	"github.com/vicanso/forest/config"
 )
 
-type ProfSrv struct{}
-
-func (srv *ProfSrv) Get(d time.Duration) (result *bytes.Buffer, err error) {
-	// 禁止拉取超过1分钟的prof
-	if d > 1*time.Minute {
-		err = errors.New("duration should be less than 1m")
-		return
-	}
-	result = &bytes.Buffer{}
-	done := fgprof.Start(result, fgprof.FormatPprof)
-	time.Sleep(d)
-	err = done()
-	if err != nil {
-		return
-	}
-	return
+// StartPyroscope 启动pyroscope
+func StartPyroscope() {
+	basicConfig := config.GetBasicConfig()
+	pyroscopeConfig := config.GetPyroscopeConfig()
+	pyroscopeProfiler.Start(pyroscopeProfiler.Config{
+		ApplicationName: basicConfig.Name,
+		ServerAddress:   pyroscopeConfig.Addr,
+		AuthToken:       pyroscopeConfig.Token,
+	})
 }

@@ -141,6 +141,11 @@ type (
 		SecretAccessKey string `validate:"required,min=6"`
 		SSL             bool
 	}
+	// PyroscopeConfig pyroscope的配置信息
+	PyroscopeConfig struct {
+		Addr  string `validate:"omitempty,url"`
+		Token string
+	}
 )
 
 // mustLoadConfig 加载配置，出错是则抛出panic
@@ -346,4 +351,14 @@ func GetMinioConfig() MinioConfig {
 	}
 	mustValidate(&minioConfig)
 	return minioConfig
+}
+
+// GetPyroscopeConfig 获取pyroscope的配置信息
+func GetPyroscopeConfig() PyroscopeConfig {
+	prefix := "pyroscope."
+	pyroscopeConfig := PyroscopeConfig{
+		Addr:  defaultViperX.GetString(prefix + "addr"),
+		Token: defaultViperX.GetString(prefix + "token"),
+	}
+	return pyroscopeConfig
 }

@@ -28,6 +28,7 @@ import (
 	"github.com/vicanso/forest/asset"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/ent/schema"
+	"github.com/vicanso/forest/profiler"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
@@ -203,7 +204,7 @@ func (*commonCtrl) getProf(c *elton.Context) (err error) {
 			return
 		}
 	}
-	result, err := profSrv.Get(d)
+	result, err := profiler.GetProf(d)
 	if err != nil {
 		return
 	}

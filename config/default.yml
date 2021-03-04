@@ -69,3 +69,8 @@ minio:
   accessKeyID: origin 
   secretAccessKey: test123456
   ssl: false
+
+# pyroscope配置
+pyroscope:
+  addr: http://127.0.0.1:4040
+  # token: ""

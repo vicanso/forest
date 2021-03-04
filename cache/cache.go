@@ -73,12 +73,13 @@ func GetRedisSession() *goCache.RedisSession {
 
 // NewMultilevelCache create a new multilevel cache
 func NewMultilevelCache(lruSize int, ttl time.Duration, prefix string) *lruttl.L2Cache {
-	return goCache.NewMultilevelCache(goCache.MultilevelCacheOptions{
-		Cache:   redisCache,
-		LRUSize: lruSize,
-		TTL:     ttl,
-		Prefix:  prefix,
-	})
+	opts := []goCache.MultilevelCacheOption{
+		goCache.MultilevelCacheRedisOption(redisCache),
+		goCache.MultilevelCacheLRUSizeOption(lruSize),
+		goCache.MultilevelCacheTTLOption(ttl),
+		goCache.MultilevelCachePrefixOption(prefix),
+	}
+	return goCache.NewMultilevelCache(opts...)
 }
 
 // NewLRUCache new lru cache with ttl

@@ -21,6 +21,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
+	github.com/pyroscope-io/pyroscope v0.0.25
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.8
@@ -29,9 +30,9 @@ require (
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.2.1
-	github.com/vicanso/go-cache v0.2.0
+	github.com/vicanso/go-cache v0.2.1
 	github.com/vicanso/go-performance v0.0.3
-	github.com/vicanso/hes v0.3.5
+	github.com/vicanso/hes v0.3.6
 	github.com/vicanso/ips v1.1.0
 	github.com/vicanso/lru-ttl v0.4.1
 	github.com/vicanso/viperx v0.1.4

@@ -51,7 +51,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		use := ""
 		status := -1
 		if resp != nil {
-			status = conf.Response.Status
+			status = resp.Status
 		}
 
 		result := cs.ResultSuccess
@@ -141,7 +141,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 }
 
 // newHTTPConvertResponseToError 将http响应码为>=400的转换为出错
-func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor {
+func newHTTPConvertResponseToError() axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
@@ -252,7 +252,7 @@ func NewHTTPInstance(serviceName, baseURL string, timeout time.Duration) *axios.
 		OnDone:      newHTTPOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newHTTPConvertResponseToError(serviceName),
+			newHTTPConvertResponseToError(),
 		},
 	})
 }
