@@ -25,6 +25,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/vicanso/forest/tracer"
@@ -54,6 +55,9 @@ var logLevel = os.Getenv("LOG_LEVEL")
 
 // 日志Dict中需要添加***的处理
 var logMask = regexp.MustCompile(`password`)
+
+// 日志中值的最大长度
+var logFieldValueMaxSize = 30
 
 var enabledDebugLog = false
 
@@ -101,11 +105,16 @@ func mustNewLogger(outputPath string) *zerolog.Logger {
 
 	l := zerolog.New(os.Stdout)
 	if util.IsDevelopment() {
-		l = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout})
+		l = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).
+			With().
+			Timestamp().
+			Logger()
+	} else {
+		l = l.Hook(&TracerHook{}).
+			With().
+			Timestamp().
+			Logger()
 	}
-
-	l = l.Hook(&TracerHook{}).
-		With().Timestamp().Logger()
 
 	if logLevel != "" {
 		lv, _ := strconv.Atoi(logLevel)
@@ -135,6 +144,26 @@ func NewEntLogger() *entLogger {
 	return &entLogger{}
 }
 
+// cutOrMaskString 将输出数据***或截断处理
+func cutOrMaskString(k, v string) string {
+	if logMask.MatchString(k) {
+		return "***"
+	}
+	return util.CutRune(v, logFieldValueMaxSize)
+}
+
+// cutOrMaskString 将输出数据***或截断处理
+func cutOrMaskInterface(k string, v interface{}) interface{} {
+	if logMask.MatchString(k) {
+		return "***"
+	}
+	switch v := v.(type) {
+	case string:
+		return util.CutRune(v, logFieldValueMaxSize)
+	}
+	return v
+}
+
 // MapStringString create a map[string]string log event
 func MapStringString(data map[string]string) *zerolog.Event {
 	if len(data) == 0 {
@@ -142,10 +171,7 @@ func MapStringString(data map[string]string) *zerolog.Event {
 	}
 	m := make(map[string]interface{})
 	for k, v := range data {
-		if logMask.MatchString(k) {
-			v = "***"
-		}
-		m[k] = v
+		m[k] = cutOrMaskString(k, v)
 	}
 	return zerolog.Dict().Fields(m)
 }
@@ -157,10 +183,7 @@ func URLValues(query url.Values) *zerolog.Event {
 	}
 	m := make(map[string]interface{})
 	for k, values := range query {
-		if logMask.MatchString(k) {
-			values = []string{"***"}
-		}
-		m[k] = values
+		m[k] = cutOrMaskString(k, strings.Join(values, ","))
 	}
 	return zerolog.Dict().Fields(m)
 }
@@ -178,11 +201,8 @@ func Struct(data interface{}) *zerolog.Event {
 	m := make(map[string]interface{})
 	// 出错忽略
 	_ = json.Unmarshal(buf, &m)
-	for k := range m {
-		if logMask.MatchString(k) {
-			m[k] = "***"
-		}
+	for k, v := range m {
+		m[k] = cutOrMaskInterface(k, v)
 	}
-
 	return zerolog.Dict().Fields(m)
 }

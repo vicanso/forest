@@ -189,6 +189,9 @@ func newOnErrorHandler(e *elton.Elton) {
 			he.Extra = make(map[string]interface{})
 		}
 		stack := util.GetStack(5)
+		if len(stack) != 0 {
+			stack = stack[1:]
+		}
 		ip := c.RealIP()
 		uri := c.Request.RequestURI
 
