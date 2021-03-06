@@ -532,8 +532,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 // 	default: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
-	// ulid的长度为26
-	if cookie == nil || len(cookie.Value) != 26 {
+	if cookie == nil {
 		uid := util.GenXID()
 		c.AddCookie(&http.Cookie{
 			Name:     sessionConfig.TrackKey,

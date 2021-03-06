@@ -146,9 +146,11 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			Int("status", status).
 			Str("addr", addr).
 			Bool("reused", reused).
-			Str("use", use).
-			Str("error", message).
-			Msg("")
+			Str("use", use)
+		if message != "" {
+			event = event.Str("error", message)
+		}
+		event.Msg("")
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
 	}
 }

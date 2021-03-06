@@ -170,6 +170,10 @@ export async function userRegister(params: {
     return;
   }
   try {
+    // 如果密码小于6位或者纯数字
+    if (params.password.length < 6 || /\d+/.exec(params.password)){
+      throw new Error("密码过于简单，请使用数字加字母且长度大于6位");
+    }
     info.processing = true;
     await request.post(
       USERS_ME,

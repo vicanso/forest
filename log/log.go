@@ -55,7 +55,7 @@ var enabledDebugLog = false
 
 func init() {
 	lv, _ := strconv.Atoi(logLevel)
-	if lv < 0 {
+	if logLevel != "" && lv <= 0 {
 		enabledDebugLog = true
 	}
 }
