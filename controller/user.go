@@ -57,8 +57,11 @@ type (
 
 	// userListResp 用户列表响应
 	userListResp struct {
+		// 用户列表
 		Users []*ent.User `json:"users,omitempty"`
-		Count int         `json:"count,omitempty"`
+
+		// 用户记录总数，如果返回-1表示此次查询未返回总数
+		Count int `json:"count,omitempty"`
 	}
 	// userRoleListResp 用户角色列表响应
 	userRoleListResp struct {
@@ -70,14 +73,24 @@ type (
 		Count      int              `json:"count,omitempty"`
 	}
 
-	// userListParams 用户查询参数
 	userListParams struct {
 		listParams
 
+		// 关键字搜索
+		// validate:"omitempty,xKeyword"
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
-		Role    string `json:"role,omitempty" validate:"omitempty,xUserRole"`
-		Group   string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
-		Status  string `json:"status,omitempty" validate:"omitempty,xStatus"`
+
+		// 用户角色筛选
+		// validate:"omitempty,xUserRole"
+		Role string `json:"role,omitempty" validate:"omitempty,xUserRole"`
+
+		// 用户分组筛选
+		// validate:"omitempty,xUserGroup"
+		Group string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
+
+		// 用户状态分组
+		// validate:"omitempty,xStatus"
+		Status string `json:"status,omitempty" validate:"omitempty,xStatus"`
 	}
 
 	// userLoginListParams 用户登录查询
@@ -447,6 +460,13 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 }
 
 // list 获取用户列表
+// swagger:route GET /users/v1 users userList
+// listUser
+//
+// 返回用户列表
+// Responses:
+// 	default: apiUserListResponse
+
 func (*userCtrl) list(c *elton.Context) (err error) {
 	params := userListParams{}
 	err = validate.Do(&params, c.Query())
@@ -524,7 +544,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	return
 }
 
-// swagger:route GET /users/v1/me users usersMe
+// swagger:route GET /users/v1/me users userMe
 // getUserInfo
 //
 // 返回用户登录信息
