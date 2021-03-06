@@ -23,6 +23,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 
 	"github.com/rs/zerolog"
@@ -50,6 +51,9 @@ var defaultLogger = mustNewLogger("")
 
 // 如果有配置指定日志级别，则以配置指定的输出
 var logLevel = os.Getenv("LOG_LEVEL")
+
+// 日志Dict中需要添加***的处理
+var logMask = regexp.MustCompile(`password`)
 
 var enabledDebugLog = false
 
@@ -138,6 +142,9 @@ func MapStringString(data map[string]string) *zerolog.Event {
 	}
 	m := make(map[string]interface{})
 	for k, v := range data {
+		if logMask.MatchString(k) {
+			v = "***"
+		}
 		m[k] = v
 	}
 	return zerolog.Dict().Fields(m)
@@ -150,6 +157,9 @@ func URLValues(query url.Values) *zerolog.Event {
 	}
 	m := make(map[string]interface{})
 	for k, values := range query {
+		if logMask.MatchString(k) {
+			values = []string{"***"}
+		}
 		m[k] = values
 	}
 	return zerolog.Dict().Fields(m)
@@ -168,5 +178,11 @@ func Struct(data interface{}) *zerolog.Event {
 	m := make(map[string]interface{})
 	// 出错忽略
 	_ = json.Unmarshal(buf, &m)
+	for k := range m {
+		if logMask.MatchString(k) {
+			m[k] = "***"
+		}
+	}
+
 	return zerolog.Dict().Fields(m)
 }
