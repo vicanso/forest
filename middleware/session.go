@@ -31,7 +31,7 @@ func NewSession() elton.Handler {
 		Signed:  true,
 		Expired: scf.TTL,
 		GenID: func() string {
-			return util.GenUlid()
+			return util.GenXID()
 		},
 		Name:     scf.Key,
 		Path:     scf.CookiePath,

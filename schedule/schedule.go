@@ -18,13 +18,12 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/rs/zerolog"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
-
-	"go.uber.org/zap"
 )
 
 type (
@@ -58,28 +57,28 @@ func doTask(desc string, fn taskFn) {
 	err := fn()
 	use := time.Since(startedAt)
 	if err != nil {
-		log.Default().Error(desc+" fail",
-			zap.String("category", logCategory),
-			zap.Duration("use", use),
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Str("category", logCategory).
+			Dur("use", use).
+			Err(err).
+			Msg(desc + " fail")
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
-		log.Default().Info(desc+" success",
-			zap.String("category", logCategory),
-			zap.Duration("use", use),
-		)
+		log.Default().Info().
+			Str("category", logCategory).
+			Dur("use", use).
+			Msg(desc + " success")
 	}
 }
 
 func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
-	log.Default().Info(desc,
-		zap.String("category", logCategory),
-		zap.Duration("use", time.Since(startedAt)),
-		zap.Any("stats", stats),
-	)
+	log.Default().Info().
+		Str("category", logCategory).
+		Dur("use", time.Since(startedAt)).
+		Dict("stats", zerolog.Dict().Fields(stats)).
+		Msg("")
 }
 
 func redisPing() {

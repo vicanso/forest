@@ -69,7 +69,7 @@ func (*fileCtrl) upload(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	contentType := header.Header.Get("Content-Type")
 	fileType := strings.Split(contentType, "/")[1]
-	name := util.GenUlid() + "." + fileType
+	name := util.GenXID() + "." + fileType
 	info, err := fileSrv.Upload(c.Context(), service.UploadParams{
 		Bucket: params.Bucket,
 		Name:   name,

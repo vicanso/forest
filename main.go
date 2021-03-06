@@ -65,7 +65,6 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
 )
 
 var (
@@ -91,14 +90,14 @@ func init() {
 
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
-		log.Default().Info(value)
+		log.Default().Info().
+			Msg(value)
 	}))
 	service.SetApplicationVersion(Version)
 	service.SetApplicationBuildedAt(BuildedAt)
 	closeOnce := sync.Once{}
 	closeDepends = func() {
 		closeOnce.Do(func() {
-			_ = log.Default().Sync()
 			// 关闭influxdb，flush统计数据
 			helper.GetInfluxSrv().Close()
 			_ = helper.EntGetClient().Close()
@@ -111,7 +110,7 @@ func init() {
 var closedByUser = false
 
 func gracefulClose(e *elton.Elton) {
-	log.Default().Info("start to graceful close")
+	log.Default().Info().Msg("start to graceful close")
 	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
 	service.SetApplicationStatus(service.ApplicationStatusStopping)
 	// docker 在10秒内退出，因此设置5秒后退出
@@ -128,9 +127,9 @@ func watchForClose(e *elton.Elton) {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for s := range c {
-			log.Default().Info("server will be closed",
-				zap.String("signal", s.String()),
-			)
+			log.Default().Info().
+				Str("signal", s.String()).
+				Msg("server will be closed")
 			closedByUser = true
 			gracefulClose(e)
 		}
@@ -206,16 +205,18 @@ func newOnErrorHandler(e *elton.Elton) {
 		})
 
 		// 可以针对实际场景输出更多的日志信息
-		log.Default().Error("exception",
-			zap.String("ip", ip),
-			zap.String("route", c.Route),
-			zap.String("uri", uri),
-			zap.Strings("stack", stack),
-			zap.Error(he.Err),
-		)
+		log.Default().Error().
+			Str("category", "excpetion").
+			Str("ip", ip).
+			Str("route", c.Route).
+			Str("uri", uri).
+			Strs("stack", stack).
+			Msg("")
+
 		warnerException.Inc("exception", 1)
 		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
+
 			service.AlarmError("panic recover:" + string(he.ToJSON()))
 			// 由于此处的error由请求触发的，因为要另外启动一个goroutine重启，避免影响当前处理
 			go gracefulClose(e)
@@ -230,13 +231,16 @@ func main() {
 	e.Server.ConnState = service.GetHTTPServerConnState()
 	e.Server.ErrorLog = log.NewHTTPServerLogger()
 
-	logger := log.Default()
-
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("panic error",
-				zap.Any("error", r),
-			)
+			err, ok := r.(error)
+			if !ok {
+				err = fmt.Errorf("%v", r)
+			}
+			log.Default().Error().
+				Str("category", "panic").
+				Err(err).
+				Msg("")
 			service.AlarmError(fmt.Sprintf("panic recover:%v", r))
 			// panic类的异常都graceful close
 			gracefulClose(e)
@@ -252,9 +256,9 @@ func main() {
 			pidData := []byte(strconv.Itoa(os.Getpid()))
 			err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
 			if err != nil {
-				logger.Error("create pid file fail",
-					zap.Error(err),
-				)
+				log.Default().Error().
+					Err(err).
+					Msg("write pid fail")
 			}
 		}()
 	} else {
@@ -350,9 +354,10 @@ func main() {
 	err := dependServiceCheck()
 	if err != nil {
 		service.AlarmError("check depend service fail, " + err.Error())
-		logger.Error("exception",
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Str("category", "depFail").
+			Err(err).
+			Msg("")
 		return
 	}
 
@@ -363,13 +368,13 @@ func main() {
 	// e.Server = &http.Server{
 	// 	Handler: h2c.NewHandler(e, &http2.Server{}),
 	// }
-	logger.Info("server will listen on " + basicConfig.Listen)
+	log.Default().Info().Msg("server will listen on " + basicConfig.Listen)
 	err = e.ListenAndServe(basicConfig.Listen)
 	// 如果出错而且非主动关闭，则发送告警
 	if err != nil && !closedByUser {
 		service.AlarmError("listen and serve fail, " + err.Error())
-		logger.Error("exception",
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Err(err).
+			Msg("")
 	}
 }

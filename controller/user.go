@@ -42,7 +42,6 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 type (
@@ -535,7 +534,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
-		uid := util.GenUlid()
+		uid := util.GenXID()
 		c.AddCookie(&http.Cookie{
 			Name:     sessionConfig.TrackKey,
 			Value:    uid,
@@ -693,9 +692,9 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			SetIsp(isp).
 			Save(ctx)
 		if err != nil {
-			log.Default().Error("save user login fail",
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Err(err).
+				Msg("save user login fail")
 		}
 		// 记录用户登录行为
 		getInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)

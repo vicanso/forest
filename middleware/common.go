@@ -26,7 +26,6 @@ import (
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 const (
@@ -110,21 +109,23 @@ func NewNotFoundHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		log.Default().Info("404",
-			zap.String("ip", ip),
-			zap.String("method", req.Method),
-			zap.String("uri", req.RequestURI),
-		)
+		log.Default().Info().
+			Str("category", "404").
+			Str("ip", ip).
+			Str("method", req.Method).
+			Str("uri", req.RequestURI).
+			Msg("")
+
 		status := http.StatusNotFound
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		resp.WriteHeader(status)
 		_, err := resp.Write(notFoundErrBytes)
 		if err != nil {
-			log.Default().Info("404 response fail",
-				zap.String("ip", ip),
-				zap.String("uri", req.RequestURI),
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Str("ip", ip).
+				Str("uri", req.RequestURI).
+				Err(err).
+				Msg("404 response fail")
 		}
 
 		tags := map[string]string{
@@ -148,21 +149,22 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		log.Default().Info("method not allowed",
-			zap.String("ip", ip),
-			zap.String("method", req.Method),
-			zap.String("uri", req.RequestURI),
-		)
+		log.Default().Info().
+			Str("category", "405").
+			Str("ip", ip).
+			Str("method", req.Method).
+			Str("uri", req.RequestURI).
+			Msg("")
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		status := http.StatusMethodNotAllowed
 		resp.WriteHeader(status)
 		_, err := resp.Write(methodNotAllowedErrBytes)
 		if err != nil {
-			log.Default().Info("method not allowed response fail",
-				zap.String("ip", ip),
-				zap.String("uri", req.RequestURI),
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Str("ip", ip).
+				Str("uri", req.RequestURI).
+				Err(err).
+				Msg("405 response fail")
 		}
 		tags := map[string]string{
 			cs.TagMethod: req.Method,

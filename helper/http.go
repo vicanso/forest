@@ -30,7 +30,6 @@ import (
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 const (
@@ -119,23 +118,37 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 		}
 		// 由于http请求是较频繁的操作，因此判断是否启用debug再输出
 		if log.DebugEnabled() {
-			log.Default().Debug(conf.CURL())
+			respData := ""
+			if resp != nil {
+				respData = string(resp.Data)
+			}
+			log.Default().Debug().
+				Str("curl", conf.CURL()).
+				Str("data", respData).
+				Msg("request log")
 		}
-		log.Default().Info("http request stats",
-			zap.String("service", serviceName),
-			zap.String("method", conf.Method),
-			zap.String("route", conf.Route),
-			zap.String("url", conf.GetURL()),
-			zap.Any("params", conf.Params),
-			zap.Any("query", conf.Query),
-			zap.Any("data", data),
-			zap.Int("size", size),
-			zap.Int("status", status),
-			zap.String("addr", addr),
-			zap.Bool("reused", reused),
-			zap.String("use", use),
-			zap.String("error", message),
-		)
+		event := log.Default().Info().
+			Str("category", "requestStats").
+			Str("service", serviceName).
+			Str("method", conf.Method).
+			Str("route", conf.Route).
+			Str("url", conf.GetURL())
+		if len(conf.Params) != 0 {
+			event = event.Dict("params", log.MapStringString(conf.Params))
+		}
+		if len(conf.Query) != 0 {
+			event = event.Dict("query", log.URLValues(conf.Query))
+		}
+		if data != nil {
+			event = event.Dict("data", log.Struct(data))
+		}
+		event.Int("size", size).
+			Int("status", status).
+			Str("addr", addr).
+			Bool("reused", reused).
+			Str("use", use).
+			Str("error", message).
+			Msg("")
 		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
 	}
 }

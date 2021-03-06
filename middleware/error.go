@@ -25,7 +25,6 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 // New Error handler
@@ -39,12 +38,13 @@ func NewError() elton.Handler {
 		he, ok := err.(*hes.Error)
 		if !ok {
 			// 如果不是以http error的形式返回的error则为非主动抛出错误
-			log.Default().Error("unexpected error",
-				zap.String("method", c.Request.Method),
-				zap.String("route", c.Route),
-				zap.String("uri", uri),
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Str("category", "unexpectedErr").
+				Str("method", c.Request.Method).
+				Str("route", c.Route).
+				Str("uri", uri).
+				Err(err).
+				Msg("")
 			he = hes.NewWithError(err)
 			he.StatusCode = http.StatusInternalServerError
 			he.Exception = true

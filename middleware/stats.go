@@ -22,7 +22,6 @@ import (
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
-	"go.uber.org/zap"
 )
 
 func NewStats() elton.Handler {
@@ -36,20 +35,22 @@ func NewStats() elton.Handler {
 			// 此处记录的session id，需要从客户登录记录中获取对应的session id
 			// us := service.NewUserSession(c)
 			sid := util.GetSessionID(c)
-			log.Default().Info("access log",
-				// 由客户端设置的uuid
-				// zap.String("uuid", c.GetRequestHeader("X-UUID")),
-				zap.String("ip", info.IP),
-				zap.String("sid", sid),
-				zap.String("method", info.Method),
-				zap.String("route", info.Route),
-				zap.String("uri", info.URI),
-				zap.Int("status", info.Status),
-				zap.Uint32("connecting", info.Connecting),
-				zap.String("consuming", info.Consuming.String()),
-				zap.String("size", humanize.Bytes(uint64(info.Size))),
-				zap.Int("bytes", info.Size),
-			)
+			// 由客户端设置的uuid
+			// zap.String("uuid", c.GetRequestHeader("X-UUID")),
+			log.Default().Info().
+				Str("category", "accessLog").
+				Str("ip", info.IP).
+				Str("sid", sid).
+				Str("method", info.Method).
+				Str("route", info.Route).
+				Str("uri", info.URI).
+				Int("stats", info.Status).
+				Uint32("connecting", info.Connecting).
+				Str("consuming", info.Consuming.String()).
+				Str("size", humanize.Bytes(uint64(info.Size))).
+				Int("bytes", info.Size).
+				Msg("")
+
 			tags := map[string]string{
 				cs.TagMethod: info.Method,
 				cs.TagRoute:  info.Route,

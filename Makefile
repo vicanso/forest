@@ -4,7 +4,7 @@
 dev:
 	air -c .air.toml	
 dev-debug:
-	LOG_LEVEL=-1 make dev
+	LOG_LEVEL=0 make dev
 doc:
 	swagger generate spec -o ./asset/api.yml && swagger validate ./asset/api.yml 
 

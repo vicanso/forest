@@ -29,6 +29,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/iancoleman/strcase"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/rs/zerolog"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
@@ -37,7 +38,6 @@ import (
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"go.uber.org/atomic"
-	"go.uber.org/zap"
 )
 
 var (
@@ -81,9 +81,9 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 			maskURI = strings.ReplaceAll(maskURI, pass, "***")
 		}
 	}
-	log.Default().Info("connect postgres",
-		zap.String("uri", maskURI),
-	)
+	log.Default().Info().
+		Str("uri", maskURI).
+		Msg("connect postgres")
 	db, err := sql.Open("pgx", postgresConfig.URI)
 	if err != nil {
 		panic(err)
@@ -251,16 +251,17 @@ func initSchemaHooks(c *ent.Client) {
 			}
 
 			d := time.Since(startedAt)
-			log.Default().Info("ent stats",
-				zap.String("schema", schemaType),
-				zap.String("op", op),
-				zap.Int("result", result),
-				zap.Int32("processing", processing),
-				zap.Int32("totalProcessing", totalProcessing),
-				zap.String("use", d.String()),
-				zap.Any("data", data),
-				zap.String("message", message),
-			)
+			log.Default().Info().
+				Str("category", "entStats").
+				Str("schema", schemaType).
+				Str("op", op).
+				Int("result", result).
+				Int32("processing", processing).
+				Int32("totalProcessing", totalProcessing).
+				Str("use", d.String()).
+				Dict("data", zerolog.Dict().Fields(data)).
+				Str("message", message).
+				Msg("")
 			fields := map[string]interface{}{
 				cs.FieldProcessing:      int(processing),
 				cs.FieldTotalProcessing: int(totalProcessing),

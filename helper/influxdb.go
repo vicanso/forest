@@ -26,7 +26,6 @@ import (
 	influxdbDomain "github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/log"
-	"go.uber.org/zap"
 )
 
 type (
@@ -56,14 +55,15 @@ func mustNewInfluxSrv() *InfluxSrv {
 		opts.SetFlushInterval(uint(v))
 	}
 	opts.SetUseGZip(influxdbConfig.Gzip)
-	log.Default().Info("new influxdb client",
-		zap.String("uri", influxdbConfig.URI),
-		zap.String("org", influxdbConfig.Org),
-		zap.String("bucket", influxdbConfig.Bucket),
-		zap.Uint("batchSize", influxdbConfig.BatchSize),
-		zap.String("token", influxdbConfig.Token[:5]+"..."),
-		zap.Duration("interval", influxdbConfig.FlushInterval),
-	)
+	log.Default().Info().
+		Str("uri", influxdbConfig.URI).
+		Str("org", influxdbConfig.Org).
+		Str("bucket", influxdbConfig.Bucket).
+		Uint("batchSize", influxdbConfig.BatchSize).
+		Str("token", influxdbConfig.Token[:5]+"...").
+		Dur("interval", influxdbConfig.FlushInterval).
+		Msg("")
+
 	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
 	go newInfluxdbErrorLogger(writer)
@@ -78,9 +78,10 @@ func mustNewInfluxSrv() *InfluxSrv {
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
 func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
 	for err := range writer.Errors() {
-		log.Default().Error("influxdb write fail",
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Str("category", "influxdbErr").
+			Err(err).
+			Msg("")
 	}
 }
 

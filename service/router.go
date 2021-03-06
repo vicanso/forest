@@ -27,7 +27,6 @@ import (
 	"github.com/vicanso/forest/log"
 	"go.uber.org/atomic"
 	"go.uber.org/ratelimit"
-	"go.uber.org/zap"
 )
 
 type (
@@ -163,9 +162,9 @@ func updateRouterMockConfigs(configs []string) {
 		v := &RouterConfig{}
 		err := json.Unmarshal([]byte(item), v)
 		if err != nil {
-			log.Default().Error("router config is invalid",
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Err(err).
+				Msg("router config is invalid")
 			AlarmError("router config is invalid:" + err.Error())
 			continue
 		}
@@ -219,9 +218,9 @@ func ResetRouterConcurrency(arr []string) {
 		v := &routerConcurrencyConfig{}
 		err := json.Unmarshal([]byte(str), v)
 		if err != nil {
-			log.Default().Error("router concurrency config is invalid",
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Err(err).
+				Msg("router concurrency config is invalid")
 			AlarmError("router concurrency config is invalid:" + err.Error())
 			continue
 		}

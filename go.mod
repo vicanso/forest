@@ -20,9 +20,10 @@ require (
 	github.com/jinzhu/now v1.1.1
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
-	github.com/oklog/ulid/v2 v2.0.2
 	github.com/pyroscope-io/pyroscope v0.0.25
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/rs/xid v1.2.1
+	github.com/rs/zerolog v1.15.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.8
 	github.com/vicanso/count-warner v1.1.0
@@ -39,7 +40,6 @@ require (
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
-	go.uber.org/zap v1.16.0
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df

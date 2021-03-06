@@ -150,7 +150,7 @@ func GetCaptcha(ctx context.Context, fontColor, bgColor string) (info CaptchaInf
 	if err != nil {
 		return
 	}
-	id := util.GenUlid()
+	id := util.GenXID()
 	ttl := 5 * time.Minute
 	err = redisSrv.Set(ctx, captchaKeyPrefix+id, value, ttl+time.Minute)
 	if err != nil {
