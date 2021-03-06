@@ -6,7 +6,7 @@ dev:
 dev-debug:
 	LOG_LEVEL=0 make dev
 doc:
-	swagger generate spec -o ./asset/api.yml && swagger validate ./asset/api.yml 
+	CGO_ENABLED= 0 swagger generate spec -o ./asset/api.yml && swagger validate ./asset/api.yml 
 
 test:
 	go test -race -cover ./...
