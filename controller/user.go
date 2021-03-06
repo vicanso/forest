@@ -114,7 +114,7 @@ type (
 	userRegisterLoginParams struct {
 		// 账户
 		Account string `json:"account,omitempty" validate:"required,xUserAccount"`
-		// 密码，密码为sha256后的加密串
+		// 用户密码，如果登录则是sha256(token + 用户密码)
 		Password string `json:"password,omitempty" validate:"required,xUserPassword"`
 	}
 
@@ -534,7 +534,7 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
 }
 
 // getLoginToken 获取登录的token
-// swagger:route GET /users/v1/me/login users userLogin
+// swagger:route GET /users/v1/me/login users userLoginToken
 // getLoginToken
 //
 // 获取用户登录时的Token
@@ -619,7 +619,12 @@ func (*userCtrl) detail(c *elton.Context) (err error) {
 	return
 }
 
-// register 用户注册
+// swagger:route POST /users/v1/me users userRegister
+// registerUser
+//
+// 用户注册
+// Responses:
+// 	201: apiUserRegisterResponse
 func (*userCtrl) register(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
@@ -641,11 +646,16 @@ func (*userCtrl) register(c *elton.Context) (err error) {
 				Save(context.Background())
 		}()
 	}
-	c.Body = user
+	c.Created(user)
 	return
 }
 
-// login 用户登录
+// swagger:route POST /users/v1/me/login users userLogin
+// loginUser
+//
+// 用户登录
+// Responses:
+// 	200: apiUserInfoResponse
 func (*userCtrl) login(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
@@ -744,7 +754,12 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	return
 }
 
-// logout 退出登录
+// swagger:route DELETE /users/v1/me users userLogout
+// logoutUser
+//
+// 用户退出登录
+// Responses:
+// 	204: apiNoContentResponse
 func (*userCtrl) logout(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除session

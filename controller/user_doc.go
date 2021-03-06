@@ -3,6 +3,8 @@
 
 package controller
 
+import "github.com/vicanso/forest/ent"
+
 // 用户列表响应
 // swagger:response apiUserListResponse
 type apiUserListResponse struct {
@@ -28,4 +30,18 @@ type apiUserLoginTokenResponse struct {
 type apiUserInfoResponse struct {
 	// in: body
 	Body *userInfoResp
+}
+
+// 用户登录与注册参数
+// swagger:parameters userRegister userLogin
+type apiUserRegisterLoginParams struct {
+	// in: body
+	Body *userRegisterLoginParams
+}
+
+// 用户注册响应
+// swagger:response apiUserRegisterResponse
+type apiUserRegisterResponse struct {
+	// in: body
+	Body *ent.User
 }
