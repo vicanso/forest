@@ -11,7 +11,7 @@ FROM golang:1.16-alpine as builder
 COPY --from=webbuilder /forest /forest
 
 RUN apk update \
-  && apk add git make \
+  && apk add git make curl jq \
   && cd /forest \
   && rm -rf asset/dist \
   && cp -rf web/dist asset/dist \
