@@ -32,14 +32,19 @@ import (
 	"github.com/vicanso/hes"
 )
 
-type (
-	configurationCtrl struct{}
+type configurationCtrl struct{}
 
+// 响应相关定义
+type (
 	// configurationListResp 配置列表响应
 	configurationListResp struct {
 		Configurations []*ent.Configuration `json:"configurations,omitempty"`
 		Count          int                  `json:"count,omitempty"`
 	}
+)
+
+// 参数相关定义
+type (
 
 	// configurationAddParams 添加配置参数
 	configurationAddParams struct {

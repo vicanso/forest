@@ -35,9 +35,10 @@ import (
 	"github.com/vicanso/hes"
 )
 
-type (
-	commonCtrl struct{}
+type commonCtrl struct{}
 
+// 响应相关定义
+type (
 	// applicationInfoResp 应用信息响应
 	applicationInfoResp struct {
 		// 版本号

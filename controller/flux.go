@@ -29,9 +29,10 @@ import (
 	"github.com/vicanso/forest/validate"
 )
 
-type (
-	fluxCtrl struct{}
+type fluxCtrl struct{}
 
+// 参数相关定义
+type (
 	// fluxListParams flux查询参数
 	fluxListParams struct {
 		Measurement string    `json:"measurement,omitempty"`

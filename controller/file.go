@@ -25,17 +25,22 @@ import (
 	"github.com/vicanso/forest/validate"
 )
 
-type (
-	fileCtrl struct{}
+type fileCtrl struct{}
 
-	// fileUploadParams 文件上传参数
-	fileUploadParams struct {
-		Bucket string `json:"bucket,omitempty" validate:"required,xFileBucket"`
-	}
+// 响应相关定义
+type (
 	// fileUploadResp 文件上传响应
 	fileUploadResp struct {
 		Name string `json:"name,omitempty"`
 		Size int64  `json:"size,omitempty"`
+	}
+)
+
+// 参数相关定义
+type (
+	// fileUploadParams 文件上传参数
+	fileUploadParams struct {
+		Bucket string `json:"bucket,omitempty" validate:"required,xFileBucket"`
 	}
 )
 

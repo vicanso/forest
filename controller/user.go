@@ -55,8 +55,7 @@ type (
 	}
 	// userInfoResp 用户信息响应
 	userInfoResp struct {
-		// 当前日期
-		// Example: 2021-03-03T21:12:11+08:00
+		// 服务器当前时间，2021-03-06T15:10:12+08:00
 		Date string `json:"date,omitempty"`
 		service.UserSessionInfo
 	}
@@ -474,7 +473,7 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 //
 // 返回用户列表
 // Responses:
-// 	default: apiUserListResponse
+// 	200: apiUserListResponse
 
 func (*userCtrl) list(c *elton.Context) (err error) {
 	params := userListParams{}

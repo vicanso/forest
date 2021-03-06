@@ -31,13 +31,20 @@ const (
 type (
 	// UserSessionInfo 用户session中的信息
 	UserSessionInfo struct {
-		Token     string   `json:"token,omitempty"`
-		Account   string   `json:"account,omitempty"`
-		ID        int      `json:"id,omitempty"`
-		Roles     []string `json:"roles,omitempty"`
-		Groups    []string `json:"groups,omitempty"`
-		UpdatedAt string   `json:"updatedAt,omitempty"`
-		LoginAt   string   `json:"loginAt,omitempty"`
+		// 登录时使用的Token，此字段不返回
+		Token string `json:"token,omitempty"`
+		// 用户账号
+		Account string `json:"account,omitempty"`
+		// 用户ID
+		ID int `json:"id,omitempty"`
+		// 用户角色列表
+		Roles []string `json:"roles,omitempty"`
+		// 用户分组列表
+		Groups []string `json:"groups,omitempty"`
+		// Session信息更新时间
+		UpdatedAt string `json:"updatedAt,omitempty"`
+		// Session信息创建时间
+		LoginAt string `json:"loginAt,omitempty"`
 	}
 	// UserSession 用户session
 	UserSession struct {
