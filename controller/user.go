@@ -44,9 +44,15 @@ import (
 	"github.com/vicanso/hes"
 )
 
-type (
-	userCtrl struct{}
+type userCtrl struct{}
 
+// 响应相关定义
+type (
+	// 用户登录Token响应
+	userLoginTokenResp struct {
+		// 用户登录的Token
+		Token string `json:"token,omitempty"`
+	}
 	// userInfoResp 用户信息响应
 	userInfoResp struct {
 		// 当前日期
@@ -72,7 +78,10 @@ type (
 		UserLogins []*ent.UserLogin `json:"userLogins,omitempty"`
 		Count      int              `json:"count,omitempty"`
 	}
+)
 
+// 参数相关定义
+type (
 	userListParams struct {
 		listParams
 
@@ -526,6 +535,12 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
 }
 
 // getLoginToken 获取登录的token
+// swagger:route GET /users/v1/me/login users userLogin
+// getLoginToken
+//
+// 获取用户登录时的Token
+// Responses:
+// 	200: apiUserLoginTokenResponse
 func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
@@ -540,7 +555,9 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.Body = &userInfo
+	c.Body = &userLoginTokenResp{
+		Token: userInfo.Token,
+	}
 	return
 }
 
@@ -549,7 +566,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 //
 // 返回用户登录信息
 // Responses:
-// 	default: apiUserInfoResponse
+// 	200: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	if cookie == nil {

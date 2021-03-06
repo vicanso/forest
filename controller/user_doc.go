@@ -4,18 +4,23 @@
 package controller
 
 // 用户列表响应
-//
 // swagger:response apiUserListResponse
-type apiUserListResponser struct {
+type apiUserListResponse struct {
 	// in: body
 	Body *userListResp
 }
 
 // 用户信息查询参数
-//
 // swagger:parameters userList
 type apiUserListParams struct {
 	userListParams
+}
+
+// 用户登录Token响应
+// swagger:response apiUserLoginTokenResponse
+type apiUserLoginTokenResponse struct {
+	// in: body
+	Body *userLoginTokenResp
 }
 
 // 用户信息
