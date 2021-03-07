@@ -17,6 +17,7 @@ Package main Forest
 
 	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码"}，
 	其中category与code字段为可选，当处理出错时，HTTP的响应状态码为`4xx`与`5xx`。
+	其中`4xx`表示客户端参数等异常出错，而`5xx`则表示服务处理异常。
 
 
 	常见出错类别：

@@ -467,11 +467,10 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 	return
 }
 
-// list 获取用户列表
 // swagger:route GET /users/v1 users userList
-// listUser
+// 用户查询
 //
-// 返回用户列表
+// 根据查询条件返回用户列表，限制只允许管理人查询
 // Responses:
 // 	200: apiUserListResponse
 
@@ -533,11 +532,11 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
 	return
 }
 
-// getLoginToken 获取登录的token
 // swagger:route GET /users/v1/me/login users userLoginToken
-// getLoginToken
+// 获取登录的token
 //
-// 获取用户登录时的Token
+// 在登录之前需要先调用获取token，此token用于登录时与客户密码sha256生成hash，
+// 保证客户每次登录时的密码均不相同，避免接口重放登录。
 // Responses:
 // 	200: apiUserLoginTokenResponse
 func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
@@ -561,9 +560,10 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 }
 
 // swagger:route GET /users/v1/me users userMe
-// getUserInfo
+// 获取客户信息
 //
-// 返回用户登录信息
+// 若用户登录状态，则返回客户的相关信息。
+// 若用户未登录，仅返回服务器当前时间。
 // Responses:
 // 	200: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) (err error) {
@@ -620,9 +620,11 @@ func (*userCtrl) detail(c *elton.Context) (err error) {
 }
 
 // swagger:route POST /users/v1/me users userRegister
-// registerUser
-//
 // 用户注册
+//
+// 用户注册时提交的密码需要在客户端以sha256后提交，
+// 在成功注册后返回用户信息。
+// 需注意此时并非登录状态，需要客户自主登录。
 // Responses:
 // 	201: apiUserRegisterResponse
 func (*userCtrl) register(c *elton.Context) (err error) {
@@ -651,9 +653,10 @@ func (*userCtrl) register(c *elton.Context) (err error) {
 }
 
 // swagger:route POST /users/v1/me/login users userLogin
-// loginUser
-//
 // 用户登录
+//
+// 用户登录时需要先获取token，之后使用token与密码sha256后提交，
+// 登录成功后返回用户信息。
 // Responses:
 // 	200: apiUserInfoResponse
 func (*userCtrl) login(c *elton.Context) (err error) {
@@ -755,9 +758,9 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 }
 
 // swagger:route DELETE /users/v1/me users userLogout
-// logoutUser
-//
 // 用户退出登录
+//
+// 退出用户当前登录状态，成功时并无内容返回。
 // Responses:
 // 	204: apiNoContentResponse
 func (*userCtrl) logout(c *elton.Context) (err error) {
