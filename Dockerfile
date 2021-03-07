@@ -14,7 +14,7 @@ RUN apk update \
   && apk add git make curl jq \
   && cd /forest \
   && rm -rf asset/dist \
-  && cp -rf web/dist asset/dist \
+  && cp -rf web/dist asset/ \
   && ./download-swagger.sh \
   && make doc \
   && make build

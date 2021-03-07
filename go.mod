@@ -27,7 +27,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.8
 	github.com/vicanso/count-warner v1.1.0
-	github.com/vicanso/elton v1.2.5
+	github.com/vicanso/elton v1.3.0
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v0.2.1

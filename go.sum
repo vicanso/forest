@@ -505,8 +505,8 @@ github.com/vicanso/count-warner v1.1.0 h1:InaYNIJIwxewkH88ZZH/MaYu2b7ri8UbzkxI/M
 github.com/vicanso/count-warner v1.1.0/go.mod h1:PMiTVSl1ngUQhXQiKbaoij0Tb64qGQMspWhMld4cFM4=
 github.com/vicanso/elton v1.2.1/go.mod h1:+xzbcB+AITdzOtmr/ye+3B3MDgRdr04tKKO2PN/SySU=
 github.com/vicanso/elton v1.2.3/go.mod h1:z2NfIpj9rOh638susxWxgzxPmcp3/E6bAHEnY0S08+E=
-github.com/vicanso/elton v1.2.5 h1:3WRqQCJKINHuCf99rOVIjcrs/njOUqpYYa/9GcaUQzo=
-github.com/vicanso/elton v1.2.5/go.mod h1:OBKtnC+82I3yKcomxDirLEhkoP+Up+K4NMnAiVR5eNM=
+github.com/vicanso/elton v1.3.0 h1:lMFRvIt+jBDbodaZ1k34JmZar4aoJORDFvRapMktvf8=
+github.com/vicanso/elton v1.3.0/go.mod h1:psz+FXn7NJtq6lm36Q3KoeU8XGf4Rxj6iO2/O/LIToM=
 github.com/vicanso/elton-compress v1.1.0 h1:6f/W0p2zmsv47KPnkNUaMNJv377kuPyiJH28AJDyx48=
 github.com/vicanso/elton-compress v1.1.0/go.mod h1:xia/AtjYrsEVzGtjX6KvGy51QiShqrenqNq2qOrDUkk=
 github.com/vicanso/elton-session v1.1.0 h1:b1Ed0pbauJrqWRfsvAEACPw3r+Vci8rTw2kJU4WfXls=

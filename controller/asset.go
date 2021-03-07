@@ -19,10 +19,6 @@ package controller
 
 import (
 	"bytes"
-	"embed"
-	"io"
-	"os"
-	"path"
 	"time"
 
 	"github.com/vicanso/elton"
@@ -33,51 +29,10 @@ import (
 
 type (
 	// assetCtrl asset ctrl
-	assetCtrl  struct{}
-	staticFile struct {
-		prefix string
-		fs     embed.FS
-	}
+	assetCtrl struct{}
 )
 
-var assetFS = &staticFile{
-	prefix: "dist/",
-	fs:     asset.GetFS(),
-}
-
-func (sf *staticFile) getFile(file string) string {
-	return path.Join(sf.prefix + file)
-}
-
-// Exists 判断文件是否存在
-func (sf *staticFile) Exists(file string) bool {
-	f, err := sf.fs.Open(sf.getFile(file))
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-	return true
-}
-
-// Get 获取文件内容
-func (sf *staticFile) Get(file string) ([]byte, error) {
-	return sf.fs.ReadFile(sf.getFile(file))
-}
-
-// Stat 获取文件stat信息
-func (sf *staticFile) Stat(file string) os.FileInfo {
-	// 文件打包至程序中，因此无file info
-	return nil
-}
-
-// NewReader 创建读取文件的reader
-func (sf *staticFile) NewReader(file string) (io.Reader, error) {
-	buf, err := sf.Get(file)
-	if err != nil {
-		return nil, err
-	}
-	return bytes.NewReader(buf), nil
-}
+var assetFS = M.NewEmbedStaticFS(asset.GetFS(), "dist")
 
 func init() {
 	g := router.NewGroup("")
