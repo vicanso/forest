@@ -112,11 +112,20 @@ mixin TimeColumn
     key="_time"
     width="160"
     fixed="right"
-  ): template(
-    #default="scope"
-  ): time-formater(
-    :time="scope.row._time"
   )
+    template(
+      #header
+    ): StatsSummary(
+      v-if="!trackers.processing"
+      :data="trackers.items"
+      :fields="summaryFields"
+    )
+
+    template(
+      #default="scope"
+    ): time-formater(
+      :time="scope.row._time"
+    )
 
 el-card.trackers
   template(
@@ -132,11 +141,12 @@ el-card.trackers
       :fields="filterFields"
       :filter="filter"
     )
-    el-table(
+    StatsTable(
+      v-if="!trackers.processing"
       :data="trackers.items"
-      row-key="_time"
-      stripe
-      :default-sort="{ prop: '_time', order: 'descending' }"
+      :count="trackers.count"
+    ): template(
+      #default
     )
       //- 账号
       +AccountColumn
@@ -189,6 +199,8 @@ import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
 import HTTPErrorFormater from "../components/HTTPErrorFormater.vue";
+import StatsSummary from "../components/StatsSummary.vue";
+import StatsTable from "../components/StatsTable.vue";
 import userFluxState, {
   fluxListUserTrackAction,
   fluxListUserTracker,
@@ -286,6 +298,8 @@ export default defineComponent({
     TimeFormater,
     HTTPErrorFormater,
     BaseJson,
+    StatsSummary,
+    StatsTable,
   },
   mixins: [FilterTable],
   setup() {
@@ -304,6 +318,7 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
+      summaryFields: ["account", "category", "ip", "sid", "tid", "result"],
       query: {
         dateRange: defaultDateRange,
         offset: 0,

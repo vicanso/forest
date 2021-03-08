@@ -26,10 +26,12 @@ interface UserTracker {
 interface UserTrackers {
   processing: boolean;
   items: UserTracker[];
+  count: number;
 }
 const userTrackers: UserTrackers = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // 用户行为轨迹类型
@@ -67,10 +69,12 @@ interface ClientAction {
 interface ClientActions {
   processing: boolean;
   items: ClientAction[];
+  count: number;
 }
 const clientActions: ClientActions = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // HTTPError 客户端HTTP请求出错记录
@@ -92,10 +96,12 @@ interface HTTPError {
 interface HTTPErrors {
   processing: boolean;
   items: HTTPError[];
+  count: number;
 }
 const httpErrors: HTTPErrors = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // HTTP出错类型
@@ -132,10 +138,12 @@ interface Request {
 interface Requests {
   processing: boolean;
   items: Request[];
+  count: number;
 }
 const requests: Requests = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // request 服务名称
@@ -189,6 +197,7 @@ export async function fluxListUserTracker(params: {
       params,
     });
     userTrackers.items = data.trackers || [];
+    userTrackers.count = data.count || 0;
   } finally {
     userTrackers.processing = false;
   }
@@ -197,6 +206,7 @@ export async function fluxListUserTracker(params: {
 // fluxListUserTrackerClear 清除tracker记录
 export function fluxListUserTrackerClear(): void {
   userTrackers.items.length = 0;
+  userTrackers.count = -1;
 }
 
 // fluxListUserTrackAction 查询用户轨迹action列表
@@ -257,6 +267,7 @@ export async function fluxListHTTPError(params: {
       params,
     });
     httpErrors.items = data.httpErrors || [];
+    httpErrors.count = data.count || 0;
   } finally {
     httpErrors.processing = false;
   }
@@ -265,6 +276,7 @@ export async function fluxListHTTPError(params: {
 // fluxListHTTPErrorClear 清除http出错列表
 export function fluxListHTTPErrorClear(): void {
   httpErrors.items.length = 0;
+  httpErrors.count = -1;
 }
 
 // fluxListClientActionCategory 查询客户端行为分类
@@ -307,6 +319,7 @@ export async function fluxListClientAction(params: {
       params,
     });
     clientActions.items = data.actions || [];
+    clientActions.count = data.count || 0;
   } finally {
     clientActions.processing = false;
   }
@@ -315,6 +328,7 @@ export async function fluxListClientAction(params: {
 // fluxListClientActionClear 清空客户端行为
 export function fluxListClientActionClear(): void {
   clientActions.items.length = 0;
+  clientActions.count = -1;
 }
 
 // fluxListRequest 查询后端请求记录
@@ -337,6 +351,7 @@ export async function fluxListRequest(params: {
       params,
     });
     requests.items = data.requests || [];
+    requests.count = data.count || 0;
   } finally {
     requests.processing = false;
   }
@@ -345,6 +360,7 @@ export async function fluxListRequest(params: {
 // fluxListRequestClear 清除request列表
 export function fluxListRequestClear(): void {
   requests.items.length = 0;
+  requests.count = -1;
 }
 
 // fluxListRequestService 获取request中的service列表

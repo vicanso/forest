@@ -14,7 +14,7 @@ export async function adminFindSessionByID(id: string): Promise<Session> {
 }
 
 // adminCleanSessionByID 清除session
-export async function adminCleanSessionByID(id: string) {
+export async function adminCleanSessionByID(id: string): void {
   const url = ADMINS_SESSION_ID.replace(":id", id);
   await request.delete(url);
 }

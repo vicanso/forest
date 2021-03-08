@@ -54,7 +54,7 @@ app.config.globalProperties.$error = function (err: Error | HTTPError) {
       });
     }
   } else if (err instanceof Error) {
-    message =  err.message;
+    message = err.message;
   }
   ElMessage.error(message);
   if (isDevelopment()) {

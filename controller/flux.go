@@ -204,6 +204,7 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (er
 	result, err := params.Do(c.Context())
 	c.Body = map[string]interface{}{
 		responseKey: result,
+		"count":     len(result),
 	}
 	return
 }

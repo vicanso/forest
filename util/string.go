@@ -71,7 +71,7 @@ func RandomDigit(n int) string {
 
 // GenXID 生成xid
 func GenXID() string {
-	return xid.New().String()
+	return strings.ToUpper(xid.New().String())
 }
 
 // Sha256 对字符串做sha256后返回base64字符串

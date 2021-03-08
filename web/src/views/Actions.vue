@@ -68,7 +68,7 @@ mixin FullPathColumn
 
 mixin ErrorColumn
   el-table-column(
-    label="error"
+    label="出错"
     width="80"
   ): template(
     #default="scope"
@@ -84,11 +84,19 @@ mixin TimeColumn
     key="_time"
     width="160"
     fixed="right"
-  ): template(
-    #default="scope"
-  ): time-formater(
-    :time="scope.row._time"
   )
+    template(
+      #header
+    ): StatsSummary(
+      v-if="!userActions.processing"
+      :data="userActions.items"
+      :fields="summaryFields"
+    )
+    template(
+      #default="scope"
+    ): time-formater(
+      :time="scope.row._time"
+    )
 
 el-card.actions
   template(
@@ -104,11 +112,12 @@ el-card.actions
       :fields="filterFields"
       :filter="filter"
     )
-    el-table(
+    StatsTable(
+      v-if="!userActions.processing"
       :data="userActions.items"
-      row-key="_time"
-      stripe
-      :default-sort="{ prop: '_time', order: 'descending' }"
+      :count="userActions.count"
+    ): template(
+      #default
     )
       //- 账号
       +AccountColumn
@@ -149,6 +158,8 @@ import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
+import StatsSummary from "../components/StatsSummary.vue";
+import StatsTable from "../components/StatsTable.vue";
 import useFluxState, {
   fluxListClientActionCategory,
   fluxListClientAction,
@@ -227,6 +238,8 @@ export default defineComponent({
     BaseTooltip,
     TimeFormater,
     BaseJson,
+    StatsSummary,
+    StatsTable,
   },
   mixins: [FilterTable],
   setup() {
@@ -245,6 +258,7 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
+      summaryFields: ["account", "category", "tid", "route", "result"],
       query: {
         dateRange: defaultDateRange,
         offset: 0,

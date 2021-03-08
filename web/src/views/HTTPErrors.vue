@@ -120,11 +120,19 @@ mixin TimeColumn
     key="_time"
     width="160"
     fixed="right"
-  ): template(
-    #default="scope"
-  ): time-formater(
-    :time="scope.row._time"
   )
+    template(
+      #header
+    ): StatsSummary(
+      v-if="!httpErrors.processing"
+      :data="httpErrors.items"
+      :fields="summaryFields"
+    )
+    template(
+      #default="scope"
+    ): time-formater(
+      :time="scope.row._time"
+    )
 
 el-card.httpErrors
   template(
@@ -140,11 +148,12 @@ el-card.httpErrors
       :fields="filterFields"
       :filter="filter"
     )
-    el-table(
+    StatsTable(
+      v-if="!httpErrors.processing"
       :data="httpErrors.items"
-      row-key="_time"
-      stripe
-      :default-sort="{ prop: '_time', order: 'descending' }"
+      :count="httpErrors.count"
+    ): template(
+      #default
     )
       //- 账号
       +AccountColumn
@@ -196,6 +205,8 @@ import BaseJson from "../components/base/JSON.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
 import HTTPErrorFormater from "../components/HTTPErrorFormater.vue";
+import StatsSummary from "../components/StatsSummary.vue";
+import StatsTable from "../components/StatsTable.vue";
 import useFluxState, {
   fluxListHTTPCategory,
   fluxListHTTPError,
@@ -294,6 +305,8 @@ export default defineComponent({
     TimeFormater,
     HTTPErrorFormater,
     BaseJson,
+    StatsSummary,
+    StatsTable,
   },
   mixins: [FilterTable],
   setup() {
@@ -312,6 +325,15 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
+      summaryFields: [
+        "account",
+        "route",
+        "category",
+        "status",
+        "sid",
+        "tid",
+        "ip",
+      ],
       query: {
         dateRange: defaultDateRange,
         offset: 0,

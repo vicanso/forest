@@ -141,11 +141,19 @@ mixin TimeColumn
     key="_time"
     width="160"
     fixed="right"
-  ): template(
-    #default="scope"
-  ): time-formater(
-    :time="scope.row._time"
   )
+    template(
+      #header
+    ): StatsSummary(
+      v-if="!requests.processing"
+      :data="requests.items"
+      :fields="summaryFields"
+    )
+    template(
+      #default="scope"
+    ): time-formater(
+      :time="scope.row._time"
+    )
 
 el-card.requests
   template(
@@ -161,12 +169,12 @@ el-card.requests
       :fields="filterFields"
       :filter="filter"
     )
-
-    el-table(
+    StatsTable(
+      v-if="!requests.processing"
       :data="requests.items"
-      row-key="_time"
-      stripe
-      :default-sort="{ prop: '_time', order: 'descending' }"
+      :count="requests.count"
+    ): template(
+      #default
     )
       //- 服务名称
       +ServiceColumn
@@ -204,6 +212,8 @@ import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
 import BaseJson from "../components/base/JSON.vue";
 import HTTPErrorFormater from "../components/HTTPErrorFormater.vue";
+import StatsSummary from "../components/StatsSummary.vue";
+import StatsTable from "../components/StatsTable.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
 
@@ -314,6 +324,8 @@ export default defineComponent({
     TimeFormater,
     HTTPErrorFormater,
     BaseJson,
+    StatsSummary,
+    StatsTable,
   },
   mixins: [FilterTable],
   setup() {
@@ -333,6 +345,14 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
+      summaryFields: [
+        "service",
+        "route",
+        "status",
+        "addr",
+        "hostname",
+        "result",
+      ],
       query: {
         dateRange: defaultDateRange,
         offset: 0,

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -158,6 +159,7 @@ func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string)
 		}
 		values = append(values, value)
 	}
+	sort.Strings(values)
 	return
 }
 
