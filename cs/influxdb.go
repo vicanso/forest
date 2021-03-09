@@ -77,8 +77,8 @@ const (
 	FieldAddr = "addr"
 	// FieldURI uri
 	FieldURI = "uri"
-	// FieldRoute route
-	FieldRoute = "route"
+	// FieldRouteName routeName
+	FieldRouteName = "routeName"
 	// FieldPath path
 	FieldPath = "path"
 	// FieldAccount 账号

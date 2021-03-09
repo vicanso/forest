@@ -9,7 +9,7 @@ require (
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/go-redis/redis/v8 v8.6.0
+	github.com/go-redis/redis/v8 v8.7.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.3
 	github.com/hashicorp/golang-lru v0.5.4
@@ -20,13 +20,13 @@ require (
 	github.com/jinzhu/now v1.1.1
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
-	github.com/pyroscope-io/pyroscope v0.0.25
+	github.com/pyroscope-io/pyroscope v0.0.26
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.2.1
-	github.com/rs/zerolog v1.15.0
+	github.com/rs/zerolog v1.20.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.8
-	github.com/vicanso/count-warner v1.1.0
+	github.com/vicanso/count-warner v1.2.0
 	github.com/vicanso/elton v1.3.0
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0

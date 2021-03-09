@@ -1,5 +1,20 @@
 <template lang="pug">
 .statsTable
+
+  el-divider(
+    v-if="$props.flux"
+  )
+    el-tooltip(
+      placement="bottom"
+    )
+      template(
+        #content
+      )
+        pre {{$props.flux}}
+      span.flux 
+        i.el-icon-connection
+        span FLUX SCRIPT
+
   el-table(
     :data="items"
     row-key="_time"
@@ -34,6 +49,7 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    flux: String,
   },
   data() {
     return {
@@ -70,7 +86,14 @@ export default defineComponent({
 </script>
 
 <style lang="stylus" scoped>
+@import "../common";
+
 .pagination
   text-align right
   margin-top 15px
+.flux
+  color $darkGray
+  i
+    margin-right 5px
+    font-weight bold
 </style>

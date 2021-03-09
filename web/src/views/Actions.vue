@@ -41,7 +41,7 @@ mixin StatusColumn
 mixin RouteColumn
   el-table-column(
     label="路由"
-    prop="route"
+    prop="routeName"
     key="route"
   )
 
@@ -116,6 +116,7 @@ el-card.actions
       v-if="!userActions.processing"
       :data="userActions.items"
       :count="userActions.count"
+      :flux="userActions.flux"
     ): template(
       #default
     )

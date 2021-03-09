@@ -173,6 +173,7 @@ el-card.requests
       v-if="!requests.processing"
       :data="requests.items"
       :count="requests.count"
+      :flux="requests.flux"
     ): template(
       #default
     )

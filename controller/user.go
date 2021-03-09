@@ -896,9 +896,9 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
 		fields := map[string]interface{}{
-			cs.FieldRoute: item.Route,
-			cs.FieldPath:  item.Path,
-			cs.FieldTID:   tid,
+			cs.FieldRouteName: item.Route,
+			cs.FieldPath:      item.Path,
+			cs.FieldTID:       tid,
 		}
 		if account != "" {
 			fields[cs.FieldAccount] = account

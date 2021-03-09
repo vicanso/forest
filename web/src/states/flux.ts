@@ -27,11 +27,13 @@ interface UserTrackers {
   processing: boolean;
   items: UserTracker[];
   count: number;
+  flux: string;
 }
 const userTrackers: UserTrackers = reactive({
   processing: false,
   items: [],
   count: -1,
+  flux: "",
 });
 
 // 用户行为轨迹类型
@@ -70,11 +72,13 @@ interface ClientActions {
   processing: boolean;
   items: ClientAction[];
   count: number;
+  flux: string;
 }
 const clientActions: ClientActions = reactive({
   processing: false,
   items: [],
   count: -1,
+  flux: "",
 });
 
 // HTTPError 客户端HTTP请求出错记录
@@ -97,11 +101,13 @@ interface HTTPErrors {
   processing: boolean;
   items: HTTPError[];
   count: number;
+  flux: string;
 }
 const httpErrors: HTTPErrors = reactive({
   processing: false,
   items: [],
   count: -1,
+  flux: "",
 });
 
 // HTTP出错类型
@@ -139,11 +145,13 @@ interface Requests {
   processing: boolean;
   items: Request[];
   count: number;
+  flux: string;
 }
 const requests: Requests = reactive({
   processing: false,
   items: [],
   count: -1,
+  flux: "",
 });
 
 // request 服务名称
@@ -198,6 +206,7 @@ export async function fluxListUserTracker(params: {
     });
     userTrackers.items = data.trackers || [];
     userTrackers.count = data.count || 0;
+    userTrackers.flux = data.flux || "";
   } finally {
     userTrackers.processing = false;
   }
@@ -207,6 +216,7 @@ export async function fluxListUserTracker(params: {
 export function fluxListUserTrackerClear(): void {
   userTrackers.items.length = 0;
   userTrackers.count = -1;
+  userTrackers.flux = "";
 }
 
 // fluxListUserTrackAction 查询用户轨迹action列表
@@ -268,6 +278,7 @@ export async function fluxListHTTPError(params: {
     });
     httpErrors.items = data.httpErrors || [];
     httpErrors.count = data.count || 0;
+    httpErrors.flux = data.flux || "";
   } finally {
     httpErrors.processing = false;
   }
@@ -277,6 +288,7 @@ export async function fluxListHTTPError(params: {
 export function fluxListHTTPErrorClear(): void {
   httpErrors.items.length = 0;
   httpErrors.count = -1;
+  httpErrors.flux = "";
 }
 
 // fluxListClientActionCategory 查询客户端行为分类
@@ -320,6 +332,7 @@ export async function fluxListClientAction(params: {
     });
     clientActions.items = data.actions || [];
     clientActions.count = data.count || 0;
+    clientActions.flux = data.flux || "";
   } finally {
     clientActions.processing = false;
   }
@@ -329,6 +342,7 @@ export async function fluxListClientAction(params: {
 export function fluxListClientActionClear(): void {
   clientActions.items.length = 0;
   clientActions.count = -1;
+  clientActions.flux = "";
 }
 
 // fluxListRequest 查询后端请求记录
@@ -352,6 +366,7 @@ export async function fluxListRequest(params: {
     });
     requests.items = data.requests || [];
     requests.count = data.count || 0;
+    requests.flux = data.flux || "";
   } finally {
     requests.processing = false;
   }
@@ -361,6 +376,7 @@ export async function fluxListRequest(params: {
 export function fluxListRequestClear(): void {
   requests.items.length = 0;
   requests.count = -1;
+  requests.flux = "";
 }
 
 // fluxListRequestService 获取request中的service列表

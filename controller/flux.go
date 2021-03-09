@@ -56,6 +56,8 @@ type (
 	}
 )
 
+// 响应相关定义
+
 func init() {
 	sessionConfig = config.GetSessionConfig()
 	g := router.NewGroup("/fluxes", loadUserSession)
@@ -97,42 +99,57 @@ func init() {
 func (params *fluxListParams) Query() string {
 	start := util.FormatTime(params.Begin.UTC())
 	stop := util.FormatTime(params.End.UTC())
-	query := fmt.Sprintf(`
-		|> range(start: %s, stop: %s)
-		|> filter(fn: (r) => r["_measurement"] == "%s")
-		|> sort(columns:["_time"], desc: true)
-		|> limit(n:%s)
-		|> pivot(
-			rowKey:["_time"],
-			columnKey: ["_field"],
-			valueColumn: "_value"
-		)
-		`,
+	query := fmt.Sprintf(`|> range(start: %s, stop: %s)
+|> filter(fn: (r) => r["_measurement"] == "%s")
+`,
 		start,
 		stop,
 		params.Measurement,
-		params.Limit,
 	)
 	addStrQuery := func(key, value string) {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == "%s")`, key, value)
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == "%s")
+`, key, value)
 	}
 	addQuery := func(key string, value interface{}) {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == %s)`, key, value)
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == %s)
+`, key, value)
 	}
+	// tag 的筛选
 	// 用户行为类型
 	if params.Action != "" {
-		addStrQuery("action", params.Action)
+		addStrQuery(cs.TagAction, params.Action)
 	}
 	// 结果
 	if params.Result != "" {
-		addStrQuery("result", params.Result)
+		addStrQuery(cs.TagResult, params.Result)
 	}
+	// 分类
 	if params.Category != "" {
-		addStrQuery("category", params.Category)
+		addStrQuery(cs.TagCategory, params.Category)
 	}
+	// service
+	if params.Service != "" {
+		addStrQuery(cs.TagService, params.Service)
+	}
+	// route
+	if params.Route != "" {
+		addStrQuery("route", params.Route)
+	}
+
+	// 筛选完成之后执行pivot
+	query += fmt.Sprintf(`|> sort(columns:["_time"], desc: true)
+|> limit(n:%s)
+|> pivot(
+	rowKey:["_time"],
+	columnKey: ["_field"],
+	valueColumn: "_value"
+)
+`, params.Limit)
+
+	// field 的筛选
 	// 账号
 	if params.Account != "" {
-		addStrQuery("account", params.Account)
+		addStrQuery(cs.FieldAccount, params.Account)
 	}
 	// 异常
 	if params.Exception != "" {
@@ -140,23 +157,11 @@ func (params *fluxListParams) Query() string {
 		if params.Exception == "0" {
 			value = "false"
 		}
-		addQuery("exception", value)
+		addQuery(cs.FieldException, value)
 	}
-
-	// service
-	if params.Service != "" {
-		addStrQuery("service", params.Service)
-	}
-
-	// route
-	if params.Route != "" {
-		addStrQuery("route", params.Route)
-	}
-
 	// 出错类型
 	if params.ErrCategory != "" {
-		addStrQuery("errCategory", params.ErrCategory)
-
+		addStrQuery(cs.FieldErrCategory, params.ErrCategory)
 	}
 
 	return query
@@ -202,9 +207,16 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (er
 	}
 	params.Measurement = measurement
 	result, err := params.Do(c.Context())
+	if err != nil {
+		return
+	}
+
+	fromBucket := fmt.Sprintf(`from(bucket: "%s")
+`, getInfluxSrv().GetBucket())
 	c.Body = map[string]interface{}{
 		responseKey: result,
 		"count":     len(result),
+		"flux":      fromBucket + params.Query(),
 	}
 	return
 }

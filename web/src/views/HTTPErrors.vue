@@ -152,6 +152,7 @@ el-card.httpErrors
       v-if="!httpErrors.processing"
       :data="httpErrors.items"
       :count="httpErrors.count"
+      :flux="httpErrors.flux"
     ): template(
       #default
     )
@@ -225,15 +226,6 @@ const filterFields = [
     span: 6,
   },
   {
-    label: "数量：",
-    key: "limit",
-    type: "number",
-    placeholder: "请输入最大数量",
-    clearable: true,
-    defaultValue: 100,
-    span: 6,
-  },
-  {
     label: "类型：",
     key: "category",
     type: "select",
@@ -260,6 +252,15 @@ const filterFields = [
         value: "0",
       },
     ],
+    span: 6,
+  },
+  {
+    label: "数量：",
+    key: "limit",
+    type: "number",
+    placeholder: "请输入最大数量",
+    clearable: true,
+    defaultValue: 100,
     span: 6,
   },
   {

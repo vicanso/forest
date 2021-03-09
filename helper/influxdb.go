@@ -190,3 +190,8 @@ func (srv *InfluxSrv) Close() {
 	}
 	srv.client.Close()
 }
+
+// GetBucket 获取bucket
+func (srv *InfluxSrv) GetBucket() string {
+	return srv.config.Bucket
+}

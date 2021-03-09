@@ -145,6 +145,7 @@ el-card.trackers
       v-if="!trackers.processing"
       :data="trackers.items"
       :count="trackers.count"
+      :flux="trackers.flux"
     ): template(
       #default
     )
