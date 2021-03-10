@@ -119,6 +119,7 @@ mixin TimeColumn
       v-if="!trackers.processing"
       :data="trackers.items"
       :fields="summaryFields"
+      @filter="doFilter"
     )
 
     template(
@@ -144,7 +145,6 @@ el-card.trackers
     StatsTable(
       v-if="!trackers.processing"
       :data="trackers.items"
-      :count="trackers.count"
       :flux="trackers.flux"
     ): template(
       #default
@@ -185,7 +185,7 @@ el-card.trackers
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted } from "vue";
+import { defineComponent, onUnmounted, reactive, provide } from "vue";
 
 import {
   today,
@@ -307,8 +307,13 @@ export default defineComponent({
     onUnmounted(() => {
       fluxListUserTrackerClear();
     });
+    const statsParams = reactive({
+      filters: {},
+    });
+    provide("statsParams", statsParams);
     const fluxState = userFluxState();
     return {
+      statsParams,
       trackers: fluxState.userTrackers,
       trackerActions: fluxState.userTrackerActions,
     };
@@ -319,7 +324,7 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
-      summaryFields: ["account", "category", "ip", "sid", "tid", "result"],
+      summaryFields: ["account", "action", "ip", "sid", "tid", "result"],
       query: {
         dateRange: defaultDateRange,
         offset: 0,
@@ -357,6 +362,9 @@ export default defineComponent({
     }
   },
   methods: {
+    doFilter(filters) {
+      this.statsParams.filters = filters;
+    },
     filterTrack(value, row) {
       return row.tid == value;
     },

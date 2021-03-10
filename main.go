@@ -177,8 +177,8 @@ func newOnErrorHandler(e *elton.Elton) {
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
 	// exception的warner只有一个key，因此无需定时清除
-	warnerException := warner.NewWarner(5*time.Minute, 5)
-	warnerException.On(func(_ string, _ int) {
+	exceptionWarner := warner.NewWarner(5*time.Minute, 5)
+	exceptionWarner.On(func(_ string, _ int) {
 		service.AlarmError("too many uncaught exception")
 	})
 	// 只有未被处理的error才会触发此回调
@@ -216,7 +216,7 @@ func newOnErrorHandler(e *elton.Elton) {
 			Strs("stack", stack).
 			Msg("")
 
-		warnerException.Inc("exception", 1)
+		exceptionWarner.Inc("exception", 1)
 		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
 

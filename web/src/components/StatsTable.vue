@@ -23,19 +23,19 @@
   )
     slot
   el-pagination.pagination(
-    v-if="$props.count > 0"
+    v-if="filterItems && filterItems.length > 0"
     layout="prev, pager, next, sizes"
     :current-page="Math.floor(offset / limit) + 1"
     :page-size="limit"
     :page-sizes="pageSizes"
-    :total="$props.count"
+    :total="filterItems.length"
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
   )
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, inject } from "vue";
 import { PAGE_SIZES } from "../constants/common";
 
 export default defineComponent({
@@ -45,14 +45,27 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
-    count: {
-      type: Number,
-      required: true,
+    flux: {
+      type: String,
+      default: "",
     },
-    flux: String,
+  },
+  setup() {
+    return {
+      statsParams: inject("statsParams"),
+    };
   },
   data() {
+    const { data } = this.$props;
+    const originalItems = data.slice(0);
+    originalItems.sort((item1: { _time: string }, item2: { _time: string }) => {
+      const date1 = new Date(item1._time);
+      const date2 = new Date(item2._time);
+      return date2.getTime() - date1.getTime();
+    });
     return {
+      originalItems: originalItems,
+      filterItems: originalItems.slice(0),
       offset: 0,
       limit: 10,
       pageSizes: PAGE_SIZES,
@@ -60,17 +73,41 @@ export default defineComponent({
   },
   computed: {
     items() {
-      const { data } = this.$props;
-      const { offset, limit } = this;
-      const originalItems = data.slice(0);
-      originalItems.sort(
-        (item1: { _time: string }, item2: { _time: string }) => {
-          const date1 = new Date(item1._time);
-          const date2 = new Date(item2._time);
-          return date2.getTime() - date1.getTime();
-        }
-      );
-      return originalItems.slice(offset, offset + limit);
+      const { offset, limit, filterItems } = this;
+      return filterItems.slice(offset, offset + limit);
+    },
+  },
+  watch: {
+    "statsParams.filters": function (filters) {
+      this.offset = 0;
+      const keys = Object.keys(filters);
+      if (keys.length === 0) {
+        this.filterItems = this.originalItems.slice(0);
+        return;
+      }
+      // 根据filter的字段筛选
+      this.filterItems = this.originalItems.filter((item) => {
+        let matched = true;
+        keys.forEach((key) => {
+          if (!matched) {
+            return;
+          }
+          // - 表示为空
+          if (filters[key] === "-") {
+            if (item[key]) {
+              matched = false;
+            }
+            return;
+          }
+          if (
+            item[key] !== filters[key] &&
+            item[key] !== Number(filters[key])
+          ) {
+            matched = false;
+          }
+        });
+        return matched;
+      });
     },
   },
   methods: {

@@ -17,7 +17,9 @@ package middleware
 import (
 	"bytes"
 	"net/http"
+	"time"
 
+	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
@@ -29,6 +31,18 @@ import (
 
 // New Error handler
 func NewError() elton.Handler {
+	// 如果有基于influxdb的统计监控，建议使用influxdb的告警
+	errorWarner := warner.NewWarner(5*time.Minute, 30)
+	errorWarner.On(func(ip string, _ int) {
+		service.AlarmError("too many errors, ip:" + ip)
+	})
+	// 定时清理有效数据
+	go func() {
+		for range time.NewTicker(5 * time.Minute).C {
+			errorWarner.ClearExpired()
+		}
+	}()
+
 	return func(c *elton.Context) error {
 		err := c.Next()
 		if err == nil {
@@ -38,13 +52,6 @@ func NewError() elton.Handler {
 		he, ok := err.(*hes.Error)
 		if !ok {
 			// 如果不是以http error的形式返回的error则为非主动抛出错误
-			log.Default().Error().
-				Str("category", "unexpectedErr").
-				Str("method", c.Request.Method).
-				Str("route", c.Route).
-				Str("uri", uri).
-				Err(err).
-				Msg("")
 			he = hes.NewWithError(err)
 			he.StatusCode = http.StatusInternalServerError
 			he.Exception = true
@@ -64,7 +71,19 @@ func NewError() elton.Handler {
 		if us != nil && us.IsLogin() {
 			account = us.MustGetInfo().Account
 		}
+
+		log.Default().Info().
+			Str("catgory", "httpError").
+			Bool("exception", he.Exception).
+			Str("method", c.Request.Method).
+			Str("route", c.Route).
+			Str("uri", uri).
+			Str("error", he.Error()).
+			Msg("")
+
 		ip := c.RealIP()
+		// 出错则按IP + 1
+		errorWarner.Inc(ip, 1)
 		sid := util.GetSessionID(c)
 
 		he.Extra["route"] = c.Route

@@ -13,6 +13,10 @@ el-popover(
     ul
       li(
         v-for="subItem in item.items"
+        @click="doFilter(item.name, subItem.key)"
+        :class=`{
+          selected: filters[item.name] === subItem.key
+        }`
       )
         span.count {{subItem.value}}
         span {{subItem.key}}
@@ -43,6 +47,7 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ["filter"],
   data() {
     const { data, fields } = this.$props;
     const stats = [];
@@ -87,8 +92,20 @@ export default defineComponent({
       });
     });
     return {
+      filters: {},
       stats,
     };
+  },
+  methods: {
+    doFilter(key, value) {
+      const { filters } = this;
+      if (filters[key] === value) {
+        delete filters[key];
+      } else {
+        filters[key] = value;
+      }
+      this.$emit("filter", Object.assign({}, filters));
+    },
   },
 });
 </script>
@@ -103,9 +120,13 @@ export default defineComponent({
 ul
   list-style-position inside
 li
-  padding 3px 5px 3px 0
+  padding 3px 5px
+  cursor pointer
   &:hover
     background-color $lightBlue
+  &.selected
+    background-color $blue
+    color $white
 .count
   float right
 </style>

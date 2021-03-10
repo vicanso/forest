@@ -49,6 +49,10 @@ type (
 		Route       string `json:"route,omitempty" validate:"omitempty,xTag"`
 		Service     string `json:"service,omitempty" validate:"omitempty,xTag"`
 	}
+	// flux tags/fields查询参数
+	fluxListTagOrFieldParams struct {
+		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
+	}
 	// fluxListTagValuesParams flux tag values查询参数
 	fluxListTagValuesParams struct {
 		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
@@ -87,11 +91,23 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listRequest,
 	)
-	// 获取tag的值
+
+	// 获取tag
+	// 不校验登录状态，无敏感信息
+	g.GET(
+		"/v1/tags/{measurement}",
+		ctrl.listTag,
+	)
+	// 获取tag的取值列表
+	// 不校验登录状态，无敏感信息
 	g.GET(
 		"/v1/tag-values/{measurement}/{tag}",
-		shouldBeAdmin,
 		ctrl.listTagValue,
+	)
+	// 获取field
+	g.GET(
+		"/v1/fields/{measurement}",
+		ctrl.ListField,
 	)
 }
 
@@ -114,6 +130,9 @@ func (params *fluxListParams) Query() string {
 		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == %s)
 `, key, value)
 	}
+
+	// TODO 根据measurement判断是tag还是field
+
 	// tag 的筛选
 	// 用户行为类型
 	if params.Action != "" {
@@ -182,6 +201,42 @@ func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interf
 	return
 }
 
+// listTag returns the tags of measurement
+func (ctrl fluxCtrl) listTag(c *elton.Context) (err error) {
+	params := fluxListTagOrFieldParams{}
+	err = validate.Do(&params, c.Params.ToMap())
+	if err != nil {
+		return
+	}
+	tags, err := getInfluxSrv().ListTag(c.Context(), params.Measurement)
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(time.Minute)
+	c.Body = map[string][]string{
+		"tags": tags,
+	}
+	return
+}
+
+// ListField return the fields of measurement
+func (ctrl fluxCtrl) ListField(c *elton.Context) (err error) {
+	params := fluxListTagOrFieldParams{}
+	err = validate.Do(&params, c.Params.ToMap())
+	if err != nil {
+		return
+	}
+	fields, err := getInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(time.Minute)
+	c.Body = map[string][]string{
+		"fields": fields,
+	}
+	return
+}
+
 // listValue get the values of tag
 func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
 	params := fluxListTagValuesParams{}
@@ -193,6 +248,7 @@ func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
+	c.CacheMaxAge(time.Minute)
 	c.Body = map[string][]string{
 		"values": values,
 	}

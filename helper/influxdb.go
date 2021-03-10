@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -39,6 +40,7 @@ type (
 
 var hostname, _ = os.Hostname()
 var defaultInfluxSrv = mustNewInfluxSrv()
+var ignoreFields = "_start _stop _field _measurement"
 
 // mustNewInfluxSrv 创建新的influx服务
 func mustNewInfluxSrv() *InfluxSrv {
@@ -138,12 +140,11 @@ func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[stri
 // ListTagValue list value of tag
 func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string) (values []string, err error) {
 	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
-
-	schema.measurementTagValues(
-	  bucket: "%s",
-	  measurement: "%s",
-	  tag: "%s"
-	)`, srv.config.Bucket, measurement, tag)
+schema.measurementTagValues(
+	bucket: "%s",
+	measurement: "%s",
+	tag: "%s"
+)`, srv.config.Bucket, measurement, tag)
 	items, err := srv.query(ctx, query)
 	if err != nil {
 		return
@@ -160,6 +161,63 @@ func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string)
 		values = append(values, value)
 	}
 	sort.Strings(values)
+	return
+}
+
+// ListTag returns the tag list of measurement
+func (srv *InfluxSrv) ListTag(ctx context.Context, measurement string) (tags []string, err error) {
+	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
+schema.measurementTagKeys(
+	bucket: "%s",
+	measurement: "%s"
+)`, srv.config.Bucket, measurement)
+	items, err := srv.query(ctx, query)
+	if err != nil {
+		return
+	}
+	for _, item := range items {
+		v, ok := item["_value"]
+		if !ok {
+			continue
+		}
+		tag, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if strings.Contains(ignoreFields, tag) {
+			continue
+		}
+		tags = append(tags, tag)
+	}
+	return
+}
+
+// ListField return the fields of measurement
+func (srv *InfluxSrv) ListField(ctx context.Context, measurement, duration string) (fields []string, err error) {
+	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
+schema.measurementFieldKeys(
+	bucket: "%s",
+	measurement: "%s",
+	start: %s
+)`, srv.config.Bucket, measurement, duration)
+	items, err := srv.query(ctx, query)
+	if err != nil {
+		return
+	}
+	for _, item := range items {
+		v, ok := item["_value"]
+		if !ok {
+			continue
+		}
+		field, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if strings.Contains(ignoreFields, field) {
+			continue
+		}
+		fields = append(fields, field)
+	}
 	return
 }
 

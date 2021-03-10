@@ -84,19 +84,11 @@ mixin CreatedAtColumn
     key="createdAt"
     label="时间"
     width="160"
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.createdAt"
   )
-    template(
-      #header
-    ): StatsSummary(
-      v-if="!logins.processing"
-      :data="logins.items"
-      :fields="summaryFields"
-    )
-    template(
-      #default="scope"
-    ): time-formater(
-      :time="scope.row.createdAt"
-    )
 
 mixin Pagination
   el-pagination.pagination(
@@ -171,7 +163,6 @@ import {
 import BaseFilter from "../components/base/Filter.vue";
 import BaseTooltip from "../components/Tooltip.vue";
 import TimeFormater from "../components/TimeFormater.vue";
-import StatsSummary from "../components/StatsSummary.vue";
 import { PAGE_SIZES } from "../constants/common";
 import FilterTable from "../mixins/FilterTable";
 
@@ -207,7 +198,6 @@ export default defineComponent({
     BaseFilter,
     BaseTooltip,
     TimeFormater,
-    StatsSummary,
   },
   mixins: [FilterTable],
   setup() {

@@ -127,6 +127,7 @@ mixin TimeColumn
       v-if="!httpErrors.processing"
       :data="httpErrors.items"
       :fields="summaryFields"
+      @filter="doFilter"
     )
     template(
       #default="scope"
@@ -151,7 +152,6 @@ el-card.httpErrors
     StatsTable(
       v-if="!httpErrors.processing"
       :data="httpErrors.items"
-      :count="httpErrors.count"
       :flux="httpErrors.flux"
     ): template(
       #default
@@ -196,7 +196,7 @@ el-card.httpErrors
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted } from "vue";
+import { defineComponent, onUnmounted, reactive, provide } from "vue";
 
 import { getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
@@ -314,8 +314,13 @@ export default defineComponent({
     onUnmounted(() => {
       fluxListHTTPErrorClear();
     });
+    const statsParams = reactive({
+      filters: {},
+    });
+    provide("statsParams", statsParams);
     const fluxState = useFluxState();
     return {
+      statsParams,
       httpErrors: fluxState.httpErrors,
       httpErrorCategories: fluxState.httpErrorCategories,
     };
@@ -372,6 +377,9 @@ export default defineComponent({
     }
   },
   methods: {
+    doFilter(filters) {
+      this.statsParams.filters = filters;
+    },
     filterTrack(value, row) {
       return row.tid == value;
     },

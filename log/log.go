@@ -106,6 +106,7 @@ func mustNewLogger(outputPath string) *zerolog.Logger {
 	l := zerolog.New(os.Stdout)
 	if util.IsDevelopment() {
 		l = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).
+			Hook(&TracerHook{}).
 			With().
 			Timestamp().
 			Logger()

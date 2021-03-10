@@ -148,6 +148,7 @@ mixin TimeColumn
       v-if="!requests.processing"
       :data="requests.items"
       :fields="summaryFields"
+      @filter="doFilter"
     )
     template(
       #default="scope"
@@ -172,7 +173,6 @@ el-card.requests
     StatsTable(
       v-if="!requests.processing"
       :data="requests.items"
-      :count="requests.count"
       :flux="requests.flux"
     ): template(
       #default
@@ -205,7 +205,7 @@ el-card.requests
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted } from "vue";
+import { defineComponent, onUnmounted, reactive, provide } from "vue";
 
 import { getDateTimeShortcuts, formatDateWithTZ } from "../helpers/util";
 import BaseFilter from "../components/base/Filter.vue";
@@ -333,8 +333,13 @@ export default defineComponent({
     onUnmounted(() => {
       fluxListRequestClear();
     });
+    const statsParams = reactive({
+      filters: {},
+    });
+    provide("statsParams", statsParams);
     const fluxState = useFluxState();
     return {
+      statsParams,
       requests: fluxState.requests,
       requestServices: fluxState.requestServices,
       requestRoutes: fluxState.requestRoutes,
@@ -399,6 +404,9 @@ export default defineComponent({
     }
   },
   methods: {
+    doFilter(filters) {
+      this.statsParams.filters = filters;
+    },
     async fetch() {
       const { requests, query } = this;
       if (requests.processing) {

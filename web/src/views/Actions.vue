@@ -91,6 +91,7 @@ mixin TimeColumn
       v-if="!userActions.processing"
       :data="userActions.items"
       :fields="summaryFields"
+      @filter="doFilter"
     )
     template(
       #default="scope"
@@ -115,7 +116,6 @@ el-card.actions
     StatsTable(
       v-if="!userActions.processing"
       :data="userActions.items"
-      :count="userActions.count"
       :flux="userActions.flux"
     ): template(
       #default
@@ -146,7 +146,7 @@ el-card.actions
 
 </template>
 <script lang="ts">
-import { defineComponent, onUnmounted } from "vue";
+import { defineComponent, onUnmounted, reactive, provide } from "vue";
 import {
   today,
   getDateDayShortcuts,
@@ -247,8 +247,13 @@ export default defineComponent({
     onUnmounted(() => {
       fluxListClientActionClear();
     });
+    const statsParams = reactive({
+      filters: {},
+    });
+    provide("statsParams", statsParams);
     const fluxState = useFluxState();
     return {
+      statsParams,
       userActionCategories: fluxState.clientActionCategories,
       userActions: fluxState.clientActions,
     };
@@ -259,7 +264,7 @@ export default defineComponent({
       disableBeforeMountFetch: true,
       filterFields,
       pageSizes: PAGE_SIZES,
-      summaryFields: ["account", "category", "tid", "route", "result"],
+      summaryFields: ["account", "category", "tid", "routeName", "result"],
       query: {
         dateRange: defaultDateRange,
         offset: 0,
@@ -290,6 +295,9 @@ export default defineComponent({
     }
   },
   methods: {
+    doFilter(filters) {
+      this.statsParams.filters = filters;
+    },
     async fetch() {
       const { userActions, query } = this;
       if (userActions.processing) {
