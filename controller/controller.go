@@ -68,8 +68,10 @@ var (
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()
+	// GetInfluxDB 仅提供基础服务
+	GetInfluxDB = helper.GetInfluxDB
 	// 获取influx service
-	getInfluxSrv = helper.GetInfluxSrv
+	GetInfluxSrv = service.GetInfluxSrv
 	// 文件服务
 	fileSrv = &service.FileSrv{}
 )
@@ -191,7 +193,7 @@ func newTrackerMiddleware(action string) elton.Handler {
 			event.Err(info.Err).
 				Msg("")
 
-			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
+			GetInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
 				cs.TagAction: action,
 				cs.TagResult: strconv.Itoa(info.Result),
 			}, fields)

@@ -100,7 +100,7 @@ func init() {
 	closeDepends = func() {
 		closeOnce.Do(func() {
 			// 关闭influxdb，flush统计数据
-			helper.GetInfluxSrv().Close()
+			helper.GetInfluxDB().Close()
 			_ = helper.EntGetClient().Close()
 			_ = helper.RedisGetClient().Close()
 		})
@@ -199,7 +199,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		he.Extra["uri"] = uri
 
 		// 记录exception
-		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
+		service.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "routeError",
 			cs.TagRoute:    c.Route,
 		}, map[string]interface{}{

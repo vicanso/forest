@@ -187,7 +187,7 @@ func (params *fluxListParams) Query() string {
 }
 
 func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interface{}, err error) {
-	items, err = getInfluxSrv().Query(ctx, params.Query())
+	items, err = GetInfluxSrv().Query(ctx, params.Query())
 	if err != nil {
 		return
 	}
@@ -208,7 +208,7 @@ func (ctrl fluxCtrl) listTag(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	tags, err := getInfluxSrv().ListTag(c.Context(), params.Measurement)
+	tags, err := GetInfluxSrv().ListTag(c.Context(), params.Measurement)
 	if err != nil {
 		return
 	}
@@ -226,7 +226,7 @@ func (ctrl fluxCtrl) ListField(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	fields, err := getInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
+	fields, err := GetInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
 	if err != nil {
 		return
 	}
@@ -244,7 +244,7 @@ func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	values, err := getInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
+	values, err := GetInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
 	if err != nil {
 		return
 	}
@@ -268,7 +268,7 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (er
 	}
 
 	fromBucket := fmt.Sprintf(`from(bucket: "%s")
-`, getInfluxSrv().GetBucket())
+`, GetInfluxDB().GetBucket())
 	c.Body = map[string]interface{}{
 		responseKey: result,
 		"count":     len(result),

@@ -108,7 +108,7 @@ func NewError() elton.Handler {
 			tags[cs.TagCategory] = he.Category
 		}
 
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPError, tags, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPError, tags, fields)
 		c.StatusCode = he.StatusCode
 		c.BodyBuffer = bytes.NewBuffer(he.ToJSON())
 		return nil

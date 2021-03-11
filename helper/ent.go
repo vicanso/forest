@@ -288,7 +288,7 @@ func initSchemaHooks(c *ent.Client) {
 				cs.TagOP:     op,
 				cs.TagResult: strconv.Itoa(result),
 			}
-			GetInfluxSrv().Write(cs.MeasurementEntOP, tags, fields)
+			GetInfluxDB().Write(cs.MeasurementEntOP, tags, fields)
 			return mutateResult, err
 		})
 	})

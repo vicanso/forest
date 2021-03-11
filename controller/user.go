@@ -596,7 +596,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 				fields[cs.FieldCity] = location.City
 				fields[cs.FieldISP] = location.ISP
 			}
-			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
+			GetInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
 	}
 	resp, err := pickUserInfo(c)
@@ -745,7 +745,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 				Msg("save user login fail")
 		}
 		// 记录用户登录行为
-		getInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
+		GetInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
 	}()
 
 	// 返回用户信息
@@ -904,7 +904,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 			fields[cs.FieldAccount] = account
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
-		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
+		GetInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
 			cs.TagCategory: item.Category,
 			cs.TagResult:   strconv.Itoa(item.Result),
 		}, fields, t)

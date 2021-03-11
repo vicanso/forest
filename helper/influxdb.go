@@ -17,10 +17,7 @@ package helper
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
-	"sort"
-	"strings"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -31,7 +28,7 @@ import (
 )
 
 type (
-	InfluxSrv struct {
+	InfluxDB struct {
 		client influxdb2.Client
 		writer influxdbAPI.WriteAPI
 		config config.InfluxdbConfig
@@ -39,15 +36,14 @@ type (
 )
 
 var hostname, _ = os.Hostname()
-var defaultInfluxSrv = mustNewInfluxSrv()
-var ignoreFields = "_start _stop _field _measurement"
+var defaultInfluxDB = mustNewInfluxDB()
 
-// mustNewInfluxSrv 创建新的influx服务
-func mustNewInfluxSrv() *InfluxSrv {
+// mustNewInfluxDB 创建新的influx服务
+func mustNewInfluxDB() *InfluxDB {
 	influxdbConfig := config.GetInfluxdbConfig()
 	if influxdbConfig.Disabled {
 
-		return new(InfluxSrv)
+		return new(InfluxDB)
 	}
 	opts := influxdb2.DefaultOptions()
 	// 设置批量提交的大小
@@ -71,7 +67,7 @@ func mustNewInfluxSrv() *InfluxSrv {
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
 	go newInfluxdbErrorLogger(writer)
 
-	return &InfluxSrv{
+	return &InfluxDB{
 		client: c,
 		writer: writer,
 		config: influxdbConfig,
@@ -88,19 +84,19 @@ func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
 	}
 }
 
-// GetInfluxSrv 获取默认的influxdb服务
-func GetInfluxSrv() *InfluxSrv {
-	return defaultInfluxSrv
+// GetInfluxDB 获取默认的influxdb服务
+func GetInfluxDB() *InfluxDB {
+	return defaultInfluxDB
 }
 
 // Health check influxdb health
-func (srv *InfluxSrv) Health() (err error) {
-	if srv.client == nil {
+func (db *InfluxDB) Health() (err error) {
+	if db.client == nil {
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	result, err := srv.client.Health(ctx)
+	result, err := db.client.Health(ctx)
 	if err != nil {
 		return
 	}
@@ -111,11 +107,11 @@ func (srv *InfluxSrv) Health() (err error) {
 	return
 }
 
-func (srv *InfluxSrv) query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
-	if srv.client == nil {
+func (db *InfluxDB) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+	if db.client == nil {
 		return
 	}
-	result, err := srv.client.QueryAPI(srv.config.Org).Query(ctx, query)
+	result, err := db.client.QueryAPI(db.config.Org).Query(ctx, query)
 	if err != nil {
 		return
 	}
@@ -131,99 +127,9 @@ func (srv *InfluxSrv) query(ctx context.Context, query string) (items []map[stri
 	return
 }
 
-// Query query records
-func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
-	query = fmt.Sprintf(`from(bucket: "%s")`, srv.config.Bucket) + query
-	return srv.query(ctx, query)
-}
-
-// ListTagValue list value of tag
-func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string) (values []string, err error) {
-	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
-schema.measurementTagValues(
-	bucket: "%s",
-	measurement: "%s",
-	tag: "%s"
-)`, srv.config.Bucket, measurement, tag)
-	items, err := srv.query(ctx, query)
-	if err != nil {
-		return
-	}
-	for _, item := range items {
-		v, ok := item["_value"]
-		if !ok {
-			continue
-		}
-		value, ok := v.(string)
-		if !ok {
-			continue
-		}
-		values = append(values, value)
-	}
-	sort.Strings(values)
-	return
-}
-
-// ListTag returns the tag list of measurement
-func (srv *InfluxSrv) ListTag(ctx context.Context, measurement string) (tags []string, err error) {
-	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
-schema.measurementTagKeys(
-	bucket: "%s",
-	measurement: "%s"
-)`, srv.config.Bucket, measurement)
-	items, err := srv.query(ctx, query)
-	if err != nil {
-		return
-	}
-	for _, item := range items {
-		v, ok := item["_value"]
-		if !ok {
-			continue
-		}
-		tag, ok := v.(string)
-		if !ok {
-			continue
-		}
-		if strings.Contains(ignoreFields, tag) {
-			continue
-		}
-		tags = append(tags, tag)
-	}
-	return
-}
-
-// ListField return the fields of measurement
-func (srv *InfluxSrv) ListField(ctx context.Context, measurement, duration string) (fields []string, err error) {
-	query := fmt.Sprintf(`import "influxdata/influxdb/schema"
-schema.measurementFieldKeys(
-	bucket: "%s",
-	measurement: "%s",
-	start: %s
-)`, srv.config.Bucket, measurement, duration)
-	items, err := srv.query(ctx, query)
-	if err != nil {
-		return
-	}
-	for _, item := range items {
-		v, ok := item["_value"]
-		if !ok {
-			continue
-		}
-		field, ok := v.(string)
-		if !ok {
-			continue
-		}
-		if strings.Contains(ignoreFields, field) {
-			continue
-		}
-		fields = append(fields, field)
-	}
-	return
-}
-
 // Write 写入数据
-func (srv *InfluxSrv) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
-	if srv.writer == nil {
+func (db *InfluxDB) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
+	if db.writer == nil {
 		return
 	}
 	var now time.Time
@@ -238,18 +144,18 @@ func (srv *InfluxSrv) Write(measurement string, tags map[string]string, fields m
 	if hostname != "" && fields["hostname"] == nil {
 		fields["hostname"] = hostname
 	}
-	srv.writer.WritePoint(influxdb2.NewPoint(measurement, tags, fields, now))
+	db.writer.WritePoint(influxdb2.NewPoint(measurement, tags, fields, now))
 }
 
 // Close 关闭当前client
-func (srv *InfluxSrv) Close() {
-	if srv.client == nil {
+func (db *InfluxDB) Close() {
+	if db.client == nil {
 		return
 	}
-	srv.client.Close()
+	db.client.Close()
 }
 
 // GetBucket 获取bucket
-func (srv *InfluxSrv) GetBucket() string {
-	return srv.config.Bucket
+func (db *InfluxDB) GetBucket() string {
+	return db.config.Bucket
 }

@@ -71,7 +71,7 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		Limiter:  hook,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			log.Default().Info().Msg("redis new connection is established")
-			GetInfluxSrv().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
+			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
 				cs.FieldCount: 1,
 			})
 			return nil
@@ -99,7 +99,7 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 			cs.FieldUse:   int(d.Milliseconds()),
 			cs.FieldError: err,
 		}
-		GetInfluxSrv().Write(cs.MeasurementRedisStats, tags, fields)
+		GetInfluxDB().Write(cs.MeasurementRedisStats, tags, fields)
 	}
 }
 
@@ -181,7 +181,7 @@ func (*redisHook) ReportResult(result error) {
 			Str("category", "redisProcessFail").
 			Err(result).
 			Msg("")
-		GetInfluxSrv().Write(cs.MeasurementRedisError, nil, map[string]interface{}{
+		GetInfluxDB().Write(cs.MeasurementRedisError, nil, map[string]interface{}{
 			cs.FieldError: result.Error(),
 		})
 	}

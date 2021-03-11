@@ -136,7 +136,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 			cs.FieldURI:    req.RequestURI,
 			cs.FieldStatus: status,
 		}
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }
 
@@ -174,6 +174,6 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 			cs.FieldURI:    req.RequestURI,
 			cs.FieldStatus: status,
 		}
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }

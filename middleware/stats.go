@@ -64,7 +64,7 @@ func NewStats() elton.Handler {
 				cs.FieldSize:       info.Size,
 				cs.FieldProcessing: info.Connecting,
 			}
-			helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
+			helper.GetInfluxDB().Write(cs.MeasurementHTTPStats, tags, fields)
 		},
 	})
 }

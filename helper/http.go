@@ -151,7 +151,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			event = event.Str("error", message)
 		}
 		event.Msg("")
-		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
+		GetInfluxDB().Write(cs.MeasurementHTTPRequest, tags, fields)
 	}
 }
 

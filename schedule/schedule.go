@@ -94,7 +94,7 @@ func redisStats() {
 	doStatsTask("redis stats", func() map[string]interface{} {
 		// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 		stats := helper.RedisStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, nil, stats)
+		helper.GetInfluxDB().Write(cs.MeasurementRedisStats, nil, stats)
 		return stats
 	})
 }
@@ -107,7 +107,7 @@ func entPing() {
 func entStats() {
 	doStatsTask("ent stats", func() map[string]interface{} {
 		stats := helper.EntGetStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, nil, stats)
+		helper.GetInfluxDB().Write(cs.MeasurementEntStats, nil, stats)
 		return stats
 	})
 }
@@ -150,7 +150,7 @@ func performanceStats() {
 		prevNumGC = data.NumGC
 		prevPauseTotal = data.PauseTotalNs
 
-		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, nil, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementPerformance, nil, fields)
 		return fields
 	})
 }
@@ -159,14 +159,14 @@ func performanceStats() {
 func httpInstanceStats() {
 	doStatsTask("http instance stats", func() map[string]interface{} {
 		fields := helper.GetHTTPInstanceStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})
 }
 
 // influxdbPing influxdb ping
 func influxdbPing() {
-	doTask("influxdb ping", helper.GetInfluxSrv().Health)
+	doTask("influxdb ping", helper.GetInfluxDB().Health)
 }
 
 // routerConcurrencyStats router concurrency stats
@@ -175,7 +175,7 @@ func routerConcurrencyStats() {
 		result := service.GetRouterConcurrencyLimiter().GetStats()
 		fields := make(map[string]interface{})
 
-		influxSrv := helper.GetInfluxSrv()
+		influxSrv := helper.GetInfluxDB()
 		for key, value := range result {
 			// 如果并发为0，则不记录
 			if value == 0 {
