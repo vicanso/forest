@@ -33,6 +33,8 @@ const (
 	ConfigurationCategoryRouter = "router"
 	// ConfigurationCategorySessionInterceptor session interceptor分类
 	ConfigurationCategorySessionInterceptor = "sessionInterceptor"
+	// ConfigurationCategoryRequestConcurrency request concurrency
+	ConfigurationCategoryRequestConcurrency = "requestConcurrency"
 )
 
 // Configuration holds the schema definition for the Configuration entity.
@@ -63,6 +65,7 @@ func (Configuration) Fields() []ent.Field {
 				ConfigurationCategoryRouterConcurrency,
 				ConfigurationCategoryRouter,
 				ConfigurationCategorySessionInterceptor,
+				ConfigurationCategoryRequestConcurrency,
 			).
 			Comment("配置分类"),
 		field.String("owner").

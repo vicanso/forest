@@ -31,10 +31,11 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-type (
-	// ConfigurationSrv 配置的相关函数
-	ConfigurationSrv struct{}
+// ConfigurationSrv 配置的相关函数
+type ConfigurationSrv struct{}
 
+// 配置数据
+type (
 	// SessionInterceptorData session拦截的数据
 	SessionInterceptorData struct {
 		Message       string   `json:"message,omitempty"`
@@ -51,6 +52,11 @@ type (
 		RouterConcurrency  map[string]uint32       `json:"routerConcurrency,omitempty"`
 		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
 		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
+	}
+	// RequestLimitConfiguration HTTP请求实例并发限制
+	RequestLimitConfiguration struct {
+		Name string `json:"name,omitempty"`
+		Max  int    `json:"max,omitempty"`
 	}
 )
 
@@ -135,6 +141,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	var signedKeys []string
 	blockIPList := make([]string, 0)
 	sessionInterceptorValue := ""
+
+	requestLimitConfigs := make(map[string]int)
 	for _, item := range configs {
 		switch item.Category {
 		case schema.ConfigurationCategoryMockTime:
@@ -157,6 +165,18 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 			// 按更新时间排序，因此如果已获取则不需要再更新
 			if sessionInterceptorValue == "" {
 				sessionInterceptorValue = item.Data
+			}
+		case schema.ConfigurationCategoryRequestConcurrency:
+			c := RequestLimitConfiguration{}
+			err := json.Unmarshal([]byte(item.Data), &c)
+			if err != nil {
+				log.Default().Error().
+					Err(err).
+					Msg("request limit config is invalid")
+				AlarmError("request limit config is invalid:" + err.Error())
+			}
+			if c.Name != "" {
+				requestLimitConfigs[c.Name] = c.Max
 			}
 		}
 	}
@@ -199,5 +219,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 
 	// 重置路由并发限制
 	ResetRouterConcurrency(routerConcurrencyConfigs)
+
+	// 更新HTTP请求实例并发限制
+	helper.UpdateInstanceConcurrencyLimit(requestLimitConfigs)
 	return
 }

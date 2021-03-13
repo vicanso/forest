@@ -214,13 +214,11 @@ export default defineComponent({
     },
   },
   setup() {
-    // const configStore = useConfigStore();
     const configState = useConfigState();
     const userState = useUserState();
     return {
       userInfo: userState.info,
       configs: configState.configs,
-      // list: (params) => configStore.dispatch("list", params),
       getStatusDesc: (status) => {
         let desc = "";
         configState.statuses.items.forEach((item) => {

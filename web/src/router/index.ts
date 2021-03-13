@@ -19,6 +19,7 @@ import BlockIP from "../views/configs/BlockIP.vue";
 import SignedKey from "../views/configs/SignedKey.vue";
 import RouterMock from "../views/configs/Router.vue";
 import RouterConcurrency from "../views/configs/RouterConcurrency.vue";
+import RequestConcurrency from "../views/configs/RequestConcurrency.vue";
 import SessionInterceptor from "../views/configs/SessionInterceptor.vue";
 import Configuration from "../views/configs/Configuration.vue";
 import Others from "../views/Others.vue";
@@ -40,6 +41,7 @@ export const ROUTE_BLOCK_IP = "blockIP";
 export const ROUTE_SIGNED_KEY = "signedKey";
 export const ROUTE_ROUTER_MOCK = "routerMock";
 export const ROUTE_ROUTER_CONCURRENCY = "routerConcurrency";
+export const REQUEST_CONCURRENCY = "requestConcurrency";
 export const ROUTE_SESSION_INTERCEPTOR = "sessionInterceptor";
 export const ROUTE_CONFIGURATION = "configuration";
 export const ROUTE_OTHERS = "others";
@@ -135,6 +137,11 @@ const router = createRouter({
       path: "/router-concurrency",
       name: ROUTE_ROUTER_CONCURRENCY,
       component: RouterConcurrency,
+    },
+    {
+      path: "/request-concurrency",
+      name: REQUEST_CONCURRENCY,
+      component: RequestConcurrency,
     },
     {
       path: "/session-interceptor",

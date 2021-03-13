@@ -90,6 +90,7 @@ const (
 	CategoryRouterConcurrency  Category = "routerConcurrency"
 	CategoryRouter             Category = "router"
 	CategorySessionInterceptor Category = "sessionInterceptor"
+	CategoryRequestConcurrency Category = "requestConcurrency"
 )
 
 func (c Category) String() string {
@@ -99,7 +100,7 @@ func (c Category) String() string {
 // CategoryValidator is a validator for the "category" field enum values. It is called by the builders before save.
 func CategoryValidator(c Category) error {
 	switch c {
-	case CategoryMockTime, CategoryBlockIP, CategorySignedKey, CategoryRouterConcurrency, CategoryRouter, CategorySessionInterceptor:
+	case CategoryMockTime, CategoryBlockIP, CategorySignedKey, CategoryRouterConcurrency, CategoryRouter, CategorySessionInterceptor, CategoryRequestConcurrency:
 		return nil
 	default:
 		return fmt.Errorf("configuration: invalid enum value for category field: %q", c)

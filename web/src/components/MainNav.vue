@@ -72,6 +72,7 @@ import {
   ROUTE_SIGNED_KEY,
   ROUTE_ROUTER_MOCK,
   ROUTE_ROUTER_CONCURRENCY,
+  REQUEST_CONCURRENCY,
   ROUTE_SESSION_INTERCEPTOR,
   ROUTE_CONFIGURATION,
   ROUTE_OTHERS,
@@ -149,6 +150,12 @@ const navs = [
       {
         name: "路由并发配置",
         route: ROUTE_ROUTER_CONCURRENCY,
+        roles: [],
+        groups: [],
+      },
+      {
+        name: "HTTP实例并发配置",
+        route: REQUEST_CONCURRENCY,
         roles: [],
         groups: [],
       },

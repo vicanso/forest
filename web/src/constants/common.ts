@@ -16,5 +16,6 @@ export const SIGNED_KEY = "signedKey";
 export const ROUTER = "router";
 export const SESSION_INTERCEPTOR = "sessionInterceptor";
 export const ROUTER_CONCURRENCY = "routerConcurrency";
+export const REQUEST_CONCURRENCY = "requestConcurrency";
 export const ORDER_COMMISSION = "orderCommission";
 export const MARKETING_GROUP = "marketingGroup";

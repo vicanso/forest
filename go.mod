@@ -30,7 +30,7 @@ require (
 	github.com/vicanso/elton v1.3.0
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
-	github.com/vicanso/go-axios v0.2.1
+	github.com/vicanso/go-axios v1.0.0
 	github.com/vicanso/go-cache v0.2.1
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.6

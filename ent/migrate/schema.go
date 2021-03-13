@@ -15,7 +15,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "category", Type: field.TypeEnum, Enums: []string{"mockTime", "blockIP", "signedKey", "routerConcurrency", "router", "sessionInterceptor"}},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"mockTime", "blockIP", "signedKey", "routerConcurrency", "router", "sessionInterceptor", "requestConcurrency"}},
 		{Name: "owner", Type: field.TypeString},
 		{Name: "data", Type: field.TypeString},
 		{Name: "started_at", Type: field.TypeTime},

@@ -15,11 +15,16 @@
 package helper
 
 import (
+	"sync/atomic"
+
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/go-axios"
 )
 
 var locationIns = newLocationInstance()
+var insList = map[string]*axios.Instance{
+	"location": locationIns,
+}
 
 // newLocationInstance 初始化location的实例
 func newLocationInstance() *axios.Instance {
@@ -34,7 +39,20 @@ func GetLocationInstance() *axios.Instance {
 
 // GetHTTPInstanceStats get http instance stats
 func GetHTTPInstanceStats() map[string]interface{} {
-	return map[string]interface{}{
-		"location": int(locationIns.GetConcurrency()),
+	data := make(map[string]interface{})
+	for name, ins := range insList {
+		data[name] = int(ins.GetConcurrency())
+	}
+	return data
+}
+
+// UpdateInstanceConcurrencyLimit update the concurrency limit for instance
+func UpdateInstanceConcurrencyLimit(limits map[string]int) {
+	for name, ins := range insList {
+		v := limits[name]
+		limit := uint32(v)
+		if ins.Config.MaxConcurrency != limit {
+			atomic.StoreUint32(&ins.Config.MaxConcurrency, limit)
+		}
 	}
 }
