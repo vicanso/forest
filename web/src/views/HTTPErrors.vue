@@ -245,11 +245,11 @@ const filterFields = [
       },
       {
         name: "是",
-        value: "1",
+        value: "true",
       },
       {
         name: "否",
-        value: "0",
+        value: "false",
       },
     ],
     span: 6,

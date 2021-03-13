@@ -172,11 +172,7 @@ func (params *fluxListParams) Query() string {
 	}
 	// 异常
 	if params.Exception != "" {
-		value := "true"
-		if params.Exception == "0" {
-			value = "false"
-		}
-		addQuery(cs.FieldException, value)
+		addQuery(cs.FieldException, params.Exception)
 	}
 	// 出错类型
 	if params.ErrCategory != "" {

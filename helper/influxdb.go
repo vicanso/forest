@@ -24,6 +24,7 @@ import (
 	influxdbAPI "github.com/influxdata/influxdb-client-go/v2/api"
 	influxdbDomain "github.com/influxdata/influxdb-client-go/v2/domain"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
 )
 
@@ -65,22 +66,28 @@ func mustNewInfluxDB() *InfluxDB {
 
 	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
-	go newInfluxdbErrorLogger(writer)
-
-	return &InfluxDB{
+	db := &InfluxDB{
 		client: c,
 		writer: writer,
 		config: influxdbConfig,
 	}
+	go newInfluxdbErrorLogger(writer, db)
+
+	return db
 }
 
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
-func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
+func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI, db *InfluxDB) {
 	for err := range writer.Errors() {
 		log.Default().Error().
-			Str("category", "influxdbErr").
+			Str("category", "influxdbError").
 			Err(err).
 			Msg("")
+		db.Write(cs.MeasurementException, map[string]string{
+			cs.TagCategory: "influxdbError",
+		}, map[string]interface{}{
+			cs.FieldError: err.Error(),
+		})
 	}
 }
 

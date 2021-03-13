@@ -334,7 +334,7 @@ func (ulq *UserLoginQuery) sqlCount(ctx context.Context) (int, error) {
 func (ulq *UserLoginQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := ulq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

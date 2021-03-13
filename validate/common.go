@@ -35,8 +35,8 @@ func init() {
 	AddAlias("xStatus", "numeric,min=1,max=2")
 	// path校验
 	AddAlias("xPath", "startswith=/")
-	// boolean的字符串形式，0: false, 1:true
-	AddAlias("xBoolean", "oneof=0 1")
+	// boolean的字符串形式
+	AddAlias("xBoolean", "oneof=true false")
 	// http(s)校验
 	Add("xHTTP", func(fl validator.FieldLevel) bool {
 		v, ok := toString(fl)

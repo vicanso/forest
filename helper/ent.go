@@ -106,10 +106,6 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	entLogger := log.NewEntLogger()
 	c := ent.NewClient(ent.Driver(driver), ent.Log(entLogger.Log))
 
-	ctx := context.Background()
-	if err := c.Schema.Create(ctx); err != nil {
-		panic(err)
-	}
 	initSchemaHooks(c)
 	return driver, c
 }

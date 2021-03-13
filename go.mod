@@ -3,7 +3,7 @@ module github.com/vicanso/forest
 go 1.16
 
 require (
-	entgo.io/ent v0.6.0
+	entgo.io/ent v0.7.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
@@ -20,7 +20,7 @@ require (
 	github.com/jinzhu/now v1.1.1
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
-	github.com/pyroscope-io/pyroscope v0.0.26
+	github.com/pyroscope-io/pyroscope v0.0.28
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.2.1
 	github.com/rs/zerolog v1.20.0
