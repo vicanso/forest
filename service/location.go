@@ -16,11 +16,11 @@ package service
 
 import (
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/request"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = helper.GetLocationInstance()
+var locationIns = request.GetLocation()
 
 // 相关的URL
 const (
@@ -48,7 +48,7 @@ func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 			"ip": ip,
 		},
 	}
-	helper.AttachWithContext(conf, c)
+	request.AttachWithContext(conf, c)
 	lo = Location{}
 	err = locationIns.EnhanceRequest(&lo, conf)
 	if err != nil {

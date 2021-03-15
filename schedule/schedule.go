@@ -22,6 +22,7 @@ import (
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
+	"github.com/vicanso/forest/request"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
@@ -158,7 +159,7 @@ func performanceStats() {
 // httpInstanceStats http instance stats
 func httpInstanceStats() {
 	doStatsTask("http instance stats", func() map[string]interface{} {
-		fields := helper.GetHTTPInstanceStats()
+		fields := request.GetHTTPStats()
 		helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})

@@ -28,6 +28,7 @@ import (
 	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
+	"github.com/vicanso/forest/request"
 	"github.com/vicanso/forest/util"
 )
 
@@ -221,6 +222,7 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	ResetRouterConcurrency(routerConcurrencyConfigs)
 
 	// 更新HTTP请求实例并发限制
-	helper.UpdateInstanceConcurrencyLimit(requestLimitConfigs)
+	request.UpdateConcurrencyLimit(requestLimitConfigs)
+
 	return
 }

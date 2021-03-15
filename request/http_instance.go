@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
+package request
 
 import (
 	"sync/atomic"
@@ -21,24 +21,24 @@ import (
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = newLocationInstance()
+var locationIns = newLocation()
 var insList = map[string]*axios.Instance{
 	"location": locationIns,
 }
 
-// newLocationInstance 初始化location的实例
-func newLocationInstance() *axios.Instance {
+// newLocation 初始化location的实例
+func newLocation() *axios.Instance {
 	locationConfig := config.GetLocationConfig()
-	return NewHTTPInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
+	return NewHTTP(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
-// GetLocationInstance get location instance
-func GetLocationInstance() *axios.Instance {
+// GetLocation get location instance
+func GetLocation() *axios.Instance {
 	return locationIns
 }
 
-// GetHTTPInstanceStats get http instance stats
-func GetHTTPInstanceStats() map[string]interface{} {
+// GetHTTPStats get http instance stats
+func GetHTTPStats() map[string]interface{} {
 	data := make(map[string]interface{})
 	for name, ins := range insList {
 		data[name] = int(ins.GetConcurrency())
@@ -46,8 +46,8 @@ func GetHTTPInstanceStats() map[string]interface{} {
 	return data
 }
 
-// UpdateInstanceConcurrencyLimit update the concurrency limit for instance
-func UpdateInstanceConcurrencyLimit(limits map[string]int) {
+// UpdateConcurrencyLimit update the concurrency limit for instance
+func UpdateConcurrencyLimit(limits map[string]int) {
 	for name, ins := range insList {
 		v := limits[name]
 		limit := uint32(v)

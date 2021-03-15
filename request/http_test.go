@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
+package request
 
 import (
 	"net/http/httptest"
@@ -29,7 +29,7 @@ func TestHTTPStats(t *testing.T) {
 	assert := assert.New(t)
 
 	data := []byte("abcd")
-	ins := NewHTTPInstance("test", "https://test.com", time.Second)
+	ins := NewHTTP("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 200,
 		Data:   data,
@@ -44,7 +44,7 @@ func TestHTTPStats(t *testing.T) {
 
 func TestConvertResponseToError(t *testing.T) {
 	assert := assert.New(t)
-	fn := newHTTPConvertResponseToError()
+	fn := newConvertResponseToError()
 	data := []byte(`{
 		"message": "error message"
 	}`)
@@ -54,7 +54,7 @@ func TestConvertResponseToError(t *testing.T) {
 	})
 	assert.Equal("statusCode=400, message=error message", err.Error())
 
-	ins := NewHTTPInstance("test", "https://test.com", time.Second)
+	ins := NewHTTP("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 400,
 		Data:   data,
@@ -71,7 +71,7 @@ func TestOnError(t *testing.T) {
 	data := []byte(`{
 		"message": "error message"
 	}`)
-	ins := NewHTTPInstance("test", "https://test.com", time.Second)
+	ins := NewHTTP("test", "https://test.com", time.Second)
 	done := ins.Mock(&axios.Response{
 		Status: 400,
 		Data:   data,
@@ -81,7 +81,7 @@ func TestOnError(t *testing.T) {
 	})
 	done()
 	he := hes.Wrap(err)
-	assert.Equal(`{"statusCode":400,"message":"error message","extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
+	assert.Equal(`{"statusCode":400,"message":"error message","extra":{"requestCURL":"curl -XGET 'https://test.com/'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
 
 	data = []byte("abc")
@@ -94,7 +94,7 @@ func TestOnError(t *testing.T) {
 	})
 	done()
 	he = hes.Wrap(err)
-	assert.Equal(`{"statusCode":400,"message":"abc","exception":true,"extra":{"requestCURL":"curl -XGET 'https://test.com'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
+	assert.Equal(`{"statusCode":400,"message":"abc","exception":true,"extra":{"requestCURL":"curl -XGET 'https://test.com/'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
 }
 

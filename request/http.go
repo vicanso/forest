@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
+package request
 
 import (
 	"errors"
@@ -26,6 +26,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/go-axios"
@@ -41,7 +42,7 @@ const (
 	httpErrCategoryReset   = "reset"
 )
 
-func newHTTPOnDone(serviceName string) axios.OnDone {
+func newOnDone(serviceName string) axios.OnDone {
 	return func(conf *axios.Config, resp *axios.Response, err error) {
 		ht := conf.HTTPTrace
 
@@ -151,12 +152,12 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			event = event.Str("error", message)
 		}
 		event.Msg("")
-		GetInfluxDB().Write(cs.MeasurementHTTPRequest, tags, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPRequest, tags, fields)
 	}
 }
 
-// newHTTPConvertResponseToError 将http响应码为>=400的转换为出错
-func newHTTPConvertResponseToError() axios.ResponseInterceptor {
+// newConvertResponseToError 将http响应码为>=400的转换为出错
+func newConvertResponseToError() axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
@@ -215,8 +216,8 @@ func getHTTPErrorCategory(err error) string {
 	return ""
 }
 
-// newHTTPOnError 新建error的处理函数
-func newHTTPOnError(serviceName string) axios.OnError {
+// newOnError 新建error的处理函数
+func newOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
 		code := -1
 		if conf.Response != nil {
@@ -258,16 +259,16 @@ func newHTTPOnError(serviceName string) axios.OnError {
 	}
 }
 
-// NewHTTPInstance 新建实例
-func NewHTTPInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
+// NewHTTP 新建实例
+func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
 	return axios.NewInstance(&axios.InstanceConfig{
 		EnableTrace: true,
 		Timeout:     timeout,
-		OnError:     newHTTPOnError(serviceName),
-		OnDone:      newHTTPOnDone(serviceName),
+		OnError:     newOnError(serviceName),
+		OnDone:      newOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newHTTPConvertResponseToError(),
+			newConvertResponseToError(),
 		},
 	})
 }
