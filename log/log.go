@@ -164,6 +164,12 @@ func cutOrMaskInterface(k string, v interface{}) interface{} {
 	}
 	return v
 }
+func cutOrMaskMapInterface(m map[string]interface{}) map[string]interface{} {
+	for k, v := range m {
+		m[k] = cutOrMaskInterface(k, v)
+	}
+	return m
+}
 
 // MapStringString create a map[string]string log event
 func MapStringString(data map[string]string) *zerolog.Event {
@@ -200,10 +206,17 @@ func Struct(data interface{}) *zerolog.Event {
 		return zerolog.Dict()
 	}
 	m := make(map[string]interface{})
-	// 出错忽略
-	_ = json.Unmarshal(buf, &m)
-	for k, v := range m {
-		m[k] = cutOrMaskInterface(k, v)
+	// 数组
+	if buf[0] == '[' {
+		data := make([]map[string]interface{}, 0)
+		_ = json.Unmarshal(buf, &data)
+		for index, item := range data {
+			m[strconv.Itoa(index)] = cutOrMaskMapInterface(item)
+		}
+	} else {
+		// 出错忽略
+		_ = json.Unmarshal(buf, &m)
+		m = cutOrMaskMapInterface(m)
 	}
 	return zerolog.Dict().Fields(m)
 }
