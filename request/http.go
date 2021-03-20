@@ -18,6 +18,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"syscall"
@@ -127,12 +128,17 @@ func newOnDone(serviceName string) axios.OnDone {
 				Str("data", respData).
 				Msg("request log")
 		}
+		requestURL := conf.GetURL()
+		urlInfo, _ := url.Parse(requestURL)
+		if urlInfo != nil {
+			requestURL = urlInfo.RequestURI()
+		}
 		event := log.Default().Info().
 			Str("category", "requestStats").
 			Str("service", serviceName).
 			Str("method", conf.Method).
 			Str("route", conf.Route).
-			Str("url", conf.GetURL())
+			Str("url", requestURL)
 		if len(conf.Params) != 0 {
 			event = event.Dict("params", log.MapStringString(conf.Params))
 		}
