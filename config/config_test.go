@@ -58,7 +58,6 @@ func TestRedisConfig(t *testing.T) {
 	redisConfig := GetRedisConfig()
 	assert.Equal("127.0.0.1:6379", redisConfig.Addr)
 	assert.Equal("", redisConfig.Password)
-	assert.Equal(0, redisConfig.DB)
 	assert.Equal(200*time.Millisecond, redisConfig.Slow)
 	assert.Equal(uint32(1000), redisConfig.MaxProcessing)
 }

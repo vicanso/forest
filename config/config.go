@@ -83,8 +83,6 @@ type (
 		Addr string `validate:"required,hostname_port"`
 		// 密码
 		Password string
-		// db(0,1,2等)
-		DB int
 		// 慢请求时长
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
@@ -229,19 +227,10 @@ func GetRedisConfig() RedisConfig {
 	if err != nil {
 		panic(err)
 	}
-	// 获取设置的db
-	db := 0
-	query := uriInfo.Query()
-	dbValue := query.Get("db")
-	if dbValue != "" {
-		db, err = strconv.Atoi(dbValue)
-		if err != nil {
-			panic(err)
-		}
-	}
 	// 获取密码
 	password, _ := uriInfo.User.Password()
 
+	query := uriInfo.Query()
 	// 获取slow设置的时间间隔
 	slowValue := query.Get("slow")
 	slow := 100 * time.Millisecond
@@ -265,7 +254,6 @@ func GetRedisConfig() RedisConfig {
 	redisConfig := RedisConfig{
 		Addr:          uriInfo.Host,
 		Password:      password,
-		DB:            db,
 		Slow:          slow,
 		MaxProcessing: uint32(maxProcessing),
 	}

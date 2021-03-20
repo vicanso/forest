@@ -57,7 +57,6 @@ func init() {
 func mustNewRedisClient() (*redis.Client, *redisHook) {
 	redisConfig := config.GetRedisConfig()
 	log.Default().Info().
-		Int("db", redisConfig.DB).
 		Str("addr", redisConfig.Addr).
 		Msg("connect to redis")
 	hook := &redisHook{
@@ -67,7 +66,6 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 	c := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
 		Password: redisConfig.Password,
-		DB:       redisConfig.DB,
 		Limiter:  hook,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			log.Default().Info().Msg("redis new connection is established")

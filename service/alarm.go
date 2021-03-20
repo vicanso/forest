@@ -56,7 +56,7 @@ func newMailDialer() *gomail.Dialer {
 func AlarmError(message string) {
 	log.Default().Error().
 		Str("app", basicInfo.Name).
-		Str("category", "alarm-error").
+		Str("category", "alarmError").
 		Msg(message)
 	d := newMailDialer()
 	if d != nil {
