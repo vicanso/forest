@@ -22,12 +22,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/forest/ent/configuration"
 	confSchema "github.com/vicanso/forest/ent/configuration"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )
 
 func TestConfigurationParams(t *testing.T) {
+	// 测试代码中不执行main，因此在此处调用初始化
+	_ = helper.EntInitSchema()
 	assert := assert.New(t)
 	now := func() time.Time {
 		t := time.Now()
