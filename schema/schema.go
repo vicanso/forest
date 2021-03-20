@@ -19,6 +19,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
 )
 
@@ -90,6 +91,14 @@ func (TimeMixin) Fields() []ent.Field {
 			Immutable().
 			UpdateDefault(time.Now).
 			Comment("更新时间，更新记录时由程序自动生成"),
+	}
+}
+
+// Indexes 公共时间字段索引
+func (TimeMixin) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("created_at"),
+		index.Fields("updated_at"),
 	}
 }
 

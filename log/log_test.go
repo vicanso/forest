@@ -15,6 +15,7 @@
 package log
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,6 +48,17 @@ func TestLogStruct(t *testing.T) {
 			Name: "abc",
 		}, {
 			Name: "def",
+		},
+	})
+	assert.NotNil(e)
+
+	e = Struct(url.Values{
+		"key": []string{
+			"a",
+			"b",
+		},
+		"name": []string{
+			"a",
 		},
 	})
 	assert.NotNil(e)

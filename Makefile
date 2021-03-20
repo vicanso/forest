@@ -11,11 +11,14 @@ doc:
 test:
 	go test -race -cover ./...
 
+install:
+	go get entgo.io/ent/cmd/entc
+
 generate: 
-	go generate ./ent
+	entc generate ./schema --target ./ent
 
 describe:
-	entc describe ./ent/schema
+	entc describe ./schema
 
 test-cover:
 	go test -race -coverprofile=test.out ./... && go tool cover --html=test.out

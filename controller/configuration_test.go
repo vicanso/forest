@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/forest/ent/configuration"
 	confSchema "github.com/vicanso/forest/ent/configuration"
-	"github.com/vicanso/forest/ent/schema"
+	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )

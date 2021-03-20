@@ -59,6 +59,12 @@ err = cache.GetRedisCache().GetStruct(context.Background(), "key", &data)
 
 redis模块记录了当前并发请求以及pipeline请求量，可以设置最大并发请求量，提供简单的熔断处理。
 
+## entc
+
+```bash
+go get entgo.io/ent/cmd/entc
+```
+
 
 ## commit
 

@@ -17,7 +17,7 @@ require (
 	github.com/iancoleman/strcase v0.1.3
 	github.com/influxdata/influxdb-client-go/v2 v2.2.2
 	github.com/jackc/pgx/v4 v4.10.1
-	github.com/jinzhu/now v1.1.1
+	github.com/jinzhu/now v1.1.2
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/pyroscope-io/pyroscope v0.0.28

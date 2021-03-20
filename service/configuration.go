@@ -25,10 +25,10 @@ import (
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/configuration"
-	"github.com/vicanso/forest/ent/schema"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/request"
+	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/util"
 )
 

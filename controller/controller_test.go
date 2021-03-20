@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
 	session "github.com/vicanso/elton-session"
-	"github.com/vicanso/forest/ent/schema"
+	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/hes"
 )

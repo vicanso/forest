@@ -200,23 +200,37 @@ func Struct(data interface{}) *zerolog.Event {
 	if data == nil {
 		return zerolog.Dict()
 	}
-	buf, _ := json.Marshal(data)
-	// 忽略错误，如果不成功则直接返回
-	if len(buf) == 0 {
-		return zerolog.Dict()
-	}
 	m := make(map[string]interface{})
-	// 数组
-	if buf[0] == '[' {
-		data := make([]map[string]interface{}, 0)
-		_ = json.Unmarshal(buf, &data)
-		for index, item := range data {
-			m[strconv.Itoa(index)] = cutOrMaskMapInterface(item)
+	switch data := data.(type) {
+	case map[string]interface{}:
+		m = data
+	case map[string]string:
+		for k, v := range data {
+			m[k] = v
 		}
-	} else {
-		// 出错忽略
-		_ = json.Unmarshal(buf, &m)
-		m = cutOrMaskMapInterface(m)
+	case url.Values:
+		for k, v := range data {
+			m[k] = strings.Join(v, ",")
+		}
+	default:
+		buf, _ := json.Marshal(data)
+		// 忽略错误，如果不成功则直接返回
+		if len(buf) == 0 {
+			break
+		}
+		// 数组
+		if buf[0] == '[' {
+			data := make([]map[string]interface{}, 0)
+			_ = json.Unmarshal(buf, &data)
+			for index, item := range data {
+				m[strconv.Itoa(index)] = cutOrMaskMapInterface(item)
+			}
+		} else {
+			// 出错忽略
+			_ = json.Unmarshal(buf, &m)
+		}
 	}
+	m = cutOrMaskMapInterface(m)
+
 	return zerolog.Dict().Fields(m)
 }
