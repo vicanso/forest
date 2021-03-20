@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
@@ -95,8 +94,8 @@ func newOnDone(serviceName string) axios.OnDone {
 			if contentTransfer != 0 {
 				fields[cs.FieldTransferUse] = int(contentTransfer)
 			}
+			fields[cs.FieldAddr] = addr
 		}
-		fields[cs.FieldAddr] = addr
 		message := ""
 		if err != nil {
 			he := hes.Wrap(err)
@@ -231,7 +230,7 @@ func newOnError(serviceName string) axios.OnError {
 		if code > http.StatusInternalServerError {
 			he.Exception = true
 		}
-		// 如果未设置http响应码，则设置为500
+		// 如果未设置http响应码(<400)，则设置为500
 		if he.StatusCode < http.StatusBadRequest {
 			he.StatusCode = http.StatusInternalServerError
 		}
@@ -271,14 +270,4 @@ func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance
 			newConvertResponseToError(),
 		},
 	})
-}
-
-// AttachWithContext 添加context中的cid至请求的config中
-func AttachWithContext(conf *axios.Config, c *elton.Context) {
-	if c == nil || conf == nil {
-		return
-	}
-	if conf.Context == nil {
-		conf.Context = c.Context()
-	}
 }

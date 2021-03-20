@@ -121,7 +121,7 @@ func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	rh.processing.Dec()
 	if log.DebugEnabled() {
 		// 由于redis是较频繁的操作
-		// 由于cmd string的执行也有耗时，因此判断是否执行再输出
+		// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
 		log.Default().Debug().Msg(cmd.String())
 	}
 	return nil

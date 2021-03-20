@@ -127,7 +127,6 @@ type (
 	}
 	// LocationConfig 定位配置
 	LocationConfig struct {
-		Name    string        `validate:"required"`
 		Timeout time.Duration `validate:"required"`
 		BaseURL string        `validate:"required,url"`
 	}
@@ -320,7 +319,6 @@ func GetAlarmConfig() AlarmConfig {
 func GetLocationConfig() LocationConfig {
 	prefix := "location."
 	locationConfig := LocationConfig{
-		Name:    defaultViperX.GetString(prefix + "name"),
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
 		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
 	}

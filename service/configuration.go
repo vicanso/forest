@@ -96,6 +96,7 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		RouterConcurrency: GetRouterConcurrency(),
 		RouterMock:        GetRouterMockConfig(),
 	}
+	// 复制数据，避免对此数据修改
 	if interData != nil {
 		v := *interData
 		result.SessionInterceptor = &v

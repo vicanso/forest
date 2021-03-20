@@ -589,7 +589,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		tracerInfo := tracer.GetTracerInfo()
 		go func() {
 			tracer.SetTracerInfo(tracerInfo)
-			location, _ := service.GetLocationByIP(ip, nil)
+			location, _ := service.GetLocationByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
 				fields[cs.FieldProvince] = location.Province
@@ -709,7 +709,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			cs.FieldTID:       tid,
 			cs.FieldSID:       sid,
 		}
-		location, _ := service.GetLocationByIP(ip, nil)
+		location, _ := service.GetLocationByIP(context.Background(), ip)
 		country := ""
 		province := ""
 		city := ""

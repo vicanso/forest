@@ -15,8 +15,9 @@
 /*
 Package main Forest
 
-	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码"}，
+	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码", "exception": true}，
 	其中category与code字段为可选，当处理出错时，HTTP的响应状态码为`4xx`与`5xx`。
+	如果exception为true则表示此出错未预期出错，一般需要修复。
 	其中`4xx`表示客户端参数等异常出错，而`5xx`则表示服务处理异常。
 
 
@@ -137,8 +138,8 @@ func watchForClose(e *elton.Elton) {
 	}()
 }
 
-// exitForDev 开发环境退出
-func exitForDev(e *elton.Elton) {
+// devWaitForExit 开发环境退出
+func devWaitForExit(e *elton.Elton) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT)
 	go func() {
@@ -265,7 +266,7 @@ func main() {
 			}
 		}()
 	} else {
-		exitForDev(e)
+		devWaitForExit(e)
 	}
 
 	newOnErrorHandler(e)

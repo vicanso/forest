@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	captchaKeyPrefix = "captcha-"
+	captchaKeyPrefix = "captcha:"
 
 	errCaptchaCategory = "captcha"
 )

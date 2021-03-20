@@ -14,11 +14,22 @@
 
 package util
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"strconv"
+)
 
 // 可根据需求调整相差值的判断
 const tolerance = 1e-6
 
+// AlmostEqual returns true is abs(a - b) < 1e-6
 func AlmostEqual(a, b float64) bool {
 	return math.Abs(a-b) <= tolerance
+}
+
+// ToFixed formats float64 to string
+func ToFixed(value float64, precision int) string {
+	str := "%." + strconv.Itoa(precision) + "f"
+	return fmt.Sprintf(str, value)
 }

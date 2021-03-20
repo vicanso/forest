@@ -15,6 +15,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ func TestGetLocationByIP(t *testing.T) {
 		  }`),
 	})
 	defer done()
-	lo, err := GetLocationByIP("127.0.0.1", nil)
+	lo, err := GetLocationByIP(context.Background(), "127.0.0.1")
 	assert.Nil(err)
 	assert.Equal("圣克拉拉", lo.City)
 }

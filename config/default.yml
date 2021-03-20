@@ -59,7 +59,6 @@ alarm:
 
 # 定位相关配置
 location:
-  name: location
   timeout: 3s
   baseURL: https://ip.npmtrend.com
 

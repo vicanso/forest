@@ -15,12 +15,10 @@
 package request
 
 import (
-	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
 )
@@ -96,14 +94,4 @@ func TestOnError(t *testing.T) {
 	he = hes.Wrap(err)
 	assert.Equal(`{"statusCode":400,"message":"abc","exception":true,"extra":{"requestCURL":"curl -XGET 'https://test.com/'","requestRoute":"/","requestService":"test"}}`, string(he.ToJSON()))
 	assert.Equal("/", resp.Config.Route)
-}
-
-func TestAttachWithContext(t *testing.T) {
-	assert := assert.New(t)
-	config := &axios.Config{}
-	req := httptest.NewRequest("GET", "/", nil)
-	c := elton.NewContext(nil, req)
-	c.ID = "abcd"
-	AttachWithContext(config, c)
-	assert.Equal(c.Context(), config.Context)
 }

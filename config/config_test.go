@@ -104,7 +104,6 @@ func TestGetLocationConfig(t *testing.T) {
 
 	locationConfig := GetLocationConfig()
 	assert.Equal("https://ip.npmtrend.com", locationConfig.BaseURL)
-	assert.Equal("location", locationConfig.Name)
 	assert.Equal(3*time.Second, locationConfig.Timeout)
 }
 

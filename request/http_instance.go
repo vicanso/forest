@@ -22,14 +22,15 @@ import (
 )
 
 var locationIns = newLocation()
+var locationService = "location"
 var insList = map[string]*axios.Instance{
-	"location": locationIns,
+	locationService: locationIns,
 }
 
 // newLocation 初始化location的实例
 func newLocation() *axios.Instance {
 	locationConfig := config.GetLocationConfig()
-	return NewHTTP(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
+	return NewHTTP(locationService, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
 // GetLocation get location instance

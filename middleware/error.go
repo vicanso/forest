@@ -32,6 +32,7 @@ import (
 // New Error handler
 func NewError() elton.Handler {
 	// 如果有基于influxdb的统计监控，建议使用influxdb的告警
+	// 如果某个IP大量出错，则可能是该IP攻击
 	errorWarner := warner.NewWarner(5*time.Minute, 30)
 	errorWarner.On(func(ip string, _ int) {
 		service.AlarmError("too many errors, ip:" + ip)
