@@ -1,4 +1,4 @@
-.PHONY: default test test-cover dev generate hooks lint-web
+.PHONY: default test test-cover dev generate hooks lint-web doc
 
 # for dev
 dev:
