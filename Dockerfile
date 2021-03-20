@@ -15,6 +15,8 @@ RUN apk update \
   && cd /forest \
   && rm -rf asset/dist \
   && cp -rf web/dist asset/ \
+  && make install \
+  && make generate \
   && ./download-swagger.sh \
   && make build
 
