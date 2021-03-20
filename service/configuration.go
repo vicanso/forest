@@ -216,7 +216,12 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	updateRouterMockConfigs(routerConfigs)
 
 	// 重置IP拦截列表
-	ResetIPBlocker(blockIPList)
+	err = ResetIPBlocker(blockIPList)
+	if err != nil {
+		log.Default().Error().
+			Err(err).
+			Msg("reset ip blocker fail")
+	}
 
 	// 重置路由并发限制
 	ResetRouterConcurrency(routerConcurrencyConfigs)

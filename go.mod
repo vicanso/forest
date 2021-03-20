@@ -34,7 +34,7 @@ require (
 	github.com/vicanso/go-cache v0.2.1
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.6
-	github.com/vicanso/ips v1.1.0
+	github.com/vicanso/ips v1.2.1
 	github.com/vicanso/lru-ttl v0.4.1
 	github.com/vicanso/viperx v0.1.4
 	go.uber.org/atomic v1.7.0
