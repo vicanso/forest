@@ -49,6 +49,13 @@ var (
 	maskRegExp = regexp.MustCompile(`(?i)password`)
 )
 
+func init() {
+	err := entInitSchema()
+	if err != nil {
+		panic(err)
+	}
+}
+
 // processingKeyAll 记录所有表的正在处理请求
 const processingKeyAll = "All"
 
@@ -322,8 +329,8 @@ func EntPing() error {
 	return defaultEntDriver.DB().PingContext(ctx)
 }
 
-// EntInitSchema 初始化schema
-func EntInitSchema() (err error) {
+// entInitSchema 初始化schema
+func entInitSchema() (err error) {
 	// 只执行一次schema初始化以及hook
 	initSchemaOnce.Do(func() {
 		err = defaultEntClient.Schema.Create(context.Background())

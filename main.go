@@ -160,11 +160,6 @@ func dependServiceCheck() (err error) {
 	if err != nil {
 		return
 	}
-	// 初始化所有schema
-	err = helper.EntInitSchema()
-	if err != nil {
-		return
-	}
 	configSrv := new(service.ConfigurationSrv)
 	err = configSrv.Refresh()
 	if err != nil {
