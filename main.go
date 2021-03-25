@@ -24,6 +24,9 @@ Package main Forest
 	常见出错类别：
 	`validate`：表示参数校验失败，接口传参不符合约束条件
 
+	常用pattern:
+
+	`xLimit`:  >=1 && <=100 的整数数
 
 Host: 127.0.0.1:7001
 Version: 1.0.0

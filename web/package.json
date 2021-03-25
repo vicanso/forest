@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "dayjs": "^1.10.4",
-    "element-plus": "^1.0.2-beta.32",
+    "element-plus": "^1.0.2-beta.35",
     "localforage": "^1.9.0",
     "pako": "^2.0.3",
     "vue": "^3.0.7",

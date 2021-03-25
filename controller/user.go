@@ -85,19 +85,19 @@ type (
 		listParams
 
 		// 关键字搜索
-		// validate:"omitempty,xKeyword"
+		// pattern: xKeyword
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
 
 		// 用户角色筛选
-		// validate:"omitempty,xUserRole"
+		// pattern: xUserRole
 		Role string `json:"role,omitempty" validate:"omitempty,xUserRole"`
 
 		// 用户分组筛选
-		// validate:"omitempty,xUserGroup"
+		// pattern: xUserGroup
 		Group string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
 
 		// 用户状态分组
-		// validate:"omitempty,xStatus"
+		// pattern: xStatus
 		Status string `json:"status,omitempty" validate:"omitempty,xStatus"`
 	}
 
@@ -113,8 +113,12 @@ type (
 	// userRegisterLoginParams 注册与登录参数
 	userRegisterLoginParams struct {
 		// 账户
+		// required: true
+		// pattern: xUserAccount
 		Account string `json:"account,omitempty" validate:"required,xUserAccount"`
 		// 用户密码，如果登录则是sha256(token + 用户密码)
+		// required: true
+		// pattern: xUserPassword
 		Password string `json:"password,omitempty" validate:"required,xUserPassword"`
 	}
 

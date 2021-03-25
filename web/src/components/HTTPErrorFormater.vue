@@ -49,9 +49,10 @@ export default defineComponent({
   data() {
     const { message } = this.$props;
     let value = message || "";
-    const arr = value.split("message=");
-    if (arr.length === 2) {
-      value = arr[1];
+    const keyword = "message=";
+    const index = value.indexOf(keyword);
+    if (index !== -1) {
+      value = value.substring(index + keyword.length);
     }
     return {
       file: getValue(/file=(\S+),/, message),

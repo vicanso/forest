@@ -1,4 +1,4 @@
-// +build !codeanalysis
+// +build swagger
 // 用户相关接口文档
 
 package controller

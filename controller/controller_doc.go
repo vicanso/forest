@@ -1,4 +1,4 @@
-// +build !codeanalysis
+// +build swagger
 
 package controller
 
