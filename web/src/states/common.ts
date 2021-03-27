@@ -4,6 +4,7 @@ import {
   COMMONS_ROUTERS,
   COMMONS_STATUSES,
   COMMONS_RANDOM_KEYS,
+  COMMONS_HTTP_STATS,
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
 
@@ -51,11 +52,27 @@ const randomKeys: RandomKeys = reactive({
   items: [],
 });
 
+// http实例
+interface HTTPInstance {
+  name: string;
+  maxConcurrency: number;
+  concurrency: number;
+}
+interface HTTPInstances {
+  processing: boolean;
+  items: HTTPInstance[];
+}
+const httpInstances: HTTPInstances = reactive({
+  processing: false,
+  items: [],
+});
+
 // 仅读通用state
 interface ReadonlyCommonState {
   statuses: DeepReadonly<Statuses>;
   routers: DeepReadonly<Routers>;
   randomKeys: DeepReadonly<RandomKeys>;
+  httpInstances: DeepReadonly<HTTPInstances>;
 }
 
 // commonGetCaptcha 获取图形验证码
@@ -111,10 +128,25 @@ export async function commonListRandomKey(): Promise<void> {
   }
 }
 
+// commonListHTTPInstance 获取http实例
+export async function commonListHTTPInstance(): Promise<void> {
+  if (httpInstances.processing || httpInstances.items.length !== 0) {
+    return;
+  }
+  try {
+    httpInstances.processing = true;
+    const { data } = await request.get(COMMONS_HTTP_STATS);
+    httpInstances.items = data.statusList;
+  } finally {
+    httpInstances.processing = false;
+  }
+}
+
 const state = {
   statuses: readonly(statuses),
   routers: readonly(routers),
   randomKeys: readonly(randomKeys),
+  httpInstances: readonly(httpInstances),
 };
 // useCommonState 使用通用state
 export default function useCommonState(): ReadonlyCommonState {

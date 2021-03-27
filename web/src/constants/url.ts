@@ -38,6 +38,8 @@ export const COMMONS_STATUSES = "/commons/schema-statuses";
 export const COMMONS_ROUTERS = "/commons/routers";
 // 随机字符串
 export const COMMONS_RANDOM_KEYS = "/commons/random-keys";
+// HTTP性能指标统计
+export const COMMONS_HTTP_STATS = "/commons/http-stats";
 
 // 系统配置相关url
 // 配置列表

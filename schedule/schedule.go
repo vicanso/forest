@@ -159,8 +159,18 @@ func performanceStats() {
 // httpInstanceStats http instance stats
 func httpInstanceStats() {
 	doStatsTask("http instance stats", func() map[string]interface{} {
-		fields := request.GetHTTPStats()
-		helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
+		fields := make(map[string]interface{})
+		statsList := request.GetHTTPStats()
+		for _, stats := range statsList {
+			helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, map[string]string{
+				cs.TagService: stats.Name,
+			}, map[string]interface{}{
+				cs.FieldMaxConcurrency: stats.MaxConcurrency,
+				cs.FieldProcessing:     stats.Concurrency,
+			})
+			fields[stats.Name+":"+cs.FieldMaxConcurrency] = stats.MaxConcurrency
+			fields[stats.Name+":"+cs.FieldProcessing] = stats.Concurrency
+		}
 		return fields
 	})
 }

@@ -111,6 +111,8 @@ const (
 
 // int 类型
 const (
+	// FieldMaxConcurrency 限制的最大并发数
+	FieldMaxConcurrency = "maxConcurrency"
 	// FieldProcessing 正在处理请求数
 	FieldProcessing = "processing"
 	// FieldTotalProcessing 正在处理的总请求数

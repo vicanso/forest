@@ -6,10 +6,10 @@ el-col(
 el-col(
   :span="8"
 ): el-form-item(
-  label="实例："
-): el-input(
-  placeholder="请输入实例名称"
-  v-model="name"
+  label="实例选择："
+): HTTPInstanceSelector.selector(
+  :instance="name"
+  @change.self="handleChangeInstance"
 )
 //- 最大并发数
 el-col(
@@ -25,8 +25,13 @@ el-col(
 <script lang="ts">
 import { defineComponent } from "vue";
 
+import HTTPInstanceSelector from "../../components/configs/HTTPInstanceSelector.vue";
+
 export default defineComponent({
   name: "RequestConcurrencyData",
+  components: {
+    HTTPInstanceSelector,
+  },
   props: {
     data: {
       type: String,
@@ -53,6 +58,10 @@ export default defineComponent({
     },
   },
   methods: {
+    handleChangeInstance(value) {
+      this.name = value;
+      this.handleChange();
+    },
     handleChange() {
       const { name, max } = this;
       let value = "";
@@ -67,3 +76,8 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="stylus" scoped>
+.selector
+  width 100%
+</style>
