@@ -155,6 +155,12 @@ func doValidate(s interface{}, data interface{}) (err error) {
 	if data != nil {
 		switch data := data.(type) {
 		case []byte:
+			if len(data) == 0 {
+				he := hes.New("data is empty")
+				he.Category = errJSONParseCategory
+				err = he
+				return
+			}
 			err = json.Unmarshal(data, s)
 			if err != nil {
 				he := hes.Wrap(err)

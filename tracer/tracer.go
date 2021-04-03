@@ -22,6 +22,8 @@ package tracer
 import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/huandu/go-tls/g"
+	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/util"
 )
 
 type TracerInfo struct {
@@ -74,4 +76,20 @@ func SetTracerInfo(info TracerInfo) {
 		return
 	}
 	tracerInfoCache.Add(id, &info)
+}
+
+// New 创建tracer中间件
+func New() elton.Handler {
+	return func(c *elton.Context) error {
+		deviceID := c.GetRequestHeader("X-Device-ID")
+		if deviceID == "" {
+			deviceID = util.GetTrackID(c)
+		}
+		// 设置tracer的信息
+		SetTracerInfo(TracerInfo{
+			TraceID:  c.ID,
+			DeviceID: deviceID,
+		})
+		return c.Next()
+	}
 }

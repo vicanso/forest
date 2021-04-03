@@ -15,15 +15,10 @@
 package request
 
 import (
-	"github.com/vicanso/forest/config"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = newLocation()
-var locationService = "location"
-var insList = map[string]*axios.Instance{
-	locationService: locationIns,
-}
+var insList = map[string]*axios.Instance{}
 
 type InstanceStats struct {
 	Name           string `json:"name,omitempty"`
@@ -31,15 +26,9 @@ type InstanceStats struct {
 	Concurrency    int    `json:"concurrency,omitempty"`
 }
 
-// newLocation 初始化location的实例
-func newLocation() *axios.Instance {
-	locationConfig := config.GetLocationConfig()
-	return NewHTTP(locationService, locationConfig.BaseURL, locationConfig.Timeout)
-}
-
-// GetLocation get location instance
-func GetLocation() *axios.Instance {
-	return locationIns
+// Register register http instance
+func Register(service string, ins *axios.Instance) {
+	insList[service] = ins
 }
 
 // GetHTTPStats get http instance stats

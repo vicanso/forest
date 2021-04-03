@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package location
 
 import (
 	"context"
@@ -25,7 +25,7 @@ import (
 func TestGetLocationByIP(t *testing.T) {
 	assert := assert.New(t)
 
-	done := locationIns.Mock(&axios.Response{
+	done := ins.Mock(&axios.Response{
 		Status: 200,
 		Data: []byte(`{
 			"ip": "47.242.95.102",
@@ -36,7 +36,7 @@ func TestGetLocationByIP(t *testing.T) {
 		  }`),
 	})
 	defer done()
-	lo, err := GetLocationByIP(context.Background(), "127.0.0.1")
+	lo, err := GetByIP(context.Background(), "127.0.0.1")
 	assert.Nil(err)
 	assert.Equal("圣克拉拉", lo.City)
 }

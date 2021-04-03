@@ -3,7 +3,7 @@
 mixin ToggleNav
   a.toggleNav(
     href="#"
-    @click.stop="toggleNav"
+    @click.prevent="toggleNav"
   )
     i(
       :class=`$props.shrinking ? "el-icon-s-unfold" : "el-icon-s-fold"`

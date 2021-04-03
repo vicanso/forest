@@ -33,6 +33,7 @@ import (
 	"github.com/vicanso/forest/ent/predicate"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/ent/userlogin"
+	"github.com/vicanso/forest/location"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
@@ -593,7 +594,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		tracerInfo := tracer.GetTracerInfo()
 		go func() {
 			tracer.SetTracerInfo(tracerInfo)
-			location, _ := service.GetLocationByIP(context.Background(), ip)
+			location, _ := location.GetByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
 				fields[cs.FieldProvince] = location.Province
@@ -713,7 +714,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			cs.FieldTID:       tid,
 			cs.FieldSID:       sid,
 		}
-		location, _ := service.GetLocationByIP(context.Background(), ip)
+		location, _ := location.GetByIP(context.Background(), ip)
 		country := ""
 		province := ""
 		city := ""

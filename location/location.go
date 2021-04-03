@@ -12,16 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package location
 
 import (
 	"context"
 
+	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/request"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = request.GetLocation()
+// var locationIns = request.GetLocation()
+var ins *axios.Instance
+
+func init() {
+	locationConfig := config.GetLocationConfig()
+	service := "location"
+	ins = request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)
+	request.Register(service, ins)
+}
 
 // 相关的URL
 const (
@@ -41,8 +50,8 @@ type Location struct {
 	ISP string `json:"isp"`
 }
 
-// GetLocationByIP get location by ip
-func GetLocationByIP(ctx context.Context, ip string) (lo Location, err error) {
+// GetByIP get location by ip
+func GetByIP(ctx context.Context, ip string) (lo Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
@@ -52,7 +61,7 @@ func GetLocationByIP(ctx context.Context, ip string) (lo Location, err error) {
 	}
 
 	lo = Location{}
-	err = locationIns.EnhanceRequest(&lo, conf)
+	err = ins.EnhanceRequest(&lo, conf)
 	if err != nil {
 		return
 	}
