@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package session
 
 import (
 	"encoding/json"
 
 	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
+	se "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/util"
 )
@@ -49,7 +49,7 @@ type (
 	// UserSession 用户session
 	UserSession struct {
 		unmarshalDone bool
-		se            *session.Session
+		se            *se.Session
 		info          UserSessionInfo
 	}
 )
@@ -131,12 +131,12 @@ func NewUserSession(c *elton.Context) *UserSession {
 			return us
 		}
 	}
-	v, ok := c.Get(session.Key)
+	v, ok := c.Get(se.Key)
 	if !ok {
 		return nil
 	}
 	us := &UserSession{
-		se: v.(*session.Session),
+		se: v.(*se.Session),
 	}
 	c.Set(cs.UserSession, us)
 

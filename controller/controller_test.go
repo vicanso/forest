@@ -19,9 +19,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
+	se "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/schema"
-	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/session"
 	"github.com/vicanso/hes"
 )
 
@@ -42,12 +42,12 @@ func TestListParams(t *testing.T) {
 	assert.Equal(2, len(params.GetOrders()))
 }
 
-func newContextAndUserSession() (*elton.Context, *service.UserSession) {
-	s := session.Session{}
+func newContextAndUserSession() (*elton.Context, *session.UserSession) {
+	s := se.Session{}
 	_, _ = s.Fetch()
 	c := elton.NewContext(nil, nil)
-	c.Set(session.Key, &s)
-	us := service.NewUserSession(c)
+	c.Set(se.Key, &s)
+	us := session.NewUserSession(c)
 	return c, us
 }
 
@@ -55,8 +55,8 @@ func TestIsLogin(t *testing.T) {
 	assert := assert.New(t)
 	c, us := newContextAndUserSession()
 	assert.False(isLogin(c))
-	err := us.SetInfo(service.UserSessionInfo{
-		Account: "trexie",
+	err := us.SetInfo(session.UserSessionInfo{
+		Account: "treexie",
 	})
 	assert.Nil(err)
 	assert.True(isLogin(c))
@@ -67,8 +67,8 @@ func TestCheckLogin(t *testing.T) {
 	c, us := newContextAndUserSession()
 	err := checkLoginMiddleware(c)
 	assert.Equal("请先登录", err.(*hes.Error).Message)
-	err = us.SetInfo(service.UserSessionInfo{
-		Account: "trexie",
+	err = us.SetInfo(session.UserSessionInfo{
+		Account: "treexie",
 	})
 	assert.Nil(err)
 	done := false
@@ -92,8 +92,8 @@ func TestCheckAnonymous(t *testing.T) {
 	err := checkAnonymousMiddleware(c)
 	assert.Nil(err)
 	assert.True(done)
-	err = us.SetInfo(service.UserSessionInfo{
-		Account: "trexie",
+	err = us.SetInfo(session.UserSessionInfo{
+		Account: "treexie",
 	})
 	assert.Nil(err)
 	err = checkAnonymousMiddleware(c)
@@ -111,16 +111,16 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	assert.Equal("请先登录", err.(*hes.Error).Message)
 
 	// 已登录但无权限
-	err = us.SetInfo(service.UserSessionInfo{
-		Account: "trexie",
+	err = us.SetInfo(session.UserSessionInfo{
+		Account: "treexie",
 	})
 	assert.Nil(err)
 	err = fn(c)
 	assert.Equal("禁止使用该功能", err.(*hes.Error).Message)
 
 	// 已登录且权限允许
-	err = us.SetInfo(service.UserSessionInfo{
-		Account: "trexie",
+	err = us.SetInfo(session.UserSessionInfo{
+		Account: "treexie",
 		Roles: []string{
 			schema.UserRoleAdmin,
 		},

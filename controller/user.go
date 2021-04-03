@@ -38,7 +38,7 @@ import (
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/schema"
-	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
@@ -58,7 +58,7 @@ type (
 	userInfoResp struct {
 		// 服务器当前时间，2021-03-06T15:10:12+08:00
 		Date string `json:"date,omitempty"`
-		service.UserSessionInfo
+		session.UserSessionInfo
 	}
 
 	// userListResp 用户列表响应
@@ -551,7 +551,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	userInfo := service.UserSessionInfo{
+	userInfo := session.UserSessionInfo{
 		Token: util.RandomString(8),
 	}
 	err = us.SetInfo(userInfo)
@@ -688,7 +688,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	account := u.Account
 
 	// 设置session
-	err = us.SetInfo(service.UserSessionInfo{
+	err = us.SetInfo(session.UserSessionInfo{
 		Account: account,
 		ID:      u.ID,
 		Roles:   u.Roles,

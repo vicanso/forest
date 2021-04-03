@@ -25,6 +25,7 @@ import (
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )
@@ -68,7 +69,7 @@ func NewError() elton.Handler {
 		}
 		account := ""
 		tid := util.GetTrackID(c)
-		us := service.NewUserSession(c)
+		us := session.NewUserSession(c)
 		if us != nil && us.IsLogin() {
 			account = us.MustGetInfo().Account
 		}
