@@ -29,8 +29,8 @@ const (
 )
 
 type (
-	// UserSessionInfo 用户session中的信息
-	UserSessionInfo struct {
+	// UserInfo 用户session中的信息
+	UserInfo struct {
 		// 登录时使用的Token，此字段不返回
 		Token string `json:"token,omitempty"`
 		// 用户账号
@@ -50,12 +50,12 @@ type (
 	UserSession struct {
 		unmarshalDone bool
 		se            *se.Session
-		info          UserSessionInfo
+		info          UserInfo
 	}
 )
 
 // GetUserInfo 获取用户信息
-func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
+func (us *UserSession) GetInfo() (info UserInfo, err error) {
 	if us.unmarshalDone {
 		info = us.info
 		return
@@ -64,7 +64,7 @@ func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 	if data == "" {
 		data = "{}"
 	}
-	info = UserSessionInfo{}
+	info = UserInfo{}
 	err = json.Unmarshal([]byte(data), &info)
 	if err != nil {
 		return
@@ -76,7 +76,7 @@ func (us *UserSession) GetInfo() (info UserSessionInfo, err error) {
 
 // MustGetInfo 获取用户信息，如果信息获取失败则触发panic，
 // 如果前置中间件已保证是登录状态，可以使用此函数，否则禁止使用
-func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
+func (us *UserSession) MustGetInfo() (info UserInfo) {
 	info, err := us.GetInfo()
 	if err != nil {
 		panic(err)
@@ -94,7 +94,7 @@ func (us *UserSession) IsLogin() bool {
 }
 
 // SetInfo 设置用户信息
-func (us *UserSession) SetInfo(info UserSessionInfo) (err error) {
+func (us *UserSession) SetInfo(info UserInfo) (err error) {
 	// 登录时设置登录时间
 	if info.Account != "" && info.LoginAt == "" {
 		info.LoginAt = util.NowString()

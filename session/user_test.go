@@ -58,7 +58,7 @@ func TestUserSession(t *testing.T) {
 	t.Run("set info", func(t *testing.T) {
 		us := newUserSession(`{}`)
 		assert.Equal("", us.MustGetInfo().Account)
-		err := us.SetInfo(UserSessionInfo{
+		err := us.SetInfo(UserInfo{
 			Account: "treexie",
 		})
 		assert.Nil(err)

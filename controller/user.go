@@ -58,7 +58,7 @@ type (
 	userInfoResp struct {
 		// 服务器当前时间，2021-03-06T15:10:12+08:00
 		Date string `json:"date,omitempty"`
-		session.UserSessionInfo
+		session.UserInfo
 	}
 
 	// userListResp 用户列表响应
@@ -468,7 +468,7 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 	resp = userInfoResp{
 		Date: now(),
 	}
-	resp.UserSessionInfo = userInfo
+	resp.UserInfo = userInfo
 	return
 }
 
@@ -551,7 +551,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	userInfo := session.UserSessionInfo{
+	userInfo := session.UserInfo{
 		Token: util.RandomString(8),
 	}
 	err = us.SetInfo(userInfo)
@@ -688,7 +688,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	account := u.Account
 
 	// 设置session
-	err = us.SetInfo(session.UserSessionInfo{
+	err = us.SetInfo(session.UserInfo{
 		Account: account,
 		ID:      u.ID,
 		Roles:   u.Roles,
