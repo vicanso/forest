@@ -43,7 +43,7 @@ var (
 
 	getUserSession = session.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(middleware.NewSession(), sessionHandle)
+	loadUserSession = elton.Compose(session.New(), sessionHandle)
 	// 判断用户是否登录
 	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录

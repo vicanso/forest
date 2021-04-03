@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package session
 
 import (
 	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
+	se "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/util"
 )
 
-// NewSession new session middleware
-func NewSession() elton.Handler {
+// New new session middleware
+func New() elton.Handler {
 	store := cache.GetRedisSession()
 	scf := config.GetSessionConfig()
-	return session.NewByCookie(session.CookieConfig{
+	return se.NewByCookie(se.CookieConfig{
 		Store:   store,
 		Signed:  true,
 		Expired: scf.TTL,

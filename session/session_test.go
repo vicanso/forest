@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package session
 
 import (
 	"net/http/httptest"
@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
+	se "github.com/vicanso/elton-session"
 )
 
 func TestNewSession(t *testing.T) {
@@ -31,8 +31,8 @@ func TestNewSession(t *testing.T) {
 	c.Next = func() error {
 		return nil
 	}
-	fn := NewSession()
+	fn := New()
 	err := fn(c)
 	assert.Nil(err)
-	assert.NotNil(c.Get(session.Key))
+	assert.NotNil(c.Get(se.Key))
 }
