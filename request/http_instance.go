@@ -15,6 +15,8 @@
 package request
 
 import (
+	"time"
+
 	"github.com/vicanso/go-axios"
 )
 
@@ -26,9 +28,20 @@ type InstanceStats struct {
 	Concurrency    int    `json:"concurrency,omitempty"`
 }
 
-// Register register http instance
-func Register(service string, ins *axios.Instance) {
-	insList[service] = ins
+// NewHTTP 新建实例
+func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
+	ins := axios.NewInstance(&axios.InstanceConfig{
+		EnableTrace: true,
+		Timeout:     timeout,
+		OnError:     newOnError(serviceName),
+		OnDone:      newOnDone(serviceName),
+		BaseURL:     baseURL,
+		ResponseInterceptors: []axios.ResponseInterceptor{
+			newConvertResponseToError(),
+		},
+	})
+	insList[serviceName] = ins
+	return ins
 }
 
 // GetHTTPStats get http instance stats

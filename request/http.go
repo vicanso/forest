@@ -22,7 +22,6 @@ import (
 	"os"
 	"strconv"
 	"syscall"
-	"time"
 
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/forest/cs"
@@ -262,18 +261,4 @@ func newOnError(serviceName string) axios.OnError {
 		}
 		return he
 	}
-}
-
-// NewHTTP 新建实例
-func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
-	return axios.NewInstance(&axios.InstanceConfig{
-		EnableTrace: true,
-		Timeout:     timeout,
-		OnError:     newOnError(serviceName),
-		OnDone:      newOnDone(serviceName),
-		BaseURL:     baseURL,
-		ResponseInterceptors: []axios.ResponseInterceptor{
-			newConvertResponseToError(),
-		},
-	})
 }

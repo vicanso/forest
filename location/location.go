@@ -22,14 +22,12 @@ import (
 	"github.com/vicanso/go-axios"
 )
 
-// var locationIns = request.GetLocation()
-var ins *axios.Instance
+var ins = newLocationInstance()
 
-func init() {
+func newLocationInstance() *axios.Instance {
 	locationConfig := config.GetLocationConfig()
 	service := "location"
-	ins = request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)
-	request.Register(service, ins)
+	return request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
 // 相关的URL
