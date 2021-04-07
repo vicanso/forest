@@ -130,6 +130,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 
 		tags := map[string]string{
 			cs.TagMethod: req.Method,
+			cs.TagRoute:  "404",
 		}
 		fields := map[string]interface{}{
 			cs.FieldIP:     ip,
@@ -168,6 +169,7 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 		}
 		tags := map[string]string{
 			cs.TagMethod: req.Method,
+			cs.TagRoute:  "405",
 		}
 		fields := map[string]interface{}{
 			cs.FieldIP:     ip,
