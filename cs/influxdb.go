@@ -21,6 +21,8 @@ const (
 	MeasurementHTTPRequest = "httpRequest"
 	// MeasurementRedisStats redis性能统计
 	MeasurementRedisStats = "redisStats"
+	// MeasurementRedisOP redis操作
+	MeasurementRedisOP = "redisOP"
 	// MeasurementRedisError redis出错统计
 	MeasurementRedisError = "redisError"
 	// MeasurementRedisConn redis连接

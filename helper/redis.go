@@ -97,7 +97,7 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 			cs.FieldUse:   int(d.Milliseconds()),
 			cs.FieldError: err,
 		}
-		GetInfluxDB().Write(cs.MeasurementRedisStats, tags, fields)
+		GetInfluxDB().Write(cs.MeasurementRedisOP, tags, fields)
 	}
 }
 
