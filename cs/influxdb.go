@@ -61,6 +61,8 @@ const (
 	TagService = "service"
 	// TagAction 用户的操作action
 	TagAction = "action"
+	// TagStep 用户操作的步骤
+	TagStep = "step"
 	// TagResult 操作结果
 	TagResult = "result"
 	// TagSchema 数据库的schema

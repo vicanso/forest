@@ -53,11 +53,18 @@ type (
 		RouterConcurrency  map[string]uint32       `json:"routerConcurrency,omitempty"`
 		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
 		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
+		Limits             map[string]int          `json:"limits,omitempty"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
 		Name string `json:"name,omitempty"`
 		Max  int    `json:"max,omitempty"`
+	}
+
+	// 当前http请求实例并发限制
+	currentRequestLimits struct {
+		sync.RWMutex
+		limits map[string]int
 	}
 )
 
@@ -65,6 +72,9 @@ var (
 	sessionSignedKeys = new(elton.RWMutexSignedKeys)
 	// sessionInterceptorConfig session拦截的配置
 	sessionInterceptorConfig = new(sync.Map)
+
+	// 当前请求实例限制
+	currentLimits = new(currentRequestLimits)
 )
 
 // 配置刷新时间
@@ -88,6 +98,9 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 // GetCurrentValidConfiguration 获取当前有效配置
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 	interData, _ := GetSessionInterceptorData()
+	currentLimits.RLock()
+	defer currentLimits.RUnlock()
+	limits := currentLimits.limits
 	result := &CurrentValidConfiguration{
 		UpdatedAt:         configurationRefreshedAt,
 		MockTime:          util.GetMockTime(),
@@ -95,6 +108,7 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		SignedKeys:        sessionSignedKeys.GetKeys(),
 		RouterConcurrency: GetRouterConcurrency(),
 		RouterMock:        GetRouterMockConfig(),
+		Limits:            limits,
 	}
 	// 复制数据，避免对此数据修改
 	if interData != nil {
@@ -228,6 +242,9 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	ResetRouterConcurrency(routerConcurrencyConfigs)
 
 	// 更新HTTP请求实例并发限制
+	currentLimits.Lock()
+	defer currentLimits.Unlock()
+	currentLimits.limits = requestLimitConfigs
 	request.UpdateConcurrencyLimit(requestLimitConfigs)
 
 	return

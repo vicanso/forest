@@ -195,11 +195,19 @@ func getHTTPErrorCategory(err error) string {
 	if errors.As(err, &addrErr) {
 		return httpErrCategoryAddr
 	}
-
-	opErr, ok := netErr.(*net.OpError)
-	if !ok {
-		return ""
+	var opErr *net.OpError
+	urlErr, ok := netErr.(*url.Error)
+	if ok {
+		opErr, _ = urlErr.Err.(*net.OpError)
 	}
+
+	if opErr == nil {
+		opErr, ok = netErr.(*net.OpError)
+		if !ok {
+			return ""
+		}
+	}
+
 	switch e := opErr.Err.(type) {
 	// 针对以下几种系统调用返回对应类型
 	case *os.SyscallError:

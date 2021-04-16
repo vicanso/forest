@@ -139,7 +139,7 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 }
 
 // newTrackerMiddleware 初始化用户行为跟踪中间件
-func newTrackerMiddleware(action string) elton.Handler {
+func newTrackerMiddleware(action string, step ...string) elton.Handler {
 	marshalString := func(data interface{}) string {
 		buf, _ := json.Marshal(data)
 		return string(buf)
@@ -174,12 +174,19 @@ func newTrackerMiddleware(action string) elton.Handler {
 			if info.Err != nil {
 				fields[cs.FieldError] = info.Err.Error()
 			}
+			currentStep := ""
+			if len(step) != 0 {
+				currentStep = step[0]
+			}
 			event := log.Default().Info().
 				Str("category", "tracker").
 				Str("action", action).
 				Str("ip", ip).
 				Str("sid", sid).
 				Int("result", info.Result)
+			if currentStep != "" {
+				event = event.Str("step", currentStep)
+			}
 			if len(info.Query) != 0 {
 				event = event.Dict("query", log.MapStringString(info.Query))
 			}
@@ -193,11 +200,14 @@ func newTrackerMiddleware(action string) elton.Handler {
 			}
 			event.Err(info.Err).
 				Msg("")
-
-			GetInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
+			tags := map[string]string{
 				cs.TagAction: action,
 				cs.TagResult: strconv.Itoa(info.Result),
-			}, fields)
+			}
+			if currentStep != "" {
+				tags["step"] = currentStep
+			}
+			GetInfluxSrv().Write(cs.MeasurementUserTracker, tags, fields)
 		},
 	})
 }
