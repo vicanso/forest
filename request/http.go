@@ -15,13 +15,9 @@
 package request
 
 import (
-	"errors"
-	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
-	"syscall"
 
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/forest/cs"
@@ -32,69 +28,43 @@ import (
 	"github.com/vicanso/hes"
 )
 
-const (
-	httpErrCategoryDNS     = "dns"
-	httpErrCategoryTimeout = "timeout"
-	httpErrCategoryAddr    = "addr"
-	httpErrCategoryAborted = "aborted"
-	httpErrCategoryRefused = "refused"
-	httpErrCategoryReset   = "reset"
-)
-
 func newOnDone(serviceName string) axios.OnDone {
 	return func(conf *axios.Config, resp *axios.Response, err error) {
+		stats := axios.GetStats(conf, err)
 		ht := conf.HTTPTrace
 
-		reused := false
-		addr := ""
 		use := ""
-		status := -1
-		if resp != nil {
-			status = resp.Status
-		}
 
-		result := cs.ResultSuccess
-		if err != nil {
-			result = cs.ResultFail
-		}
 		tags := map[string]string{
 			cs.TagService: serviceName,
-			cs.TagRoute:   conf.Route,
-			cs.TagMethod:  conf.Method,
-			cs.TagResult:  strconv.Itoa(result),
+			cs.TagRoute:   stats.Route,
+			cs.TagMethod:  stats.Method,
+			cs.TagResult:  strconv.Itoa(stats.Result),
 		}
 		fields := map[string]interface{}{
-			cs.FieldURI:    conf.GetURL(),
-			cs.FieldStatus: status,
+			cs.FieldURI:    stats.URI,
+			cs.FieldStatus: stats.Status,
 		}
 		if ht != nil {
-			reused = ht.Reused
-			addr = ht.Addr
-			timelineStats := ht.Stats()
-			use = timelineStats.String()
-			fields[cs.FieldReused] = reused
-			fields[cs.FieldUse] = int(timelineStats.Total.Milliseconds())
-			dns := timelineStats.DNSLookup.Milliseconds()
-			if dns != 0 {
-				fields[cs.FieldDNSUse] = int(dns)
+			use = ht.Stats().String()
+			fields[cs.FieldReused] = stats.Reused
+			fields[cs.FieldUse] = stats.Use
+			if stats.DNSUse != 0 {
+				fields[cs.FieldDNSUse] = stats.DNSUse
 			}
-			tcp := timelineStats.TCPConnection.Milliseconds()
-			if tcp != 0 {
-				fields[cs.FieldTCPUse] = int(tcp)
+			if stats.TCPUse != 0 {
+				fields[cs.FieldTCPUse] = stats.TCPUse
 			}
-			tls := timelineStats.TLSHandshake.Milliseconds()
-			if tls != 0 {
-				fields[cs.FieldTLSUse] = int(tls)
+			if stats.TLSUse != 0 {
+				fields[cs.FieldTLSUse] = stats.TLSUse
 			}
-			serverProcessing := timelineStats.ServerProcessing.Milliseconds()
-			if serverProcessing != 0 {
-				fields[cs.FieldProcessingUse] = int(serverProcessing)
+			if stats.ServerProcessingUse != 0 {
+				fields[cs.FieldProcessingUse] = stats.ServerProcessingUse
 			}
-			contentTransfer := timelineStats.ContentTransfer.Milliseconds()
-			if contentTransfer != 0 {
-				fields[cs.FieldTransferUse] = int(contentTransfer)
+			if stats.ContentTransferUse != 0 {
+				fields[cs.FieldTransferUse] = stats.ContentTransferUse
 			}
-			fields[cs.FieldAddr] = addr
+			fields[cs.FieldAddr] = stats.Addr
 		}
 		message := ""
 		if err != nil {
@@ -111,10 +81,9 @@ func newOnDone(serviceName string) axios.OnDone {
 		}
 		// 输出响应数据，如果响应数据为隐私数据可不输出
 		var data interface{}
-		size := -1
+		size := stats.Size
 		if resp != nil {
 			data = resp.UnmarshalData
-			size = len(resp.Data)
 		}
 		// 由于http请求是较频繁的操作，因此判断是否启用debug再输出
 		if log.DebugEnabled() {
@@ -127,7 +96,7 @@ func newOnDone(serviceName string) axios.OnDone {
 				Str("data", respData).
 				Msg("request log")
 		}
-		requestURL := conf.GetURL()
+		requestURL := stats.URI
 		urlInfo, _ := url.Parse(requestURL)
 		if urlInfo != nil {
 			requestURL = urlInfo.RequestURI()
@@ -135,8 +104,8 @@ func newOnDone(serviceName string) axios.OnDone {
 		event := log.Default().Info().
 			Str("category", "requestStats").
 			Str("service", serviceName).
-			Str("method", conf.Method).
-			Str("route", conf.Route).
+			Str("method", stats.Method).
+			Str("route", stats.Route).
 			Str("url", requestURL)
 		if len(conf.Params) != 0 {
 			event = event.Dict("params", log.MapStringString(conf.Params))
@@ -148,9 +117,9 @@ func newOnDone(serviceName string) axios.OnDone {
 			event = event.Dict("data", log.Struct(data))
 		}
 		event.Int("size", size).
-			Int("status", status).
-			Str("addr", addr).
-			Bool("reused", reused).
+			Int("status", stats.Status).
+			Str("addr", stats.Addr).
+			Bool("reused", stats.Reused).
 			Str("use", use)
 		if message != "" {
 			event = event.Str("error", message)
@@ -179,55 +148,6 @@ func newConvertResponseToError() axios.ResponseInterceptor {
 	}
 }
 
-// getHTTPErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
-func getHTTPErrorCategory(err error) string {
-
-	netErr, ok := err.(net.Error)
-	if ok && netErr.Timeout() {
-		return httpErrCategoryTimeout
-	}
-
-	var dnsErr *net.DNSError
-	if errors.As(err, &dnsErr) {
-		return httpErrCategoryDNS
-	}
-	var addrErr *net.AddrError
-	if errors.As(err, &addrErr) {
-		return httpErrCategoryAddr
-	}
-	var opErr *net.OpError
-	urlErr, ok := netErr.(*url.Error)
-	if ok {
-		opErr, _ = urlErr.Err.(*net.OpError)
-	}
-
-	if opErr == nil {
-		opErr, ok = netErr.(*net.OpError)
-		if !ok {
-			return ""
-		}
-	}
-
-	switch e := opErr.Err.(type) {
-	// 针对以下几种系统调用返回对应类型
-	case *os.SyscallError:
-		if no, ok := e.Err.(syscall.Errno); ok {
-			switch no {
-			case syscall.ECONNREFUSED:
-				return httpErrCategoryRefused
-			case syscall.ECONNABORTED:
-				return httpErrCategoryAborted
-			case syscall.ECONNRESET:
-				return httpErrCategoryReset
-			case syscall.ETIMEDOUT:
-				return httpErrCategoryTimeout
-			}
-		}
-	}
-
-	return ""
-}
-
 // newOnError 新建error的处理函数
 func newOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
@@ -254,7 +174,7 @@ func newOnError(serviceName string) axios.OnError {
 
 		// 如果为空，则通过error获取
 		if he.Category == "" {
-			he.Category = getHTTPErrorCategory(err)
+			he.Category = axios.GetInternalErrorCategory(err)
 			// 如果返回错误类型，则认为异常
 			// 因为返回出错均是网络连接上的异常
 			if he.Category != "" {

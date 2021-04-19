@@ -102,6 +102,7 @@ func mustNewLogger(outputPath string) *zerolog.Logger {
 	// 如果要节约日志空间，可以配置
 	zerolog.TimestampFieldName = "t"
 	zerolog.LevelFieldName = "l"
+	zerolog.TimeFieldFormat = "2006-01-02T15:04:05.999Z07:00"
 
 	l := zerolog.New(os.Stdout)
 	if util.IsDevelopment() {
