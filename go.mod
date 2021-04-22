@@ -25,13 +25,13 @@ require (
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.21.0
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/gjson v1.7.4
+	github.com/tidwall/gjson v1.7.5
 	github.com/vicanso/count-warner v1.2.0
 	github.com/vicanso/elton v1.4.0
 	github.com/vicanso/elton-compress v1.1.0
 	github.com/vicanso/elton-session v1.1.0
 	github.com/vicanso/go-axios v1.3.0
-	github.com/vicanso/go-cache v0.2.1
+	github.com/vicanso/go-cache v0.3.0
 	github.com/vicanso/go-performance v0.0.3
 	github.com/vicanso/hes v0.3.6
 	github.com/vicanso/ips v1.2.1

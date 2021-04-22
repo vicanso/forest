@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/vicanso/forest/validate"
@@ -80,7 +81,9 @@ type (
 	// RedisConfig redis配置
 	RedisConfig struct {
 		// 连接地址
-		Addr string `validate:"required,hostname_port"`
+		Addrs []string `validate:"required,dive,hostname_port"`
+		// 用户名
+		Username string
 		// 密码
 		Password string
 		// 慢请求时长
@@ -89,6 +92,8 @@ type (
 		MaxProcessing uint32 `validate:"required"`
 		// key前缀
 		Prefix string
+		// sentinel模式下使用的master name
+		Master string
 	}
 	// PostgresConfig postgres配置
 	PostgresConfig struct {
@@ -228,6 +233,7 @@ func GetRedisConfig() RedisConfig {
 	}
 	// 获取密码
 	password, _ := uriInfo.User.Password()
+	username := uriInfo.User.Username()
 
 	query := uriInfo.Query()
 	// 获取slow设置的时间间隔
@@ -251,10 +257,12 @@ func GetRedisConfig() RedisConfig {
 	}
 
 	redisConfig := RedisConfig{
-		Addr:          uriInfo.Host,
+		Addrs:         strings.Split(uriInfo.Host, ","),
+		Username:      username,
 		Password:      password,
 		Slow:          slow,
 		MaxProcessing: uint32(maxProcessing),
+		Master:        query.Get("master"),
 	}
 	keyPrefix := query.Get("prefix")
 	if keyPrefix != "" {

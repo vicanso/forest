@@ -54,19 +54,21 @@ type (
 func init() {
 	redis.SetLogger(log.NewRedisLogger())
 }
-func mustNewRedisClient() (*redis.Client, *redisHook) {
+func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 	redisConfig := config.GetRedisConfig()
 	log.Default().Info().
-		Str("addr", redisConfig.Addr).
+		Strs("addr", redisConfig.Addrs).
 		Msg("connect to redis")
 	hook := &redisHook{
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
 	}
-	c := redis.NewClient(&redis.Options{
-		Addr:     redisConfig.Addr,
-		Password: redisConfig.Password,
-		Limiter:  hook,
+	c := redis.NewUniversalClient(&redis.UniversalOptions{
+		Addrs:            redisConfig.Addrs,
+		Username:         redisConfig.Username,
+		Password:         redisConfig.Password,
+		SentinelPassword: redisConfig.Password,
+		MasterName:       redisConfig.Master,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			log.Default().Info().Msg("redis new connection is established")
 			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
@@ -186,7 +188,7 @@ func (*redisHook) ReportResult(result error) {
 }
 
 // RedisGetClient 获取redis client
-func RedisGetClient() *redis.Client {
+func RedisGetClient() redis.UniversalClient {
 	return defaultRedisClient
 }
 
