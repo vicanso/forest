@@ -115,6 +115,8 @@ func newOnDone(serviceName string) axios.OnDone {
 		}
 		if data != nil {
 			event = event.Dict("data", log.Struct(data))
+		} else if resp != nil {
+			event = event.Str("data", string(resp.Data))
 		}
 		event.Int("size", size).
 			Int("status", stats.Status).
