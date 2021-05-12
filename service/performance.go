@@ -32,8 +32,8 @@ func GetHTTPServerConnState() func(net.Conn, http.ConnState) {
 type (
 	// Performance 应用性能指标
 	Performance struct {
-		Concurrency           int32 `json:"concurrency,omitempty"`
-		RequestProcessedTotal int64 `json:"requestProcessedTotal,omitempty"`
+		Concurrency           int32 `json:"concurrency"`
+		RequestProcessedTotal int64 `json:"requestProcessedTotal"`
 		performance.CPUMemory
 		performance.ConnStats
 	}

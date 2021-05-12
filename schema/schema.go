@@ -27,8 +27,8 @@ type Status int8
 
 // StatusInfo 状态信息
 type StatusInfo struct {
-	Name  string `json:"name,omitempty"`
-	Value Status `json:"value,omitempty"`
+	Name  string `json:"name"`
+	Value Status `json:"value"`
 }
 
 const (
@@ -81,12 +81,12 @@ func (TimeMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
 			// 对于多个单词组成的，如果需要使用select，则需要添加sql tag
-			StructTag(`json:"createdAt,omitempty" sql:"created_at"`).
+			StructTag(`json:"createdAt" sql:"created_at"`).
 			Immutable().
 			Default(time.Now).
 			Comment("创建时间，添加记录时由程序自动生成"),
 		field.Time("updated_at").
-			StructTag(`json:"updatedAt,omitempty" sql:"updated_at"`).
+			StructTag(`json:"updatedAt" sql:"updated_at"`).
 			Default(time.Now).
 			Immutable().
 			UpdateDefault(time.Now).

@@ -42,12 +42,12 @@ const (
 type (
 	// CaptchaInfo 图形验证码
 	CaptchaInfo struct {
-		ExpiredAt time.Time `json:"expiredAt,omitempty"`
-		Data      []byte    `json:"data,omitempty"`
+		ExpiredAt time.Time `json:"expiredAt"`
+		Data      []byte    `json:"data"`
 		// json输出时，忽略此字段
 		Value string `json:"-"`
-		ID    string `json:"id,omitempty"`
-		Type  string `json:"type,omitempty"`
+		ID    string `json:"id"`
+		Type  string `json:"type"`
 	}
 )
 

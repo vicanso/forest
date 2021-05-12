@@ -27,7 +27,7 @@ type (
 	adminCtrl struct{}
 
 	findSessionResp struct {
-		Data string `json:"data,omitempty"`
+		Data string `json:"data"`
 	}
 )
 

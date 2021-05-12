@@ -35,7 +35,7 @@ type (
 type (
 	// 缓存的values
 	fluxCacheValues struct {
-		Values []string `json:"values,omitempty"`
+		Values []string `json:"values"`
 	}
 )
 

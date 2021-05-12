@@ -52,31 +52,31 @@ type (
 	// 用户登录Token响应
 	userLoginTokenResp struct {
 		// 用户登录的Token
-		Token string `json:"token,omitempty"`
+		Token string `json:"token"`
 	}
 	// userInfoResp 用户信息响应
 	userInfoResp struct {
 		// 服务器当前时间，2021-03-06T15:10:12+08:00
-		Date string `json:"date,omitempty"`
+		Date string `json:"date"`
 		session.UserInfo
 	}
 
 	// userListResp 用户列表响应
 	userListResp struct {
 		// 用户列表
-		Users []*ent.User `json:"users,omitempty"`
+		Users []*ent.User `json:"users"`
 
 		// 用户记录总数，如果返回-1表示此次查询未返回总数
-		Count int `json:"count,omitempty"`
+		Count int `json:"count"`
 	}
 	// userRoleListResp 用户角色列表响应
 	userRoleListResp struct {
-		UserRoles []*schema.UserRoleInfo `json:"userRoles,omitempty"`
+		UserRoles []*schema.UserRoleInfo `json:"userRoles"`
 	}
 	// userLoginListResp 用户登录列表响应
 	userLoginListResp struct {
-		UserLogins []*ent.UserLogin `json:"userLogins,omitempty"`
-		Count      int              `json:"count,omitempty"`
+		UserLogins []*ent.UserLogin `json:"userLogins"`
+		Count      int              `json:"count"`
 	}
 )
 
@@ -87,28 +87,28 @@ type (
 
 		// 关键字搜索
 		// pattern: xKeyword
-		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		Keyword string `json:"keyword" validate:"omitempty,xKeyword"`
 
 		// 用户角色筛选
 		// pattern: xUserRole
-		Role string `json:"role,omitempty" validate:"omitempty,xUserRole"`
+		Role string `json:"role" validate:"omitempty,xUserRole"`
 
 		// 用户分组筛选
 		// pattern: xUserGroup
-		Group string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
+		Group string `json:"group" validate:"omitempty,xUserGroup"`
 
 		// 用户状态分组
 		// pattern: xStatus
-		Status string `json:"status,omitempty" validate:"omitempty,xStatus"`
+		Status string `json:"status" validate:"omitempty,xStatus"`
 	}
 
 	// userLoginListParams 用户登录查询
 	userLoginListParams struct {
 		listParams
 
-		Begin   time.Time `json:"begin,omitempty"`
-		End     time.Time `json:"end,omitempty"`
-		Account string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
+		Begin   time.Time `json:"begin"`
+		End     time.Time `json:"end"`
+		Account string    `json:"account" validate:"omitempty,xUserAccount"`
 	}
 
 	// userRegisterLoginParams 注册与登录参数
@@ -116,41 +116,41 @@ type (
 		// 账户
 		// required: true
 		// pattern: xUserAccount
-		Account string `json:"account,omitempty" validate:"required,xUserAccount"`
+		Account string `json:"account" validate:"required,xUserAccount"`
 		// 用户密码，如果登录则是sha256(token + 用户密码)
 		// required: true
 		// pattern: xUserPassword
-		Password string `json:"password,omitempty" validate:"required,xUserPassword"`
+		Password string `json:"password" validate:"required,xUserPassword"`
 	}
 
 	// userUpdateMeParams 用户信息更新参数
 	userUpdateMeParams struct {
-		Name        string `json:"name,omitempty" validate:"omitempty,xUserName"`
-		Email       string `json:"email,omitempty" validate:"omitempty,xUserEmail"`
-		Password    string `json:"password,omitempty" validate:"omitempty,xUserPassword"`
-		NewPassword string `json:"newPassword,omitempty" validate:"omitempty,xUserPassword"`
+		Name        string `json:"name" validate:"omitempty,xUserName"`
+		Email       string `json:"email" validate:"omitempty,xUserEmail"`
+		Password    string `json:"password" validate:"omitempty,xUserPassword"`
+		NewPassword string `json:"newPassword" validate:"omitempty,xUserPassword"`
 	}
 	// userUpdateParams 更新用户信息参数
 	userUpdateParams struct {
-		Roles  []string      `json:"roles,omitempty" validate:"omitempty"`
-		Status schema.Status `json:"status,omitempty" validate:"omitempty,xStatus"`
+		Roles  []string      `json:"roles" validate:"omitempty"`
+		Status schema.Status `json:"status" validate:"omitempty,xStatus"`
 	}
 	// userActionAddParams 用户添加行为记录的参数
 	userActionAddParams struct {
 		Actions []struct {
 			// Category 用户行为类型
-			Category string `json:"category,omitempty" validate:"required,xUserActionCategory"`
+			Category string `json:"category" validate:"required,xUserActionCategory"`
 			// Route 触发时所在路由
-			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
+			Route string `json:"route" validate:"required,xUserActionRoute"`
 			// Path 触发时的完整路径
-			Path string `json:"path,omitempty" validate:"required,xPath"`
+			Path string `json:"path" validate:"required,xPath"`
 			// Result 操作结果，0:成功 1:失败
-			Result int `json:"result,omitempty"`
+			Result int `json:"result"`
 			// Time 记录的时间戳，单位秒
-			Time int64 `json:"time,omitempty" validate:"required"`
+			Time int64 `json:"time" validate:"required"`
 			// Extra 其它额外信息
-			Extra map[string]interface{} `json:"extra,omitempty"`
-		} `json:"actions,omitempty" validate:"required,dive"`
+			Extra map[string]interface{} `json:"extra"`
+		} `json:"actions" validate:"required,dive"`
 	}
 )
 

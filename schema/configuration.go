@@ -75,10 +75,10 @@ func (Configuration) Fields() []ent.Field {
 			NotEmpty().
 			Comment("配置信息"),
 		field.Time("started_at").
-			StructTag(`json:"startedAt,omitempty"`).
+			StructTag(`json:"startedAt"`).
 			Comment("配置启用时间"),
 		field.Time("ended_at").
-			StructTag(`json:"endedAt,omitempty"`).
+			StructTag(`json:"endedAt"`).
 			Comment("配置停用时间"),
 	}
 }

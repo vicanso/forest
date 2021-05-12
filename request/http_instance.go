@@ -23,9 +23,9 @@ import (
 var insList = map[string]*axios.Instance{}
 
 type InstanceStats struct {
-	Name           string `json:"name,omitempty"`
-	MaxConcurrency int    `json:"maxConcurrency,omitempty"`
-	Concurrency    int    `json:"concurrency,omitempty"`
+	Name           string `json:"name"`
+	MaxConcurrency int    `json:"maxConcurrency"`
+	Concurrency    int    `json:"concurrency"`
 }
 
 // NewHTTP 新建实例

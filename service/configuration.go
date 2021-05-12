@@ -39,26 +39,26 @@ type ConfigurationSrv struct{}
 type (
 	// SessionInterceptorData session拦截的数据
 	SessionInterceptorData struct {
-		Message       string   `json:"message,omitempty"`
-		AllowAccounts []string `json:"allowAccounts,omitempty"`
-		AllowRoutes   []string `json:"allowRoutes,omitempty"`
+		Message       string   `json:"message"`
+		AllowAccounts []string `json:"allowAccounts"`
+		AllowRoutes   []string `json:"allowRoutes"`
 	}
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
-		UpdatedAt          time.Time               `json:"updatedAt,omitempty"`
-		MockTime           string                  `json:"mockTime,omitempty"`
-		IPBlockList        []string                `json:"ipBlockList,omitempty"`
-		SignedKeys         []string                `json:"signedKeys,omitempty"`
-		RouterConcurrency  map[string]uint32       `json:"routerConcurrency,omitempty"`
-		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
-		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
-		Limits             map[string]int          `json:"limits,omitempty"`
+		UpdatedAt          time.Time               `json:"updatedAt"`
+		MockTime           string                  `json:"mockTime"`
+		IPBlockList        []string                `json:"ipBlockList"`
+		SignedKeys         []string                `json:"signedKeys"`
+		RouterConcurrency  map[string]uint32       `json:"routerConcurrency"`
+		RouterMock         map[string]RouterConfig `json:"routerMock"`
+		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor"`
+		Limits             map[string]int          `json:"limits"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
-		Name string `json:"name,omitempty"`
-		Max  int    `json:"max,omitempty"`
+		Name string `json:"name"`
+		Max  int    `json:"max"`
 	}
 
 	// 当前http请求实例并发限制

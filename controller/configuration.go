@@ -38,8 +38,8 @@ type configurationCtrl struct{}
 type (
 	// configurationListResp 配置列表响应
 	configurationListResp struct {
-		Configurations []*ent.Configuration `json:"configurations,omitempty"`
-		Count          int                  `json:"count,omitempty"`
+		Configurations []*ent.Configuration `json:"configurations"`
+		Count          int                  `json:"count"`
 	}
 )
 
@@ -48,29 +48,29 @@ type (
 
 	// configurationAddParams 添加配置参数
 	configurationAddParams struct {
-		Name      string              `json:"name,omitempty" validate:"required,xConfigurationName"`
-		Category  confSchema.Category `json:"category,omitempty" validate:"required,xConfigurationCategory"`
-		Status    schema.Status       `json:"status,omitempty" validate:"required,xStatus"`
-		Data      string              `json:"data,omitempty" validate:"required,xConfigurationData"`
-		StartedAt time.Time           `json:"startedAt,omitempty"`
-		EndedAt   time.Time           `json:"endedAt,omitempty"`
+		Name      string              `json:"name" validate:"required,xConfigurationName"`
+		Category  confSchema.Category `json:"category" validate:"required,xConfigurationCategory"`
+		Status    schema.Status       `json:"status" validate:"required,xStatus"`
+		Data      string              `json:"data" validate:"required,xConfigurationData"`
+		StartedAt time.Time           `json:"startedAt"`
+		EndedAt   time.Time           `json:"endedAt"`
 	}
 	// configurationUpdateParams 更新配置参数
 	configurationUpdateParams struct {
-		Name      string              `json:"name,omitempty" validate:"omitempty,xConfigurationName"`
-		Status    schema.Status       `json:"status,omitempty" validate:"omitempty,xStatus"`
-		Category  confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
-		Data      string              `json:"data,omitempty" validate:"omitempty,xConfigurationData"`
-		StartedAt time.Time           `json:"startedAt,omitempty"`
-		EndedAt   time.Time           `json:"endedAt,omitempty"`
+		Name      string              `json:"name" validate:"omitempty,xConfigurationName"`
+		Status    schema.Status       `json:"status" validate:"omitempty,xStatus"`
+		Category  confSchema.Category `json:"category" validate:"omitempty,xConfigurationCategory"`
+		Data      string              `json:"data" validate:"omitempty,xConfigurationData"`
+		StartedAt time.Time           `json:"startedAt"`
+		EndedAt   time.Time           `json:"endedAt"`
 	}
 
 	// configurationListParmas 配置查询参数
 	configurationListParmas struct {
 		listParams
 
-		Name     string              `json:"name,omitempty" validate:"omitempty,xConfigurationName"`
-		Category confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
+		Name     string              `json:"name" validate:"omitempty,xConfigurationName"`
+		Category confSchema.Category `json:"category" validate:"omitempty,xConfigurationCategory"`
 	}
 )
 

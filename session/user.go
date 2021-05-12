@@ -32,19 +32,19 @@ type (
 	// UserInfo 用户session中的信息
 	UserInfo struct {
 		// 登录时使用的Token，此字段不返回
-		Token string `json:"token,omitempty"`
+		Token string `json:"token"`
 		// 用户账号
-		Account string `json:"account,omitempty"`
+		Account string `json:"account"`
 		// 用户ID
-		ID int `json:"id,omitempty"`
+		ID int `json:"id"`
 		// 用户角色列表
-		Roles []string `json:"roles,omitempty"`
+		Roles []string `json:"roles"`
 		// 用户分组列表
-		Groups []string `json:"groups,omitempty"`
+		Groups []string `json:"groups"`
 		// Session信息更新时间
-		UpdatedAt string `json:"updatedAt,omitempty"`
+		UpdatedAt string `json:"updatedAt"`
 		// Session信息创建时间
-		LoginAt string `json:"loginAt,omitempty"`
+		LoginAt string `json:"loginAt"`
 	}
 	// UserSession 用户session
 	UserSession struct {

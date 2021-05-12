@@ -32,21 +32,21 @@ import (
 type (
 	// RouterConfig 路由配置信息
 	RouterConfig struct {
-		Route      string `json:"route,omitempty"`
-		Method     string `json:"method,omitempty"`
-		Status     int    `json:"status,omitempty"`
-		CotentType string `json:"cotentType,omitempty"`
-		Response   string `json:"response,omitempty"`
+		Route      string `json:"route"`
+		Method     string `json:"method"`
+		Status     int    `json:"status"`
+		CotentType string `json:"cotentType"`
+		Response   string `json:"response"`
 		// DelaySeconds 延时，单位秒
-		DelaySeconds int    `json:"delaySeconds,omitempty"`
-		URL          string `json:"url,omitempty"`
+		DelaySeconds int    `json:"delaySeconds"`
+		URL          string `json:"url"`
 	}
 	routerConcurrencyConfig struct {
-		Route  string `json:"route,omitempty"`
-		Method string `json:"method,omitempty"`
-		Max    uint32 `json:"max,omitempty"`
+		Route  string `json:"route"`
+		Method string `json:"method"`
+		Max    uint32 `json:"max"`
 		// RateLimit 频率限制，如100/s
-		RateLimit string `json:"rateLimit,omitempty"`
+		RateLimit string `json:"rateLimit"`
 	}
 	// routerRateLimit 路由频率限制
 	routerRateLimit struct {

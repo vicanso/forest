@@ -35,28 +35,28 @@ type fluxCtrl struct{}
 type (
 	// fluxListParams flux查询参数
 	fluxListParams struct {
-		Measurement string    `json:"measurement,omitempty"`
-		Begin       time.Time `json:"begin,omitempty" validate:"required"`
-		End         time.Time `json:"end,omitempty" validate:"required"`
-		Account     string    `json:"account,omitempty" validate:"omitempty,xUserAccount"`
-		Limit       string    `json:"limit,omitempty" validate:"required,xLargerLimit"`
-		Exception   string    `json:"exception,omitempty" validate:"omitempty,xBoolean"`
+		Measurement string    `json:"measurement"`
+		Begin       time.Time `json:"begin" validate:"required"`
+		End         time.Time `json:"end" validate:"required"`
+		Account     string    `json:"account" validate:"omitempty,xUserAccount"`
+		Limit       string    `json:"limit" validate:"required,xLargerLimit"`
+		Exception   string    `json:"exception" validate:"omitempty,xBoolean"`
 		// 用户行为类型筛选
-		Action      string `json:"action,omitempty" validate:"omitempty,xTag"`
-		Result      string `json:"result,omitempty" validate:"omitempty,xTag"`
-		Category    string `json:"category,omitempty" validate:"omitempty,xTag"`
-		ErrCategory string `json:"errCategory,omitempty" validate:"omitempty,xTag"`
-		Route       string `json:"route,omitempty" validate:"omitempty,xTag"`
-		Service     string `json:"service,omitempty" validate:"omitempty,xTag"`
+		Action      string `json:"action" validate:"omitempty,xTag"`
+		Result      string `json:"result" validate:"omitempty,xTag"`
+		Category    string `json:"category" validate:"omitempty,xTag"`
+		ErrCategory string `json:"errCategory" validate:"omitempty,xTag"`
+		Route       string `json:"route" validate:"omitempty,xTag"`
+		Service     string `json:"service" validate:"omitempty,xTag"`
 	}
 	// flux tags/fields查询参数
 	fluxListTagOrFieldParams struct {
-		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
+		Measurement string `json:"measurement" validate:"required,xMeasurement"`
 	}
 	// fluxListTagValuesParams flux tag values查询参数
 	fluxListTagValuesParams struct {
-		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
-		Tag         string `json:"tag,omitempty" validate:"required,xTag"`
+		Measurement string `json:"measurement" validate:"required,xMeasurement"`
+		Tag         string `json:"tag" validate:"required,xTag"`
 	}
 )
 

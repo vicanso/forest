@@ -43,36 +43,36 @@ type (
 	// applicationInfoResp 应用信息响应
 	applicationInfoResp struct {
 		// 版本号
-		Version string `json:"version,omitempty"`
+		Version string `json:"version"`
 		// 构建时间
-		BuildedAt string `json:"buildedAt,omitempty"`
+		BuildedAt string `json:"buildedAt"`
 		// 运行时长
-		Uptime string `json:"uptime,omitempty"`
+		Uptime string `json:"uptime"`
 		// os类型
-		OS string `json:"os,omitempty"`
+		OS string `json:"os"`
 		// go版本
-		GO string `json:"go,omitempty"`
+		GO string `json:"go"`
 		// 架构类型
-		ARCH string `json:"arch,omitempty"`
+		ARCH string `json:"arch"`
 		// 运行环境配置
-		ENV string `json:"env,omitempty"`
+		ENV string `json:"env"`
 	}
 	// routersResp 路由列表响应
 	routersResp struct {
 		// 路由信息
-		Routers []elton.RouterInfo `json:"routers,omitempty"`
+		Routers []elton.RouterInfo `json:"routers"`
 	}
 	// statusListResp 状态列表响应
 	statusListResp struct {
-		Statuses []*schema.StatusInfo `json:"statuses,omitempty"`
+		Statuses []*schema.StatusInfo `json:"statuses"`
 	}
 	// randomKeysResp 随机字符
 	randomKeysResp struct {
-		Keys []string `json:"keys,omitempty"`
+		Keys []string `json:"keys"`
 	}
 	// httpStatsListResp http性能统计响应
 	httpStatsListResp struct {
-		StatusList []*request.InstanceStats `json:"statusList,omitempty"`
+		StatusList []*request.InstanceStats `json:"statusList"`
 	}
 )
 

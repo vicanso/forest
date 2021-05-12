@@ -31,8 +31,8 @@ type fileCtrl struct{}
 type (
 	// fileUploadResp 文件上传响应
 	fileUploadResp struct {
-		Name string `json:"name,omitempty"`
-		Size int64  `json:"size,omitempty"`
+		Name string `json:"name"`
+		Size int64  `json:"size"`
 	}
 )
 
@@ -40,7 +40,7 @@ type (
 type (
 	// fileUploadParams 文件上传参数
 	fileUploadParams struct {
-		Bucket string `json:"bucket,omitempty" validate:"required,xFileBucket"`
+		Bucket string `json:"bucket" validate:"required,xFileBucket"`
 	}
 )
 
