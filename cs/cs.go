@@ -14,6 +14,8 @@
 
 package cs
 
+import "regexp"
+
 const (
 	// CID context id
 	CID = "cid"
@@ -39,3 +41,5 @@ const (
 	// ResultFail result fail
 	ResultFail
 )
+
+var MaskRegExp = regexp.MustCompile(`(?i)password`)
