@@ -97,7 +97,10 @@ type (
 	}
 	// PostgresConfig postgres配置
 	PostgresConfig struct {
-		URI string `validate:"required,uri"`
+		URI          string `validate:"required,uri"`
+		MaxOpenConns int
+		MaxIdleConns int
+		MaxIdleTime  time.Duration
 	}
 	// MailConfig email的配置
 	MailConfig struct {
@@ -276,8 +279,25 @@ func GetRedisConfig() RedisConfig {
 // GetPostgresConfig 获取postgres配置
 func GetPostgresConfig() PostgresConfig {
 	prefix := "postgres."
+	uri := defaultViperX.GetStringFromENV(prefix + "uri")
+	rawQuery := ""
+	uriInfo, _ := url.Parse(uri)
+	maxIdleConns := 0
+	maxOpenConns := 0
+	var maxIdleTime time.Duration
+	if uriInfo != nil {
+		query := uriInfo.Query()
+		rawQuery = uriInfo.RawQuery
+		maxIdleConns, _ = strconv.Atoi(query.Get("maxIdleConns"))
+		maxOpenConns, _ = strconv.Atoi(query.Get("maxOpenConns"))
+		maxIdleTime, _ = time.ParseDuration(query.Get("maxIdleTime"))
+	}
+
 	postgresConfig := PostgresConfig{
-		URI: defaultViperX.GetStringFromENV(prefix + "uri"),
+		URI:          strings.ReplaceAll(uri, rawQuery, ""),
+		MaxIdleConns: maxIdleConns,
+		MaxOpenConns: maxOpenConns,
+		MaxIdleTime:  maxIdleTime,
 	}
 	mustValidate(&postgresConfig)
 	return postgresConfig

@@ -79,7 +79,11 @@ const (
 )
 
 func init() {
-	g := router.NewGroup("/configurations", loadUserSession, shouldBeSu)
+	g := router.NewGroup(
+		"/configurations",
+		loadUserSession,
+		shouldBeSu,
+	)
 	ctrl := configurationCtrl{}
 
 	// 查询配置

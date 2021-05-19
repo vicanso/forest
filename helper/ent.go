@@ -97,6 +97,15 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	if err != nil {
 		panic(err)
 	}
+	if postgresConfig.MaxIdleConns != 0 {
+		db.SetMaxIdleConns(postgresConfig.MaxIdleConns)
+	}
+	if postgresConfig.MaxOpenConns != 0 {
+		db.SetMaxOpenConns(postgresConfig.MaxOpenConns)
+	}
+	if postgresConfig.MaxIdleTime != 0 {
+		db.SetConnMaxIdleTime(postgresConfig.MaxIdleTime)
+	}
 
 	// Create an ent.Driver from `db`.
 	driver := entsql.OpenDB(dialect.Postgres, db)
