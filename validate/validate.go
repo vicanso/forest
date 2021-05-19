@@ -17,6 +17,7 @@ package validate
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"reflect"
 	"strconv"
 
@@ -197,8 +198,21 @@ func Do(s interface{}, data interface{}) (err error) {
 	return
 }
 
+// 任何参数均返回true，不校验。用于临时将某个校验禁用
+func notValidate(fl validator.FieldLevel) bool {
+	return true
+}
+
+func isDisabled(tag string) bool {
+	return os.Getenv("VALIDATE_"+tag) != ""
+}
+
 // Add 添加一个校验函数
 func Add(tag string, fn validator.Func, args ...bool) {
+	if isDisabled(tag) {
+		_ = defaultValidator.RegisterValidation(tag, notValidate)
+		return
+	}
 	err := defaultValidator.RegisterValidation(tag, fn, args...)
 	if err != nil {
 		panic(err)
@@ -207,5 +221,9 @@ func Add(tag string, fn validator.Func, args ...bool) {
 
 // AddAlias add alias
 func AddAlias(alias, tags string) {
+	if isDisabled(alias) {
+		_ = defaultValidator.RegisterValidation(alias, notValidate)
+		return
+	}
 	defaultValidator.RegisterAlias(alias, tags)
 }
