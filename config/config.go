@@ -120,9 +120,9 @@ type (
 		// 认证的token
 		Token string `validate:"required,ascii"`
 		// 批量提交大小
-		BatchSize uint `validate:"required,min=1,max=5000"`
+		BatchSize uint `default:"100" validate:"required,min=1,max=5000"`
 		// 间隔提交时长
-		FlushInterval time.Duration `validate:"required"`
+		FlushInterval time.Duration `default:"30s" validate:"required"`
 		// 是否启用gzip
 		Gzip bool
 		// 是否禁用

@@ -19,6 +19,7 @@ require (
 	github.com/influxdata/influxdb-client-go/v2 v2.3.0
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/jinzhu/now v1.1.2
+	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/pyroscope-io/pyroscope v0.0.31

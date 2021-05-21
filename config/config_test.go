@@ -81,7 +81,7 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert.Equal("bigTree", influxdbConfig.Org)
 	assert.Equal("YcAmMWPl0XR_OKJYNIozsiBI0qBGIe4-Y_rWKUcNbQ8sYobWFrsMCgY_t0FRlpAMkVNgghhcQ1TgDixt92Qe6w==", influxdbConfig.Token)
 	assert.Equal(uint(100), influxdbConfig.BatchSize)
-	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
+	assert.Equal(30*time.Second, influxdbConfig.FlushInterval)
 	assert.False(influxdbConfig.Disabled)
 }
 

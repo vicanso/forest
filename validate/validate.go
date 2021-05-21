@@ -22,6 +22,7 @@ import (
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mcuadros/go-defaults"
 	"github.com/vicanso/hes"
 )
 
@@ -180,20 +181,35 @@ func doValidate(s interface{}, data interface{}) (err error) {
 			}
 		}
 	}
+	defaults.SetDefaults(s)
 	err = defaultValidator.Struct(s)
 	return
+}
+
+func wrapError(err error) error {
+
+	he := hes.Wrap(err)
+	if he.Category == "" {
+		he.Category = errCategory
+	}
+	he.StatusCode = http.StatusBadRequest
+	return he
 }
 
 // Do 执行校验
 func Do(s interface{}, data interface{}) (err error) {
 	err = doValidate(s, data)
 	if err != nil {
-		he := hes.Wrap(err)
-		if he.Category == "" {
-			he.Category = errCategory
-		}
-		he.StatusCode = http.StatusBadRequest
-		err = he
+		return wrapError(err)
+	}
+	return
+}
+
+// 对struct校验
+func Struct(s interface{}) (err error) {
+	err = defaultValidator.Struct(s)
+	if err != nil {
+		return wrapError(err)
 	}
 	return
 }
@@ -203,14 +219,19 @@ func notValidate(fl validator.FieldLevel) bool {
 	return true
 }
 
-func isDisabled(tag string) bool {
-	return os.Getenv("VALIDATE_"+tag) != ""
+func getCustomDefine(tag string) string {
+	return os.Getenv("VALIDATE_" + tag)
 }
 
 // Add 添加一个校验函数
 func Add(tag string, fn validator.Func, args ...bool) {
-	if isDisabled(tag) {
+	custom := getCustomDefine(tag)
+	if custom == "*" {
 		_ = defaultValidator.RegisterValidation(tag, notValidate)
+		return
+	}
+	if custom != "" {
+		defaultValidator.RegisterAlias(tag, custom)
 		return
 	}
 	err := defaultValidator.RegisterValidation(tag, fn, args...)
@@ -221,9 +242,13 @@ func Add(tag string, fn validator.Func, args ...bool) {
 
 // AddAlias add alias
 func AddAlias(alias, tags string) {
-	if isDisabled(alias) {
+	custom := getCustomDefine(alias)
+	if custom == "*" {
 		_ = defaultValidator.RegisterValidation(alias, notValidate)
 		return
+	}
+	if custom != "" {
+		tags = custom
 	}
 	defaultValidator.RegisterAlias(alias, tags)
 }

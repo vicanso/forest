@@ -39,8 +39,8 @@ influxdb:
   bucket: forest 
   org: bigTree
   token: YcAmMWPl0XR_OKJYNIozsiBI0qBGIe4-Y_rWKUcNbQ8sYobWFrsMCgY_t0FRlpAMkVNgghhcQ1TgDixt92Qe6w==
-  batchSize: 100
-  flushInterval: 10s
+  # batchSize: 100
+  # flushInterval: 10s
   # 如果与influxdb非同一内网，建议设置为true
   gzip: false
   disabled: false 
