@@ -8,7 +8,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
-	github.com/go-chi/chi v4.0.2+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/go-redis/redis/v8 v8.8.3
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
@@ -22,7 +21,7 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/mozillazg/go-pinyin v0.18.0
-	github.com/pyroscope-io/pyroscope v0.0.31
+	github.com/pyroscope-io/pyroscope v0.0.32
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.22.0
@@ -37,7 +36,7 @@ require (
 	github.com/vicanso/go-performance v0.0.4
 	github.com/vicanso/hes v0.3.9
 	github.com/vicanso/ips v1.2.1
-	github.com/vicanso/lru-ttl v0.4.1
+	github.com/vicanso/lru-ttl v0.4.2
 	github.com/vicanso/viperx v0.1.4
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.4.0
@@ -45,5 +44,4 @@ require (
 	golang.org/x/image v0.0.0-20210504121937-7319ad40d33e
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	k8s.io/klog v1.0.0 // indirect
 )

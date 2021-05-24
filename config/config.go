@@ -64,6 +64,8 @@ type (
 		PidFile string `validate:"required"`
 		// 应用前缀
 		Prefixes []string `validate:"omitempty,dive,xPath"`
+		// 超时（用于设置所有请求)
+		Timeout time.Duration
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
@@ -201,6 +203,7 @@ func GetBasicConfig() BasicConfig {
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 		Prefixes:     defaultViperX.GetStringSlice(prefix + "prefixes"),
+		Timeout:      defaultViperX.GetDuration(prefix + "timeout"),
 	}
 	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
 	pwd, _ := os.Getwd()

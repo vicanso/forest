@@ -17,7 +17,6 @@ import { defineComponent } from "vue";
 
 import useCommonState, { commonListHTTPInstance } from "../../states/common";
 
-
 export default defineComponent({
   name: "HTTPInstanceSelector",
   props: {
@@ -57,6 +56,6 @@ export default defineComponent({
         this.$error(err);
       }
     },
-  }
+  },
 });
 </script>

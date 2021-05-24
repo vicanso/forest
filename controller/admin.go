@@ -18,15 +18,15 @@ package controller
 
 import (
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/router"
 )
 
 type (
 	adminCtrl struct{}
 
-	findSessionResp struct {
+	findCacheResp struct {
 		Data string `json:"data"`
 	}
 )
@@ -35,36 +35,34 @@ func init() {
 	ctrl := adminCtrl{}
 	g := router.NewGroup("/@admin", loadUserSession, shouldBeAdmin)
 
-	// 查询session数据
+	// 查询缓存数据
 	g.GET(
-		"/v1/sessions/{id}",
-		ctrl.findSessionByID,
+		"/v1/caches/{key}",
+		ctrl.findCacheByKey,
 	)
 	// 清空session数据
 	g.DELETE(
-		"/v1/sessions/{id}",
-		newTrackerMiddleware(cs.ActionAdminCleanSession),
-		ctrl.cleanSessionByID,
+		"/v1/caches/{key}",
+		newTrackerMiddleware(cs.ActionAdminCleanCache),
+		ctrl.cleanCacheByKey,
 	)
 }
 
-// findSessionByID find session by id
-func (*adminCtrl) findSessionByID(c *elton.Context) (err error) {
-	store := cache.GetRedisSession()
-	data, err := store.Get(c.Param("id"))
+// findCacheByKey find cache by key
+func (*adminCtrl) findCacheByKey(c *elton.Context) (err error) {
+	data, err := helper.RedisGetClient().Get(c.Context(), c.Param("key")).Result()
 	if err != nil {
 		return
 	}
-	c.Body = &findSessionResp{
-		Data: string(data),
+	c.Body = &findCacheResp{
+		Data: data,
 	}
 	return
 }
 
-// cleanSessionByID clean session by id
-func (*adminCtrl) cleanSessionByID(c *elton.Context) (err error) {
-	store := cache.GetRedisSession()
-	err = store.Destroy(c.Param("id"))
+// cleanCacheByKey clean cache by key
+func (*adminCtrl) cleanCacheByKey(c *elton.Context) (err error) {
+	_, err = helper.RedisGetClient().Del(c.Context(), c.Param("key")).Result()
 	if err != nil {
 		return
 	}

@@ -31,6 +31,6 @@ const (
 	// ActionConfigurationUpdate update configuration
 	ActionConfigurationUpdate = "updateConfiguration"
 
-	// ActionAdminCleanSession clean session
-	ActionAdminCleanSession = "cleanSession"
+	// ActionAdminCleanCache clean cache
+	ActionAdminCleanCache = "cleanCache"
 )

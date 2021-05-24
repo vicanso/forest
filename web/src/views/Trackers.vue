@@ -33,21 +33,23 @@ mixin StatusColumn
 mixin FormColumn
   el-table-column(
     label="Form"
-    width="300"
+    width="100"
   ): template(
     #default="scope"
   ): base-json(
     :content="scope.row.form"
+    icon="el-icon-info"
   )
 
 mixin QueryColumn
   el-table-column(
     label="Query"
-    width="200"
+    width="100"
   ): template(
     #default="scope"
   ): base-json(
     :content="scope.row.query"
+    icon="el-icon-info"
   )
 
 mixin ParamsColumn
@@ -77,7 +79,7 @@ mixin TrackIDColumn
     label="Track ID"
     :filters="trackIDFilters"
     :filter-method="filterTrack"
-    width="90"
+    width="100"
   ): template(
     #default="scope"
   ): base-tooltip(
@@ -98,7 +100,6 @@ mixin IPColumn
 mixin ErrorColumn
   el-table-column(
     label="Error"
-    width="200"
   ): template(
     #default="scope"
   ): HTTPErrorFormater(

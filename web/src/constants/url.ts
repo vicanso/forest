@@ -50,4 +50,4 @@ export const CONFIGS_ID = "/configurations/v1/:id";
 export const CONFIGS_CURRENT_VALID = "/configurations/v1/current-valid";
 
 // 管理员相关接口
-export const ADMINS_SESSION_ID = "/@admin/v1/sessions/:id";
+export const ADMINS_CACHE_ID = "/@admin/v1/caches/:key";

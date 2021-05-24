@@ -1,20 +1,21 @@
 import request from "../helpers/request";
 
-import { ADMINS_SESSION_ID } from "../constants/url";
+import { ADMINS_CACHE_ID } from "../constants/url";
 
 interface Session {
   data: string;
 }
 
-// adminFindSessionByID 查询session
-export async function adminFindSessionByID(id: string): Promise<Session> {
-  const url = ADMINS_SESSION_ID.replace(":id", id);
+// adminFindCacheByKey 查询缓存
+export async function adminFindCacheByKey(key: string): Promise<Session> {
+  const url = ADMINS_CACHE_ID.replace(":key", key);
   const { data } = await request.get(url);
   return <Session>data;
 }
 
-// adminCleanSessionByID 清除session
-export async function adminCleanSessionByID(id: string): void {
-  const url = ADMINS_SESSION_ID.replace(":id", id);
+// adminCleanCacheByKey 清除缓存
+export async function adminCleanCacheByKey(key: string): Promise<void> {
+  const url = ADMINS_CACHE_ID.replace(":key", key);
   await request.delete(url);
+  return;
 }

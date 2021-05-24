@@ -21,47 +21,49 @@ mixin RandomKeys
       :onClick="listRandomKey"
     ) 生成随机字符串
 
-//- session查询清理
-mixin SessionQueryDelete
+//- 缓存查询与删除
+mixin CacheQueryDelete
   el-card(
-    v-loading="sessionProcessing"
+    v-loading="cacheProcessing"
   )
     template(
       #header
     )
-      span Session查询与清除
+      span 缓存查询与删除
+    p.tips session的缓存格式 ss:sessionID
     el-row(
       :gutter="15"
     )
       el-col(
         :span="12"
       ): el-input(
-        v-model="sessionID"
-        placeholder="请输入session id"
+        v-model="cacheKey"
+        placeholder="请输入缓存的key"
         clearable
       )
+     
+      el-col(
+        :span="6"
+      ): ex-button(
+        :onClick="findCache"
+      ) 查询
       el-col(
         :span=6
         category="smallText"
       ): ex-button(
         buttonCategory="default"
-        :onClick="cleanSession"
+        :onClick="cleanCache"
       ) 清除
-      el-col(
-        :span="6"
-      ): ex-button(
-        :onClick="findSession"
-      ) 查询
 
-    pre.sessionData(
-      v-if="sessionData"
-    ) {{sessionData}}
+    pre.cacheData(
+      v-if="cacheData"
+    ) {{cacheData}}
 
 .others
   //- 随机字符串
   +RandomKeys
-  //- session查询与删除
-  +SessionQueryDelete
+  //- 缓存查询与删除
+  +CacheQueryDelete
 
 </template>
 
@@ -70,7 +72,7 @@ import { defineComponent } from "vue";
 
 import ExButton from "../components/ExButton.vue";
 import useCommonState, { commonListRandomKey } from "../states/common";
-import { adminFindSessionByID, adminCleanSessionByID } from "../states/admin";
+import { adminFindCacheByKey, adminCleanCacheByKey } from "../states/admin";
 
 export default defineComponent({
   name: "Others",
@@ -86,60 +88,60 @@ export default defineComponent({
   },
   data() {
     return {
-      sessionID: "",
-      sessionProcessing: false,
-      sessionData: "",
+      cacheKey: "",
+      cacheProcessing: false,
+      cacheData: "",
     };
   },
   methods: {
-    // 查询session
-    async findSession() {
-      const { sessionID, sessionProcessing } = this;
-      if (!sessionID) {
-        this.$message.warning("session id不能为空");
+    // 查询缓存
+    async findCache() {
+      const { cacheKey, cacheProcessing } = this;
+      if (!cacheKey) {
+        this.$message.warning("缓存key不能为空");
         return;
       }
-      if (sessionProcessing) {
+      if (cacheProcessing) {
         return;
       }
       try {
-        this.sessionProcessing = true;
-        const resp = await adminFindSessionByID(sessionID);
+        this.cacheProcessing = true;
+        const resp = await adminFindCacheByKey(cacheKey);
         if (!resp.data) {
-          this.$message.warning("该session信息不存的，请确认ID是否有误");
+          this.$message.warning("请缓存不存在，请确认是否正确");
           return;
         }
-        const sessionData = JSON.parse(resp.data);
-        if (sessionData["user-session-info"]) {
-          sessionData["user-session-info"] = JSON.parse(
-            sessionData["user-session-info"]
-          );
+        this.cacheData = resp.data;
+        try {
+          const data = JSON.parse(resp.data);
+          this.cacheData = JSON.stringify(data, null, 2);
+        } catch (err) {
+          // 如果json处理出错，忽略
         }
-        this.sessionData = JSON.stringify(sessionData, null, 2);
       } catch (err) {
         this.$error(err);
       } finally {
-        this.sessionProcessing = false;
+        this.cacheProcessing = false;
       }
     },
-    // 清除session
-    async cleanSession() {
-      const { sessionID, sessionProcessing } = this;
-      if (!sessionID) {
-        this.$message.warning("session id不能为空");
+    // 清除缓存
+    async cleanCache() {
+      const { cacheKey, cacheProcessing } = this;
+      if (!cacheKey) {
+        this.$message.warning("key不能为空");
         return;
       }
-      if (sessionProcessing) {
+      if (cacheProcessing) {
         return;
       }
       try {
-        this.sessionProcessing = true;
-        await adminCleanSessionByID(sessionID);
-        this.sessionData = "";
+        this.cacheProcessing = true;
+        await adminCleanCacheByKey(cacheKey);
+        this.cacheData = "";
       } catch (err) {
         this.$error(err);
       } finally {
-        this.sessionProcessing = false;
+        this.cacheProcessing = false;
       }
     },
   },
@@ -167,7 +169,8 @@ export default defineComponent({
 .tips
   color $darkGray
   font-size 14px
+  line-height 2em
 
-.sessionData
+.cacheData
   margin $mainMargin
 </style>

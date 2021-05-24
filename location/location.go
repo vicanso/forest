@@ -30,11 +30,6 @@ func newLocationInstance() *axios.Instance {
 	return request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
-// 相关的URL
-const (
-	locationURL = "/ip-locations/json/:ip"
-)
-
 // Location location
 type Location struct {
 	IP string `json:"ip"`

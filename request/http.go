@@ -138,7 +138,7 @@ func newConvertResponseToError() axios.ResponseInterceptor {
 			message := gjson.GetBytes(resp.Data, "message").String()
 			exception := false
 			if message == "" {
-				message = string(resp.Data)
+				message = util.CutRune(string(resp.Data), 30)
 				// 如果出错响应不符合，则认为是异常响应
 				exception = true
 			}
