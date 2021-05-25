@@ -23,11 +23,11 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog"
-	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 )
@@ -55,6 +55,8 @@ var logLevel = os.Getenv("LOG_LEVEL")
 
 // 日志中值的最大长度
 var logFieldValueMaxSize = 30
+var maskRegexp *regexp.Regexp
+var fullLogRegexp *regexp.Regexp
 
 var enabledDebugLog = false
 
@@ -143,9 +145,18 @@ func NewEntLogger() *entLogger {
 	return &entLogger{}
 }
 
+// 设置log的两种正则处理
+func SetLogRegexp(mask, full *regexp.Regexp) {
+	maskRegexp = mask
+	fullLogRegexp = full
+}
+
 // cutOrMaskString 将输出数据***或截断处理
 func cutOrMaskString(k, v string) string {
-	if cs.MaskRegExp.MatchString(k) {
+	if fullLogRegexp != nil && fullLogRegexp.MatchString(k) {
+		return v
+	}
+	if maskRegexp != nil && maskRegexp.MatchString(k) {
 		return "***"
 	}
 	return util.CutRune(v, logFieldValueMaxSize)
@@ -153,7 +164,10 @@ func cutOrMaskString(k, v string) string {
 
 // cutOrMaskString 将输出数据***或截断处理
 func cutOrMaskInterface(k string, v interface{}) interface{} {
-	if cs.MaskRegExp.MatchString(k) {
+	if fullLogRegexp != nil && fullLogRegexp.MatchString(k) {
+		return v
+	}
+	if maskRegexp != nil && maskRegexp.MatchString(k) {
 		return "***"
 	}
 	switch v := v.(type) {

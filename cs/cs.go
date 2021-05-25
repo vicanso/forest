@@ -42,4 +42,5 @@ const (
 	ResultFail
 )
 
+// ***处理
 var MaskRegExp = regexp.MustCompile(`(?i)password`)
