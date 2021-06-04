@@ -16,16 +16,16 @@ package profiler
 
 import (
 	"bytes"
-	"errors"
 	"time"
 
 	"github.com/felixge/fgprof"
+	"github.com/vicanso/hes"
 )
 
 func GetProf(d time.Duration) (result *bytes.Buffer, err error) {
 	// 禁止拉取超过1分钟的prof
 	if d > 1*time.Minute {
-		err = errors.New("duration should be less than 1m")
+		err = hes.New("duration should be less than 1m")
 		return
 	}
 	result = &bytes.Buffer{}

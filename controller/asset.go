@@ -18,7 +18,6 @@
 package controller
 
 import (
-	"bytes"
 	"time"
 
 	"github.com/vicanso/elton"
@@ -53,22 +52,9 @@ func init() {
 	}))
 }
 
-// 静态文件响应
-func sendFile(c *elton.Context, file string) (err error) {
-	// 因为静态文件打包至程序中，直接读取
-	buf, err := assetFS.Get(file)
-	if err != nil {
-		return
-	}
-	// 根据文件后续设置类型
-	c.SetContentTypeByExt(file)
-	c.BodyBuffer = bytes.NewBuffer(buf)
-	return
-}
-
 // getIndex 首页
 func (*assetCtrl) getIndex(c *elton.Context) (err error) {
-	err = sendFile(c, "index.html")
+	err = assetFS.SendFile(c, "index.html")
 	if err != nil {
 		return
 	}
@@ -78,7 +64,7 @@ func (*assetCtrl) getIndex(c *elton.Context) (err error) {
 
 // getFavIcon 图标
 func (*assetCtrl) getFavIcon(c *elton.Context) (err error) {
-	err = sendFile(c, "favicon.png")
+	err = assetFS.SendFile(c, "favicon.png")
 	if err != nil {
 		return
 	}

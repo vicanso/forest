@@ -50,20 +50,6 @@ func TestStaticFile(t *testing.T) {
 	assert.Equal(testHTMLContent, string(buf))
 }
 
-func TestSendFile(t *testing.T) {
-	assert := assert.New(t)
-	c := elton.NewContext(httptest.NewRecorder(), nil)
-	err := sendFile(c, "index.html")
-	assert.Nil(err)
-	assert.Equal(testHTMLContent, c.BodyBuffer.String())
-	assert.Equal("text/html; charset=utf-8", c.GetHeader(elton.HeaderContentType))
-
-	err = sendFile(c, "favicon.png")
-	assert.Nil(err)
-	assert.Equal(958, c.BodyBuffer.Len())
-	assert.Equal("image/png", c.GetHeader(elton.HeaderContentType))
-}
-
 func TestAassetCtrl(t *testing.T) {
 	assert := assert.New(t)
 	ctrl := assetCtrl{}

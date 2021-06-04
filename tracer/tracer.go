@@ -25,6 +25,7 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/huandu/go-tls/g"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/util"
 )
 
@@ -45,9 +46,10 @@ func getID() uintptr {
 }
 
 func mustNewTracerCache() *lru.Cache {
-	// 设置缓存，根据系统的访问量调整，需要比request limit大
-	// tracer不依赖项目的模块，因此未直接从config中获取
-	l, err := lru.New(1024 * 10)
+	limit := config.GetBasicConfig().RequestLimit
+	// 由于tracer中记录的数据量较少，因此可以选择更大的容易
+	// 设置为限制请求的10倍大小，尽可能保证tracer可用
+	l, err := lru.New(int(limit) * 10)
 	if err != nil {
 		panic(err)
 	}

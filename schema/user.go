@@ -61,7 +61,7 @@ func GetUserRoleList() []*UserRoleInfo {
 	}
 }
 
-// Mixin 用户表的minxin
+// Mixin 用户表的mixin
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},

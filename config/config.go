@@ -99,10 +99,14 @@ type (
 	}
 	// PostgresConfig postgres配置
 	PostgresConfig struct {
-		URI          string `validate:"required,uri"`
+		// 连接串
+		URI string `validate:"required,uri"`
+		// 最大连接数
 		MaxOpenConns int
+		// 最大空闲连接数
 		MaxIdleConns int
-		MaxIdleTime  time.Duration
+		// 最大空闲时长
+		MaxIdleTime time.Duration
 	}
 	// MailConfig email的配置
 	MailConfig struct {

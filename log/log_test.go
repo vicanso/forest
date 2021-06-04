@@ -19,7 +19,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vicanso/forest/cs"
 )
+
+func init() {
+	SetLogRegexp(cs.MaskRegExp, nil)
+}
 
 func TestCutOrMask(t *testing.T) {
 	assert := assert.New(t)

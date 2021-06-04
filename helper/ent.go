@@ -57,19 +57,16 @@ type entProcessingStats struct {
 // EntEntListParams 公共的列表查询参数
 type EntListParams struct {
 	// 查询limit限制
-	// validate:"required,xLimit"
+	// required: true
 	Limit string `json:"limit" validate:"required,xLimit"`
 
 	// 查询的offset偏移
-	// validate:"omitempty,xOffset"
 	Offset string `json:"offset" validate:"omitempty,xOffset"`
 
 	// 查询筛选的字段，如果多个字段以,分隔
-	// validate:"omitempty,xFields"
 	Fields string `json:"fields" validate:"omitempty,xFields"`
 
 	// 查询的排序字段，如果以-前缀表示降序，如果多个字段以,分隔
-	// validate:"omitempty,xOrder"
 	Order string `json:"order" validate:"omitempty,xOrder"`
 
 	// 忽略计算总数，如果此字段不为空则表示不查询总数
