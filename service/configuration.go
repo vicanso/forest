@@ -40,6 +40,7 @@ type (
 	// SessionInterceptorData session拦截的数据
 	SessionInterceptorData struct {
 		Message       string   `json:"message"`
+		AllowAccount  string   `json:"allowAccount"`
 		AllowAccounts []string `json:"allowAccounts"`
 		AllowRoutes   []string `json:"allowRoutes"`
 	}
@@ -208,6 +209,9 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 				Err(err).
 				Msg("session interceptor config is invalid")
 			AlarmError("session interceptor config is invalid:" + err.Error())
+		}
+		if len(interData.AllowAccounts) == 0 && interData.AllowAccount != "" {
+			interData.AllowAccounts = strings.Split(interData.AllowAccount, ",")
 		}
 		sessionInterceptorConfig.Store(sessionInterceptorKey, interData)
 	}

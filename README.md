@@ -119,3 +119,7 @@ docker run -d --restart=always \
 - 所有自定义的error都必须为hes.Error
 - 数值类的展示需要使用专用组件
 - 用户点击类的操作需要使用专用组件
+
+## 常见问题
+
+- esbuild提示未成功安装，执行`node node_modules/esbuild/install.js`

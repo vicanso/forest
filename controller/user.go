@@ -436,8 +436,12 @@ func (params *userLoginListParams) where(query *ent.UserLoginQuery) *ent.UserLog
 	if params.Account != "" {
 		query = query.Where(userlogin.AccountEQ(params.Account))
 	}
-	query = query.Where(userlogin.CreatedAtGTE(params.Begin))
-	query = query.Where(userlogin.CreatedAtLTE(params.End))
+	if !params.Begin.IsZero() {
+		query = query.Where(userlogin.CreatedAtGTE(params.Begin))
+	}
+	if !params.End.IsZero() {
+		query = query.Where(userlogin.CreatedAtLTE(params.End))
+	}
 	return query
 }
 

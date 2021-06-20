@@ -32,6 +32,7 @@ import (
 type (
 	// RouterConfig 路由配置信息
 	RouterConfig struct {
+		Router     string `json:"router"`
 		Route      string `json:"route"`
 		Method     string `json:"method"`
 		Status     int    `json:"status"`
@@ -167,6 +168,11 @@ func updateRouterMockConfigs(configs []string) {
 				Msg("router config is invalid")
 			AlarmError("router config is invalid:" + err.Error())
 			continue
+		}
+		arr := strings.Split(v.Router, " ")
+		if len(arr) == 2 {
+			v.Method = arr[0]
+			v.Route = arr[1]
 		}
 		// 如果未配置Route或者method的则忽略
 		if v.Route == "" || v.Method == "" {

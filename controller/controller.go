@@ -76,6 +76,13 @@ var (
 	fileSrv = &service.FileSrv{}
 )
 
+type (
+	trackerExtraParams struct {
+		// 步骤（tag)
+		Step string
+	}
+)
+
 func newMagicalCaptchaValidate() elton.Handler {
 	magicValue := ""
 	if !util.IsProduction() {
@@ -138,10 +145,14 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 }
 
 // newTrackerMiddleware 初始化用户行为跟踪中间件
-func newTrackerMiddleware(action string, step ...string) elton.Handler {
+func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Handler {
 	marshalString := func(data interface{}) string {
 		buf, _ := json.Marshal(data)
 		return string(buf)
+	}
+	var extraParams *trackerExtraParams
+	if len(params) != 0 {
+		extraParams = &params[0]
 	}
 	return M.NewTracker(M.TrackerConfig{
 		Mask: cs.MaskRegExp,
@@ -174,8 +185,8 @@ func newTrackerMiddleware(action string, step ...string) elton.Handler {
 				fields[cs.FieldError] = info.Err.Error()
 			}
 			currentStep := ""
-			if len(step) != 0 {
-				currentStep = step[0]
+			if extraParams != nil {
+				currentStep = extraParams.Step
 			}
 			event := log.Default().Info().
 				Str("category", "tracker").

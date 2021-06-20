@@ -1,18 +1,21 @@
-import { reactive, readonly, DeepReadonly } from "vue";
-
-import request from "../helpers/request";
-import { sha256 } from "../helpers/crypto";
+import { DeepReadonly, reactive, readonly } from "vue";
 import {
   USERS_ME,
   USERS_LOGIN,
   USERS_INNER_LOGIN,
-  USERS_LOGINS,
-  USERS_ROLES,
   USERS,
-  USERS_ID,
-  USERS_ME_DETAIL,
+  USERS_LOGINS,
 } from "../constants/url";
-import { generatePassword } from "../helpers/util";
+// eslint-disable-next-line
+// @ts-ignore
+import { sha256 } from "../helpers/crypto";
+import request from "../helpers/request";
+
+const hash = "JT";
+
+function generatePassword(pass: string): string {
+  return sha256(hash + sha256(pass + hash));
+}
 
 // 用户信息
 interface UserInfo {
@@ -30,20 +33,6 @@ const info: UserInfo = reactive({
   roles: [],
 });
 
-interface UserRole {
-  name: string;
-  value: string;
-}
-interface UserRoles {
-  processing: boolean;
-  items: UserRole[];
-}
-
-const roles: UserRoles = reactive({
-  processing: false,
-  items: [],
-});
-
 // 用户账户信息
 interface UserAccount {
   id: number;
@@ -52,6 +41,7 @@ interface UserAccount {
   roles: string[];
   email: string;
   status: number;
+  statusDesc: string;
 }
 // 用户账户列表
 interface UserAccounts {
@@ -64,6 +54,17 @@ const users: UserAccounts = reactive({
   count: -1,
   items: [],
 });
+
+const accountStatusDesc = ["启用", "禁用"];
+function fillUserAccountInfo(data: UserAccount) {
+  data.statusDesc = accountStatusDesc[data.status - 1] || "未知";
+}
+function fillUserInfo(data: UserInfo) {
+  info.account = data.account;
+  info.date = data.date;
+  info.roles = data.roles || [];
+  info.groups = data.groups || [];
+}
 
 // 用户登录信息
 interface UserLoginRecord {
@@ -79,6 +80,7 @@ interface UserLoginRecord {
   isp?: string;
   updatedAt?: string;
   createdAt?: string;
+  location?: string;
 }
 // 用户登录列表
 interface UserLoginRecords {
@@ -93,19 +95,15 @@ const logins: UserLoginRecords = reactive({
   items: [],
 });
 
-// 仅读用户state
-interface ReadonlyUserState {
-  info: DeepReadonly<UserInfo>;
-  logins: DeepReadonly<UserLoginRecords>;
-  users: DeepReadonly<UserAccounts>;
-  roles: DeepReadonly<UserRoles>;
-}
-
-function fillUserInfo(data: UserInfo) {
-  info.account = data.account;
-  info.date = data.date;
-  info.roles = data.roles || [];
-  info.groups = data.groups || [];
+function fillUserLoginRecord(data: UserLoginRecord) {
+  const arr: string[] = [];
+  if (data.province) {
+    arr.push(data.province);
+  }
+  if (data.city) {
+    arr.push(data.city);
+  }
+  data.location = arr.join("");
 }
 
 // userFetchInfo 拉取用户信息
@@ -123,38 +121,21 @@ export async function userFetchInfo(): Promise<void> {
   }
 }
 
-// userFetchDetail 拉取个人详细信息， 仅在个人信息页使用，因此不记录state
-export async function userFetchDetail(): Promise<UserAccount> {
-  const { data } = await request.get(USERS_ME_DETAIL);
-  return <UserAccount>data;
-}
-
-// userLogin 用户登录
-export async function userLogin(params: {
-  account: string;
-  password: string;
-  captcha: string;
-}): Promise<void> {
+// userLogout 退出登录
+export async function userLogout(): Promise<void> {
   if (info.processing) {
     return;
   }
   try {
     info.processing = true;
-    const resp = await request.get(USERS_LOGIN);
-    const { token } = resp.data;
-    const { data } = await request.post(
-      USERS_INNER_LOGIN,
-      {
-        account: params.account,
-        password: sha256(generatePassword(params.password) + token),
-      },
-      {
-        headers: {
-          "X-Captcha": params.captcha,
-        },
-      }
-    );
-    fillUserInfo(<UserInfo>data);
+    await request.delete(USERS_ME);
+    fillUserInfo({
+      account: "",
+      roles: [],
+      groups: [],
+      date: "",
+      processing: false,
+    });
   } finally {
     info.processing = false;
   }
@@ -192,48 +173,69 @@ export async function userRegister(params: {
   }
 }
 
-// userLogout 退出登录
-export async function userLogout(): Promise<void> {
-  if (info.processing) {
-    return;
-  }
-  try {
-    info.processing = true;
-    await request.delete(USERS_ME);
-    fillUserInfo({
-      account: "",
-      roles: [],
-      groups: [],
-      date: "",
-      processing: false,
-    });
-  } finally {
-    info.processing = false;
-  }
-}
-
-// userUpdate 更新用户信息
-export async function userUpdate(params: {
-  password?: string;
-  newPassword?: string;
-  roles?: string[];
+// userLogin 用户登录
+export async function userLogin(params: {
+  account: string;
+  password: string;
+  captcha: string;
 }): Promise<void> {
   if (info.processing) {
     return;
   }
   try {
     info.processing = true;
-    const data = Object.assign({}, params);
-    if (data.password) {
-      data.password = generatePassword(data.password);
-    }
-    if (data.newPassword) {
-      data.newPassword = generatePassword(data.newPassword);
-    }
-    await request.patch(USERS_ME, data);
+    const resp = await request.get(USERS_LOGIN);
+    const { token } = resp.data;
+    const { data } = await request.post(
+      USERS_INNER_LOGIN,
+      {
+        account: params.account,
+        password: sha256(generatePassword(params.password) + token),
+      },
+      {
+        headers: {
+          "X-Captcha": params.captcha,
+        },
+      }
+    );
+    fillUserInfo(<UserInfo>data);
   } finally {
     info.processing = false;
   }
+}
+
+// userList 查询用户
+export async function userList(params: {
+  keyword?: string;
+  limit: number;
+  offset: number;
+  role?: string;
+  status?: string;
+  order?: string;
+}): Promise<void> {
+  if (users.processing) {
+    return;
+  }
+  try {
+    users.processing = true;
+    const { data } = await request.get(USERS, {
+      params,
+    });
+    const count = data.count || 0;
+    if (count >= 0) {
+      users.count = count;
+    }
+    users.items = data.users || [];
+    users.items.forEach(fillUserAccountInfo);
+  } finally {
+    users.processing = false;
+  }
+}
+
+// userListClear 清空用户记录
+export function userListClear(): void {
+  users.count = -1;
+  users.items.length = 0;
 }
 
 // userListLogin 查询用户登录记录
@@ -258,6 +260,7 @@ export async function userListLogin(params: {
       logins.count = count;
     }
     logins.items = data.userLogins || [];
+    logins.items.forEach(fillUserLoginRecord);
   } finally {
     logins.processing = false;
   }
@@ -269,96 +272,19 @@ export function userLoginClear(): void {
   logins.items.length = 0;
 }
 
-// userList 查询用户
-export async function userList(params: {
-  keyword?: string;
-  limit: number;
-  offset: number;
-  role?: string;
-  status?: number;
-  order?: string;
-}): Promise<void> {
-  if (users.processing) {
-    return;
-  }
-  try {
-    users.processing = true;
-    const { data } = await request.get(USERS, {
-      params,
-    });
-    const count = data.count || 0;
-    if (count >= 0) {
-      users.count = count;
-    }
-    users.items = data.users || [];
-  } finally {
-    users.processing = false;
-  }
-}
-
-// userListClear 清空用户记录
-export function userListClear(): void {
-  users.count = -1;
-  users.items.length = 0;
-}
-
-// userFindByID 通过ID查询用户
-export async function userFindByID(id: number): Promise<UserAccount> {
-  const { data } = await request.get(USERS_ID.replace(":id", `${id}`));
-  return <UserAccount>data;
-}
-
-// userUpdateByID 通过ID更新用户
-export async function userUpdateByID(params: {
-  id: number;
-  data: Record<string, unknown>;
-}): Promise<void> {
-  if (users.processing) {
-    return;
-  }
-  const data = Object.assign({}, params.data);
-  try {
-    users.processing = true;
-    // 如果groups未设置，则清空
-    ["groups"].forEach((key) => {
-      const value = data[key];
-      if (value && Array.isArray(value) && value.length === 0) {
-        delete data[key];
-      }
-    });
-    await request.patch(USERS_ID.replace(":id", `${params.id}`), data);
-    const items = users.items.slice(0);
-    items.forEach((item) => {
-      if (item.id === params.id) {
-        Object.assign(item, data);
-      }
-    });
-    users.items = items;
-  } finally {
-    users.processing = false;
-  }
-}
-
-// userListRole 查询用户角色
-export async function userListRole(): Promise<void> {
-  if (roles.processing || roles.items.length !== 0) {
-    return;
-  }
-  try {
-    roles.processing = true;
-    const { data } = await request.get(USERS_ROLES);
-    roles.items = data.userRoles || [];
-  } finally {
-    roles.processing = false;
-  }
+// 仅读用户state
+interface ReadonlyUserState {
+  info: DeepReadonly<UserInfo>;
+  users: DeepReadonly<UserAccounts>;
+  logins: DeepReadonly<UserLoginRecords>;
 }
 
 const state = {
   info: readonly(info),
-  logins: readonly(logins),
   users: readonly(users),
-  roles: readonly(roles),
+  logins: readonly(logins),
 };
+
 // useUserState 使用用户state
 export default function useUserState(): ReadonlyUserState {
   return state;

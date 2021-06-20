@@ -1,13 +1,11 @@
-import request from "../helpers/request";
+import { DeepReadonly, reactive, readonly } from "vue";
 import {
   COMMONS_CAPTCHA,
   COMMONS_ROUTERS,
-  COMMONS_STATUSES,
-  COMMONS_RANDOM_KEYS,
   COMMONS_HTTP_STATS,
 } from "../constants/url";
-import { DeepReadonly, reactive, readonly } from "vue";
-
+import request from "../helpers/request";
+import { settingStorage } from "../storages/local";
 interface Captcha {
   data: string;
   expiredAt: string;
@@ -15,17 +13,12 @@ interface Captcha {
   type: string;
 }
 
-interface Status {
-  name: string;
-  value: number;
+interface Settings {
+  theme: string;
 }
-interface Statuses {
-  processing: boolean;
-  items: Status[];
-}
-const statuses: Statuses = reactive({
-  processing: false,
-  items: [],
+
+const settings: Settings = reactive({
+  theme: "dark",
 });
 
 // 路由配置
@@ -42,37 +35,23 @@ const routers: Routers = reactive({
   items: [],
 });
 
-// 随机数
-interface RandomKeys {
-  processing: boolean;
-  items: string[];
-}
-const randomKeys: RandomKeys = reactive({
-  processing: false,
-  items: [],
-});
-
 // http实例
-interface HTTPInstance {
+interface RequestInstance {
   name: string;
   maxConcurrency: number;
   concurrency: number;
 }
-interface HTTPInstances {
+interface RequestInstances {
   processing: boolean;
-  items: HTTPInstance[];
+  items: RequestInstance[];
 }
-const httpInstances: HTTPInstances = reactive({
+const requestInstances: RequestInstances = reactive({
   processing: false,
   items: [],
 });
 
-// 仅读通用state
-interface ReadonlyCommonState {
-  statuses: DeepReadonly<Statuses>;
-  routers: DeepReadonly<Routers>;
-  randomKeys: DeepReadonly<RandomKeys>;
-  httpInstances: DeepReadonly<HTTPInstances>;
+export function commonGetEmptyCaptcha(): Captcha {
+  return <Captcha>{};
 }
 
 // commonGetCaptcha 获取图形验证码
@@ -81,18 +60,16 @@ export async function commonGetCaptcha(): Promise<Captcha> {
   return <Captcha>data;
 }
 
-// commonListStatus 获取状态列表
-export async function commonListStatus(): Promise<void> {
-  if (statuses.processing || statuses.items.length !== 0) {
-    return;
+export async function commonGetSettings(): Promise<void> {
+  const data = await settingStorage.load();
+  if (data.theme) {
+    settings.theme = data.theme as string;
   }
-  try {
-    statuses.processing = true;
-    const { data } = await request.get(COMMONS_STATUSES);
-    statuses.items = data.statuses || [];
-  } finally {
-    statuses.processing = false;
-  }
+}
+
+export async function commonSetSettingTheme(theme: string): Promise<void> {
+  await settingStorage.set("theme", theme);
+  settings.theme = theme;
 }
 
 // commonListRouter 获取路由列表
@@ -109,46 +86,32 @@ export async function commonListRouter(): Promise<void> {
   }
 }
 
-// commonListRandomKey 获取随机字符串
-export async function commonListRandomKey(): Promise<void> {
-  if (randomKeys.processing) {
+// 获取http request实例
+export async function commonListRequestInstance(): Promise<void> {
+  if (requestInstances.processing || requestInstances.items.length !== 0) {
     return;
   }
   try {
-    randomKeys.processing = true;
-    const { data } = await request.get(COMMONS_RANDOM_KEYS, {
-      params: {
-        size: 10,
-        n: 5,
-      },
-    });
-    randomKeys.items = data.keys || [];
+    requestInstances.processing = true;
+    const { data } = await request.get(COMMONS_HTTP_STATS);
+    requestInstances.items = data.statusList;
   } finally {
-    randomKeys.processing = false;
+    requestInstances.processing = false;
   }
 }
 
-// commonListHTTPInstance 获取http实例
-export async function commonListHTTPInstance(): Promise<void> {
-  if (httpInstances.processing || httpInstances.items.length !== 0) {
-    return;
-  }
-  try {
-    httpInstances.processing = true;
-    const { data } = await request.get(COMMONS_HTTP_STATS);
-    httpInstances.items = data.statusList;
-  } finally {
-    httpInstances.processing = false;
-  }
+interface ReadonlyCommonState {
+  settings: DeepReadonly<Settings>;
+  routers: DeepReadonly<Routers>;
+  requestInstances: DeepReadonly<RequestInstances>;
 }
 
 const state = {
-  statuses: readonly(statuses),
+  settings: readonly(settings),
   routers: readonly(routers),
-  randomKeys: readonly(randomKeys),
-  httpInstances: readonly(httpInstances),
+  requestInstances: readonly(requestInstances),
 };
-// useCommonState 使用通用state
+
 export default function useCommonState(): ReadonlyCommonState {
   return state;
 }

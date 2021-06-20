@@ -74,16 +74,17 @@ func NewError() elton.Handler {
 			account = us.MustGetInfo().Account
 		}
 
+		ip := c.RealIP()
 		log.Default().Info().
 			Str("catgory", "httpError").
 			Bool("exception", he.Exception).
+			Str("ip", ip).
 			Str("method", c.Request.Method).
 			Str("route", c.Route).
 			Str("uri", uri).
 			Str("error", he.Error()).
 			Msg("")
 
-		ip := c.RealIP()
 		// 出错则按IP + 1
 		errorWarner.Inc(ip, 1)
 		sid := util.GetSessionID(c)

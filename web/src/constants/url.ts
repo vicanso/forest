@@ -6,16 +6,18 @@ export const USERS_ME_DETAIL = "/users/v1/detail";
 // 用户登录
 export const USERS_LOGIN = "/users/v1/me/login";
 export const USERS_INNER_LOGIN = "/users/inner/v1/me/login";
-// 用户行为
-export const USERS_ACTIONS = "/users/v1/actions";
-// 用户登录记录
-export const USERS_LOGINS = "/users/v1/login-records";
-// 用户角色列表
-export const USERS_ROLES = "/users/v1/roles";
 // 用户列表
 export const USERS = "/users/v1";
-// 根据ID查询用户信息
-export const USERS_ID = "/users/v1/:id";
+// 用户登录记录
+export const USERS_LOGINS = "/users/v1/login-records";
+
+// 通用接口相关url
+// 图形验证码
+export const COMMONS_CAPTCHA = "/commons/captcha";
+// 路由列表
+export const COMMONS_ROUTERS = "/commons/routers";
+// HTTP性能指标统计
+export const COMMONS_HTTP_STATS = "/commons/http-stats";
 
 // flux相关查询
 // 用户行为日志列表
@@ -28,18 +30,6 @@ export const FLUXES_ACTIONS = "/fluxes/v1/actions";
 export const FLUXES_REQUESTS = "/fluxes/v1/requests";
 // tag value列表
 export const FLUXES_TAG_VALUES = "/fluxes/v1/tag-values/:measurement/:tag";
-
-// 通用接口相关url
-// 图形验证码
-export const COMMONS_CAPTCHA = "/commons/captcha";
-// schema状态列表
-export const COMMONS_STATUSES = "/commons/schema-statuses";
-// 路由列表
-export const COMMONS_ROUTERS = "/commons/routers";
-// 随机字符串
-export const COMMONS_RANDOM_KEYS = "/commons/random-keys";
-// HTTP性能指标统计
-export const COMMONS_HTTP_STATS = "/commons/http-stats";
 
 // 系统配置相关url
 // 配置列表

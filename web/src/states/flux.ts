@@ -3,19 +3,39 @@ import {
   FLUXES_TRACKERS,
   FLUXES_HTTP_ERRORS,
   FLUXES_TAG_VALUES,
-  FLUXES_ACTIONS,
   FLUXES_REQUESTS,
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
+import { formatDate } from "../helpers/util";
+
+function sortByTime(
+  item1: {
+    _time: string;
+  },
+  item2: {
+    _time: string;
+  }
+) {
+  if (item1._time === item2._time) {
+    return 0;
+  }
+  if (item1._time > item2._time) {
+    return -1;
+  }
+  return 1;
+}
 
 // 用户行为轨迹
 interface UserTracker {
   _time: string;
+  key: string;
+  createdAt: string;
   account: string;
   action: string;
   hostname: string;
   ip: string;
   result: string;
+  resultDesc: string;
   sid: string;
   tid: string;
   form: string;
@@ -46,44 +66,31 @@ const userTrackerActions: UserTrackerActions = reactive({
   items: [],
 });
 
-// 客户端行为记录类型
-interface ClientActionCategories {
+function fillUserTrackerInfo(data: UserTracker) {
+  if (data.result === "0") {
+    data.resultDesc = "成功";
+  } else {
+    data.resultDesc = "失败";
+  }
+  data.key = data._time;
+  data.createdAt = formatDate(data._time);
+}
+
+// HTTP出错类型
+interface HTTPErrorCategories {
   processing: boolean;
   items: string[];
 }
-const clientActionCategories: ClientActionCategories = reactive({
+const httpErrorCategories: HTTPErrorCategories = reactive({
   processing: false,
   items: [],
-});
-
-// 客户端行为记录
-interface ClientAction {
-  _time: string;
-  account: string;
-  category: string;
-  hostname: string;
-  path: string;
-  result: string;
-  route: string;
-  tid: string;
-  message: string;
-}
-interface ClientActions {
-  processing: boolean;
-  items: ClientAction[];
-  count: number;
-  flux: string;
-}
-const clientActions: ClientActions = reactive({
-  processing: false,
-  items: [],
-  count: -1,
-  flux: "",
 });
 
 // HTTPError 客户端HTTP请求出错记录
 interface HTTPError {
   _time: string;
+  createdAt: string;
+  key: string;
   account: string;
   category: string;
   error: string;
@@ -110,19 +117,16 @@ const httpErrors: HTTPErrors = reactive({
   flux: "",
 });
 
-// HTTP出错类型
-interface HTTPErrorCategories {
-  processing: boolean;
-  items: string[];
+function fillHTTPErrorInfo(data: HTTPError) {
+  data.key = data._time;
+  data.createdAt = formatDate(data._time);
 }
-const httpErrorCategories: HTTPErrorCategories = reactive({
-  processing: false,
-  items: [],
-});
 
 // 后端HTTP请求记录
 interface Request {
   _time: string;
+  key: string;
+  createdAt: string;
   hostname: string;
   addr: string;
   service: string;
@@ -174,16 +178,9 @@ const requestRoutes: RequestRoutes = reactive({
   items: [],
 });
 
-interface ReadonlyFluxState {
-  userTrackers: DeepReadonly<UserTrackers>;
-  userTrackerActions: DeepReadonly<UserTrackerActions>;
-  httpErrorCategories: DeepReadonly<HTTPErrorCategories>;
-  httpErrors: DeepReadonly<HTTPErrors>;
-  requests: DeepReadonly<Requests>;
-  requestServices: DeepReadonly<RequestServices>;
-  requestRoutes: DeepReadonly<RequestRoutes>;
-  clientActions: DeepReadonly<ClientActions>;
-  clientActionCategories: DeepReadonly<ClientActionCategories>;
+function fillRequestInfo(data: Request) {
+  data.key = data._time;
+  data.createdAt = formatDate(data._time);
 }
 
 // fluxListUserTracker 查询用户跟踪轨迹记录
@@ -193,7 +190,6 @@ export async function fluxListUserTracker(params: {
   begin: string;
   end: string;
   limit: number;
-  offset: number;
   result?: string;
 }): Promise<void> {
   if (userTrackers.processing) {
@@ -205,18 +201,13 @@ export async function fluxListUserTracker(params: {
       params,
     });
     userTrackers.items = data.trackers || [];
+    userTrackers.items.sort(sortByTime);
     userTrackers.count = data.count || 0;
     userTrackers.flux = data.flux || "";
+    userTrackers.items.forEach(fillUserTrackerInfo);
   } finally {
     userTrackers.processing = false;
   }
-}
-
-// fluxListUserTrackerClear 清除tracker记录
-export function fluxListUserTrackerClear(): void {
-  userTrackers.items.length = 0;
-  userTrackers.count = -1;
-  userTrackers.flux = "";
 }
 
 // fluxListUserTrackAction 查询用户轨迹action列表
@@ -231,10 +222,17 @@ export async function fluxListUserTrackAction(): Promise<void> {
       "userTracker"
     ).replace(":tag", "action");
     const { data } = await request.get(url);
-    userTrackerActions.items = data.values || [];
+    userTrackerActions.items = (data.values || []).sort();
   } finally {
     userTrackerActions.processing = false;
   }
+}
+
+// fluxListUserTrackerClear 清除tracker记录
+export function fluxListUserTrackerClear(): void {
+  userTrackers.items.length = 0;
+  userTrackers.count = -1;
+  userTrackers.flux = "";
 }
 
 // fluxListHTTPCategory 查询HTTP出错类型列表
@@ -252,7 +250,7 @@ export async function fluxListHTTPCategory(): Promise<void> {
       "category"
     );
     const { data } = await request.get(url);
-    httpErrorCategories.items = data.values || [];
+    httpErrorCategories.items = (data.values || []).sort();
   } finally {
     httpErrorCategories.processing = false;
   }
@@ -266,7 +264,6 @@ export async function fluxListHTTPError(params: {
   end: string;
   exception?: string;
   limit: number;
-  offset: number;
 }): Promise<void> {
   if (httpErrors.processing) {
     return;
@@ -279,6 +276,8 @@ export async function fluxListHTTPError(params: {
     httpErrors.items = data.httpErrors || [];
     httpErrors.count = data.count || 0;
     httpErrors.flux = data.flux || "";
+    httpErrors.items.forEach(fillHTTPErrorInfo);
+    httpErrors.items.sort(sortByTime);
   } finally {
     httpErrors.processing = false;
   }
@@ -291,60 +290,6 @@ export function fluxListHTTPErrorClear(): void {
   httpErrors.flux = "";
 }
 
-// fluxListClientActionCategory 查询客户端行为分类
-export async function fluxListClientActionCategory(): Promise<void> {
-  if (
-    clientActionCategories.processing ||
-    clientActionCategories.items.length !== 0
-  ) {
-    return;
-  }
-  try {
-    clientActionCategories.processing = true;
-    const url = FLUXES_TAG_VALUES.replace(":measurement", "userAction").replace(
-      ":tag",
-      "category"
-    );
-    const { data } = await request.get(url);
-    clientActionCategories.items = data.values || [];
-  } finally {
-    clientActionCategories.processing = false;
-  }
-}
-
-// fluxListClientAction 查询客户端行为记录
-export async function fluxListClientAction(params: {
-  account?: string;
-  category?: string;
-  begin: string;
-  end: string;
-  limit: number;
-  offset: number;
-  result?: string;
-}): Promise<void> {
-  if (clientActions.processing) {
-    return;
-  }
-  try {
-    clientActions.processing = true;
-    const { data } = await request.get(FLUXES_ACTIONS, {
-      params,
-    });
-    clientActions.items = data.actions || [];
-    clientActions.count = data.count || 0;
-    clientActions.flux = data.flux || "";
-  } finally {
-    clientActions.processing = false;
-  }
-}
-
-// fluxListClientActionClear 清空客户端行为
-export function fluxListClientActionClear(): void {
-  clientActions.items.length = 0;
-  clientActions.count = -1;
-  clientActions.flux = "";
-}
-
 // fluxListRequest 查询后端请求记录
 export async function fluxListRequest(params: {
   route?: string;
@@ -354,7 +299,6 @@ export async function fluxListRequest(params: {
   end: string;
   exception?: string;
   limit: number;
-  offset: number;
 }): Promise<void> {
   if (requests.processing) {
     return;
@@ -367,6 +311,8 @@ export async function fluxListRequest(params: {
     requests.items = data.requests || [];
     requests.count = data.count || 0;
     requests.flux = data.flux || "";
+    requests.items.forEach(fillRequestInfo);
+    requests.items.sort(sortByTime);
   } finally {
     requests.processing = false;
   }
@@ -415,17 +361,26 @@ export async function fluxListRequestRoute(): Promise<void> {
   }
 }
 
+interface ReadonlyFluxState {
+  userTrackers: DeepReadonly<UserTrackers>;
+  userTrackerActions: DeepReadonly<UserTrackerActions>;
+  httpErrors: DeepReadonly<HTTPErrors>;
+  httpErrorCategories: DeepReadonly<HTTPErrorCategories>;
+  requests: DeepReadonly<Requests>;
+  requestServices: DeepReadonly<RequestServices>;
+  requestRoutes: DeepReadonly<RequestRoutes>;
+}
+
 const state = {
   userTrackers: readonly(userTrackers),
   userTrackerActions: readonly(userTrackerActions),
-  httpErrorCategories: readonly(httpErrorCategories),
   httpErrors: readonly(httpErrors),
+  httpErrorCategories: readonly(httpErrorCategories),
   requests: readonly(requests),
   requestServices: readonly(requestServices),
   requestRoutes: readonly(requestRoutes),
-  clientActions: readonly(clientActions),
-  clientActionCategories: readonly(clientActionCategories),
 };
+
 export default function useFluxState(): ReadonlyFluxState {
   return state;
 }

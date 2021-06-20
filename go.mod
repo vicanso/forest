@@ -38,10 +38,10 @@ require (
 	github.com/vicanso/ips v1.2.1
 	github.com/vicanso/lru-ttl v0.5.0
 	github.com/vicanso/viperx v0.1.4
-	go.uber.org/atomic v1.7.0
+	go.uber.org/atomic v1.8.0
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/image v0.0.0-20210504121937-7319ad40d33e
+	golang.org/x/image v0.0.0-20210607152325-775e3b0c77b9
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

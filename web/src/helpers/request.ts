@@ -3,7 +3,7 @@ import { gzip } from "pako";
 
 import HTTPError from "./http-error";
 import { isDevelopment } from "../constants/env";
-import { httpRequests } from "../store";
+// import { httpRequests } from "../store";
 
 const requestedAt = "X-Requested-At";
 // 最小压缩长度
@@ -71,7 +71,7 @@ function addRequestStats(
   if (he) {
     data.message = he.message;
   }
-  httpRequests.add(data);
+  // httpRequests.add(data);
 }
 
 // 设置接口最少要x ms才完成，能让客户看到loading

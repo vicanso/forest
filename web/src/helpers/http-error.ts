@@ -1,4 +1,4 @@
-class HTTPError {
+class HTTPError extends Error {
   // http状态码
   status: number;
   // 是否异常
@@ -14,6 +14,7 @@ class HTTPError {
   // 其它一些额外的信息
   extra?: Record<string, unknown>;
   constructor(status: number, message: string) {
+    super(message);
     this.status = status;
     this.message = message;
   }
