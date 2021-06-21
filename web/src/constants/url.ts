@@ -10,6 +10,7 @@ export const USERS_INNER_LOGIN = "/users/inner/v1/me/login";
 export const USERS = "/users/v1";
 // 用户登录记录
 export const USERS_LOGINS = "/users/v1/login-records";
+export const USERS_ID = "/users/v1/:id";
 
 // 通用接口相关url
 // 图形验证码

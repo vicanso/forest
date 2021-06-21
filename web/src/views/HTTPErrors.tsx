@@ -9,6 +9,7 @@ import useFluxState, {
 } from "../states/flux";
 import { today } from "../helpers/util";
 import ExLoading from "../components/ExLoading";
+import { FormItemTypes } from "../components/ExForm";
 
 function getColumns() {
   return [
@@ -61,6 +62,7 @@ function getColumns() {
     {
       title: "URI",
       key: "uri",
+      width: 200,
     },
     {
       title: "出错信息",
@@ -97,14 +99,14 @@ function getFilters() {
       key: "category",
       name: "分类：",
       placeholder: "请选择要筛选的分类",
-      type: "select",
+      type: FormItemTypes.Select,
       options: categoryOptions,
     },
     {
       key: "exception",
       name: "是否异常",
       placeholder: "请选择是否筛选异常出错",
-      type: "select",
+      type: FormItemTypes.Select,
       options: [
         {
           label: "所有",
@@ -123,13 +125,13 @@ function getFilters() {
     {
       key: "limit",
       name: "查询数量：",
-      type: "inputNumber",
+      type: FormItemTypes.InputNumber,
       placeholder: "请输入要查询的记录数量",
     },
     {
       key: "begin:end",
       name: "开始结束时间：",
-      type: "daterange",
+      type: FormItemTypes.DateRange,
       span: 12,
       defaultValue: [today().toISOString(), new Date().toISOString()],
     },

@@ -29,6 +29,7 @@ export enum FormItemTypes {
   Select = "select",
   MultiSelect = "multiselect",
   DateTime = "datetime",
+  DateRange = "datrange",
   InputNumber = "inputnumber",
   TextArea = "textarea",
   Blank = "blank",

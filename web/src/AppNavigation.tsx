@@ -1,9 +1,10 @@
-import { ChartBar, Cogs, User, Deezer } from "@vicons/fa";
+import { ChartBar, Cogs, Deezer, User } from "@vicons/fa";
 import { NButton, NIcon, NMenu } from "naive-ui";
 import { Component, defineComponent, h } from "vue";
 import { containsAny } from "./helpers/util";
 import { goTo, goToLogin } from "./routes";
 import { names } from "./routes/routes";
+import useCommonState from "./states/common";
 import useUserState from "./states/user";
 
 function renderIcon(icon: Component) {
@@ -104,7 +105,9 @@ export default defineComponent({
   name: "AppNavigation",
   setup() {
     const { info } = useUserState();
+    const { settings } = useCommonState();
     return {
+      settings,
       userInfo: info,
       handleNavigation(key: string): void {
         goTo(key, {
@@ -114,7 +117,7 @@ export default defineComponent({
     };
   },
   render() {
-    const { userInfo, $router } = this;
+    const { userInfo, $router, settings } = this;
     if (userInfo.processing) {
       return <p class="tac">...</p>;
     }
@@ -142,8 +145,8 @@ export default defineComponent({
         defaultExpandAll={true}
         onUpdate:value={this.handleNavigation}
         options={options}
-        inverted={true}
         collapsedWidth={64}
+        collapsed={settings.collapsed}
       />
     );
   },

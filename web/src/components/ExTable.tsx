@@ -2,22 +2,23 @@ import {
   NButton,
   NCard,
   NDataTable,
+  NDatePicker,
   NForm,
   NFormItem,
   NGrid,
   NGridItem,
   NInput,
+  NInputNumber,
   NPagination,
   NSelect,
   NSpin,
   useMessage,
-  NDatePicker,
-  NInputNumber,
 } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { Component, defineComponent, onMounted, ref } from "vue";
 import { padding } from "../constants/style";
-import { showError, today, getDaysAgo, yesterday } from "../helpers/util";
+import { getDaysAgo, showError, today, yesterday } from "../helpers/util";
+import { FormItemTypes } from "./ExForm";
 
 interface Filter {
   type?: string;
@@ -83,7 +84,7 @@ export default defineComponent({
         return;
       }
       switch (filter.type) {
-        case "daterange": {
+        case FormItemTypes.DateRange: {
           const arr = filter.key.split(":");
           const values = filter.defaultValue as [];
           arr.forEach((key, index) => {
@@ -148,9 +149,10 @@ export default defineComponent({
       currentSpan += span;
       let component: Component;
       switch (filterItem.type) {
-        case "select":
+        case FormItemTypes.Select:
           component = (
             <NSelect
+              filterable
               size={size}
               options={filterItem.options || []}
               placeholder={filterItem.placeholder}
@@ -160,7 +162,7 @@ export default defineComponent({
             ></NSelect>
           );
           break;
-        case "inputNumber":
+        case FormItemTypes.InputNumber:
           component = (
             <NInputNumber
               class="widthFull"
@@ -172,7 +174,7 @@ export default defineComponent({
             />
           );
           break;
-        case "daterange": {
+        case FormItemTypes.DateRange: {
           let defaultValue: [number, number] | null = null;
           if (filterItem.defaultValue) {
             const arr = filterItem.defaultValue as [];

@@ -5,6 +5,7 @@ import {
   USERS_INNER_LOGIN,
   USERS,
   USERS_LOGINS,
+  USERS_ID,
 } from "../constants/url";
 // eslint-disable-next-line
 // @ts-ignore
@@ -270,6 +271,14 @@ export async function userListLogin(params: {
 export function userLoginClear(): void {
   logins.count = -1;
   logins.items.length = 0;
+}
+
+// userUpdateByID 通过ID更新用户
+export async function userUpdateByID(params: {
+  id: number;
+  data: Record<string, unknown>;
+}): Promise<void> {
+  await request.patch(USERS_ID.replace(":id", `${params.id}`), params.data);
 }
 
 // 仅读用户state

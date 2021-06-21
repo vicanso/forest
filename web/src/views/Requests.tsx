@@ -10,6 +10,7 @@ import useFluxState, {
 } from "../states/flux";
 import ExTable from "../components/ExTable";
 import { getHoursAge } from "../helpers/util";
+import { FormItemTypes } from "../components/ExForm";
 
 const serviceOptions = [
   {
@@ -30,7 +31,7 @@ function getFilters() {
     {
       key: "result",
       name: "结果：",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择要筛选的结果",
       options: [
         {
@@ -50,21 +51,21 @@ function getFilters() {
     {
       key: "service",
       name: "服务：",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择要筛选的调用服务",
       options: serviceOptions,
     },
     {
       key: "route",
       name: "路由",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择要筛选的调用路由",
       options: routeOptions,
     },
     {
       key: "exception",
       name: "异常",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择是否筛选异常出错",
       options: [
         {
@@ -80,13 +81,13 @@ function getFilters() {
     {
       key: "limit",
       name: "查询数量：",
-      type: "inputNumber",
+      type: FormItemTypes.InputNumber,
       placeholder: "请输入要查询的记录数量",
     },
     {
       key: "begin:end",
       name: "开始结束时间：",
-      type: "daterange",
+      type: FormItemTypes.DateRange,
       span: 12,
       defaultValue: [getHoursAge(3).toISOString(), new Date().toISOString()],
     },

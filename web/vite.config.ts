@@ -20,6 +20,9 @@ export default defineConfig({
             "vue",
             "vue-router",
           ],
+          naive: [
+            "naive-ui",
+          ]
         },
       },
     },

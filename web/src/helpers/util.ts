@@ -119,3 +119,34 @@ export function formatBegin(begin: Date): string {
 export function formatEnd(end: Date): string {
   return formatDateWithTZ(new Date(end.getTime() + 24 * 3600 * 1000 - 1));
 }
+
+interface DiffInfo {
+  modifiedCount: number;
+  data: Record<string, unknown>;
+}
+// eslint-disable-next-line
+function isEqual(value: any, originalValue: any): boolean {
+  // 使用json stringify对比是否相同
+  return JSON.stringify(value) == JSON.stringify(originalValue);
+}
+
+// diff  对比两个object的差异
+// eslint-disable-next-line
+export function diff(
+  current: Record<string, unknown>,
+  original: Record<string, unknown>
+): DiffInfo {
+  const data: Record<string, unknown> = {};
+  let modifiedCount = 0;
+  Object.keys(current).forEach((key) => {
+    const value = current[key];
+    if (!isEqual(value, original[key])) {
+      data[key] = value;
+      modifiedCount++;
+    }
+  });
+  return {
+    modifiedCount,
+    data,
+  };
+}

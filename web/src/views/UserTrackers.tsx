@@ -8,6 +8,7 @@ import useFluxState, {
   fluxListUserTrackAction,
 } from "../states/flux";
 import { showError, today } from "../helpers/util";
+import { FormItemTypes } from "../components/ExForm";
 
 function getColumns() {
   return [
@@ -37,7 +38,7 @@ function getColumns() {
     {
       title: "类别",
       key: "action",
-      width: 150,
+      width: 160,
     },
     {
       title: "结果",
@@ -92,13 +93,13 @@ function getFilters() {
       key: "action",
       name: "类别：",
       placeholder: "请选择要筛选的类别",
-      type: "select",
+      type: FormItemTypes.Select,
       options: actionOptions,
     },
     {
       key: "result",
       name: "结果：",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择要筛选的结果",
       options: [
         {
@@ -118,13 +119,13 @@ function getFilters() {
     {
       key: "limit",
       name: "查询数量",
-      type: "inputNumber",
+      type: FormItemTypes.InputNumber,
       placeholder: "请输入要查询的记录数量",
     },
     {
       key: "begin:end",
       name: "开始结束时间：",
-      type: "daterange",
+      type: FormItemTypes.DateRange,
       span: 12,
       defaultValue: [today().toISOString(), new Date().toISOString()],
     },

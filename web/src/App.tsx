@@ -1,15 +1,15 @@
-import { defineComponent, onMounted } from "vue";
 import { NLayout, NLayoutSider, useLoadingBar } from "naive-ui";
-import { setLoadingEvent } from "./routes/router";
-
+import { defineComponent, onMounted } from "vue";
 import AppHeader from "./AppHeader";
 import AppNavigation from "./AppNavigation";
-import "./main.css";
 import {
   mainHeaderHeight,
   mainNavigationWidth,
   padding,
 } from "./constants/style";
+import "./main.css";
+import { setLoadingEvent } from "./routes/router";
+import useCommonState, { commonUpdateSettingCollapsed } from "./states/common";
 
 const layoutStyle = {
   top: `${mainHeaderHeight}px`,
@@ -22,6 +22,7 @@ const contentLayoutStyle = {
 export default defineComponent({
   name: "App",
   setup() {
+    const { settings } = useCommonState();
     const loadingBar = useLoadingBar();
     if (loadingBar != undefined) {
       setLoadingEvent(loadingBar.start, loadingBar.finish);
@@ -29,8 +30,12 @@ export default defineComponent({
         loadingBar.finish();
       });
     }
+    return {
+      settings,
+    };
   },
   render() {
+    const { settings } = this;
     return (
       <div>
         <AppHeader />
@@ -38,9 +43,16 @@ export default defineComponent({
           <NLayoutSider
             bordered
             collapseMode="width"
+            collapsed={settings.collapsed}
             collapsedWidth={64}
             width={mainNavigationWidth}
             showTrigger
+            onCollapse={() => {
+              commonUpdateSettingCollapsed(true);
+            }}
+            onExpand={() => {
+              commonUpdateSettingCollapsed(false);
+            }}
           >
             <AppNavigation />
           </NLayoutSider>

@@ -15,10 +15,12 @@ interface Captcha {
 
 interface Settings {
   theme: string;
+  collapsed: boolean;
 }
 
 const settings: Settings = reactive({
   theme: "dark",
+  collapsed: false,
 });
 
 // 路由配置
@@ -60,16 +62,24 @@ export async function commonGetCaptcha(): Promise<Captcha> {
   return <Captcha>data;
 }
 
-export async function commonGetSettings(): Promise<void> {
-  const data = await settingStorage.load();
+export function commonGetSettings(): void {
+  const data = settingStorage.getData();
   if (data.theme) {
     settings.theme = data.theme as string;
   }
+  settings.collapsed = data.collapsed as boolean;
 }
 
-export async function commonSetSettingTheme(theme: string): Promise<void> {
+export async function commonUpdateSettingTheme(theme: string): Promise<void> {
   await settingStorage.set("theme", theme);
   settings.theme = theme;
+}
+
+export async function commonUpdateSettingCollapsed(
+  collapsed: boolean
+): Promise<void> {
+  await settingStorage.set("collapsed", collapsed);
+  settings.collapsed = collapsed;
 }
 
 // commonListRouter 获取路由列表

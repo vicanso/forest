@@ -15,7 +15,7 @@ import { goToHome, goToLogin, goToRegister } from "./routes";
 import useUserState, { userFetchInfo, userLogout } from "./states/user";
 import useCommonState, {
   commonGetSettings,
-  commonSetSettingTheme,
+  commonUpdateSettingTheme,
 } from "./states/common";
 
 const headerStyle = {
@@ -63,7 +63,7 @@ export default defineComponent({
           bordered={false}
           onClick={async () => {
             try {
-              await commonSetSettingTheme(toggleTheme);
+              await commonUpdateSettingTheme(toggleTheme);
             } catch (err) {
               showError(message, err);
             }

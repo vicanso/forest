@@ -1,5 +1,6 @@
 import { defineComponent, onUnmounted } from "vue";
-import { NButton } from "naive-ui";
+import { NButton, NIcon } from "naive-ui";
+import { EditRegular } from "@vicons/fa";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExTable from "../components/ExTable";
 import { formatDate } from "../helpers/util";
@@ -129,6 +130,9 @@ export default defineComponent({
                 onUpdate(row.id);
               }}
             >
+              <NIcon>
+                <EditRegular />
+              </NIcon>
               更新
             </NButton>
           );

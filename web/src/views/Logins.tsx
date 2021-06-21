@@ -60,7 +60,7 @@ function getFilters() {
       key: "begin:end",
       name: "开始结束时间：",
       type: "daterange",
-      span: 8,
+      span: 12,
       defaultValue: [today().toISOString(), new Date().toISOString()],
     },
   ];
