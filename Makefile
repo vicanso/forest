@@ -15,7 +15,7 @@ install:
 	go get entgo.io/ent/cmd/entc
 
 generate: 
-	entc generate ./schema --target ./ent
+	entc generate --feature privacy ./schema --target ./ent
 
 describe:
 	entc describe ./schema

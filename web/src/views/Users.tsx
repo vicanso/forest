@@ -20,6 +20,16 @@ function getColumns(): TableColumn[] {
     {
       title: "角色",
       key: "roles",
+      render: (row: Record<string, unknown>) => {
+        if (!row.roles) {
+          return null;
+        }
+
+        const arr = (row.roles as string[]).map((role) => {
+          return <li>{role}</li>;
+        });
+        return <ul>{arr}</ul>;
+      },
     },
     {
       title: "状态",

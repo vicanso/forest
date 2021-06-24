@@ -41,6 +41,10 @@ export default defineComponent({
         await userFetchInfo();
       } catch (err) {
         showError(message, err);
+      } finally {
+        if (!info.account) {
+          goToLogin();
+        }
       }
     });
 

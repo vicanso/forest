@@ -9,18 +9,28 @@ function getColumns() {
     {
       title: "账户",
       key: "account",
+      width: 120,
+      ellipsis: {
+        tooltip: true,
+      },
     },
     {
       title: "IP",
       key: "ip",
+      width: 120,
+      ellipsis: {
+        tooltip: true,
+      },
     },
     {
       title: "定位",
       key: "location",
+      width: 150,
     },
     {
       title: "运营商",
       key: "isp",
+      width: 80,
     },
     {
       title: "Track ID",

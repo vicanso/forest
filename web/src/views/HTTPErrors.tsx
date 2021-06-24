@@ -17,6 +17,7 @@ function getColumns() {
       title: "账户",
       key: "account",
       width: 100,
+      fixed: "left",
     },
     {
       title: "方法",

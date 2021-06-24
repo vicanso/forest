@@ -122,6 +122,9 @@ export default defineComponent({
       return <p class="tac">...</p>;
     }
     if (!userInfo.account) {
+      if (settings.collapsed) {
+        return <div />
+      }
       return (
         <div style={loginButtonStyle}>
           <NButton type="info" onClick={() => goToLogin()}>
