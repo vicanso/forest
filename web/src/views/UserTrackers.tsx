@@ -7,7 +7,7 @@ import useFluxState, {
   fluxListUserTrackerClear,
   fluxListUserTrackAction,
 } from "../states/flux";
-import { showError, today } from "../helpers/util";
+import { showError, today, formatJSON } from "../helpers/util";
 import { FormItemTypes } from "../components/ExForm";
 
 function getColumns() {
@@ -24,13 +24,13 @@ function getColumns() {
       renderExpand: (data: Record<string, unknown>) => {
         const arr = [];
         if (data.form) {
-          arr.push(<pre>form: {data.form}</pre>);
+          arr.push(<pre>form: {formatJSON(data.form as string)}</pre>);
         }
         if (data.query) {
-          arr.push(<pre>query: {data.query}</pre>);
+          arr.push(<pre>query: {formatJSON(data.query as string)}</pre>);
         }
         if (data.params) {
-          arr.push(<pre>params: {data.params}</pre>);
+          arr.push(<pre>params: {formatJSON(data.params as string)}</pre>);
         }
         return <div>{arr}</div>;
       },

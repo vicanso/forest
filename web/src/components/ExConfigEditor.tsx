@@ -1,15 +1,14 @@
-import { NCard, NSpin, useMessage, NButton, NIcon } from "naive-ui";
-import { AngleLeft } from "@vicons/fa";
+import { NCard, NPageHeader, NSpin, useMessage } from "naive-ui";
 import { defineComponent, PropType, ref, Ref } from "vue";
 import { showError, showWarning } from "../helpers/util";
-import ExForm, { FormItem } from "./ExForm";
 import {
+  Config,
   configAdd,
   configFindByID,
-  Config,
-  configUpdateByID,
   ConfigStatus,
+  configUpdateByID,
 } from "../states/configs";
+import ExForm, { FormItem } from "./ExForm";
 import ExLoading from "./ExLoading";
 
 export function getDefaultFormItems(params: {
@@ -135,11 +134,11 @@ export default defineComponent({
       required: true,
     },
     onSubmitDone: {
-      type: Function,
+      type: Function as PropType<() => void>,
       default: noop,
     },
     onBack: {
-      type: Function,
+      type: Function as PropType<() => void>,
       default: noop,
     },
   },
@@ -253,32 +252,20 @@ export default defineComponent({
     if (processing && id && !currentConfig.id) {
       return <ExLoading />;
     }
-    const slots: Record<string, unknown> = {};
-    if (onBack !== noop) {
-      slots["header-extra"] = () => (
-        <NButton
-          size="large"
-          bordered={false}
-          onClick={() => {
-            onBack();
-          }}
-        >
-          <NIcon>
-            <AngleLeft />
-          </NIcon>
-          返回
-        </NButton>
-      );
-    }
     return (
       <NSpin show={processing}>
-        <NCard title={title} v-slots={slots}>
-          <p>{description}</p>
-          <ExForm
-            formItems={items}
-            onSubmit={onSubmit}
-            submitText={id !== 0 ? "更新" : "添加"}
-          />
+        <NCard>
+          <NPageHeader
+            title={title}
+            onBack={onBack == noop ? undefined : onBack}
+            subtitle={description}
+          >
+            <ExForm
+              formItems={items}
+              onSubmit={onSubmit}
+              submitText={id !== 0 ? "更新" : "添加"}
+            />
+          </NPageHeader>
         </NCard>
       </NSpin>
     );

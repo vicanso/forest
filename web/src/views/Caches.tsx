@@ -21,6 +21,7 @@ export default defineComponent({
       }
       processing.value = true;
       try {
+        cacheData.value = "";
         const result = await adminFindCacheByKey(key.value);
         try {
           const json = JSON.parse(result.data);
@@ -44,6 +45,7 @@ export default defineComponent({
         return;
       }
       try {
+        cacheData.value = "";
         await adminCleanCacheByKey(key.value);
         toast(message, "已成功清除数据");
       } catch (err) {

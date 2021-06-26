@@ -67,6 +67,13 @@ const userTrackerActions: UserTrackerActions = reactive({
 });
 
 function fillUserTrackerInfo(data: UserTracker) {
+  if (data.error) {
+    const reg = /, message=([\s\S]*)/;
+    const result = reg.exec(data.error);
+    if (result && result.length === 2) {
+      data.error = `${result[1]}, ${data.error.replace(result[0], "")}`;
+    }
+  }
   if (data.result === "0") {
     data.resultDesc = "成功";
   } else {

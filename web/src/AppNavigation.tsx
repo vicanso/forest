@@ -123,7 +123,7 @@ export default defineComponent({
     }
     if (!userInfo.account) {
       if (settings.collapsed) {
-        return <div />
+        return <div />;
       }
       return (
         <div style={loginButtonStyle}>
