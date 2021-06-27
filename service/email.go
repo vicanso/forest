@@ -16,6 +16,7 @@ package service
 
 import (
 	"crypto/tls"
+	"strings"
 	"sync"
 
 	"github.com/vicanso/forest/config"
@@ -26,6 +27,10 @@ import (
 var (
 	sendingMailMutex = &sync.Mutex{}
 	newMailOnce      = &sync.Once{}
+
+	currentEmailListRMutex = &sync.RWMutex{}
+	// 保存当前邮箱列表
+	currentEmailList map[string][]string
 )
 
 var (
@@ -33,10 +38,27 @@ var (
 )
 
 var (
-	basicInfo   = config.GetBasicConfig()
-	alarmConfig = config.GetAlarmConfig()
-	mailConfig  = config.GetMailConfig()
+	basicInfo  = config.GetBasicConfig()
+	mailConfig = config.GetMailConfig()
 )
+
+// 更新邮箱列表
+func updateEmailList(data map[string]string) {
+	currentEmailListRMutex.Lock()
+	defer currentEmailListRMutex.Unlock()
+	currentEmailList = make(map[string][]string)
+	for key, item := range data {
+		currentEmailList[key] = strings.Split(item, ",")
+	}
+}
+
+// 根据名称获取邮件列表
+func GetEmailList(name string) []string {
+	currentEmailListRMutex.RLock()
+	defer currentEmailListRMutex.RUnlock()
+	emails := currentEmailList[name]
+	return emails
+}
 
 // newMailDialer 新建邮件发送dialer
 func newMailDialer() *gomail.Dialer {
@@ -59,9 +81,10 @@ func AlarmError(message string) {
 		Str("category", "alarmError").
 		Msg(message)
 	d := newMailDialer()
-	if d != nil {
+	receivers := GetEmailList("alarmReceivers")
+
+	if d != nil && len(receivers) != 0 {
 		m := gomail.NewMessage()
-		receivers := alarmConfig.Receivers
 		m.SetHeader("From", mailConfig.User)
 		m.SetHeader("To", receivers...)
 		m.SetHeader("Subject", "Alarm-"+basicInfo.Name)

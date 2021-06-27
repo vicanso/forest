@@ -23,6 +23,7 @@ export const names = {
   requestConcurrencies: "requestConcurrencies",
   sessionInterceptors: "sessionInterceptors",
   caches: "caches",
+  emails: "emails",
 };
 
 export const routes: Router[] = [
@@ -106,4 +107,9 @@ export const routes: Router[] = [
     name: names.caches,
     component: () => import("../views/Caches"),
   },
+  {
+    path: "/emails",
+    name: names.emails,
+    component: () => import("../views/Emails"),
+  }
 ];

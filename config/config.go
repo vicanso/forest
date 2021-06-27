@@ -134,11 +134,7 @@ type (
 		// 是否禁用
 		Disabled bool
 	}
-	// AlarmConfig alarm配置
-	AlarmConfig struct {
-		// 接收人列表
-		Receivers []string `validate:"required"`
-	}
+
 	// LocationConfig 定位配置
 	LocationConfig struct {
 		Timeout time.Duration `validate:"required"`
@@ -338,16 +334,6 @@ func GetInfluxdbConfig() InfluxdbConfig {
 	}
 	mustValidate(&influxdbConfig)
 	return influxdbConfig
-}
-
-// GetAlarmConfig 获取告警配置
-func GetAlarmConfig() AlarmConfig {
-	prefix := "alarm."
-	alarmConfig := AlarmConfig{
-		Receivers: defaultViperX.GetStringSlice(prefix + "receivers"),
-	}
-	mustValidate(&alarmConfig)
-	return alarmConfig
 }
 
 // GetLocationConfig 获取定位的配置

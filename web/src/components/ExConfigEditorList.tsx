@@ -1,7 +1,7 @@
 // 配置的列表展示与更新
 
 import { NButton, NCard } from "naive-ui";
-import { defineComponent, ref } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import { padding } from "../constants/style";
 import ExConfigEditor, { getDefaultFormItems } from "./ExConfigEditor";
 import ExConfigTable from "./ExConfigTable";
@@ -36,7 +36,7 @@ export default defineComponent({
       required: true,
     },
     extraFormItems: {
-      type: Array,
+      type: Array as PropType<FormItem[]>,
       default: () => [],
     },
   },

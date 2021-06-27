@@ -159,6 +159,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	blockIPList := make([]string, 0)
 	sessionInterceptorValue := ""
 
+	mailList := make(map[string]string)
+
 	requestLimitConfigs := make(map[string]int)
 	for _, item := range configs {
 		switch item.Category {
@@ -195,6 +197,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 			if c.Name != "" {
 				requestLimitConfigs[c.Name] = c.Max
 			}
+		case schema.ConfigurationCategoryEmail:
+			mailList[item.Name] = item.Data
 		}
 	}
 
@@ -250,6 +254,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	defer currentLimits.Unlock()
 	currentLimits.limits = requestLimitConfigs
 	request.UpdateConcurrencyLimit(requestLimitConfigs)
+
+	updateEmailList(mailList)
 
 	return
 }

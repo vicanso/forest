@@ -12,6 +12,7 @@ export enum ConfigCategory {
   SessionInterceptor = "sessionInterceptor",
   RequestConcurrency = "requestConcurrency",
   Router = "router",
+  Email = "email",
 }
 
 export enum ConfigStatus {

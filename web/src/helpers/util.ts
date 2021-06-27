@@ -103,26 +103,6 @@ export function yesterday(): Date {
 
 // formatDate 格式化日期
 export function formatDate(str: string): string {
-  export function formatJSON(str: string): string {
-    if (!str || str.length <= 2) {
-      return str;
-    }
-    let result = str;
-    const first = str[0];
-    const last = str[str.length - 1];
-    if ((first === "{" && last === "}") || (first === "[" && last === "]")) {
-      try {
-        result = JSON.stringify(JSON.parse(str), null, 2);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return result;
-  }
-  if (!str) {
-    return "--";
-  }
-
   return dayjs(str).format("YYYY-MM-DD HH:mm:ss");
 }
 // formatDateWithTZ 格式化日期（带时区）
@@ -166,6 +146,7 @@ export function diff(
     data,
   };
 }
+
 
 export function formatJSON(str: string): string {
   if (!str || str.length <= 2) {

@@ -85,13 +85,6 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert.False(influxdbConfig.Disabled)
 }
 
-func TestAlarmConfig(t *testing.T) {
-	assert := assert.New(t)
-
-	alarmConfig := GetAlarmConfig()
-	assert.Equal([]string{"tree.xie@outlook.com"}, alarmConfig.Receivers)
-}
-
 func TestGetPostgresConfig(t *testing.T) {
 	assert := assert.New(t)
 
