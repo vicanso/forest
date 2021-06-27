@@ -83,6 +83,9 @@ func (Configuration) Fields() []ent.Field {
 		field.Time("ended_at").
 			StructTag(`json:"endedAt"`).
 			Comment("配置停用时间"),
+		field.String("description").
+			Comment("配置说明").
+			Optional(),
 	}
 }
 

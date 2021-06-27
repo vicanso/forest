@@ -75,6 +75,14 @@ function getColumns(): TableColumn[] {
         return formatDate(row.endedAt as string);
       },
     },
+    {
+      title: "配置描述",
+      key: "description",
+      width: 100,
+      ellipsis: {
+        tooltip: true,
+      },
+    },
   ];
 }
 

@@ -111,5 +111,5 @@ export const routes: Router[] = [
     path: "/emails",
     name: names.emails,
     component: () => import("../views/Emails"),
-  }
+  },
 ];

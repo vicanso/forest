@@ -33,6 +33,7 @@ export interface Config {
   data: string;
   startedAt: string;
   endedAt: string;
+  description?: string;
 }
 
 interface Configs {

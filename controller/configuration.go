@@ -48,21 +48,23 @@ type (
 
 	// configurationAddParams 添加配置参数
 	configurationAddParams struct {
-		Name      string              `json:"name" validate:"required,xConfigurationName"`
-		Category  confSchema.Category `json:"category" validate:"required,xConfigurationCategory"`
-		Status    schema.Status       `json:"status" validate:"required,xStatus"`
-		Data      string              `json:"data" validate:"required,xConfigurationData"`
-		StartedAt time.Time           `json:"startedAt"`
-		EndedAt   time.Time           `json:"endedAt"`
+		Name        string              `json:"name" validate:"required,xConfigurationName"`
+		Category    confSchema.Category `json:"category" validate:"required,xConfigurationCategory"`
+		Status      schema.Status       `json:"status" validate:"required,xStatus"`
+		Data        string              `json:"data" validate:"required,xConfigurationData"`
+		StartedAt   time.Time           `json:"startedAt"`
+		EndedAt     time.Time           `json:"endedAt"`
+		Description string              `json:"description"`
 	}
 	// configurationUpdateParams 更新配置参数
 	configurationUpdateParams struct {
-		Name      string              `json:"name" validate:"omitempty,xConfigurationName"`
-		Status    schema.Status       `json:"status" validate:"omitempty,xStatus"`
-		Category  confSchema.Category `json:"category" validate:"omitempty,xConfigurationCategory"`
-		Data      string              `json:"data" validate:"omitempty,xConfigurationData"`
-		StartedAt time.Time           `json:"startedAt"`
-		EndedAt   time.Time           `json:"endedAt"`
+		Name        string              `json:"name" validate:"omitempty,xConfigurationName"`
+		Status      schema.Status       `json:"status" validate:"omitempty,xStatus"`
+		Category    confSchema.Category `json:"category" validate:"omitempty,xConfigurationCategory"`
+		Data        string              `json:"data" validate:"omitempty,xConfigurationData"`
+		StartedAt   time.Time           `json:"startedAt"`
+		EndedAt     time.Time           `json:"endedAt"`
+		Description string              `json:"description"`
 	}
 
 	// configurationListParmas 配置查询参数
@@ -149,6 +151,7 @@ func (params *configurationAddParams) save(ctx context.Context, owner string) (c
 		SetOwner(owner).
 		SetStartedAt(params.StartedAt).
 		SetEndedAt(params.EndedAt).
+		SetDescription(params.Description).
 		Save(ctx)
 }
 
@@ -206,6 +209,9 @@ func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int
 	}
 	if params.Data != "" {
 		updateOne = updateOne.SetData(params.Data)
+	}
+	if params.Description != "" {
+		updateOne = updateOne.SetDescription(params.Description)
 	}
 	return updateOne.Save(ctx)
 }

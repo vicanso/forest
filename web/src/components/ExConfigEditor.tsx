@@ -8,7 +8,7 @@ import {
   ConfigStatus,
   configUpdateByID,
 } from "../states/configs";
-import ExForm, { FormItem } from "./ExForm";
+import ExForm, { FormItem, FormItemTypes } from "./ExForm";
 import ExLoading from "./ExLoading";
 
 export function getDefaultFormItems(params: {
@@ -32,7 +32,7 @@ export function getDefaultFormItems(params: {
     {
       name: "状态：",
       key: "status",
-      type: "select",
+      type: FormItemTypes.Select,
       placeholder: "请选择配置状态",
       options: [
         {
@@ -48,13 +48,13 @@ export function getDefaultFormItems(params: {
     {
       name: "开始时间：",
       key: "startedAt",
-      type: "datetime",
+      type: FormItemTypes.DateTime,
       placeholder: "请选择配置生效开始时间",
     },
     {
       name: "结束时间：",
       key: "endedAt",
-      type: "datetime",
+      type: FormItemTypes.DateTime,
       placeholder: "请选择配置生效结束时间",
     },
   ];
@@ -81,6 +81,7 @@ function convertDataToConfig(data: Record<string, unknown>): Config {
     startedAt: data.startedAt,
     endedAt: data.endedAt,
     data: configDataStr,
+    description: data.description,
   } as Config;
 }
 
@@ -106,6 +107,9 @@ function diffConfig(
   }
   if (newConfig.data !== current.data) {
     data.data = newConfig.data;
+  }
+  if (newConfig.description !== current.description) {
+    data.description = newConfig.description;
   }
   return data;
 }
@@ -187,6 +191,13 @@ export default defineComponent({
     };
     // 后续再确认是否要deep clone
     const items = props.formItems.slice(0);
+    items.push({
+      name: "配置描述：",
+      key: "description",
+      type: FormItemTypes.TextArea,
+      placeholder: "请输入配置描述",
+      span: 24,
+    });
     // 如果指定了id，则拉取配置
     const fetch = async () => {
       processing.value = true;
@@ -215,6 +226,9 @@ export default defineComponent({
               break;
             case "data":
               item.defaultValue = data.data;
+              break;
+            case "description":
+              item.defaultValue = data.description;
               break;
             default:
               {

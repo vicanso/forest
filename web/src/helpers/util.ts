@@ -147,7 +147,6 @@ export function diff(
   };
 }
 
-
 export function formatJSON(str: string): string {
   if (!str || str.length <= 2) {
     return str;
