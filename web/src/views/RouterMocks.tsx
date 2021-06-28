@@ -1,7 +1,7 @@
 import { defineComponent, onMounted } from "vue";
 import ExConfigEditorList from "../components/ExConfigEditorList";
 import { ConfigCategory } from "../states/configs";
-import { FormItemTypes } from "../components/ExForm";
+import { FormItemTypes, FormItem } from "../components/ExForm";
 import useCommonState, { commonListRouter } from "../states/common";
 import { useMessage } from "naive-ui";
 import { showError } from "../helpers/util";
@@ -28,9 +28,11 @@ export default defineComponent({
     if (routers.processing) {
       return <ExLoading />;
     }
-    const extraFormItems = [
+    const extraFormItems: FormItem[] = [
       {
         type: FormItemTypes.Blank,
+        name: "",
+        key: "",
       },
       {
         name: "路由：",

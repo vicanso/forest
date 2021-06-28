@@ -1,7 +1,7 @@
 import { useMessage } from "naive-ui";
 import { defineComponent, onMounted } from "vue";
 import ExConfigEditorList from "../components/ExConfigEditorList";
-import { FormItemTypes } from "../components/ExForm";
+import { FormItemTypes, FormItem } from "../components/ExForm";
 import ExLoading from "../components/ExLoading";
 import { showError } from "../helpers/util";
 import useCommonState, { commonListRequestInstance } from "../states/common";
@@ -31,9 +31,11 @@ export default defineComponent({
     if (requestInstances.processing) {
       return <ExLoading />;
     }
-    const extraFormItems = [
+    const extraFormItems: FormItem[] = [
       {
         type: FormItemTypes.Blank,
+        name: "",
+        key: "",
       },
       {
         name: "实例：",

@@ -134,6 +134,9 @@ export default defineComponent({
     const page = Math.floor(offset / limit) + 1;
 
     const ranges: Record<string, [number, number]> = {
+      最近1小时: [Date.now() - 3600 * 1000, Date.now()],
+      最近3小时: [Date.now() - 3 * 3600 * 1000, Date.now()],
+      最近6小时: [Date.now() - 3 * 3600 * 1000, Date.now()],
       今天: [today().getTime(), Date.now()],
       昨天: [yesterday().getTime(), today().getTime() - 1],
       最近3天: [getDaysAgo(2).getTime(), Date.now()],
