@@ -24,11 +24,15 @@ function getColumns(): TableColumn[] {
         if (!row.roles) {
           return null;
         }
-
+        const style = {
+          margin: 0,
+          padding: 0,
+          "list-style-position": "inside",
+        };
         const arr = (row.roles as string[]).map((role) => {
           return <li>{role}</li>;
         });
-        return <ul>{arr}</ul>;
+        return <ul style={style}>{arr}</ul>;
       },
     },
     {

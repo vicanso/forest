@@ -94,6 +94,12 @@ export default defineComponent({
         processing.value = false;
       }
     };
+    const handleEnterPress = (e: KeyboardEvent) => {
+      if (e.code !== "Enter") {
+        return;
+      }
+      loginOrRegister();
+    }
     onMounted(() => {
       // 首次加载自动加载图形验证码
       refreshCaptcha();
@@ -102,6 +108,7 @@ export default defineComponent({
     return {
       refreshCaptcha,
       loginOrRegister,
+      handleEnterPress,
       isLogin,
       captchaData,
       model,
@@ -127,7 +134,7 @@ export default defineComponent({
   },
   render() {
     const size = "large";
-    const { model, captchaData, rules, processing, isLogin } = this;
+    const { model, captchaData, rules, processing, isLogin, handleEnterPress } = this;
     const title = isLogin ? "用户登录" : "用户注册";
     const btnText = isLogin ? "登录" : "注册";
     return (
@@ -167,6 +174,7 @@ export default defineComponent({
                   placeholder="请输入验证码"
                   maxlength={4}
                   clearable
+                  onKeyup={handleEnterPress}
                   onUpdateValue={(value) => {
                     model.captcha = value;
                   }}
