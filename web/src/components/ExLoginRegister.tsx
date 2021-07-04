@@ -99,7 +99,7 @@ export default defineComponent({
         return;
       }
       loginOrRegister();
-    }
+    };
     onMounted(() => {
       // 首次加载自动加载图形验证码
       refreshCaptcha();
@@ -134,7 +134,8 @@ export default defineComponent({
   },
   render() {
     const size = "large";
-    const { model, captchaData, rules, processing, isLogin, handleEnterPress } = this;
+    const { model, captchaData, rules, processing, isLogin, handleEnterPress } =
+      this;
     const title = isLogin ? "用户登录" : "用户注册";
     const btnText = isLogin ? "登录" : "注册";
     return (
