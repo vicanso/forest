@@ -32,9 +32,9 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-type TracerHook struct{}
+type tracerHook struct{}
 
-func (h TracerHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+func (h tracerHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 	if level == zerolog.NoLevel {
 		return
 	}
@@ -48,24 +48,13 @@ func (h TracerHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 		Str("account", info.Account)
 }
 
-var defaultLogger = mustNewLogger("")
-
-// 如果有配置指定日志级别，则以配置指定的输出
-var logLevel = os.Getenv("LOG_LEVEL")
+var enabledDebugLog = false
+var defaultLogger = newLogger()
 
 // 日志中值的最大长度
 var logFieldValueMaxSize = 30
 var maskRegexp *regexp.Regexp
 var fullLogRegexp *regexp.Regexp
-
-var enabledDebugLog = false
-
-func init() {
-	lv, _ := strconv.Atoi(logLevel)
-	if logLevel != "" && lv <= 0 {
-		enabledDebugLog = true
-	}
-}
 
 type httpServerLogger struct{}
 
@@ -96,30 +85,37 @@ func DebugEnabled() bool {
 	return enabledDebugLog
 }
 
-// mustNewLogger 初始化logger
-func mustNewLogger(outputPath string) *zerolog.Logger {
+// newLogger 初始化logger
+func newLogger() *zerolog.Logger {
 	// 如果要节约日志空间，可以配置
 	zerolog.TimestampFieldName = "t"
 	zerolog.LevelFieldName = "l"
 	zerolog.TimeFieldFormat = "2006-01-02T15:04:05.999Z07:00"
 
-	l := zerolog.New(os.Stdout)
+	var l zerolog.Logger
 	if util.IsDevelopment() {
 		l = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).
-			Hook(&TracerHook{}).
+			Hook(&tracerHook{}).
 			With().
 			Timestamp().
 			Logger()
 	} else {
-		l = l.Hook(&TracerHook{}).
+		l = zerolog.New(os.Stdout).
+			Level(zerolog.InfoLevel).
+			Hook(&tracerHook{}).
 			With().
 			Timestamp().
 			Logger()
 	}
 
+	// 如果有配置指定日志级别，则以配置指定的输出
+	logLevel := os.Getenv("LOG_LEVEL")
 	if logLevel != "" {
 		lv, _ := strconv.Atoi(logLevel)
 		l = l.Level(zerolog.Level(lv))
+		if logLevel != "" && lv <= 0 {
+			enabledDebugLog = true
+		}
 	}
 
 	return &l

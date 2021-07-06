@@ -44,7 +44,7 @@ func NewStats() elton.Handler {
 				Str("method", info.Method).
 				Str("route", info.Route).
 				Str("uri", info.URI).
-				Int("stats", info.Status).
+				Int("status", info.Status).
 				Uint32("connecting", info.Connecting).
 				Str("consuming", info.Consuming.String()).
 				Str("size", humanize.Bytes(uint64(info.Size))).

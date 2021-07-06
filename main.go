@@ -215,7 +215,7 @@ func newOnErrorHandler(e *elton.Elton) {
 
 		// 可以针对实际场景输出更多的日志信息
 		log.Default().Error().
-			Str("category", "excpetion").
+			Str("category", "exception").
 			Str("ip", ip).
 			Str("route", c.Route).
 			Str("uri", uri).
