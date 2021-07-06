@@ -8,6 +8,7 @@ import {
   NInput,
   useMessage,
 } from "naive-ui";
+import { css } from "@linaria/core";
 import { defineComponent, onMounted, ref, PropType } from "vue";
 import { showError, showWarning } from "../helpers/util";
 import { commonGetCaptcha, commonGetEmptyCaptcha } from "../states/common";
@@ -16,20 +17,23 @@ import { goToHome, goToLogin } from "../routes";
 
 const loginType = "login";
 
-const cardStyle = {
-  maxWidth: "640px",
-  margin: "120px auto",
-};
+const cardClass = css`
+  max-width: 640px;
+  margin: 120px auto;
+`;
 
-const captchaStyle = {
-  "text-align": "center",
-  height: "40px",
-  cursor: "pointer",
-};
+const captchaClass = css`
+  text-align: center;
+  height: 40px;
+  cursor: pointer;
+`;
 
-const submitButtonStyle = {
-  width: "100%",
-};
+const submitButtonClass = css`
+  width: 100%;
+`;
+const captchaImageClass = css`
+  height: 100%;
+`;
 
 export default defineComponent({
   name: "ExLoginRegister",
@@ -139,7 +143,7 @@ export default defineComponent({
     const title = isLogin ? "用户登录" : "用户注册";
     const btnText = isLogin ? "登录" : "注册";
     return (
-      <NCard title={title} style={cardStyle}>
+      <NCard title={title} class={cardClass}>
         <NForm
           labelWidth="100"
           labelAlign="right"
@@ -182,12 +186,10 @@ export default defineComponent({
                 />
               </NGridItem>
               <NGridItem span={1}>
-                <div style={captchaStyle} onClick={this.refreshCaptcha}>
+                <div class={captchaClass} onClick={this.refreshCaptcha}>
                   {captchaData.id && (
                     <img
-                      style={{
-                        height: "100%",
-                      }}
+                      class={captchaImageClass}
                       src={`data:image/${captchaData.type};base64,${captchaData.data}`}
                     />
                   )}
@@ -198,7 +200,7 @@ export default defineComponent({
           </NFormItem>
           <NButton
             loading={processing}
-            style={submitButtonStyle}
+            class={submitButtonClass}
             size={size}
             onClick={this.loginOrRegister}
           >

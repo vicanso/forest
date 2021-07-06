@@ -8,6 +8,7 @@ import {
   NText,
   useMessage,
 } from "naive-ui";
+import { css } from "@linaria/core";
 import { defineComponent, onBeforeMount } from "vue";
 import { mainHeaderHeight, padding } from "./constants/style";
 import { showError } from "./helpers/util";
@@ -18,16 +19,19 @@ import useCommonState, {
   commonUpdateSettingTheme,
 } from "./states/common";
 
-const headerStyle = {
-  height: `${mainHeaderHeight}px`,
-  lineHeight: `${mainHeaderHeight}px`,
-  padding: `0 ${3 * padding}px`,
-};
+const userInfoClass = css`
+  margin-right: 5px;
+`;
+const headerClass = css`
+  height: ${mainHeaderHeight}px;
+  line-height: ${mainHeaderHeight}px;
+  padding: 0 ${3 * padding}px;
+`;
 
-const logoStyle = {
-  float: "left",
-  cursor: "pointer",
-};
+const logoClass = css`
+  float: left;
+  cursor: pointer;
+`;
 
 export default defineComponent({
   name: "AppHeader",
@@ -82,11 +86,7 @@ export default defineComponent({
     const renderUserInfo = () => (
       <>
         <div>
-          <NIcon
-            style={{
-              marginRight: "5px",
-            }}
-          >
+          <NIcon class={userInfoClass}>
             <User />
           </NIcon>
           {info.account}
@@ -117,8 +117,8 @@ export default defineComponent({
   render() {
     const { processing, account } = this.userInfo;
     return (
-      <NLayoutHeader bordered style={headerStyle}>
-        <NText tag="div" style={logoStyle}>
+      <NLayoutHeader bordered class={headerClass}>
+        <NText tag="div" class={logoClass}>
           <NH2>
             <a
               href="#"

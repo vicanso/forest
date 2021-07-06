@@ -2,6 +2,7 @@ import { defineComponent, onUnmounted, ref } from "vue";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { AngleLeft, EditRegular } from "@vicons/fa";
 import { NButton, NCard, useMessage, NIcon, NSpin } from "naive-ui";
+import { css } from "@linaria/core";
 import ExForm, { FormItemTypes } from "../components/ExForm";
 import ExTable from "../components/ExTable";
 import useUserState, {
@@ -10,6 +11,12 @@ import useUserState, {
   userUpdateByID,
 } from "../states/user";
 import { diff, showError, showWarning } from "../helpers/util";
+
+const userRoleClass = css`
+  margin: 0;
+  padding: 0;
+  list-style-position: insied;
+`;
 
 function getColumns(): TableColumn[] {
   return [
@@ -24,15 +31,10 @@ function getColumns(): TableColumn[] {
         if (!row.roles) {
           return null;
         }
-        const style = {
-          margin: 0,
-          padding: 0,
-          "list-style-position": "inside",
-        };
         const arr = (row.roles as string[]).map((role) => {
           return <li>{role}</li>;
         });
-        return <ul style={style}>{arr}</ul>;
+        return <ul class={userRoleClass}>{arr}</ul>;
       },
     },
     {

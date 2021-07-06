@@ -1,4 +1,5 @@
 import { ChartBar, Cogs, Deezer, User } from "@vicons/fa";
+import { css } from "@linaria/core";
 import { NButton, NIcon, NMenu } from "naive-ui";
 import { Component, defineComponent, h } from "vue";
 import { containsAny } from "./helpers/util";
@@ -11,10 +12,10 @@ function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
 }
 
-const loginButtonStyle = {
-  margin: "50px auto",
-  "text-align": "center",
-};
+const loginButtonClass = css`
+  margin: 50px auto;
+  text-align: center;
+`;
 
 const navigationOptions = [
   {
@@ -130,7 +131,7 @@ export default defineComponent({
         return <div />;
       }
       return (
-        <div style={loginButtonStyle}>
+        <div class={loginButtonClass}>
           <NButton type="info" onClick={() => goToLogin()}>
             立即登录
           </NButton>

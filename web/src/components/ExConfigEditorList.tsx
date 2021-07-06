@@ -1,16 +1,17 @@
 // 配置的列表展示与更新
 
 import { NButton, NCard } from "naive-ui";
+import { css } from "@linaria/core";
 import { defineComponent, PropType, ref } from "vue";
 import { padding } from "../constants/style";
 import ExConfigEditor, { getDefaultFormItems } from "./ExConfigEditor";
 import ExConfigTable from "./ExConfigTable";
 import { FormItem } from "./ExForm";
 
-const addButtonStyle = {
-  width: "100%",
-  marginTop: `${2 * padding}px`,
-};
+const addButtonClass = css`
+  width: 100%;
+  margin-top: ${2 * padding}px;
+`;
 
 const listMode = "list";
 const addMode = "add";
@@ -73,7 +74,7 @@ export default defineComponent({
           />
           <NButton
             size="large"
-            style={addButtonStyle}
+            class={addButtonClass}
             onClick={() => {
               this.updatedID = 0;
               toggle(addMode);

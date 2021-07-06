@@ -16,6 +16,7 @@ import {
 } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { Component, defineComponent, onMounted, ref } from "vue";
+import { css } from "@linaria/core";
 import { padding } from "../constants/style";
 import { getDaysAgo, showError, today, yesterday } from "../helpers/util";
 import { FormItemTypes } from "./ExForm";
@@ -36,10 +37,10 @@ interface TableData {
   count: number;
 }
 
-const paginationStyle = {
-  marginTop: `${padding}px`,
-  float: "right",
-};
+const paginationClass = css`
+  margin-top: ${padding}px;
+  float: right;
+`;
 
 export default defineComponent({
   name: "ExTable",
@@ -264,7 +265,7 @@ export default defineComponent({
             <NPagination
               page={page}
               pageCount={pageCount}
-              style={paginationStyle}
+              class={paginationClass}
               onUpdatePage={(value) => {
                 this.offset = (value - 1) * limit;
                 fetchData();

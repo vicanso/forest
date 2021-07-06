@@ -1,14 +1,15 @@
 import { NSpin } from "naive-ui";
 import { defineComponent } from "vue";
+import { css } from "@linaria/core";
 
-const spinStyle = {
-  float: "left",
-  marginRight: "10px",
-};
-const loadingStyle = {
-  margin: "auto",
-  width: "200px",
-};
+const spinClass = css`
+  float: left;
+  margin-right: 10px;
+`;
+const loadingClass = css`
+  margin: auto;
+  width: 200px;
+`;
 
 export default defineComponent({
   name: "ExLoading",
@@ -23,10 +24,10 @@ export default defineComponent({
     },
   },
   render() {
-    const style = Object.assign({}, loadingStyle, this.$props.style);
+    const { style } = this.$props;
     return (
-      <div style={style}>
-        <NSpin size="small" style={spinStyle} />
+      <div style={style} class={loadingClass}>
+        <NSpin size="small" class={spinClass} />
         正在加载中，请稍候...
       </div>
     );

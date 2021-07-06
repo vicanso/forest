@@ -1,4 +1,5 @@
 import { NLayout, NLayoutSider, useLoadingBar } from "naive-ui";
+import { css } from "@linaria/core";
 import { defineComponent, onMounted } from "vue";
 import AppHeader from "./AppHeader";
 import AppNavigation from "./AppNavigation";
@@ -11,13 +12,13 @@ import "./main.css";
 import { setLoadingEvent } from "./routes/router";
 import useCommonState, { commonUpdateSettingCollapsed } from "./states/common";
 
-const layoutStyle = {
-  top: `${mainHeaderHeight}px`,
-};
+const layoutClass = css`
+  top: ${mainHeaderHeight}px !important;
+`;
 
-const contentLayoutStyle = {
-  padding: `${2 * padding}px`,
-};
+const contentLayoutClass = css`
+  padding: ${2 * padding}px;
+`;
 
 export default defineComponent({
   name: "App",
@@ -39,7 +40,7 @@ export default defineComponent({
     return (
       <div>
         <AppHeader />
-        <NLayout hasSider position="absolute" style={layoutStyle}>
+        <NLayout hasSider position="absolute" class={layoutClass}>
           <NLayoutSider
             bordered
             collapseMode="width"
@@ -56,7 +57,7 @@ export default defineComponent({
           >
             <AppNavigation />
           </NLayoutSider>
-          <NLayout style={contentLayoutStyle}>
+          <NLayout class={contentLayoutClass}>
             <router-view />
           </NLayout>
         </NLayout>
