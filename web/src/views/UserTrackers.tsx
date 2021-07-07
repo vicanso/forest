@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, defineComponent } from "vue";
-import { useMessage } from "naive-ui";
+import { useMessage, NEllipsis } from "naive-ui";
 import ExTable from "../components/ExTable";
 import ExLoading from "../components/ExLoading";
 import useFluxState, {
@@ -63,8 +63,15 @@ function getColumns() {
     {
       title: "出错信息",
       key: "error",
-      ellipsis: {
-        tooltip: true,
+      render: (row: Record<string, unknown>) => {
+        const text = row.error as string;
+        if (!text) {
+          return;
+        }
+        const tooltip = {
+          maxWidth: 250,
+        };
+        return <NEllipsis tooltip={tooltip}>{text}</NEllipsis>;
       },
     },
     {
