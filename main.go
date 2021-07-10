@@ -360,11 +360,14 @@ func main() {
 	e.UseWithName(M.NewDefaultFresh(), "fresh").
 		UseWithName(M.NewDefaultETag(), "eTag")
 
-	// 对响应数据 c.Body 转换为相应的json响应
-	e.UseWithName(M.NewDefaultResponder(), "responder")
-
 	// 读取读取body的数的，转换为json bytes
 	e.UseWithName(M.NewDefaultBodyParser(), "bodyParser")
+
+	// 拦截
+	// e.UseWithName(middleware.NewInterceptor(), "interceptor")
+
+	// 对响应数据 c.Body 转换为相应的json响应
+	e.UseWithName(M.NewDefaultResponder(), "responder")
 
 	// 初始化路由
 	for _, g := range router.GetGroups() {
