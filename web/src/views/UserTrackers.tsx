@@ -58,7 +58,10 @@ function getColumns() {
     {
       title: "IP",
       key: "ip",
-      width: 140,
+      width: 100,
+      ellipsis: {
+        tooltip: true,
+      },
     },
     {
       title: "出错信息",
