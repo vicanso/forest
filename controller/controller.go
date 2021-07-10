@@ -24,6 +24,7 @@ import (
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/schema"
@@ -236,7 +237,7 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 
 // sessionHandle session的相关处理
 func sessionHandle(c *elton.Context) error {
-	interData, _ := service.GetSessionInterceptorData()
+	interData, _ := interceptor.GetSessionData()
 
 	us := session.NewUserSession(c)
 	account := ""

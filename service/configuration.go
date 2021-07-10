@@ -26,6 +26,7 @@ import (
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/request"
 	"github.com/vicanso/forest/schema"
@@ -37,24 +38,17 @@ type ConfigurationSrv struct{}
 
 // 配置数据
 type (
-	// SessionInterceptorData session拦截的数据
-	SessionInterceptorData struct {
-		Message       string   `json:"message"`
-		AllowAccount  string   `json:"allowAccount"`
-		AllowAccounts []string `json:"allowAccounts"`
-		AllowRoutes   []string `json:"allowRoutes"`
-	}
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
-		UpdatedAt          time.Time               `json:"updatedAt"`
-		MockTime           string                  `json:"mockTime"`
-		IPBlockList        []string                `json:"ipBlockList"`
-		SignedKeys         []string                `json:"signedKeys"`
-		RouterConcurrency  map[string]uint32       `json:"routerConcurrency"`
-		RouterMock         map[string]RouterConfig `json:"routerMock"`
-		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor"`
-		Limits             map[string]int          `json:"limits"`
+		UpdatedAt          time.Time                `json:"updatedAt"`
+		MockTime           string                   `json:"mockTime"`
+		IPBlockList        []string                 `json:"ipBlockList"`
+		SignedKeys         []string                 `json:"signedKeys"`
+		RouterConcurrency  map[string]uint32        `json:"routerConcurrency"`
+		RouterMock         map[string]RouterConfig  `json:"routerMock"`
+		SessionInterceptor *interceptor.SessionData `json:"sessionInterceptor"`
+		Limits             map[string]int           `json:"limits"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
@@ -71,8 +65,6 @@ type (
 
 var (
 	sessionSignedKeys = new(elton.RWMutexSignedKeys)
-	// sessionInterceptorConfig session拦截的配置
-	sessionInterceptorConfig = new(sync.Map)
 
 	// 当前请求实例限制
 	currentLimits = new(currentRequestLimits)
@@ -80,10 +72,6 @@ var (
 
 // 配置刷新时间
 var configurationRefreshedAt time.Time
-
-const (
-	sessionInterceptorKey = "sessionInterceptor"
-)
 
 func init() {
 	sessionConfig := config.GetSessionConfig()
@@ -98,7 +86,7 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 
 // GetCurrentValidConfiguration 获取当前有效配置
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
-	interData, _ := GetSessionInterceptorData()
+	interData, _ := interceptor.GetSessionData()
 	currentLimits.RLock()
 	defer currentLimits.RUnlock()
 	limits := currentLimits.limits
@@ -117,19 +105,6 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		result.SessionInterceptor = &v
 	}
 	return result
-}
-
-// GetSessionInterceptorMessage 获取session拦截的配置信息
-func GetSessionInterceptorData() (*SessionInterceptorData, bool) {
-	value, ok := sessionInterceptorConfig.Load(sessionInterceptorKey)
-	if !ok {
-		return nil, false
-	}
-	data, ok := value.(*SessionInterceptorData)
-	if !ok {
-		return nil, false
-	}
-	return data, true
 }
 
 // available 获取可用的配置
@@ -203,21 +178,12 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	}
 
 	// 设置session interceptor的拦截信息
-	if sessionInterceptorValue == "" {
-		sessionInterceptorConfig.Delete(sessionInterceptorKey)
-	} else {
-		interData := &SessionInterceptorData{}
-		err := json.Unmarshal([]byte(sessionInterceptorValue), interData)
-		if err != nil {
-			log.Default().Error().
-				Err(err).
-				Msg("session interceptor config is invalid")
-			AlarmError("session interceptor config is invalid:" + err.Error())
-		}
-		if len(interData.AllowAccounts) == 0 && interData.AllowAccount != "" {
-			interData.AllowAccounts = strings.Split(interData.AllowAccount, ",")
-		}
-		sessionInterceptorConfig.Store(sessionInterceptorKey, interData)
+	err = interceptor.UpdateSessionConfig(sessionInterceptorValue)
+	if err != nil {
+		log.Default().Error().
+			Err(err).
+			Msg("session interceptor config is invalid")
+		AlarmError("session interceptor config is invalid:" + err.Error())
 	}
 
 	// 如果未配置mock time，则设置为空
