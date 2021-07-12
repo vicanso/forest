@@ -182,6 +182,7 @@ export default defineComponent({
     }
     return (
       <ExTable
+        disableAutoFetch={true}
         hidePagination={true}
         title={"HTTP响应出错"}
         filters={getFilters()}

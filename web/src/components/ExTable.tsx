@@ -73,6 +73,10 @@ export default defineComponent({
       type: Boolean,
       default: () => false,
     },
+    disableAutoFetch: {
+      type: Boolean,
+      default: () => false,
+    },
   },
   setup(props) {
     const message = useMessage();
@@ -114,9 +118,11 @@ export default defineComponent({
         showError(message, err);
       }
     };
-    onMounted(() => {
-      fetchData();
-    });
+    if (!props.disableAutoFetch) {
+      onMounted(() => {
+        fetchData();
+      });
+    }
     return {
       fetchData,
       filterParams,

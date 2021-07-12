@@ -181,6 +181,7 @@ export default defineComponent({
     }
     return (
       <ExTable
+        disableAutoFetch={true}
         hidePagination={true}
         filters={getFilters()}
         title={"用户行为查询"}

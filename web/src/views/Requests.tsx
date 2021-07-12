@@ -227,6 +227,7 @@ export default defineComponent({
 
     return (
       <ExTable
+        disableAutoFetch={true}
         hidePagination={true}
         title={"HTTP请求统计"}
         data={requests}
