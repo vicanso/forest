@@ -109,6 +109,10 @@ func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (contex
 	ctx = context.WithValue(ctx, startedAtKey, &t)
 	rh.processing.Inc()
 	rh.total.Inc()
+	err := rh.Allow()
+	if err != nil {
+		return ctx, err
+	}
 	return ctx, nil
 }
 
@@ -135,6 +139,10 @@ func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmd
 	ctx = context.WithValue(ctx, startedAtKey, &t)
 	rh.pipeProcessing.Inc()
 	rh.total.Inc()
+	err := rh.Allow()
+	if err != nil {
+		return ctx, err
+	}
 	return ctx, nil
 }
 

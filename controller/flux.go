@@ -48,6 +48,8 @@ type (
 		ErrCategory string `json:"errCategory" validate:"omitempty,xTag"`
 		Route       string `json:"route" validate:"omitempty,xTag"`
 		Service     string `json:"service" validate:"omitempty,xTag"`
+		// 请求耗时大于
+		UseGT string `json:"useGT" validate:"omitempty,xTag"`
 	}
 	// flux tags/fields查询参数
 	fluxListTagOrFieldParams struct {
@@ -177,6 +179,10 @@ func (params *fluxListParams) Query() string {
 	// 出错类型
 	if params.ErrCategory != "" {
 		addStrQuery(cs.FieldErrCategory, params.ErrCategory)
+	}
+	// 耗时大于
+	if params.UseGT != "" {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s > %s)`, cs.FieldUse, params.UseGT)
 	}
 
 	return query

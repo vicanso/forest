@@ -1,5 +1,6 @@
-import { useMessage } from "naive-ui";
-import { defineComponent, onMounted, onUnmounted } from "vue";
+import { useMessage, NPopover } from "naive-ui";
+import { defineComponent, onMounted, onUnmounted, VNode } from "vue";
+import { css } from "@linaria/core";
 import ExLoading from "../components/ExLoading";
 import { showError } from "../helpers/util";
 import useFluxState, {
@@ -25,6 +26,12 @@ const routeOptions = [
     value: "",
   },
 ];
+
+const useTimeListClass = css`
+  margin: 0;
+  padding: 0;
+  list-style-position: inside;
+`;
 
 function getFilters() {
   return [
@@ -85,10 +92,16 @@ function getFilters() {
       placeholder: "请输入要查询的记录数量",
     },
     {
+      key: "useGt",
+      name: "请求耗时大于：",
+      type: FormItemTypes.InputNumber,
+      placeholder: "请输入要查询的耗时记录",
+    },
+    {
       key: "begin:end",
       name: "开始结束时间：",
       type: FormItemTypes.DateRange,
-      span: 12,
+      span: 8,
       defaultValue: [getHoursAge(3).toISOString(), new Date().toISOString()],
     },
   ];
@@ -146,7 +159,35 @@ function getColumns() {
         if (row.use) {
           use = row.use as number;
         }
-        return `${use.toLocaleString()}ms`;
+        if (!use) {
+          return "--";
+        }
+        const slots = {
+          trigger: () => <span>{use.toLocaleString()}ms</span>,
+        };
+        const list: VNode[] = [];
+        const append = (key: string, name: string) => {
+          if (!row[key]) {
+            return;
+          }
+          const use = row[key] as number;
+          list.push(
+            <li>
+              {name}: {use.toLocaleString()}ms
+            </li>
+          );
+        };
+        append("dnsUse", "DNS");
+        append("tcpUse", "TCP");
+        append("tlsUse", "TLS");
+        append("processingUse", "PROCESSING");
+        append("transferUse", "TRANSFER");
+
+        return (
+          <NPopover v-slots={slots}>
+            <ul class={useTimeListClass}>{list}</ul>
+          </NPopover>
+        );
       },
     },
     {
