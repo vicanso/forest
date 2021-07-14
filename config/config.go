@@ -91,7 +91,7 @@ type (
 		// 慢请求时长
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
-		MaxProcessing uint32 `validate:"required"`
+		MaxProcessing uint32 `validate:"required" default:"1000"`
 		// key前缀
 		Prefix string
 		// sentinel模式下使用的master name
@@ -102,11 +102,11 @@ type (
 		// 连接串
 		URI string `validate:"required,uri"`
 		// 最大连接数
-		MaxOpenConns int
+		MaxOpenConns int `default:"100"`
 		// 最大空闲连接数
-		MaxIdleConns int
+		MaxIdleConns int `default:"10"`
 		// 最大空闲时长
-		MaxIdleTime time.Duration
+		MaxIdleTime time.Duration `default:"5m"`
 	}
 	// MailConfig email的配置
 	MailConfig struct {
@@ -196,9 +196,9 @@ func GetENV() string {
 }
 
 // GetBasicConfig 获取基本配置信息
-func GetBasicConfig() BasicConfig {
+func GetBasicConfig() *BasicConfig {
 	prefix := "basic."
-	basicConfig := BasicConfig{
+	basicConfig := &BasicConfig{
 		Name:         defaultViperX.GetString(prefix + "name"),
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
@@ -211,26 +211,26 @@ func GetBasicConfig() BasicConfig {
 		pidFile = pwd + "/" + pidFile
 	}
 	basicConfig.PidFile = pidFile
-	mustValidate(&basicConfig)
+	mustValidate(basicConfig)
 	return basicConfig
 }
 
 // GetSessionConfig 获取session的配置
-func GetSessionConfig() SessionConfig {
+func GetSessionConfig() *SessionConfig {
 	prefix := "session."
-	sessConfig := SessionConfig{
+	sessConfig := &SessionConfig{
 		TTL:        defaultViperX.GetDuration(prefix + "ttl"),
 		Key:        defaultViperX.GetString(prefix + "key"),
 		CookiePath: defaultViperX.GetString(prefix + "path"),
 		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
 		TrackKey:   defaultViperX.GetString(prefix + "trackKey"),
 	}
-	mustValidate(&sessConfig)
+	mustValidate(sessConfig)
 	return sessConfig
 }
 
 // GetRedisConfig 获取redis的配置
-func GetRedisConfig() RedisConfig {
+func GetRedisConfig() *RedisConfig {
 	prefix := "redis."
 	uri := defaultViperX.GetStringFromENV(prefix + "uri")
 	uriInfo, err := url.Parse(uri)
@@ -262,7 +262,7 @@ func GetRedisConfig() RedisConfig {
 		}
 	}
 
-	redisConfig := RedisConfig{
+	redisConfig := &RedisConfig{
 		Addrs:         strings.Split(uriInfo.Host, ","),
 		Username:      username,
 		Password:      password,
@@ -275,12 +275,12 @@ func GetRedisConfig() RedisConfig {
 		redisConfig.Prefix = keyPrefix + ":"
 	}
 
-	mustValidate(&redisConfig)
+	mustValidate(redisConfig)
 	return redisConfig
 }
 
 // GetPostgresConfig 获取postgres配置
-func GetPostgresConfig() PostgresConfig {
+func GetPostgresConfig() *PostgresConfig {
 	prefix := "postgres."
 	uri := defaultViperX.GetStringFromENV(prefix + "uri")
 	rawQuery := ""
@@ -296,33 +296,34 @@ func GetPostgresConfig() PostgresConfig {
 		maxIdleTime, _ = time.ParseDuration(query.Get("maxIdleTime"))
 	}
 
-	postgresConfig := PostgresConfig{
+	postgresConfig := &PostgresConfig{
 		URI:          strings.ReplaceAll(uri, rawQuery, ""),
 		MaxIdleConns: maxIdleConns,
 		MaxOpenConns: maxOpenConns,
 		MaxIdleTime:  maxIdleTime,
 	}
-	mustValidate(&postgresConfig)
+	mustValidate(postgresConfig)
+	fmt.Println(*postgresConfig)
 	return postgresConfig
 }
 
 // GetMailConfig 获取邮件配置
-func GetMailConfig() MailConfig {
+func GetMailConfig() *MailConfig {
 	prefix := "mail."
-	mailConfig := MailConfig{
+	mailConfig := &MailConfig{
 		Host:     defaultViperX.GetString(prefix + "host"),
 		Port:     defaultViperX.GetInt(prefix + "port"),
 		User:     defaultViperX.GetStringFromENV(prefix + "user"),
 		Password: defaultViperX.GetStringFromENV(prefix + "password"),
 	}
-	mustValidate(&mailConfig)
+	mustValidate(mailConfig)
 	return mailConfig
 }
 
 // GetInfluxdbConfig 获取influxdb配置
-func GetInfluxdbConfig() InfluxdbConfig {
+func GetInfluxdbConfig() *InfluxdbConfig {
 	prefix := "influxdb."
-	influxdbConfig := InfluxdbConfig{
+	influxdbConfig := &InfluxdbConfig{
 		URI:           defaultViperX.GetStringFromENV(prefix + "uri"),
 		Bucket:        defaultViperX.GetString(prefix + "bucket"),
 		Org:           defaultViperX.GetString(prefix + "org"),
@@ -332,38 +333,38 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		Gzip:          defaultViperX.GetBool(prefix + "gzip"),
 		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
 	}
-	mustValidate(&influxdbConfig)
+	mustValidate(influxdbConfig)
 	return influxdbConfig
 }
 
 // GetLocationConfig 获取定位的配置
-func GetLocationConfig() LocationConfig {
+func GetLocationConfig() *LocationConfig {
 	prefix := "location."
-	locationConfig := LocationConfig{
+	locationConfig := &LocationConfig{
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
 		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
 	}
-	mustValidate(&locationConfig)
+	mustValidate(locationConfig)
 	return locationConfig
 }
 
 // GetMinioConfig 获取minio的配置
-func GetMinioConfig() MinioConfig {
+func GetMinioConfig() *MinioConfig {
 	prefix := "minio."
-	minioConfig := MinioConfig{
+	minioConfig := &MinioConfig{
 		Endpoint:        defaultViperX.GetString(prefix + "endpoint"),
 		AccessKeyID:     defaultViperX.GetStringFromENV(prefix + "accessKeyID"),
 		SecretAccessKey: defaultViperX.GetStringFromENV(prefix + "secretAccessKey"),
 		SSL:             defaultViperX.GetBool(prefix + "ssl"),
 	}
-	mustValidate(&minioConfig)
+	mustValidate(minioConfig)
 	return minioConfig
 }
 
 // GetPyroscopeConfig 获取pyroscope的配置信息
-func GetPyroscopeConfig() PyroscopeConfig {
+func GetPyroscopeConfig() *PyroscopeConfig {
 	prefix := "pyroscope."
-	pyroscopeConfig := PyroscopeConfig{
+	pyroscopeConfig := &PyroscopeConfig{
 		Addr:  defaultViperX.GetString(prefix + "addr"),
 		Token: defaultViperX.GetString(prefix + "token"),
 	}

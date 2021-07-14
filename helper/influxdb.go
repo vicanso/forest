@@ -32,7 +32,7 @@ type (
 	InfluxDB struct {
 		client influxdb2.Client
 		writer influxdbAPI.WriteAPI
-		config config.InfluxdbConfig
+		config *config.InfluxdbConfig
 	}
 )
 

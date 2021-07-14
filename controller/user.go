@@ -156,7 +156,7 @@ type (
 
 var (
 	// session配置信息
-	sessionConfig config.SessionConfig
+	sessionConfig *config.SessionConfig
 )
 
 const (

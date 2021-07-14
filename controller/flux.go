@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/util"
@@ -65,7 +64,6 @@ type (
 // 响应相关定义
 
 func init() {
-	sessionConfig = config.GetSessionConfig()
 	g := router.NewGroup("/fluxes", loadUserSession)
 
 	ctrl := fluxCtrl{}
