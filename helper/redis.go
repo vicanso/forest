@@ -69,6 +69,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 		Password:         redisConfig.Password,
 		SentinelPassword: redisConfig.Password,
 		MasterName:       redisConfig.Master,
+		PoolSize:         redisConfig.PoolSize,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			log.Default().Info().Msg("redis new connection is established")
 			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{

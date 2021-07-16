@@ -4,7 +4,7 @@ basic:
   # 系统并发限制，如果调整此限制，需要确认tracer中的大小也需要调整
   requestLimit: 1000
   listen: :7001
-  timeout: 30s
+  # timeout: 60s
   # 如果需要支持前缀，则可添加配置
   # prefixes:
   # - /api

@@ -311,18 +311,15 @@ func main() {
 	// 出错转换为json（出错处理应该在stats之后，这样stats中才可获取到正确的http status code)
 	e.UseWithName(middleware.NewError(), "error")
 
-	// 如果有配置应用超时设置
-	if basicConfig.Timeout != 0 {
-		// 仅将timeout设置给context，后续调用如果无依赖于context
-		// 则不会超时
-		// 后续再考虑是否增加select
-		e.UseWithName(func(c *elton.Context) error {
-			ctx, cancel := context.WithTimeout(c.Context(), basicConfig.Timeout)
-			defer cancel()
-			c.WithContext(ctx)
-			return c.Next()
-		}, "timeout")
-	}
+	// 仅将timeout设置给context，后续调用如果无依赖于context
+	// 则不会超时
+	// 后续再考虑是否增加select
+	e.UseWithName(func(c *elton.Context) error {
+		ctx, cancel := context.WithTimeout(c.Context(), basicConfig.Timeout)
+		defer cancel()
+		c.WithContext(ctx)
+		return c.Next()
+	}, "timeout")
 
 	// 限制最大请求量
 	if basicConfig.RequestLimit != 0 {

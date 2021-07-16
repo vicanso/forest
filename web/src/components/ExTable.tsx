@@ -225,7 +225,7 @@ export default defineComponent({
               size={size}
               placeholder={filterItem.placeholder}
               onUpdateValue={(value) => {
-                filterParams[filterItem.key] = value;
+                filterParams[filterItem.key] = value.trim();
               }}
             />
           );

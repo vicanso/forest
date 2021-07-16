@@ -55,9 +55,9 @@ type (
 	// BasicConfig 应用基本配置信息
 	BasicConfig struct {
 		// 监听地址
-		Listen string `validate:"required,ascii"`
+		Listen string `validate:"required,ascii" default:":7001"`
 		// 最大处理请求数
-		RequestLimit uint `validate:"required"`
+		RequestLimit uint `validate:"required" default:"1000"`
 		// 应用名称
 		Name string `validate:"required,ascii"`
 		// PID文件
@@ -65,7 +65,7 @@ type (
 		// 应用前缀
 		Prefixes []string `validate:"omitempty,dive,xPath"`
 		// 超时（用于设置所有请求)
-		Timeout time.Duration
+		Timeout time.Duration `default:"2m"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
@@ -92,6 +92,8 @@ type (
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
 		MaxProcessing uint32 `validate:"required" default:"1000"`
+		// 连接池大小
+		PoolSize int `default:"100"`
 		// key前缀
 		Prefix string
 		// sentinel模式下使用的master name
@@ -262,12 +264,16 @@ func GetRedisConfig() *RedisConfig {
 		}
 	}
 
+	// 转换失败则为0
+	poolSize, _ := strconv.Atoi(query.Get("poolSize"))
+
 	redisConfig := &RedisConfig{
 		Addrs:         strings.Split(uriInfo.Host, ","),
 		Username:      username,
 		Password:      password,
 		Slow:          slow,
 		MaxProcessing: uint32(maxProcessing),
+		PoolSize:      poolSize,
 		Master:        query.Get("master"),
 	}
 	keyPrefix := query.Get("prefix")
@@ -303,7 +309,6 @@ func GetPostgresConfig() *PostgresConfig {
 		MaxIdleTime:  maxIdleTime,
 	}
 	mustValidate(postgresConfig)
-	fmt.Println(*postgresConfig)
 	return postgresConfig
 }
 
