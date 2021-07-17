@@ -41,7 +41,7 @@ var defaultInfluxDB = mustNewInfluxDB()
 
 // mustNewInfluxDB 创建新的influx服务
 func mustNewInfluxDB() *InfluxDB {
-	influxdbConfig := config.GetInfluxdbConfig()
+	influxdbConfig := config.MustGetInfluxdbConfig()
 	if influxdbConfig.Disabled {
 
 		return new(InfluxDB)

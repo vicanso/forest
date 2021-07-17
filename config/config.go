@@ -197,8 +197,8 @@ func GetENV() string {
 	return env
 }
 
-// GetBasicConfig 获取基本配置信息
-func GetBasicConfig() *BasicConfig {
+// MustGetBasicConfig 获取基本配置信息
+func MustGetBasicConfig() *BasicConfig {
 	prefix := "basic."
 	basicConfig := &BasicConfig{
 		Name:         defaultViperX.GetString(prefix + "name"),
@@ -217,8 +217,8 @@ func GetBasicConfig() *BasicConfig {
 	return basicConfig
 }
 
-// GetSessionConfig 获取session的配置
-func GetSessionConfig() *SessionConfig {
+// MustGetSessionConfig 获取session的配置
+func MustGetSessionConfig() *SessionConfig {
 	prefix := "session."
 	sessConfig := &SessionConfig{
 		TTL:        defaultViperX.GetDuration(prefix + "ttl"),
@@ -231,8 +231,8 @@ func GetSessionConfig() *SessionConfig {
 	return sessConfig
 }
 
-// GetRedisConfig 获取redis的配置
-func GetRedisConfig() *RedisConfig {
+// MustGetRedisConfig 获取redis的配置
+func MustGetRedisConfig() *RedisConfig {
 	prefix := "redis."
 	uri := defaultViperX.GetStringFromENV(prefix + "uri")
 	uriInfo, err := url.Parse(uri)
@@ -285,8 +285,8 @@ func GetRedisConfig() *RedisConfig {
 	return redisConfig
 }
 
-// GetPostgresConfig 获取postgres配置
-func GetPostgresConfig() *PostgresConfig {
+// MustGetPostgresConfig 获取postgres配置
+func MustGetPostgresConfig() *PostgresConfig {
 	prefix := "postgres."
 	uri := defaultViperX.GetStringFromENV(prefix + "uri")
 	rawQuery := ""
@@ -312,8 +312,8 @@ func GetPostgresConfig() *PostgresConfig {
 	return postgresConfig
 }
 
-// GetMailConfig 获取邮件配置
-func GetMailConfig() *MailConfig {
+// MustGetMailConfig 获取邮件配置
+func MustGetMailConfig() *MailConfig {
 	prefix := "mail."
 	mailConfig := &MailConfig{
 		Host:     defaultViperX.GetString(prefix + "host"),
@@ -325,8 +325,8 @@ func GetMailConfig() *MailConfig {
 	return mailConfig
 }
 
-// GetInfluxdbConfig 获取influxdb配置
-func GetInfluxdbConfig() *InfluxdbConfig {
+// MustGetInfluxdbConfig 获取influxdb配置
+func MustGetInfluxdbConfig() *InfluxdbConfig {
 	prefix := "influxdb."
 	influxdbConfig := &InfluxdbConfig{
 		URI:           defaultViperX.GetStringFromENV(prefix + "uri"),
@@ -342,8 +342,8 @@ func GetInfluxdbConfig() *InfluxdbConfig {
 	return influxdbConfig
 }
 
-// GetLocationConfig 获取定位的配置
-func GetLocationConfig() *LocationConfig {
+// MustGetLocationConfig 获取定位的配置
+func MustGetLocationConfig() *LocationConfig {
 	prefix := "location."
 	locationConfig := &LocationConfig{
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
@@ -353,8 +353,8 @@ func GetLocationConfig() *LocationConfig {
 	return locationConfig
 }
 
-// GetMinioConfig 获取minio的配置
-func GetMinioConfig() *MinioConfig {
+// MustGetMinioConfig 获取minio的配置
+func MustGetMinioConfig() *MinioConfig {
 	prefix := "minio."
 	minioConfig := &MinioConfig{
 		Endpoint:        defaultViperX.GetString(prefix + "endpoint"),
@@ -366,8 +366,8 @@ func GetMinioConfig() *MinioConfig {
 	return minioConfig
 }
 
-// GetPyroscopeConfig 获取pyroscope的配置信息
-func GetPyroscopeConfig() *PyroscopeConfig {
+// MustGetPyroscopeConfig 获取pyroscope的配置信息
+func MustGetPyroscopeConfig() *PyroscopeConfig {
 	prefix := "pyroscope."
 	pyroscopeConfig := &PyroscopeConfig{
 		Addr:  defaultViperX.GetString(prefix + "addr"),

@@ -89,7 +89,7 @@ func init() {
 	hes.EnableCaller(true)
 
 	// 替换出错信息中的file中的目录
-	basicConfig := config.GetBasicConfig()
+	basicConfig := config.MustGetBasicConfig()
 	reg := regexp.MustCompile(fmt.Sprintf(`\S*/%s/`, basicConfig.Name))
 	hes.SetFileConvertor(func(file string) string {
 		return reg.ReplaceAllString(file, "")
@@ -257,7 +257,7 @@ func main() {
 		}
 	}()
 
-	basicConfig := config.GetBasicConfig()
+	basicConfig := config.MustGetBasicConfig()
 	defer closeDepends()
 	// 非开发环境，监听信号退出
 	if !util.IsDevelopment() {

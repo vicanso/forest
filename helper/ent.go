@@ -77,7 +77,7 @@ var currentEntProcessingStats = new(entProcessingStats)
 
 // mustNewEntClient 初始化客户端与driver
 func mustNewEntClient() (*entsql.Driver, *ent.Client) {
-	postgresConfig := config.GetPostgresConfig()
+	postgresConfig := config.MustGetPostgresConfig()
 
 	maskURI := postgresConfig.URI
 	urlInfo, _ := url.Parse(maskURI)

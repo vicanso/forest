@@ -25,7 +25,7 @@ import (
 var ins = newLocationInstance()
 
 func newLocationInstance() *axios.Instance {
-	locationConfig := config.GetLocationConfig()
+	locationConfig := config.MustGetLocationConfig()
 	service := "location"
 	return request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)
 }

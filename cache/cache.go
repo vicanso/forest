@@ -26,7 +26,7 @@ import (
 var redisCache = newRedisCache()
 var redisCacheWithCompress = newCompressRedisCache()
 var redisSession = newRedisSession()
-var redisConfig = config.GetRedisConfig()
+var redisConfig = config.MustGetRedisConfig()
 
 func newRedisCache() *goCache.RedisCache {
 	opts := []goCache.RedisCacheOption{

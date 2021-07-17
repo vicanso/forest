@@ -56,7 +56,7 @@ func init() {
 	redis.SetLogger(log.NewRedisLogger())
 }
 func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
-	redisConfig := config.GetRedisConfig()
+	redisConfig := config.MustGetRedisConfig()
 	log.Default().Info().
 		Strs("addr", redisConfig.Addrs).
 		Msg("connect to redis")

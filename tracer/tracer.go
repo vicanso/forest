@@ -46,7 +46,7 @@ func getID() uintptr {
 }
 
 func mustNewTracerCache() *lru.Cache {
-	limit := config.GetBasicConfig().RequestLimit
+	limit := config.MustGetBasicConfig().RequestLimit
 	// 由于tracer中记录的数据量较少，因此可以选择更大的容易
 	// 设置为限制请求的10倍大小，尽可能保证tracer可用
 	l, err := lru.New(int(limit) * 10)

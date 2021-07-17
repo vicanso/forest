@@ -51,7 +51,7 @@ var defaultMinioClient = mustNewMinioClient()
 
 // mustNewMinioClient 初始化minio client
 func mustNewMinioClient() *minio.Client {
-	minioConfig := config.GetMinioConfig()
+	minioConfig := config.MustGetMinioConfig()
 	c, err := minio.New(minioConfig.Endpoint, &minio.Options{
 		Secure: minioConfig.SSL,
 		Creds:  credentials.NewStaticV4(minioConfig.AccessKeyID, minioConfig.SecretAccessKey, ""),

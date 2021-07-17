@@ -22,8 +22,8 @@ import (
 
 // StartPyroscope 启动pyroscope
 func StartPyroscope() {
-	basicConfig := config.GetBasicConfig()
-	pyroscopeConfig := config.GetPyroscopeConfig()
+	basicConfig := config.MustGetBasicConfig()
+	pyroscopeConfig := config.MustGetPyroscopeConfig()
 	pyroscopeProfiler.Start(pyroscopeProfiler.Config{
 		ApplicationName: basicConfig.Name,
 		ServerAddress:   pyroscopeConfig.Addr,

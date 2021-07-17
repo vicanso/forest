@@ -25,7 +25,7 @@ import (
 // New new session middleware
 func New() elton.Handler {
 	store := cache.GetRedisSession()
-	scf := config.GetSessionConfig()
+	scf := config.MustGetSessionConfig()
 	return se.NewByCookie(se.CookieConfig{
 		Store:   store,
 		Signed:  true,

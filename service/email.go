@@ -38,8 +38,8 @@ var (
 )
 
 var (
-	basicInfo  = config.GetBasicConfig()
-	mailConfig = config.GetMailConfig()
+	basicInfo  = config.MustGetBasicConfig()
+	mailConfig = config.MustGetMailConfig()
 )
 
 // 更新邮箱列表

@@ -25,7 +25,7 @@ import (
 
 func TestGetTrackID(t *testing.T) {
 	assert := assert.New(t)
-	sessionConfig = config.GetSessionConfig()
+	sessionConfig = config.MustGetSessionConfig()
 	req := httptest.NewRequest("GET", "/", nil)
 	cookie := http.Cookie{
 		Name:  sessionConfig.TrackKey,
@@ -38,7 +38,7 @@ func TestGetTrackID(t *testing.T) {
 
 func TestGetSessionID(t *testing.T) {
 	assert := assert.New(t)
-	sessionConfig = config.GetSessionConfig()
+	sessionConfig = config.MustGetSessionConfig()
 	req := httptest.NewRequest("GET", "/", nil)
 	cookie := http.Cookie{
 		Name:  sessionConfig.Key,
