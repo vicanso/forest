@@ -197,6 +197,8 @@ const (
 	FieldConnCreatedCount = "connCreatedCount"
 	// FieldTotal 总数
 	FieldTotal = "total"
+	// FieldPoolSize pool size
+	FieldPoolSize = "poolSize"
 )
 
 // bool 类型

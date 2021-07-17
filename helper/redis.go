@@ -43,6 +43,7 @@ type (
 
 	// redisHook redis的hook配置
 	redisHook struct {
+		poolSize       int
 		maxProcessing  uint32
 		slow           time.Duration
 		processing     atomic.Uint32
@@ -63,7 +64,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
 	}
-	c := redis.NewUniversalClient(&redis.UniversalOptions{
+	opts := &redis.UniversalOptions{
 		Addrs:            redisConfig.Addrs,
 		Username:         redisConfig.Username,
 		Password:         redisConfig.Password,
@@ -77,7 +78,29 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 			})
 			return nil
 		},
-	})
+	}
+	var c redis.UniversalClient
+	// 需要对增加limiter，因此单独判断处理
+	if opts.MasterName != "" {
+		// TODO 确认有无可能增加limiter
+		failoverOpts := opts.Failover()
+		c = redis.NewFailoverClient(failoverOpts)
+		hook.poolSize = failoverOpts.PoolSize
+	} else if len(opts.Addrs) > 1 {
+		clusterOpts := opts.Cluster()
+		clusterOpts.NewClient = func(opt *redis.Options) *redis.Client {
+			// 对每个client的增加limiter
+			opt.Limiter = hook
+			return redis.NewClient(opt)
+		}
+		c = redis.NewClusterClient(clusterOpts)
+		hook.poolSize = clusterOpts.PoolSize
+	} else {
+		simpleOpts := opts.Simple()
+		simpleOpts.Limiter = hook
+		c = redis.NewClient(simpleOpts)
+		hook.poolSize = simpleOpts.PoolSize
+	}
 	c.AddHook(hook)
 	return c, hook
 }
@@ -110,10 +133,6 @@ func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (contex
 	ctx = context.WithValue(ctx, startedAtKey, &t)
 	rh.processing.Inc()
 	rh.total.Inc()
-	err := rh.Allow()
-	if err != nil {
-		return ctx, err
-	}
 	return ctx, nil
 }
 
@@ -140,10 +159,6 @@ func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmd
 	ctx = context.WithValue(ctx, startedAtKey, &t)
 	rh.pipeProcessing.Inc()
 	rh.total.Inc()
-	err := rh.Allow()
-	if err != nil {
-		return ctx, err
-	}
 	return ctx, nil
 }
 
@@ -220,6 +235,7 @@ func RedisStats() map[string]interface{} {
 		cs.FieldProcessing:    int(processing),
 		cs.FilePipeProcessing: int(pipeProcessing),
 		cs.FieldTotal:         int(total),
+		cs.FieldPoolSize:      defaultRedisHook.poolSize,
 	}
 }
 

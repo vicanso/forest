@@ -91,7 +91,7 @@ type (
 		// 慢请求时长
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
-		MaxProcessing uint32 `validate:"required" default:"1000"`
+		MaxProcessing uint32 `validate:"required" default:"100"`
 		// 连接池大小
 		PoolSize int `default:"100"`
 		// key前缀
