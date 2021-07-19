@@ -15,6 +15,6 @@
 // limitations under the License.
 package profiler
 
-// StartPyroscope 启动pyroscope（并不执行任何函数）
-func StartPyroscope() {
+// MustStartPyroscope 启动pyroscope（并不执行任何函数）
+func MustStartPyroscope() {
 }

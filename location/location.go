@@ -22,9 +22,9 @@ import (
 	"github.com/vicanso/go-axios"
 )
 
-var ins = newLocationInstance()
+var ins = mustNewLocationInstance()
 
-func newLocationInstance() *axios.Instance {
+func mustNewLocationInstance() *axios.Instance {
 	locationConfig := config.MustGetLocationConfig()
 	service := "location"
 	return request.NewHTTP(service, locationConfig.BaseURL, locationConfig.Timeout)

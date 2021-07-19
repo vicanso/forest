@@ -72,9 +72,9 @@ var (
 
 // 配置刷新时间
 var configurationRefreshedAt time.Time
+var sessionConfig = config.MustGetSessionConfig()
 
 func init() {
-	sessionConfig := config.MustGetSessionConfig()
 	// session中用于cookie的signed keys
 	sessionSignedKeys.SetKeys(sessionConfig.Keys)
 }
@@ -195,7 +195,6 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 
 	// 如果数据库中未配置，则使用默认配置
 	if len(signedKeys) == 0 {
-		sessionConfig := config.MustGetSessionConfig()
 		sessionSignedKeys.SetKeys(sessionConfig.Keys)
 	} else {
 		sessionSignedKeys.SetKeys(signedKeys)

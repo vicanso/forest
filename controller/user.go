@@ -156,7 +156,7 @@ type (
 
 var (
 	// session配置信息
-	sessionConfig *config.SessionConfig
+	sessionConfig = config.MustGetSessionConfig()
 )
 
 const (
@@ -164,7 +164,6 @@ const (
 )
 
 func init() {
-	sessionConfig = config.MustGetSessionConfig()
 	prefix := "/users"
 	g := router.NewGroup(prefix, loadUserSession)
 	noneSessionGroup := router.NewGroup(prefix)
@@ -791,8 +790,7 @@ func (*userCtrl) refresh(c *elton.Context) (err error) {
 		return
 	}
 
-	scf := config.MustGetSessionConfig()
-	cookie, _ := c.SignedCookie(scf.Key)
+	cookie, _ := c.SignedCookie(sessionConfig.Key)
 	// 如果认证的cookie已过期，则不做刷新
 	if cookie == nil {
 		c.NoContent()
@@ -805,10 +803,10 @@ func (*userCtrl) refresh(c *elton.Context) (err error) {
 	}
 	// 更新session
 	c.AddSignedCookie(&http.Cookie{
-		Name:     scf.Key,
+		Name:     sessionConfig.Key,
 		Value:    cookie.Value,
-		Path:     scf.CookiePath,
-		MaxAge:   int(scf.TTL.Seconds()),
+		Path:     sessionConfig.CookiePath,
+		MaxAge:   int(sessionConfig.TTL.Seconds()),
 		HttpOnly: true,
 	})
 

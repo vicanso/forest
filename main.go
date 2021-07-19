@@ -235,7 +235,7 @@ func newOnErrorHandler(e *elton.Elton) {
 
 func main() {
 	log.SetLogRegexp(cs.MaskRegExp, nil)
-	profiler.StartPyroscope()
+	profiler.MustStartPyroscope()
 	e := elton.New()
 	// 记录server中连接的状态变化
 	e.Server.ConnState = service.GetHTTPServerConnState()

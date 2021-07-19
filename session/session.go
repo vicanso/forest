@@ -22,10 +22,11 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
+var scf = config.MustGetSessionConfig()
+
 // New new session middleware
 func New() elton.Handler {
 	store := cache.GetRedisSession()
-	scf := config.MustGetSessionConfig()
 	return se.NewByCookie(se.CookieConfig{
 		Store:   store,
 		Signed:  true,

@@ -20,8 +20,8 @@ import (
 	"github.com/vicanso/forest/config"
 )
 
-// StartPyroscope 启动pyroscope
-func StartPyroscope() {
+// MustStartPyroscope 启动pyroscope
+func MustStartPyroscope() {
 	basicConfig := config.MustGetBasicConfig()
 	pyroscopeConfig := config.MustGetPyroscopeConfig()
 	pyroscopeProfiler.Start(pyroscopeProfiler.Config{

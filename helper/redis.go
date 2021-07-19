@@ -43,12 +43,18 @@ type (
 
 	// redisHook redis的hook配置
 	redisHook struct {
-		poolSize       int
-		maxProcessing  uint32
-		slow           time.Duration
-		processing     atomic.Uint32
+		// 连接池大小
+		poolSize int
+		// 最大正在处理数量
+		maxProcessing uint32
+		// 慢请求阀值
+		slow time.Duration
+		// 正在处理数
+		processing atomic.Uint32
+		// pipe的正在处理数
 		pipeProcessing atomic.Uint32
-		total          atomic.Uint64
+		// 总的处理请求数
+		total atomic.Uint64
 	}
 )
 
@@ -78,6 +84,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 			})
 			return nil
 		},
+		MinIdleConns: 2,
 	}
 	var c redis.UniversalClient
 	// 需要对增加limiter，因此单独判断处理
@@ -138,6 +145,7 @@ func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (contex
 
 // AfterProcess redis处理命令后的hook函数
 func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+	// allow返回error时也触发
 	message := ""
 	err := cmd.Err()
 	if err != nil {
@@ -155,6 +163,7 @@ func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 
 // BeforeProcessPipeline redis pipeline命令前的hook函数
 func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+	// allow返回error时也触发
 	t := time.Now()
 	ctx = context.WithValue(ctx, startedAtKey, &t)
 	rh.pipeProcessing.Inc()
@@ -200,6 +209,8 @@ func (rh *redisHook) Allow() error {
 
 // ReportResult 记录结果
 func (*redisHook) ReportResult(result error) {
+	// 仅是调用redis完成时触发
+	// 如allow返回出错的不会触发
 	if result != nil && !RedisIsNilError(result) {
 		log.Default().Error().
 			Str("category", "redisProcessFail").
