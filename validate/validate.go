@@ -16,6 +16,8 @@ package validate
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"reflect"
@@ -23,6 +25,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mcuadros/go-defaults"
+	"github.com/spf13/cast"
 	"github.com/vicanso/hes"
 )
 
@@ -194,6 +197,73 @@ func wrapError(err error) error {
 	}
 	he.StatusCode = http.StatusBadRequest
 	return he
+}
+
+// Query 转换数据后执行校验，用于将query转换为struct时使用
+func Query(s interface{}, data map[string]string) (err error) {
+	v := reflect.ValueOf(s)
+	if v.Kind() != reflect.Ptr {
+		err = wrapError(errors.New("only support pointer"))
+		return
+	}
+	v = v.Elem()
+	t := v.Type()
+	len := t.NumField()
+	for i := 0; i < len; i++ {
+		field := t.Field(i)
+		// we can't access the value of unexported fields
+		if field.PkgPath != "" {
+			continue
+		}
+		value := v.FieldByIndex(field.Index)
+		tag := field.Tag.Get("json")
+		tagValue := data[tag]
+		// 如果值为空，则不做赋值处理
+		if tagValue == "" {
+			continue
+		}
+		switch value.Kind() {
+		case reflect.Int:
+			fallthrough
+		case reflect.Int8:
+			fallthrough
+		case reflect.Int16:
+			fallthrough
+		case reflect.Int32:
+			fallthrough
+		case reflect.Int64:
+			v, e := cast.ToInt64E(tagValue)
+			if e != nil {
+				err = wrapError(e)
+				return
+			}
+			value.SetInt(v)
+		case reflect.Float64:
+			fallthrough
+		case reflect.Float32:
+			v, e := cast.ToFloat64E(tagValue)
+			if e != nil {
+				err = wrapError(e)
+				return
+			}
+			value.SetFloat(v)
+		case reflect.Bool:
+			v, e := cast.ToBoolE(tagValue)
+			if e != nil {
+				err = wrapError(e)
+				return
+			}
+			value.SetBool(v)
+		case reflect.String:
+			value.SetString(tagValue)
+		default:
+			err = wrapError(fmt.Errorf("not support the type:%s", tag))
+			return
+		}
+	}
+	defaults.SetDefaults(s)
+	err = defaultValidator.Struct(s)
+	return
 }
 
 // Do 执行校验

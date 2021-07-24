@@ -26,6 +26,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.23.0
+	github.com/spf13/cast v1.3.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1
 	github.com/vicanso/count-warner v1.2.0
