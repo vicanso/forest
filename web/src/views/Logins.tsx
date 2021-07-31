@@ -1,10 +1,11 @@
 import { defineComponent, onUnmounted } from "vue";
+import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 
 import ExTable from "../components/ExTable";
 import useUserState, { userListLogin, userLoginClear } from "../states/user";
 import { today } from "../helpers/util";
 
-function getColumns() {
+function getColumns(): TableColumn[] {
   return [
     {
       title: "账户",

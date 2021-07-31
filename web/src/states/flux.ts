@@ -4,9 +4,14 @@ import {
   FLUXES_HTTP_ERRORS,
   FLUXES_TAG_VALUES,
   FLUXES_REQUESTS,
+  FLUXES_FIND_ONE,
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
 import { formatDate } from "../helpers/util";
+
+export const measurementUserTracker = "userTracker";
+export const measurementHttpRequest = "httpRequest";
+export const measurementHttpError = "httpError";
 
 function sortByTime(
   item1: {
@@ -226,7 +231,7 @@ export async function fluxListUserTrackAction(): Promise<void> {
     userTrackerActions.processing = true;
     const url = FLUXES_TAG_VALUES.replace(
       ":measurement",
-      "userTracker"
+      measurementUserTracker
     ).replace(":tag", "action");
     const { data } = await request.get(url);
     userTrackerActions.items = (data.values || []).sort();
@@ -252,10 +257,10 @@ export async function fluxListHTTPCategory(): Promise<void> {
   }
   try {
     httpErrorCategories.processing = true;
-    const url = FLUXES_TAG_VALUES.replace(":measurement", "httpError").replace(
-      ":tag",
-      "category"
-    );
+    const url = FLUXES_TAG_VALUES.replace(
+      ":measurement",
+      measurementHttpError
+    ).replace(":tag", "category");
     const { data } = await request.get(url);
     httpErrorCategories.items = (data.values || []).sort();
   } finally {
@@ -341,7 +346,7 @@ export async function fluxListRequestService(): Promise<void> {
     requestServices.processing = true;
     const url = FLUXES_TAG_VALUES.replace(
       ":measurement",
-      "httpRequest"
+      measurementHttpRequest
     ).replace(":tag", "service");
     const { data } = await request.get(url);
     requestServices.items = data.values || [];
@@ -359,13 +364,31 @@ export async function fluxListRequestRoute(): Promise<void> {
     requestRoutes.processing = true;
     const url = FLUXES_TAG_VALUES.replace(
       ":measurement",
-      "httpRequest"
+      measurementHttpRequest
     ).replace(":tag", "route");
     const { data } = await request.get(url);
     requestRoutes.items = data.values || [];
   } finally {
     requestRoutes.processing = false;
   }
+}
+
+// flux查询单条记录
+export async function fluxFindOne(params: {
+  measurement: string;
+  time: string;
+  tags: Record<string, string>;
+}): Promise<Record<string, unknown>> {
+  const url = FLUXES_FIND_ONE.replace(":measurement", params.measurement);
+  const { data } = await request.get(url, {
+    params: Object.assign(
+      {
+        time: params.time,
+      },
+      params.tags
+    ),
+  });
+  return data as Record<string, unknown>;
 }
 
 interface ReadonlyFluxState {

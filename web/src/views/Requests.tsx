@@ -1,6 +1,7 @@
 import { useMessage, NPopover } from "naive-ui";
 import { defineComponent, onMounted, onUnmounted, VNode } from "vue";
 import { css } from "@linaria/core";
+import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExLoading from "../components/ExLoading";
 import { showError } from "../helpers/util";
 import useFluxState, {
@@ -8,10 +9,12 @@ import useFluxState, {
   fluxListRequestClear,
   fluxListRequestRoute,
   fluxListRequestService,
+  measurementHttpRequest,
 } from "../states/flux";
 import ExTable from "../components/ExTable";
 import { getHoursAge } from "../helpers/util";
 import { FormItemTypes } from "../components/ExForm";
+import ExFluxDetail from "../components/ExFluxDetail";
 
 const serviceOptions = [
   {
@@ -107,7 +110,7 @@ function getFilters() {
   ];
 }
 
-function getColumns() {
+function getColumns(): TableColumn[] {
   return [
     {
       title: "服务名称",
@@ -154,6 +157,7 @@ function getColumns() {
     {
       title: "耗时",
       key: "use",
+      width: 100,
       render(row: Record<string, unknown>) {
         let use = 0;
         if (row.use) {
@@ -209,6 +213,20 @@ function getColumns() {
     {
       title: "出错信息",
       key: "error",
+    },
+    {
+      title: "完整记录",
+      key: "requestDetail",
+      width: 90,
+      render(row: Record<string, unknown>) {
+        return (
+          <ExFluxDetail
+            measurement={measurementHttpRequest}
+            data={row}
+            tagKeys={["service", "route", "method", "result"]}
+          />
+        );
+      },
     },
     {
       title: "时间",

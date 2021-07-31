@@ -1,16 +1,19 @@
-import { onMounted, onUnmounted, defineComponent } from "vue";
-import { useMessage, NEllipsis } from "naive-ui";
-import ExTable from "../components/ExTable";
+import { NEllipsis, useMessage } from "naive-ui";
+import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { defineComponent, onMounted, onUnmounted } from "vue";
+import ExFluxDetail from "../components/ExFluxDetail";
+import { FormItemTypes } from "../components/ExForm";
 import ExLoading from "../components/ExLoading";
+import ExTable from "../components/ExTable";
+import { formatJSON, showError, today } from "../helpers/util";
 import useFluxState, {
+  fluxListUserTrackAction,
   fluxListUserTracker,
   fluxListUserTrackerClear,
-  fluxListUserTrackAction,
+  measurementUserTracker,
 } from "../states/flux";
-import { showError, today, formatJSON } from "../helpers/util";
-import { FormItemTypes } from "../components/ExForm";
 
-function getColumns() {
+function getColumns(): TableColumn[] {
   return [
     {
       title: "账户",
@@ -48,12 +51,14 @@ function getColumns() {
     {
       title: "TrackID",
       key: "tid",
-      width: 220,
+      width: 120,
+      ellipsis: true,
     },
     {
       title: "SessionID",
       key: "sid",
-      width: 220,
+      width: 120,
+      ellipsis: true,
     },
     {
       title: "IP",
@@ -72,9 +77,24 @@ function getColumns() {
           return;
         }
         const tooltip = {
-          maxWidth: 250,
+          width: 250,
         };
         return <NEllipsis tooltip={tooltip}>{text}</NEllipsis>;
+      },
+    },
+    {
+      title: "完整记录",
+      key: "userTrackerDetail",
+      width: 90,
+      align: "center",
+      render(row: Record<string, unknown>) {
+        return (
+          <ExFluxDetail
+            measurement={measurementUserTracker}
+            data={row}
+            tagKeys={["action", "result", "step"]}
+          />
+        );
       },
     },
     {

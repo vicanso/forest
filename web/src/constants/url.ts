@@ -31,6 +31,8 @@ export const FLUXES_ACTIONS = "/fluxes/v1/actions";
 export const FLUXES_REQUESTS = "/fluxes/v1/requests";
 // tag value列表
 export const FLUXES_TAG_VALUES = "/fluxes/v1/tag-values/:measurement/:tag";
+// flux单条记录查询
+export const FLUXES_FIND_ONE = "/fluxes/v1/one/:measurement";
 
 // 系统配置相关url
 // 配置列表

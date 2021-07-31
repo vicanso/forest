@@ -23,6 +23,7 @@ import (
 	"github.com/vicanso/elton"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
@@ -38,8 +39,8 @@ import (
 type listParams = helper.EntListParams
 
 var (
-	getEntClient = helper.EntGetClient
-	now          = util.NowString
+	// getEntClient = helper.EntGetClient
+	now = util.NowString
 
 	getUserSession = session.NewUserSession
 	// 加载用户session
@@ -83,6 +84,18 @@ type (
 		Step string
 	}
 )
+
+func getUserClient() *ent.UserClient {
+	return helper.EntGetClient().User
+}
+
+func getUserLoginClient() *ent.UserLoginClient {
+	return helper.EntGetClient().UserLogin
+}
+
+func getConfigurationClient() *ent.ConfigurationClient {
+	return helper.EntGetClient().Configuration
+}
 
 func newMagicalCaptchaValidate() elton.Handler {
 	magicValue := ""
@@ -156,7 +169,8 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 		extraParams = &params[0]
 	}
 	return M.NewTracker(M.TrackerConfig{
-		Mask: cs.MaskRegExp,
+		Mask:      cs.MaskRegExp,
+		MaxLength: 30,
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			tid := util.GetTrackID(c)

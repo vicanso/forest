@@ -54,6 +54,7 @@ func mustNewInfluxDB() *InfluxDB {
 		v := influxdbConfig.FlushInterval / time.Millisecond
 		opts.SetFlushInterval(uint(v))
 	}
+	opts.SetPrecision(time.Nanosecond)
 	opts.SetUseGZip(influxdbConfig.Gzip)
 	log.Default().Info().
 		Str("uri", influxdbConfig.URI).

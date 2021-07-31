@@ -1,16 +1,23 @@
-import { defineComponent, onUnmounted, ref } from "vue";
-import { TableColumn } from "naive-ui/lib/data-table/src/interface";
-import { AngleLeft, EditRegular } from "@vicons/fa";
-import { NButton, NCard, useMessage, NIcon, NSpin } from "naive-ui";
 import { css } from "@linaria/core";
+import { EditRegular } from "@vicons/fa";
+import {
+  NButton,
+  NCard,
+  NIcon,
+  NPageHeader,
+  NSpin,
+  useMessage,
+} from "naive-ui";
+import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { defineComponent, onUnmounted, ref } from "vue";
 import ExForm, { FormItemTypes } from "../components/ExForm";
 import ExTable from "../components/ExTable";
+import { diff, showError, showWarning } from "../helpers/util";
 import useUserState, {
   userList,
   userListClear,
   userUpdateByID,
 } from "../states/user";
-import { diff, showError, showWarning } from "../helpers/util";
 
 const userRoleClass = css`
   margin: 0;
@@ -212,26 +219,21 @@ export default defineComponent({
       this;
     if (mode === updateMode) {
       const formItems = getUpdateFormItems(updatedUser);
-      const slots = {
-        "header-extra": () => (
-          <NButton
-            size="large"
-            bordered={false}
-            onClick={() => {
-              this.mode = listMode;
-            }}
-          >
-            <NIcon>
-              <AngleLeft />
-            </NIcon>
-            返回
-          </NButton>
-        ),
-      };
       return (
         <NSpin show={updating}>
-          <NCard title="用户信息更新" v-slots={slots}>
-            <ExForm formItems={formItems} onSubmit={update} submitText="更新" />
+          <NCard>
+            <NPageHeader
+              title="用户信息更新"
+              onBack={() => {
+                this.mode = listMode;
+              }}
+            >
+              <ExForm
+                formItems={formItems}
+                onSubmit={update}
+                submitText="更新"
+              />
+            </NPageHeader>
           </NCard>
         </NSpin>
       );
@@ -248,7 +250,7 @@ export default defineComponent({
               this.mode = updateMode;
             }}
           >
-            <NIcon>
+            <NIcon class="mright5">
               <EditRegular />
             </NIcon>
             更新

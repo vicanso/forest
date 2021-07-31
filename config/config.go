@@ -296,7 +296,7 @@ func MustGetPostgresConfig() *PostgresConfig {
 	var maxIdleTime time.Duration
 	if uriInfo != nil {
 		query := uriInfo.Query()
-		rawQuery = uriInfo.RawQuery
+		rawQuery = "?" + uriInfo.RawQuery
 		maxIdleConns, _ = strconv.Atoi(query.Get("maxIdleConns"))
 		maxOpenConns, _ = strconv.Atoi(query.Get("maxOpenConns"))
 		maxIdleTime, _ = time.ParseDuration(query.Get("maxIdleTime"))

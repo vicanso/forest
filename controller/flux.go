@@ -26,6 +26,7 @@ import (
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
+	"github.com/vicanso/hes"
 )
 
 type fluxCtrl struct{}
@@ -108,6 +109,11 @@ func init() {
 	g.GET(
 		"/v1/fields/{measurement}",
 		ctrl.ListField,
+	)
+	// 查询一条记录
+	g.GET(
+		"/v1/one/{measurement}",
+		ctrl.findOne,
 	)
 }
 
@@ -295,4 +301,49 @@ func (ctrl fluxCtrl) listAction(c *elton.Context) (err error) {
 // listRequest list request
 func (ctrl fluxCtrl) listRequest(c *elton.Context) (err error) {
 	return ctrl.list(c, cs.MeasurementHTTPRequest, "requests")
+}
+
+func (ctrl fluxCtrl) findOne(c *elton.Context) (err error) {
+	query := c.Query()
+	timeValue := query["time"]
+	t, err := time.Parse(time.RFC3339Nano, timeValue)
+	if err != nil {
+		return
+	}
+	measurement := c.Param("measurement")
+	start := t.Format(time.RFC3339Nano)
+	stop := t.Add(time.Nanosecond).Format(time.RFC3339Nano)
+	filter := ""
+	for k, v := range query {
+		if k == "time" {
+			continue
+		}
+		filter += fmt.Sprintf(`|> filter(fn: (r) => r["%s"] == "%s")`, k, v)
+	}
+	ql := fmt.Sprintf(`|> range(start: %s, stop: %s)
+	|> filter(fn: (r) => r["_measurement"] == "%s")
+	%s
+	|> pivot(
+		rowKey:["_time"],
+		columnKey: ["_field"],
+		valueColumn: "_value"
+	)
+	`, start, stop, measurement, filter)
+	items, err := GetInfluxSrv().Query(c.Context(), ql)
+	if err != nil {
+		return
+	}
+	if len(items) == 0 {
+		err = hes.New("Not Found")
+		return
+	}
+	index := 0
+	for i, item := range items {
+		if item["_time"] == timeValue {
+			index = i
+		}
+	}
+	c.CacheMaxAge(5 * time.Minute)
+	c.Body = items[index]
+	return
 }

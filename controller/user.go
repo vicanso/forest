@@ -294,7 +294,7 @@ func init() {
 // validateBeforeSave 保存前校验
 func (params *userRegisterLoginParams) validateBeforeSave(ctx context.Context) (err error) {
 	// 判断该账户是否已注册
-	exists, err := getEntClient().User.Query().
+	exists, err := getUserClient().Query().
 		Where(user.Account(params.Account)).
 		Exist(ctx)
 	if err != nil {
@@ -314,7 +314,7 @@ func (params *userRegisterLoginParams) save(ctx context.Context) (*ent.User, err
 	if err != nil {
 		return nil, err
 	}
-	return getEntClient().User.Create().
+	return getUserClient().Create().
 		SetAccount(params.Account).
 		SetPassword(params.Password).
 		Save(ctx)
@@ -322,7 +322,7 @@ func (params *userRegisterLoginParams) save(ctx context.Context) (*ent.User, err
 
 // login 登录
 func (params *userRegisterLoginParams) login(ctx context.Context, token string) (u *ent.User, err error) {
-	u, err = getEntClient().User.Query().
+	u, err = getUserClient().Query().
 		Where(user.Account(params.Account)).
 		First(ctx)
 	errAccountOrPasswordInvalid := hes.New("账户或者密码错误", errUserCategory)
@@ -353,7 +353,7 @@ func (params *userRegisterLoginParams) login(ctx context.Context, token string) 
 // update 更新用户信息
 func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account string) (u *ent.User, err error) {
 
-	u, err = getEntClient().User.Query().
+	u, err = getUserClient().Query().
 		Where(user.Account(account)).
 		First(ctx)
 	if err != nil {
@@ -381,7 +381,7 @@ func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account 
 
 // updateByID 通过ID更新信息
 func (params *userUpdateParams) updateByID(ctx context.Context, id int) (u *ent.User, err error) {
-	updateOne := getEntClient().User.UpdateOneID(id)
+	updateOne := getUserClient().UpdateOneID(id)
 	if len(params.Roles) != 0 {
 		updateOne = updateOne.SetRoles(params.Roles)
 	}
@@ -411,7 +411,7 @@ func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 
 // queryAll 查询用户列表
 func (params *userListParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
-	query := getEntClient().User.Query()
+	query := getUserClient().Query()
 
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
@@ -423,7 +423,7 @@ func (params *userListParams) queryAll(ctx context.Context) (users []*ent.User, 
 
 // count 计算总数
 func (params *userListParams) count(ctx context.Context) (count int, err error) {
-	query := getEntClient().User.Query()
+	query := getUserClient().Query()
 
 	query = params.where(query)
 
@@ -446,7 +446,7 @@ func (params *userLoginListParams) where(query *ent.UserLoginQuery) *ent.UserLog
 
 // queryAll 查询所有的登录记录
 func (params *userLoginListParams) queryAll(ctx context.Context) (userLogins []*ent.UserLogin, err error) {
-	query := getEntClient().UserLogin.Query()
+	query := getUserLoginClient().Query()
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
 		Order(params.GetOrders()...)
@@ -456,7 +456,7 @@ func (params *userLoginListParams) queryAll(ctx context.Context) (userLogins []*
 
 // count 计算登录记录总数
 func (params *userLoginListParams) count(ctx context.Context) (count int, err error) {
-	query := getEntClient().UserLogin.Query()
+	query := getUserLoginClient().Query()
 	query = params.where(query)
 	return query.Count(ctx)
 }
@@ -513,7 +513,7 @@ func (*userCtrl) findByID(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	data, err := getEntClient().User.Get(c.Context(), id)
+	data, err := getUserClient().Get(c.Context(), id)
 	if err != nil {
 		return
 	}
@@ -618,7 +618,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 // detail 详细信息
 func (*userCtrl) detail(c *elton.Context) (err error) {
 	us := getUserSession(c)
-	user, err := getEntClient().User.Get(c.Context(), us.MustGetInfo().ID)
+	user, err := getUserClient().Get(c.Context(), us.MustGetInfo().ID)
 	if err != nil {
 		return
 	}
@@ -735,7 +735,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		// 记录至数据库
-		_, err := getEntClient().UserLogin.Create().
+		_, err := getUserLoginClient().Create().
 			SetAccount(account).
 			SetUserAgent(userAgent).
 			SetIP(ip).

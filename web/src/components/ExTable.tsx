@@ -15,7 +15,7 @@ import {
   useMessage,
 } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
-import { Component, defineComponent, onMounted, ref } from "vue";
+import { Component, defineComponent, onMounted, ref, PropType } from "vue";
 import { css } from "@linaria/core";
 import { padding } from "../constants/style";
 import { getDaysAgo, showError, today, yesterday } from "../helpers/util";
@@ -50,7 +50,7 @@ export default defineComponent({
       default: "",
     },
     columns: {
-      type: Array,
+      type: Array as PropType<TableColumn[]>,
       required: true,
     },
     data: {
@@ -263,10 +263,7 @@ export default defineComponent({
               <NGrid xGap={24}>{filterGrids}</NGrid>
             </NForm>
           )}
-          <NDataTable
-            columns={columns as TableColumn[]}
-            data={tableData.items}
-          ></NDataTable>
+          <NDataTable columns={columns} data={tableData.items}></NDataTable>
           {!hidePagination && pageCount > 1 && (
             <NPagination
               page={page}

@@ -40,7 +40,7 @@ func TestConfigurationParams(t *testing.T) {
 	name := util.RandomString(8)
 	category := confSchema.CategoryBlockIP
 	defer func() {
-		_, _ = getEntClient().Configuration.Delete().Where(configuration.Name(name)).Exec(context.Background())
+		_, _ = getConfigurationClient().Delete().Where(configuration.Name(name)).Exec(context.Background())
 	}()
 
 	configID := 0

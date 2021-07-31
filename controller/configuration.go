@@ -124,7 +124,7 @@ func init() {
 // validateBeforeSave 保存前校验
 func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (err error) {
 	// schema中有唯一限制，也可不校验
-	exists, err := getEntClient().Configuration.Query().
+	exists, err := getConfigurationClient().Query().
 		Where(configuration.Name(params.Name)).
 		Exist(ctx)
 	if err != nil {
@@ -143,7 +143,7 @@ func (params *configurationAddParams) save(ctx context.Context, owner string) (c
 	if err != nil {
 		return
 	}
-	return getEntClient().Configuration.Create().
+	return getConfigurationClient().Create().
 		SetName(params.Name).
 		SetStatus(params.Status).
 		SetCategory(params.Category).
@@ -168,7 +168,7 @@ func (params *configurationListParmas) where(query *ent.ConfigurationQuery) *ent
 
 // queryAll 查询配置列表
 func (params *configurationListParmas) queryAll(ctx context.Context) (configurations []*ent.Configuration, err error) {
-	query := getEntClient().Configuration.Query()
+	query := getConfigurationClient().Query()
 
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
@@ -180,7 +180,7 @@ func (params *configurationListParmas) queryAll(ctx context.Context) (configurat
 
 // count 计算总数
 func (params *configurationListParmas) count(ctx context.Context) (count int, err error) {
-	query := getEntClient().Configuration.Query()
+	query := getConfigurationClient().Query()
 
 	query = params.where(query)
 
@@ -189,7 +189,7 @@ func (params *configurationListParmas) count(ctx context.Context) (count int, er
 
 // update 更新配置信息
 func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int) (configuration *ent.Configuration, err error) {
-	updateOne := getEntClient().Configuration.
+	updateOne := getConfigurationClient().
 		UpdateOneID(id)
 	if !params.StartedAt.IsZero() {
 		updateOne = updateOne.SetStartedAt(params.StartedAt)
@@ -283,7 +283,7 @@ func (*configurationCtrl) findByID(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	configuration, err := getEntClient().Configuration.Get(c.Context(), id)
+	configuration, err := getConfigurationClient().Get(c.Context(), id)
 	if err != nil {
 		return
 	}
