@@ -49,23 +49,23 @@ func init() {
 }
 
 // findCacheByKey find cache by key
-func (*adminCtrl) findCacheByKey(c *elton.Context) (err error) {
+func (*adminCtrl) findCacheByKey(c *elton.Context) error {
 	data, err := helper.RedisGetClient().Get(c.Context(), c.Param("key")).Result()
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &findCacheResp{
 		Data: data,
 	}
-	return
+	return nil
 }
 
 // cleanCacheByKey clean cache by key
-func (*adminCtrl) cleanCacheByKey(c *elton.Context) (err error) {
-	_, err = helper.RedisGetClient().Del(c.Context(), c.Param("key")).Result()
+func (*adminCtrl) cleanCacheByKey(c *elton.Context) error {
+	_, err := helper.RedisGetClient().Del(c.Context(), c.Param("key")).Result()
 	if err != nil {
-		return
+		return err
 	}
 	c.NoContent()
-	return
+	return nil
 }

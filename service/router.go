@@ -113,20 +113,20 @@ func (rc *RouterConcurrency) Take() {
 }
 
 // IncConcurrency 当前路由处理数+1
-func (l *rcLimiter) IncConcurrency(key string) (current uint32, max uint32) {
+func (l *rcLimiter) IncConcurrency(key string) (uint32, uint32) {
 	// 该map仅初始化一次，因此无需要考虑锁
 	r, ok := l.m[key]
 	if !ok {
-		return
+		return 0, 0
 	}
-	current = r.Current.Inc()
-	max = r.Max.Load()
+	current := r.Current.Inc()
+	max := r.Max.Load()
 	// 如果设置为0或已超出最大并发限制，则直接返回
 	if max == 0 || current > max {
-		return
+		return current, max
 	}
 	r.Take()
-	return
+	return current, max
 }
 
 // DecConcurrency 当前路由处理数-1

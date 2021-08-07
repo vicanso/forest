@@ -155,7 +155,7 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 // }
 
 // doValidate 校验struct
-func doValidate(s interface{}, data interface{}) (err error) {
+func doValidate(s interface{}, data interface{}) error {
 	// statusCode := http.StatusBadRequest
 	if data != nil {
 		switch data := data.(type) {
@@ -163,15 +163,13 @@ func doValidate(s interface{}, data interface{}) (err error) {
 			if len(data) == 0 {
 				he := hes.New("data is empty")
 				he.Category = errJSONParseCategory
-				err = he
-				return
+				return he
 			}
-			err = json.Unmarshal(data, s)
+			err := json.Unmarshal(data, s)
 			if err != nil {
 				he := hes.Wrap(err)
 				he.Category = errJSONParseCategory
-				err = he
-				return
+				return he
 			}
 		default:
 			buf, err := json.Marshal(data)
@@ -185,8 +183,7 @@ func doValidate(s interface{}, data interface{}) (err error) {
 		}
 	}
 	defaults.SetDefaults(s)
-	err = defaultValidator.Struct(s)
-	return
+	return defaultValidator.Struct(s)
 }
 
 func wrapError(err error) error {
@@ -267,21 +264,22 @@ func Query(s interface{}, data map[string]string) (err error) {
 }
 
 // Do 执行校验
-func Do(s interface{}, data interface{}) (err error) {
-	err = doValidate(s, data)
+func Do(s interface{}, data interface{}) error {
+	err := doValidate(s, data)
 	if err != nil {
 		return wrapError(err)
 	}
-	return
+	return nil
 }
 
 // 对struct校验
-func Struct(s interface{}) (err error) {
-	err = defaultValidator.Struct(s)
+func Struct(s interface{}) error {
+	defaults.SetDefaults(s)
+	err := defaultValidator.Struct(s)
 	if err != nil {
 		return wrapError(err)
 	}
-	return
+	return nil
 }
 
 // 任何参数均返回true，不校验。用于临时将某个校验禁用

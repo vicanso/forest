@@ -44,7 +44,7 @@ type Location struct {
 }
 
 // GetByIP get location by ip
-func GetByIP(ctx context.Context, ip string) (lo Location, err error) {
+func GetByIP(ctx context.Context, ip string) (*Location, error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
@@ -53,10 +53,10 @@ func GetByIP(ctx context.Context, ip string) (lo Location, err error) {
 		Context: ctx,
 	}
 
-	lo = Location{}
-	err = ins.EnhanceRequest(&lo, conf)
+	lo := &Location{}
+	err := ins.EnhanceRequest(lo, conf)
 	if err != nil {
-		return
+		return nil, err
 	}
-	return
+	return lo, nil
 }

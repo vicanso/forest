@@ -22,18 +22,17 @@ import (
 	"github.com/vicanso/hes"
 )
 
-func GetProf(d time.Duration) (result *bytes.Buffer, err error) {
+func GetProf(d time.Duration) (*bytes.Buffer, error) {
 	// 禁止拉取超过1分钟的prof
 	if d > 1*time.Minute {
-		err = hes.New("duration should be less than 1m")
-		return
+		return nil, hes.New("duration should be less than 1m")
 	}
-	result = &bytes.Buffer{}
+	result := &bytes.Buffer{}
 	done := fgprof.Start(result, fgprof.FormatPprof)
 	time.Sleep(d)
-	err = done()
+	err := done()
 	if err != nil {
-		return
+		return nil, err
 	}
-	return
+	return result, nil
 }

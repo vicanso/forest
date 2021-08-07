@@ -28,7 +28,7 @@ type ExitFunc func() int32
 
 // NewEntry create an entry middleware
 func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
-	return func(c *elton.Context) (err error) {
+	return func(c *elton.Context) error {
 		entryFn()
 		defer exitFn()
 		if c.ID != "" {

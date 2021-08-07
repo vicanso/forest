@@ -292,20 +292,19 @@ func init() {
 }
 
 // validateBeforeSave 保存前校验
-func (params *userRegisterLoginParams) validateBeforeSave(ctx context.Context) (err error) {
+func (params *userRegisterLoginParams) validateBeforeSave(ctx context.Context) error {
 	// 判断该账户是否已注册
 	exists, err := getUserClient().Query().
 		Where(user.Account(params.Account)).
 		Exist(ctx)
 	if err != nil {
-		return
+		return err
 	}
 	if exists {
-		err = hes.New("该账户已注册", errUserCategory)
-		return
+		return hes.New("该账户已注册", errUserCategory)
 	}
 
-	return
+	return nil
 }
 
 // save 创建用户
@@ -321,8 +320,8 @@ func (params *userRegisterLoginParams) save(ctx context.Context) (*ent.User, err
 }
 
 // login 登录
-func (params *userRegisterLoginParams) login(ctx context.Context, token string) (u *ent.User, err error) {
-	u, err = getUserClient().Query().
+func (params *userRegisterLoginParams) login(ctx context.Context, token string) (*ent.User, error) {
+	u, err := getUserClient().Query().
 		Where(user.Account(params.Account)).
 		First(ctx)
 	errAccountOrPasswordInvalid := hes.New("账户或者密码错误", errUserCategory)
@@ -331,7 +330,7 @@ func (params *userRegisterLoginParams) login(ctx context.Context, token string) 
 		if ent.IsNotFound(err) {
 			err = errAccountOrPasswordInvalid
 		}
-		return
+		return nil, err
 	}
 	pwd := util.Sha256(u.Password + token)
 	// 用于自动化测试使用
@@ -339,31 +338,28 @@ func (params *userRegisterLoginParams) login(ctx context.Context, token string) 
 		pwd = params.Password
 	}
 	if pwd != params.Password {
-		err = errAccountOrPasswordInvalid
-		return
+		return nil, errAccountOrPasswordInvalid
 	}
 	// 禁止非正常状态用户登录
 	if u.Status != schema.StatusEnabled {
-		err = hes.NewWithStatusCode("该账户不允许登录", http.StatusForbidden, errUserCategory)
-		return
+		return nil, hes.NewWithStatusCode("该账户不允许登录", http.StatusForbidden, errUserCategory)
 	}
-	return
+	return u, nil
 }
 
 // update 更新用户信息
-func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account string) (u *ent.User, err error) {
+func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account string) (*ent.User, error) {
 
-	u, err = getUserClient().Query().
+	u, err := getUserClient().Query().
 		Where(user.Account(account)).
 		First(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	// 更新密码时需要先校验旧密码
 	if params.NewPassword != "" {
 		if u.Password != params.Password {
-			err = hes.New("旧密码错误，请重新输入", errUserCategory)
-			return
+			return nil, hes.New("旧密码错误，请重新输入", errUserCategory)
 		}
 	}
 	updateOne := u.Update()
@@ -380,7 +376,7 @@ func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account 
 }
 
 // updateByID 通过ID更新信息
-func (params *userUpdateParams) updateByID(ctx context.Context, id int) (u *ent.User, err error) {
+func (params *userUpdateParams) updateByID(ctx context.Context, id int) (*ent.User, error) {
 	updateOne := getUserClient().UpdateOneID(id)
 	if len(params.Roles) != 0 {
 		updateOne = updateOne.SetRoles(params.Roles)
@@ -410,7 +406,7 @@ func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 }
 
 // queryAll 查询用户列表
-func (params *userListParams) queryAll(ctx context.Context) (users []*ent.User, err error) {
+func (params *userListParams) queryAll(ctx context.Context) ([]*ent.User, error) {
 	query := getUserClient().Query()
 
 	query = query.Limit(params.GetLimit()).
@@ -422,7 +418,7 @@ func (params *userListParams) queryAll(ctx context.Context) (users []*ent.User, 
 }
 
 // count 计算总数
-func (params *userListParams) count(ctx context.Context) (count int, err error) {
+func (params *userListParams) count(ctx context.Context) (int, error) {
 	query := getUserClient().Query()
 
 	query = params.where(query)
@@ -445,7 +441,7 @@ func (params *userLoginListParams) where(query *ent.UserLoginQuery) *ent.UserLog
 }
 
 // queryAll 查询所有的登录记录
-func (params *userLoginListParams) queryAll(ctx context.Context) (userLogins []*ent.UserLogin, err error) {
+func (params *userLoginListParams) queryAll(ctx context.Context) ([]*ent.UserLogin, error) {
 	query := getUserLoginClient().Query()
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
@@ -455,24 +451,24 @@ func (params *userLoginListParams) queryAll(ctx context.Context) (userLogins []*
 }
 
 // count 计算登录记录总数
-func (params *userLoginListParams) count(ctx context.Context) (count int, err error) {
+func (params *userLoginListParams) count(ctx context.Context) (int, error) {
 	query := getUserLoginClient().Query()
 	query = params.where(query)
 	return query.Count(ctx)
 }
 
 // pickUserInfo 获取用户信息
-func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
+func pickUserInfo(c *elton.Context) (*userInfoResp, error) {
 	us := getUserSession(c)
 	userInfo, err := us.GetInfo()
 	if err != nil {
-		return
+		return nil, err
 	}
-	resp = userInfoResp{
+	resp := userInfoResp{
 		Date: now(),
 	}
 	resp.UserInfo = userInfo
-	return
+	return &resp, nil
 }
 
 // swagger:route GET /users/v1 users userList
@@ -482,62 +478,62 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 // Responses:
 // 	200: apiUserListResponse
 
-func (*userCtrl) list(c *elton.Context) (err error) {
+func (*userCtrl) list(c *elton.Context) error {
 	params := userListParams{}
-	err = validate.Do(&params, c.Query())
+	err := validate.Do(&params, c.Query())
 	if err != nil {
-		return
+		return err
 	}
 	count := -1
 	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
-			return
+			return err
 		}
 	}
 	users, err := params.queryAll(c.Context())
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &userListResp{
 		Count: count,
 		Users: users,
 	}
 
-	return
+	return nil
 }
 
 // findByID 通过ID查询用户信息
-func (*userCtrl) findByID(c *elton.Context) (err error) {
+func (*userCtrl) findByID(c *elton.Context) error {
 	id, err := getIDFromParams(c)
 	if err != nil {
-		return
+		return err
 	}
 	data, err := getUserClient().Get(c.Context(), id)
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = data
-	return
+	return nil
 }
 
 // updateByID 更新信息
-func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
+func (ctrl *userCtrl) updateByID(c *elton.Context) error {
 	id, err := getIDFromParams(c)
 	if err != nil {
-		return
+		return err
 	}
 	params := userUpdateParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 	user, err := params.updateByID(c.Context(), id)
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = user
-	return
+	return nil
 }
 
 // swagger:route GET /users/v1/me/login users userLoginToken
@@ -547,24 +543,24 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
 // 保证客户每次登录时的密码均不相同，避免接口重放登录。
 // Responses:
 // 	200: apiUserLoginTokenResponse
-func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
+func (*userCtrl) getLoginToken(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
-	err = us.Destroy()
+	err := us.Destroy()
 	if err != nil {
-		return
+		return err
 	}
 	userInfo := session.UserInfo{
 		Token: util.RandomString(8),
 	}
 	err = us.SetInfo(userInfo)
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &userLoginTokenResp{
 		Token: userInfo.Token,
 	}
-	return
+	return nil
 }
 
 // swagger:route GET /users/v1/me users userMe
@@ -574,7 +570,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 // 若用户未登录，仅返回服务器当前时间。
 // Responses:
 // 	200: apiUserInfoResponse
-func (*userCtrl) me(c *elton.Context) (err error) {
+func (*userCtrl) me(c *elton.Context) error {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	if cookie == nil {
 		uid := util.GenXID()
@@ -609,22 +605,22 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 	}
 	resp, err := pickUserInfo(c)
 	if err != nil {
-		return
+		return err
 	}
-	c.Body = &resp
-	return
+	c.Body = resp
+	return nil
 }
 
 // detail 详细信息
-func (*userCtrl) detail(c *elton.Context) (err error) {
+func (*userCtrl) detail(c *elton.Context) error {
 	us := getUserSession(c)
 	user, err := getUserClient().Get(c.Context(), us.MustGetInfo().ID)
 	if err != nil {
-		return
+		return err
 	}
 
 	c.Body = user
-	return
+	return nil
 }
 
 // swagger:route POST /users/v1/me users userRegister
@@ -635,16 +631,16 @@ func (*userCtrl) detail(c *elton.Context) (err error) {
 // 需注意此时并非登录状态，需要客户自主登录。
 // Responses:
 // 	201: apiUserRegisterResponse
-func (*userCtrl) register(c *elton.Context) (err error) {
+func (*userCtrl) register(c *elton.Context) error {
 	params := userRegisterLoginParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err := validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 
 	user, err := params.save(c.Context())
 	if err != nil {
-		return
+		return err
 	}
 	// 第一个创建的用户添加su权限
 	if user.ID == 1 {
@@ -657,7 +653,7 @@ func (*userCtrl) register(c *elton.Context) (err error) {
 		}()
 	}
 	c.Created(user)
-	return
+	return nil
 }
 
 // swagger:route POST /users/v1/me/login users userLogin
@@ -667,26 +663,25 @@ func (*userCtrl) register(c *elton.Context) (err error) {
 // 登录成功后返回用户信息。
 // Responses:
 // 	200: apiUserInfoResponse
-func (*userCtrl) login(c *elton.Context) (err error) {
+func (*userCtrl) login(c *elton.Context) error {
 	params := userRegisterLoginParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err := validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 	us := getUserSession(c)
 	userInfo, err := us.GetInfo()
 	if err != nil {
-		return
+		return err
 	}
 
 	if userInfo.Token == "" {
-		err = hes.New("登录令牌不能为空", errUserCategory)
-		return
+		return hes.New("登录令牌不能为空", errUserCategory)
 	}
 	// 登录
 	u, err := params.login(c.Context(), userInfo.Token)
 	if err != nil {
-		return
+		return err
 	}
 	account := u.Account
 
@@ -698,7 +693,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 		// Groups: u.,
 	})
 	if err != nil {
-		return
+		return err
 	}
 
 	ip := c.RealIP()
@@ -759,10 +754,10 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	// 返回用户信息
 	resp, err := pickUserInfo(c)
 	if err != nil {
-		return
+		return err
 	}
-	c.Body = &resp
-	return
+	c.Body = resp
+	return nil
 }
 
 // swagger:route DELETE /users/v1/me users userLogout
@@ -771,35 +766,35 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 // 退出用户当前登录状态，成功时并无内容返回。
 // Responses:
 // 	204: apiNoContentResponse
-func (*userCtrl) logout(c *elton.Context) (err error) {
+func (*userCtrl) logout(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除session
-	err = us.Destroy()
+	err := us.Destroy()
 	if err != nil {
-		return
+		return err
 	}
 	c.NoContent()
-	return
+	return nil
 }
 
 // refresh 刷新用户session
-func (*userCtrl) refresh(c *elton.Context) (err error) {
+func (*userCtrl) refresh(c *elton.Context) error {
 	us := getUserSession(c)
 	if us == nil {
 		c.NoContent()
-		return
+		return nil
 	}
 
 	cookie, _ := c.SignedCookie(sessionConfig.Key)
 	// 如果认证的cookie已过期，则不做刷新
 	if cookie == nil {
 		c.NoContent()
-		return
+		return nil
 	}
 
-	err = us.Refresh()
+	err := us.Refresh()
 	if err != nil {
-		return
+		return err
 	}
 	// 更新session
 	c.AddSignedCookie(&http.Cookie{
@@ -811,78 +806,78 @@ func (*userCtrl) refresh(c *elton.Context) (err error) {
 	})
 
 	c.NoContent()
-	return
+	return nil
 }
 
 // updateMe 更新用户信息
-func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
+func (ctrl *userCtrl) updateMe(c *elton.Context) error {
 	// 如果没有数据要更新，如{}
 	if len(c.RequestBody) <= 2 {
 		return ctrl.refresh(c)
 	}
 	us := getUserSession(c)
 	params := userUpdateMeParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err := validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 
 	// 更新用户信息
 	_, err = params.updateOneAccount(c.Context(), us.MustGetInfo().Account)
 	if err != nil {
-		return
+		return err
 	}
 	c.NoContent()
-	return
+	return nil
 }
 
 // getRoleList 获取用户角色列表
-func (*userCtrl) getRoleList(c *elton.Context) (err error) {
+func (*userCtrl) getRoleList(c *elton.Context) error {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &userRoleListResp{
 		UserRoles: schema.GetUserRoleList(),
 	}
-	return
+	return nil
 }
 
 // listLoginRecord list login record
-func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
+func (ctrl userCtrl) listLoginRecord(c *elton.Context) error {
 	params := userLoginListParams{}
-	err = validate.Do(&params, c.Query())
+	err := validate.Do(&params, c.Query())
 	if err != nil {
-		return
+		return err
 	}
 	count := -1
 	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
-			return
+			return err
 		}
 	}
 	userLogins, err := params.queryAll(c.Context())
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &userLoginListResp{
 		Count:      count,
 		UserLogins: userLogins,
 	}
-	return
+	return nil
 }
 
 // addUserAction add user action
-func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
+func (ctrl userCtrl) addUserAction(c *elton.Context) error {
 	tid := util.GetTrackID(c)
 	// 如果没有tid，则直接返回
 	if tid == "" {
 		c.NoContent()
-		return
+		return nil
 	}
 
 	params := userActionAddParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err := validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 	now := time.Now().Unix()
 	us := getUserSession(c)
@@ -919,5 +914,5 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	c.Body = map[string]int{
 		"count": count,
 	}
-	return
+	return nil
 }

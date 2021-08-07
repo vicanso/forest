@@ -59,16 +59,16 @@ func init() {
 }
 
 // upload 上传文件
-func (*fileCtrl) upload(c *elton.Context) (err error) {
+func (*fileCtrl) upload(c *elton.Context) error {
 	params := fileUploadParams{}
-	err = validate.Do(&params, c.Query())
+	err := validate.Do(&params, c.Query())
 	if err != nil {
-		return
+		return err
 	}
 
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		return
+		return err
 	}
 	defer file.Close()
 	us := getUserSession(c)
@@ -88,11 +88,11 @@ func (*fileCtrl) upload(c *elton.Context) (err error) {
 		},
 	})
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &fileUploadResp{
 		Name: info.Key,
 		Size: info.Size,
 	}
-	return
+	return nil
 }

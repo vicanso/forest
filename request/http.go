@@ -133,7 +133,7 @@ func newOnDone(serviceName string) axios.OnDone {
 
 // newConvertResponseToError 将http响应码为>=400的转换为出错
 func newConvertResponseToError() axios.ResponseInterceptor {
-	return func(resp *axios.Response) (err error) {
+	return func(resp *axios.Response) error {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
 			exception := false
@@ -146,13 +146,13 @@ func newConvertResponseToError() axios.ResponseInterceptor {
 			he.Exception = exception
 			return he
 		}
-		return
+		return nil
 	}
 }
 
 // newOnError 新建error的处理函数
 func newOnError(serviceName string) axios.OnError {
-	return func(err error, conf *axios.Config) (newErr error) {
+	return func(err error, conf *axios.Config) error {
 		code := -1
 		if conf.Response != nil {
 			code = conf.Response.Status

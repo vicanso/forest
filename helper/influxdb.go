@@ -98,41 +98,40 @@ func GetInfluxDB() *InfluxDB {
 }
 
 // Health check influxdb health
-func (db *InfluxDB) Health() (err error) {
+func (db *InfluxDB) Health() error {
 	if db.client == nil {
-		return
+		return nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	result, err := db.client.Health(ctx)
 	if err != nil {
-		return
+		return err
 	}
 	if result.Status != influxdbDomain.HealthCheckStatusPass {
-		err = errors.New(string(result.Status))
-		return
+		return errors.New(string(result.Status))
 	}
-	return
+	return nil
 }
 
-func (db *InfluxDB) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+func (db *InfluxDB) Query(ctx context.Context, query string) ([]map[string]interface{}, error) {
 	if db.client == nil {
-		return
+		return nil, nil
 	}
 	result, err := db.client.QueryAPI(db.config.Org).Query(ctx, query)
 	if err != nil {
-		return
+		return nil, err
 	}
-	items = make([]map[string]interface{}, 0)
+	items := make([]map[string]interface{}, 0)
 	for result.Next() {
 		items = append(items, result.Record().Values())
 	}
 	err = result.Err()
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	return
+	return items, nil
 }
 
 // Write 写入数据

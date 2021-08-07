@@ -53,21 +53,21 @@ func init() {
 }
 
 // getIndex 首页
-func (*assetCtrl) getIndex(c *elton.Context) (err error) {
-	err = assetFS.SendFile(c, "index.html")
+func (*assetCtrl) getIndex(c *elton.Context) error {
+	err := assetFS.SendFile(c, "index.html")
 	if err != nil {
-		return
+		return err
 	}
 	c.CacheMaxAge(10 * time.Second)
-	return
+	return nil
 }
 
 // getFavIcon 图标
-func (*assetCtrl) getFavIcon(c *elton.Context) (err error) {
-	err = assetFS.SendFile(c, "favicon.png")
+func (*assetCtrl) getFavIcon(c *elton.Context) error {
+	err := assetFS.SendFile(c, "favicon.png")
 	if err != nil {
-		return
+		return err
 	}
 	c.CacheMaxAge(time.Hour, 10*time.Minute)
-	return
+	return nil
 }

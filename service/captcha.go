@@ -52,10 +52,10 @@ type (
 )
 
 // createCaptcha 创建图形验证码
-func createCaptcha(fontColor, bgColor color.Color, width, height int, text string) (img image.Image, err error) {
+func createCaptcha(fontColor, bgColor color.Color, width, height int, text string) (image.Image, error) {
 	font, err := truetype.Parse(goregular.TTF)
 	if err != nil {
-		return
+		return nil, err
 	}
 	dc := gg.NewContext(width, height)
 	// 设置背景色
@@ -95,27 +95,24 @@ func createCaptcha(fontColor, bgColor color.Color, width, height int, text strin
 		dc.DrawLine(x1, y1, x2, y2)
 		dc.Stroke()
 	}
-	img = dc.Image()
-	return
+	return dc.Image(), nil
 }
 
 // parseColor 转换颜色
-func parseColor(s string) (c color.RGBA, err error) {
+func parseColor(s string) (*color.RGBA, error) {
 	arr := strings.Split(s, ",")
 	if len(arr) != 3 {
-		err = hes.New(fmt.Sprintf("非法颜色值，格式必须为：1,1,1，当前为：%s", s), errCaptchaCategory)
-		return
+		return nil, hes.New(fmt.Sprintf("非法颜色值，格式必须为：1,1,1，当前为：%s", s), errCaptchaCategory)
 	}
+	c := &color.RGBA{}
 	c.A = 0xff
 	for index, v := range arr {
 		value, e := strconv.Atoi(strings.TrimSpace(v))
 		if e != nil {
-			err = hes.Wrap(e)
-			return
+			return nil, hes.Wrap(e)
 		}
 		if value > 255 || value < 0 {
-			err = hes.New(fmt.Sprintf("非法颜色值，必须>=0 <=255，当前为：%d", value), errCaptchaCategory)
-			return
+			return nil, hes.New(fmt.Sprintf("非法颜色值，必须>=0 <=255，当前为：%d", value), errCaptchaCategory)
 		}
 		switch index {
 		case 0:
@@ -126,52 +123,50 @@ func parseColor(s string) (c color.RGBA, err error) {
 			c.B = uint8(value)
 		}
 	}
-	return
+	return c, nil
 }
 
 // GetCaptcha 获取图形验证码
-func GetCaptcha(ctx context.Context, fontColor, bgColor string) (info CaptchaInfo, err error) {
+func GetCaptcha(ctx context.Context, fontColor, bgColor string) (*CaptchaInfo, error) {
 	value := util.RandomDigit(4)
 	fc, err := parseColor(fontColor)
 	if err != nil {
-		return
+		return nil, err
 	}
 	bc, err := parseColor(bgColor)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	img, err := createCaptcha(fc, bc, 80, 40, value)
 	if err != nil {
-		return
+		return nil, err
 	}
 	buffer := new(bytes.Buffer)
 	err = jpeg.Encode(buffer, img, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
 	id := util.GenXID()
 	ttl := 5 * time.Minute
 	err = redisSrv.Set(ctx, captchaKeyPrefix+id, value, ttl+time.Minute)
 	if err != nil {
-		return
+		return nil, err
 	}
-	info = CaptchaInfo{
+	return &CaptchaInfo{
 		ExpiredAt: time.Now().Add(ttl),
 		Data:      buffer.Bytes(),
 		Value:     value,
 		ID:        id,
 		Type:      "jpeg",
-	}
-	return
+	}, nil
 }
 
 // ValidateCaptcha 校验图形验证码是否正确
-func ValidateCaptcha(ctx context.Context, id, value string) (valid bool, err error) {
+func ValidateCaptcha(ctx context.Context, id, value string) (bool, error) {
 	data, err := redisSrv.GetAndDel(ctx, captchaKeyPrefix+id)
 	if err != nil {
-		return
+		return false, err
 	}
-	valid = string(data) == value
-	return
+	return string(data) == value, nil
 }

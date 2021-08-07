@@ -125,7 +125,7 @@ func (*commonCtrl) ping(c *elton.Context) error {
 }
 
 // getApplicationInfo 获取应用信息
-func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
+func (*commonCtrl) getApplicationInfo(c *elton.Context) error {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &applicationInfoResp{
 		Version:   service.GetApplicationVersion(),
@@ -136,20 +136,20 @@ func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 		ARCH:      runtime.GOARCH,
 		ENV:       config.GetENV(),
 	}
-	return
+	return nil
 }
 
 // getRouters 获取系统的路由
-func (*commonCtrl) getRouters(c *elton.Context) (err error) {
+func (*commonCtrl) getRouters(c *elton.Context) error {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &routersResp{
 		Routers: c.Elton().GetRouters(),
 	}
-	return
+	return nil
 }
 
 // getCaptcha 获取图形验证码
-func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
+func (*commonCtrl) getCaptcha(c *elton.Context) error {
 	bgColor := c.QueryParam("bg")
 	fontColor := c.QueryParam("color")
 	if bgColor == "" {
@@ -160,33 +160,33 @@ func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	}
 	info, err := service.GetCaptcha(c.Context(), fontColor, bgColor)
 	if err != nil {
-		return
+		return err
 	}
 	// 防止此字段未设置好，序列化至前端
 	info.Value = ""
 	c.NoStore()
-	c.Body = &info
-	return
+	c.Body = info
+	return nil
 }
 
 // getPerformance 获取应用性能指标
-func (*commonCtrl) getPerformance(c *elton.Context) (err error) {
+func (*commonCtrl) getPerformance(c *elton.Context) error {
 	p := service.GetPerformance()
-	c.Body = &p
-	return
+	c.Body = p
+	return nil
 }
 
 // listStatus 获取状态列表
-func (*commonCtrl) listStatus(c *elton.Context) (err error) {
+func (*commonCtrl) listStatus(c *elton.Context) error {
 	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &statusListResp{
 		Statuses: schema.GetStatusList(),
 	}
-	return
+	return nil
 }
 
 // getRandomKeys 获取随机字符串
-func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
+func (*commonCtrl) getRandomKeys(c *elton.Context) error {
 	n, _ := strconv.Atoi(c.QueryParam("n"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 	if size < 1 {
@@ -202,48 +202,49 @@ func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
 	c.Body = &randomKeysResp{
 		Keys: result,
 	}
-	return
+	return nil
 }
 
 // getProf 获取prof信息
-func (*commonCtrl) getProf(c *elton.Context) (err error) {
+func (*commonCtrl) getProf(c *elton.Context) error {
 	d := 30 * time.Second
 	v := c.QueryParam("d")
 	if v != "" {
-		d, err = time.ParseDuration(v)
+		d1, err := time.ParseDuration(v)
 		if err != nil {
-			return
+			return err
 		}
+		d = d1
 	}
 	result, err := profiler.GetProf(d)
 	if err != nil {
-		return
+		return err
 	}
 	c.SetHeader(elton.HeaderContentType, elton.MIMEBinary)
 	c.SetHeader("Content-Disposition", `attachment; filename="gprof"`)
 	c.BodyBuffer = result
-	return
+	return nil
 }
 
 // getAPI 获取API信息
-func (*commonCtrl) getAPI(c *elton.Context) (err error) {
+func (*commonCtrl) getAPI(c *elton.Context) error {
 	file := "api.yml"
 	buf, err := asset.GetFS().ReadFile(file)
 	if err != nil {
-		return
+		return err
 	}
 	c.SetHeader(elton.HeaderContentType, "text/vnd.yaml;charset=utf-8")
 
 	c.BodyBuffer = bytes.NewBuffer(buf)
-	return
+	return nil
 }
 
 // listHTTPInstanceStats 获取http实例的性能统计
-func (*commonCtrl) listHTTPInstanceStats(c *elton.Context) (err error) {
+func (*commonCtrl) listHTTPInstanceStats(c *elton.Context) error {
 	stats := request.GetHTTPStats()
 	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &httpStatsListResp{
 		StatusList: stats,
 	}
-	return
+	return nil
 }

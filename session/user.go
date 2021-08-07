@@ -55,28 +55,29 @@ type (
 )
 
 // GetUserInfo 获取用户信息
-func (us *UserSession) GetInfo() (info UserInfo, err error) {
+// 避免修改了session中的数据，因此返回非指针的形式
+func (us *UserSession) GetInfo() (UserInfo, error) {
+	info := us.info
 	if us.unmarshalDone {
-		info = us.info
-		return
+		return info, nil
 	}
 	data := us.se.GetString(UserSessionInfoKey)
 	if data == "" {
 		data = "{}"
 	}
 	info = UserInfo{}
-	err = json.Unmarshal([]byte(data), &info)
+	err := json.Unmarshal([]byte(data), &info)
 	if err != nil {
-		return
+		return info, err
 	}
 	us.info = info
 	us.unmarshalDone = true
-	return
+	return info, err
 }
 
 // MustGetInfo 获取用户信息，如果信息获取失败则触发panic，
 // 如果前置中间件已保证是登录状态，可以使用此函数，否则禁止使用
-func (us *UserSession) MustGetInfo() (info UserInfo) {
+func (us *UserSession) MustGetInfo() UserInfo {
 	info, err := us.GetInfo()
 	if err != nil {
 		panic(err)
@@ -94,7 +95,7 @@ func (us *UserSession) IsLogin() bool {
 }
 
 // SetInfo 设置用户信息
-func (us *UserSession) SetInfo(info UserInfo) (err error) {
+func (us *UserSession) SetInfo(info UserInfo) error {
 	// 登录时设置登录时间
 	if info.Account != "" && info.LoginAt == "" {
 		info.LoginAt = util.NowString()
@@ -104,13 +105,13 @@ func (us *UserSession) SetInfo(info UserInfo) (err error) {
 	us.unmarshalDone = true
 	buf, err := json.Marshal(&info)
 	if err != nil {
-		return
+		return err
 	}
 	err = us.se.Set(UserSessionInfoKey, string(buf))
 	if err != nil {
-		return
+		return err
 	}
-	return
+	return nil
 }
 
 // Destroy 清除用户session

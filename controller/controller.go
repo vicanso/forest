@@ -111,50 +111,47 @@ func isLogin(c *elton.Context) bool {
 	return us.IsLogin()
 }
 
-func validateLogin(c *elton.Context) (err error) {
+func validateLogin(c *elton.Context) error {
 	if !isLogin(c) {
-		err = hes.New("请先登录", errUserCategory)
-		return
+		return hes.New("请先登录", errUserCategory)
 	}
-	return
+	return nil
 }
 
 // checkLoginMiddleware 校验是否登录中间件
-func checkLoginMiddleware(c *elton.Context) (err error) {
-	err = validateLogin(c)
+func checkLoginMiddleware(c *elton.Context) error {
+	err := validateLogin(c)
 	if err != nil {
-		return
+		return err
 	}
 	return c.Next()
 }
 
 // checkAnonymousMiddleware 判断是匿名状态
-func checkAnonymousMiddleware(c *elton.Context) (err error) {
+func checkAnonymousMiddleware(c *elton.Context) error {
 	if isLogin(c) {
-		err = hes.New("已是登录状态，请先退出登录", errUserCategory)
-		return
+		return hes.New("已是登录状态，请先退出登录", errUserCategory)
 	}
 	return c.Next()
 }
 
 // newCheckRolesMiddleware 创建用户角色校验中间件
 func newCheckRolesMiddleware(validRoles []string) elton.Handler {
-	return func(c *elton.Context) (err error) {
-		err = validateLogin(c)
+	return func(c *elton.Context) error {
+		err := validateLogin(c)
 		if err != nil {
-			return
+			return err
 		}
 		us := session.NewUserSession(c)
 		userInfo, err := us.GetInfo()
 		if err != nil {
-			return
+			return err
 		}
 		valid := util.ContainsAny(validRoles, userInfo.Roles)
 		if valid {
 			return c.Next()
 		}
-		err = hes.NewWithStatusCode("禁止使用该功能", http.StatusForbidden, errUserCategory)
-		return
+		return hes.NewWithStatusCode("禁止使用该功能", http.StatusForbidden, errUserCategory)
 	}
 }
 
@@ -238,15 +235,14 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 }
 
 // getIDFromParams get id form context params
-func getIDFromParams(c *elton.Context) (id int, err error) {
-	id, err = strconv.Atoi(c.Param("id"))
+func getIDFromParams(c *elton.Context) (int, error) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		he := hes.Wrap(err)
 		he.Category = "parseInt"
-		err = he
-		return
+		return 0, he
 	}
-	return
+	return id, nil
 }
 
 // sessionHandle session的相关处理

@@ -26,7 +26,7 @@ type GetConfigFunc func(method, route string) *service.RouterConfig
 
 // NewRouterMocker create a router mocker
 func NewRouterMocker(fn GetConfigFunc) elton.Handler {
-	return func(c *elton.Context) (err error) {
+	return func(c *elton.Context) error {
 		routerConfig := fn(c.Request.Method, c.Route)
 		if routerConfig == nil {
 			return c.Next()

@@ -20,10 +20,10 @@ import (
 )
 
 func NewInterceptor() elton.Handler {
-	return func(c *elton.Context) (err error) {
+	return func(c *elton.Context) error {
 		inter, err := interceptor.NewHTTPServer(c)
 		if err != nil {
-			return
+			return err
 		}
 		// 如果返回空表示没有设置interceptor
 		if inter == nil {
@@ -32,27 +32,27 @@ func NewInterceptor() elton.Handler {
 		// 前置处理
 		resp, err := inter.Before()
 		if err != nil {
-			return
+			return err
 		}
 		// 如果状态码不为0，则表示已设置响应数据
 		if resp.Status != 0 {
 			resp.SetResponse(c)
-			return
+			return nil
 		}
 		err = c.Next()
 		if err != nil {
-			return
+			return err
 		}
 		// 后置处理
 		resp, err = inter.After()
 		if err != nil {
-			return
+			return err
 		}
 		// 如果状态码不为0，则表示重设响应数据
 		if resp.Status != 0 {
 			resp.SetResponse(c)
-			return
+			return nil
 		}
-		return
+		return nil
 	}
 }

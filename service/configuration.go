@@ -121,10 +121,10 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 }
 
 // Refresh 刷新配置
-func (srv *ConfigurationSrv) Refresh() (err error) {
+func (srv *ConfigurationSrv) Refresh() error {
 	configs, err := srv.available()
 	if err != nil {
-		return
+		return err
 	}
 	configurationRefreshedAt = time.Now()
 	var mockTimeConfig *ent.Configuration
@@ -222,5 +222,5 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 
 	updateEmailList(mailList)
 
-	return
+	return nil
 }

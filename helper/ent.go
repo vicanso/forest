@@ -326,9 +326,10 @@ func EntPing() error {
 }
 
 // EntInitSchema 初始化schema
-func EntInitSchema() (err error) {
+func EntInitSchema() error {
+	var err error
 	initSchemaOnce.Do(func() {
 		err = defaultEntClient.Schema.Create(context.Background())
 	})
-	return
+	return err
 }

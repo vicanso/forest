@@ -192,10 +192,10 @@ func (params *fluxListParams) Query() string {
 	return query
 }
 
-func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interface{}, err error) {
-	items, err = GetInfluxSrv().Query(ctx, params.Query())
+func (params *fluxListParams) Do(ctx context.Context) ([]map[string]interface{}, error) {
+	items, err := GetInfluxSrv().Query(ctx, params.Query())
 	if err != nil {
-		return
+		return nil, err
 	}
 	// 清除不需要字段
 	for _, item := range items {
@@ -204,73 +204,73 @@ func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interf
 		delete(item, "_stop")
 		delete(item, "table")
 	}
-	return
+	return items, nil
 }
 
 // listTag returns the tags of measurement
-func (ctrl fluxCtrl) listTag(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listTag(c *elton.Context) error {
 	params := fluxListTagOrFieldParams{}
-	err = validate.Do(&params, c.Params.ToMap())
+	err := validate.Do(&params, c.Params.ToMap())
 	if err != nil {
-		return
+		return err
 	}
 	tags, err := GetInfluxSrv().ListTag(c.Context(), params.Measurement)
 	if err != nil {
-		return
+		return err
 	}
 	c.CacheMaxAge(time.Minute)
 	c.Body = map[string][]string{
 		"tags": tags,
 	}
-	return
+	return nil
 }
 
 // ListField return the fields of measurement
-func (ctrl fluxCtrl) ListField(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) ListField(c *elton.Context) error {
 	params := fluxListTagOrFieldParams{}
-	err = validate.Do(&params, c.Params.ToMap())
+	err := validate.Do(&params, c.Params.ToMap())
 	if err != nil {
-		return
+		return err
 	}
 	fields, err := GetInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
 	if err != nil {
-		return
+		return err
 	}
 	c.CacheMaxAge(time.Minute)
 	c.Body = map[string][]string{
 		"fields": fields,
 	}
-	return
+	return nil
 }
 
 // listValue get the values of tag
-func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listTagValue(c *elton.Context) error {
 	params := fluxListTagValuesParams{}
-	err = validate.Do(&params, c.Params.ToMap())
+	err := validate.Do(&params, c.Params.ToMap())
 	if err != nil {
-		return
+		return err
 	}
 	values, err := GetInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
 	if err != nil {
-		return
+		return err
 	}
 	c.CacheMaxAge(time.Minute)
 	c.Body = map[string][]string{
 		"values": values,
 	}
-	return
+	return nil
 }
 
-func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (err error) {
+func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) error {
 	params := fluxListParams{}
-	err = validate.Do(&params, c.Query())
+	err := validate.Do(&params, c.Query())
 	if err != nil {
-		return
+		return err
 	}
 	params.Measurement = measurement
 	result, err := params.Do(c.Context())
 	if err != nil {
-		return
+		return err
 	}
 
 	fromBucket := fmt.Sprintf(`from(bucket: "%s")
@@ -280,35 +280,35 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (er
 		"count":     len(result),
 		"flux":      fromBucket + params.Query(),
 	}
-	return
+	return nil
 }
 
 // listHTTPError list http error
-func (ctrl fluxCtrl) listHTTPError(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listHTTPError(c *elton.Context) error {
 	return ctrl.list(c, cs.MeasurementHTTPError, "httpErrors")
 }
 
 // listTracker list user tracker
-func (ctrl fluxCtrl) listTracker(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listTracker(c *elton.Context) error {
 	return ctrl.list(c, cs.MeasurementUserTracker, "trackers")
 }
 
 // listAction list user action
-func (ctrl fluxCtrl) listAction(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listAction(c *elton.Context) error {
 	return ctrl.list(c, cs.MeasurementUserAction, "actions")
 }
 
 // listRequest list request
-func (ctrl fluxCtrl) listRequest(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) listRequest(c *elton.Context) error {
 	return ctrl.list(c, cs.MeasurementHTTPRequest, "requests")
 }
 
-func (ctrl fluxCtrl) findOne(c *elton.Context) (err error) {
+func (ctrl fluxCtrl) findOne(c *elton.Context) error {
 	query := c.Query()
 	timeValue := query["time"]
 	t, err := time.Parse(time.RFC3339Nano, timeValue)
 	if err != nil {
-		return
+		return err
 	}
 	measurement := c.Param("measurement")
 	start := t.Format(time.RFC3339Nano)
@@ -331,11 +331,10 @@ func (ctrl fluxCtrl) findOne(c *elton.Context) (err error) {
 	`, start, stop, measurement, filter)
 	items, err := GetInfluxSrv().Query(c.Context(), ql)
 	if err != nil {
-		return
+		return err
 	}
 	if len(items) == 0 {
-		err = hes.New("Not Found")
-		return
+		return hes.New("Not Found")
 	}
 	index := 0
 	for i, item := range items {
@@ -345,5 +344,5 @@ func (ctrl fluxCtrl) findOne(c *elton.Context) (err error) {
 	}
 	c.CacheMaxAge(5 * time.Minute)
 	c.Body = items[index]
-	return
+	return nil
 }

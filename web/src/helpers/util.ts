@@ -163,3 +163,17 @@ export function formatJSON(str: string): string {
   }
   return result;
 }
+
+export function omitNil(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  const result = {} as Record<string, unknown>;
+  Object.keys(data).forEach((key) => {
+    const value = data[key];
+    if (value === null) {
+      return;
+    }
+    result[key] = value;
+  });
+  return result;
+}

@@ -122,26 +122,25 @@ func init() {
 }
 
 // validateBeforeSave 保存前校验
-func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (err error) {
+func (params *configurationAddParams) validateBeforeSave(ctx context.Context) error {
 	// schema中有唯一限制，也可不校验
 	exists, err := getConfigurationClient().Query().
 		Where(configuration.Name(params.Name)).
 		Exist(ctx)
 	if err != nil {
-		return
+		return err
 	}
 	if exists {
-		err = hes.New("该配置已存在", errConfigurationCategory)
-		return
+		return hes.New("该配置已存在", errConfigurationCategory)
 	}
-	return
+	return nil
 }
 
 // save 保存配置
-func (params *configurationAddParams) save(ctx context.Context, owner string) (configuration *ent.Configuration, err error) {
-	err = params.validateBeforeSave(ctx)
+func (params *configurationAddParams) save(ctx context.Context, owner string) (*ent.Configuration, error) {
+	err := params.validateBeforeSave(ctx)
 	if err != nil {
-		return
+		return nil, err
 	}
 	return getConfigurationClient().Create().
 		SetName(params.Name).
@@ -167,7 +166,7 @@ func (params *configurationListParmas) where(query *ent.ConfigurationQuery) *ent
 }
 
 // queryAll 查询配置列表
-func (params *configurationListParmas) queryAll(ctx context.Context) (configurations []*ent.Configuration, err error) {
+func (params *configurationListParmas) queryAll(ctx context.Context) ([]*ent.Configuration, error) {
 	query := getConfigurationClient().Query()
 
 	query = query.Limit(params.GetLimit()).
@@ -179,7 +178,7 @@ func (params *configurationListParmas) queryAll(ctx context.Context) (configurat
 }
 
 // count 计算总数
-func (params *configurationListParmas) count(ctx context.Context) (count int, err error) {
+func (params *configurationListParmas) count(ctx context.Context) (int, error) {
 	query := getConfigurationClient().Query()
 
 	query = params.where(query)
@@ -188,7 +187,7 @@ func (params *configurationListParmas) count(ctx context.Context) (count int, er
 }
 
 // update 更新配置信息
-func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int) (configuration *ent.Configuration, err error) {
+func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int) (*ent.Configuration, error) {
 	updateOne := getConfigurationClient().
 		UpdateOneID(id)
 	if !params.StartedAt.IsZero() {
@@ -217,82 +216,82 @@ func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int
 }
 
 // add 添加配置
-func (*configurationCtrl) add(c *elton.Context) (err error) {
+func (*configurationCtrl) add(c *elton.Context) error {
 	params := configurationAddParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err := validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 	us := getUserSession(c)
 	configuration, err := params.save(c.Context(), us.MustGetInfo().Account)
 	if err != nil {
-		return
+		return err
 	}
 	c.Created(configuration)
-	return
+	return nil
 }
 
 // list 查询配置列表
-func (*configurationCtrl) list(c *elton.Context) (err error) {
+func (*configurationCtrl) list(c *elton.Context) error {
 	params := configurationListParmas{}
-	err = validate.Do(&params, c.Query())
+	err := validate.Do(&params, c.Query())
 	if err != nil {
-		return
+		return err
 	}
 	count := -1
 	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
-			return
+			return err
 		}
 	}
 	configurations, err := params.queryAll(c.Context())
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = &configurationListResp{
 		Count:          count,
 		Configurations: configurations,
 	}
-	return
+	return nil
 }
 
 // update 更新配置信息
-func (*configurationCtrl) update(c *elton.Context) (err error) {
+func (*configurationCtrl) update(c *elton.Context) error {
 	id, err := getIDFromParams(c)
 	if err != nil {
-		return
+		return err
 	}
 	params := configurationUpdateParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
-		return
+		return err
 	}
 	configuration, err := params.updateOneID(c.Context(), id)
 	if err != nil {
-		return
+		return err
 	}
 
 	c.Body = configuration
-	return
+	return nil
 }
 
 // findByID 通过id查询
-func (*configurationCtrl) findByID(c *elton.Context) (err error) {
+func (*configurationCtrl) findByID(c *elton.Context) error {
 	id, err := getIDFromParams(c)
 	if err != nil {
-		return
+		return err
 	}
 	configuration, err := getConfigurationClient().Get(c.Context(), id)
 	if err != nil {
-		return
+		return err
 	}
 	c.Body = configuration
-	return
+	return nil
 }
 
 // getCurrentValid 获取当前有效配置
-func (*configurationCtrl) getCurrentValid(c *elton.Context) (err error) {
+func (*configurationCtrl) getCurrentValid(c *elton.Context) error {
 	c.Body = service.GetCurrentValidConfiguration()
-	return
+	return nil
 }

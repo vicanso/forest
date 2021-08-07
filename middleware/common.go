@@ -40,34 +40,32 @@ func WaitFor(d time.Duration, onlyErrOccurreds ...bool) elton.Handler {
 	if len(onlyErrOccurreds) != 0 {
 		onlyErrOccurred = onlyErrOccurreds[0]
 	}
-	return func(c *elton.Context) (err error) {
+	return func(c *elton.Context) error {
 		start := time.Now()
-		err = c.Next()
+		err := c.Next()
 		// 如果未出错，而且配置为仅在出错时才等待
 		if err == nil && onlyErrOccurred {
-			return
+			return err
 		}
 		use := time.Now().UnixNano() - start.UnixNano()
 		// 无论成功还是失败都wait for
 		if use < ns {
 			time.Sleep(time.Duration(ns-use) * time.Nanosecond)
 		}
-		return
+		return err
 	}
 }
 
 // ValidateCaptcha 图形难码校验
 func ValidateCaptcha(magicalCaptcha string) elton.Handler {
-	return func(c *elton.Context) (err error) {
+	return func(c *elton.Context) error {
 		value := c.GetRequestHeader(xCaptchaHeader)
 		if value == "" {
-			err = hes.New("图形验证码参数不能为空", errCommonCategory)
-			return
+			return hes.New("图形验证码参数不能为空", errCommonCategory)
 		}
 		arr := strings.Split(value, ":")
 		if len(arr) != 2 {
-			err = hes.New(fmt.Sprintf("图形验证码参数长度异常(%d)", len(arr)), errCommonCategory)
-			return
+			return hes.New(fmt.Sprintf("图形验证码参数长度异常(%d)", len(arr)), errCommonCategory)
 		}
 		// 如果有配置万能验证码，则判断是否相等
 		if magicalCaptcha != "" && arr[1] == magicalCaptcha {
@@ -81,8 +79,7 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 			return err
 		}
 		if !valid {
-			err = hes.New("图形验证码错误", errCommonCategory)
-			return
+			return hes.New("图形验证码错误", errCommonCategory)
 		}
 		return c.Next()
 	}
@@ -90,12 +87,12 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 
 // NewNoCacheWithCondition 创建no cache的中间件，此中间件根据设置的key value来判断是否设置为no cache
 func NewNoCacheWithCondition(key, value string) elton.Handler {
-	return func(c *elton.Context) (err error) {
-		err = c.Next()
+	return func(c *elton.Context) error {
+		err := c.Next()
 		if c.QueryParam(key) == value {
 			c.NoCache()
 		}
-		return
+		return err
 	}
 }
 

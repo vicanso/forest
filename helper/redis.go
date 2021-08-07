@@ -251,9 +251,9 @@ func RedisStats() map[string]interface{} {
 }
 
 // RedisPing ping操作
-func RedisPing() (err error) {
+func RedisPing() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	_, err = RedisGetClient().Ping(ctx).Result()
-	return
+	_, err := RedisGetClient().Ping(ctx).Result()
+	return err
 }

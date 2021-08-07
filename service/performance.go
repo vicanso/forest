@@ -40,8 +40,8 @@ type (
 )
 
 // GetPerformance 获取应用性能指标
-func GetPerformance() Performance {
-	return Performance{
+func GetPerformance() *Performance {
+	return &Performance{
 		Concurrency:           GetConcurrency(),
 		RequestProcessedTotal: requestProcessConcurrency.Total(),
 		CPUMemory:             performance.CurrentCPUMemory(),

@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )
 
@@ -30,7 +31,8 @@ func TestNewConcurrentLimit(t *testing.T) {
 	fn := NewConcurrentLimit([]string{
 		"q:key",
 	}, 10*time.Millisecond, "TestNewConcurrentLimit")
-	req := httptest.NewRequest("GET", "/?key=1", nil)
+	key := util.RandomString(8)
+	req := httptest.NewRequest("GET", "/?key="+key, nil)
 	c := elton.NewContext(nil, req)
 	c.Next = func() error {
 		return nil
@@ -54,7 +56,8 @@ func TestNewConcurrentLimitWithDone(t *testing.T) {
 	fn := NewConcurrentLimitWithDone([]string{
 		"q:key",
 	}, 20*time.Millisecond, "TestNewConcurrentLimitWithDone")
-	req := httptest.NewRequest("GET", "/?key=1", nil)
+	key := util.RandomString(8)
+	req := httptest.NewRequest("GET", "/?key="+key, nil)
 	c := elton.NewContext(nil, req)
 	// 由于后续有另外的goroutine读取，因此直接先获取一次query
 	_ = c.Query()
