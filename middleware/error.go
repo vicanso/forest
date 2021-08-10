@@ -17,14 +17,11 @@ package middleware
 import (
 	"bytes"
 	"net/http"
-	"time"
 
-	warner "github.com/vicanso/count-warner"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
-	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
@@ -32,18 +29,6 @@ import (
 
 // New Error handler
 func NewError() elton.Handler {
-	// 如果有基于influxdb的统计监控，建议使用influxdb的告警
-	// 如果某个IP大量出错，则可能是该IP攻击
-	errorWarner := warner.NewWarner(5*time.Minute, 30)
-	errorWarner.On(func(ip string, _ int) {
-		service.AlarmError("too many errors, ip:" + ip)
-	})
-	// 定时清理有效数据
-	go func() {
-		for range time.NewTicker(5 * time.Minute).C {
-			errorWarner.ClearExpired()
-		}
-	}()
 
 	return func(c *elton.Context) error {
 		err := c.Next()
@@ -85,8 +70,6 @@ func NewError() elton.Handler {
 			Str("error", he.Error()).
 			Msg("")
 
-		// 出错则按IP + 1
-		errorWarner.Inc(ip, 1)
 		sid := util.GetSessionID(c)
 
 		he.Extra["route"] = c.Route

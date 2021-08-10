@@ -24,6 +24,7 @@ import (
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
+	"github.com/vicanso/go-gauge"
 	"github.com/vicanso/hes"
 	"go.uber.org/atomic"
 )
@@ -54,7 +55,9 @@ type (
 		// pipe的正在处理数
 		pipeProcessing atomic.Uint32
 		// 总的处理请求数
-		total atomic.Uint64
+		total     atomic.Uint64
+		gauge     *gauge.Gauge
+		pipeGauge *gauge.Gauge
 	}
 )
 
@@ -69,6 +72,10 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 	hook := &redisHook{
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
+		// 记录每分钟最大并发数
+		gauge: gauge.New(gauge.PeriodOption(time.Minute)),
+		// 记录每分钟pipe最大并发数
+		pipeGauge: gauge.New(gauge.PeriodOption(time.Minute)),
 	}
 	opts := &redis.UniversalOptions{
 		Addrs:            redisConfig.Addrs,
@@ -138,7 +145,8 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
 	t := time.Now()
 	ctx = context.WithValue(ctx, startedAtKey, &t)
-	rh.processing.Inc()
+	v := rh.processing.Inc()
+	rh.gauge.SetMax(int64(v))
 	rh.total.Inc()
 	return ctx, nil
 }
@@ -166,7 +174,8 @@ func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmd
 	// allow返回error时也触发
 	t := time.Now()
 	ctx = context.WithValue(ctx, startedAtKey, &t)
-	rh.pipeProcessing.Inc()
+	v := rh.pipeProcessing.Inc()
+	rh.pipeGauge.SetMax(int64(v))
 	rh.total.Inc()
 	return ctx, nil
 }
@@ -192,8 +201,8 @@ func (rh *redisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmde
 
 // getProcessingAndTotal 获取正在处理中的请求与总请求量
 func (rh *redisHook) getProcessingAndTotal() (uint32, uint32, uint64) {
-	processing := rh.processing.Load()
-	pipeProcessing := rh.pipeProcessing.Load()
+	processing := uint32(rh.gauge.Count())
+	pipeProcessing := uint32(rh.pipeGauge.Count())
 	total := rh.total.Load()
 	return processing, pipeProcessing, total
 }

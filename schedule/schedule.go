@@ -15,10 +15,13 @@
 package schedule
 
 import (
+	"context"
+	"strconv"
 	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
+	"github.com/shirou/gopsutil/v3/process"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
@@ -121,32 +124,140 @@ func cpuUsageStats() {
 // prevMemFrees 上一次 memory objects 释放的数量
 var prevMemFrees uint64
 
+// 上一次memory objects的申请数量
+var prevMemMallocs uint64
+
 // prevNumGC 上一次 gc 的次数
 var prevNumGC uint32
 
 // prevPauseTotal 上一次 pause 的总时长
 var prevPauseTotal time.Duration
 
+// 上一次的 io counter记录
+var prevIOCountersStat = &process.IOCountersStat{}
+
+// 上一次context切换记录
+var prevNumCtxSwitchesStat = &process.NumCtxSwitchesStat{}
+
+// 上一次的page faults记录
+var prevPageFaultsStat = &process.PageFaultsStat{}
+
+const mb = 1024 * 1024
+
 // performanceStats 系统性能
 func performanceStats() {
 	doStatsTask("performance stats", func() map[string]interface{} {
-		data := service.GetPerformance()
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		data := service.GetPerformance(ctx)
 		fields := map[string]interface{}{
-			cs.FieldGoMaxProcs:       data.GoMaxProcs,
-			cs.FieldProcessing:       int(data.Concurrency),
-			cs.FieldThreadCount:      int(data.ThreadCount),
-			cs.FieldMemSys:           data.MemSys,
-			cs.FieldMemHeapSys:       data.MemHeapSys,
-			cs.FieldMemHeapInuse:     data.MemHeapInuse,
-			cs.FieldMemFrees:         int(data.MemFrees - prevMemFrees),
-			cs.FieldRoutineCount:     data.RoutineCount,
-			cs.FieldCpuUsage:         int(data.CPUUsage),
-			cs.FieldNumGC:            int(data.NumGC - prevNumGC),
-			cs.FieldPauseNS:          int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
-			cs.FieldConnProcessing:   int(data.ConnProcessing),
-			cs.FieldConnAlive:        int(data.ConnAlive),
-			cs.FieldConnCreatedCount: int(data.ConnCreatedCount),
+			cs.FieldGoMaxProcs:   data.GoMaxProcs,
+			cs.FieldThreadCount:  int(data.ThreadCount),
+			cs.FieldRoutineCount: data.RoutineCount,
+			cs.FieldProcessing:   int(data.Concurrency),
+
+			// CPU使用率相关
+			cs.FieldCPUUsage:     int(data.CPUUsage),
+			cs.FieldCPUUser:      data.CPUUser,
+			cs.FieldCPUIdle:      data.CPUIdle,
+			cs.FieldCPUNice:      data.CPUNice,
+			cs.FieldCPUIowait:    data.CPUIowait,
+			cs.FieldCPUIrq:       data.CPUIrq,
+			cs.FieldCPUSoftirq:   data.CPUSoftirq,
+			cs.FieldCPUSteal:     data.CPUSteal,
+			cs.FieldCPUGuest:     data.CPUGuest,
+			cs.FieldCPUGuestNice: data.CPUGuestNice,
+
+			// 内存使用相关
+			cs.FieldMemAlloc:        data.MemAlloc,
+			cs.FieldMemTotalAlloc:   data.MemTotalAlloc,
+			cs.FieldMemSys:          data.MemSys,
+			cs.FieldMemLookups:      data.MemLookups,
+			cs.FieldMemMallocs:      int(data.MemMallocs - prevMemMallocs),
+			cs.FieldMemFrees:        int(data.MemFrees - prevMemFrees),
+			cs.FieldMemHeapAlloc:    data.MemHeapAlloc,
+			cs.FieldMemHeapSys:      data.MemHeapSys,
+			cs.FieldMemHeapIdle:     data.MemHeapIdle,
+			cs.FieldMemHeapInuse:    data.MemHeapInuse,
+			cs.FieldMemHeapReleased: data.MemHeapReleased,
+			cs.FieldMemHeapObjects:  data.MemHeapObjects,
+			cs.FieldMemStackInuse:   data.MemStackInuse,
+			cs.FieldMemStackSys:     data.MemStackSys,
+			cs.FieldMemMSpanInuse:   data.MemMSpanInuse,
+			cs.FieldMemMSpanSys:     data.MemMSpanSys,
+			cs.FieldMemMCacheInuse:  data.MemMCacheInuse,
+			cs.FieldMemMCacheSys:    data.MemMCacheSys,
+			cs.FieldMemBuckHashSys:  data.MemBuckHashSys,
+
+			cs.FieldMemGCSys:    data.MemGCSys,
+			cs.FieldMemOtherSys: data.MemOtherSys,
+
+			cs.FieldNumGC:   int(data.NumGC - prevNumGC),
+			cs.FieldPauseNS: int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
+
+			cs.FieldConnProcessing:   int(data.HTTPServerConnStats.ConnProcessing),
+			cs.FieldConnAlive:        int(data.HTTPServerConnStats.ConnAlive),
+			cs.FieldConnCreatedCount: int(data.HTTPServerConnStats.ConnCreatedCount),
 		}
+		// io 相关统计
+		if data.IOCountersStat != nil {
+			readCount := data.IOCountersStat.ReadCount - prevIOCountersStat.ReadCount
+			writeCount := data.IOCountersStat.WriteCount - prevIOCountersStat.WriteCount
+			readBytes := data.IOCountersStat.ReadBytes - prevIOCountersStat.ReadBytes
+			writeBytes := data.IOCountersStat.WriteBytes - prevIOCountersStat.WriteBytes
+			prevIOCountersStat = data.IOCountersStat
+			fields[cs.FieldIOReadCount] = readCount
+			fields[cs.FieldIOWriteCount] = writeCount
+			fields[cs.FieldIOReadMBytes] = readBytes / mb
+			fields[cs.FieldIOWriteMBytes] = writeBytes / mb
+		}
+
+		// 网络相关
+		if data.ConnStat != nil {
+			count := make(map[string]string)
+
+			for k, v := range data.ConnStat.Status {
+				count[k] = strconv.Itoa(v)
+			}
+			for k, v := range data.ConnStat.RemoteAddr {
+				count[k] = strconv.Itoa(v)
+			}
+
+			log.Default().Info().
+				Str("category", "connStat").
+				Dict("count", log.MapStringString(count)).
+				Msg("")
+			fields[cs.FieldConnTotal] = data.ConnStat.Count
+		}
+		// context切换相关
+		if data.NumCtxSwitchesStat != nil {
+			fields[cs.FieldCtxSwitchesVoluntary] = data.NumCtxSwitchesStat.Voluntary - prevNumCtxSwitchesStat.Voluntary
+			fields[cs.FieldCtxSwitchesInvoluntary] = data.NumCtxSwitchesStat.Involuntary - prevNumCtxSwitchesStat.Involuntary
+			prevNumCtxSwitchesStat = data.NumCtxSwitchesStat
+		}
+
+		// page fault相关
+		if data.PageFaultsStat != nil {
+			fields[cs.FieldPageFaultMinor] = data.PageFaultsStat.MinorFaults - prevPageFaultsStat.MinorFaults
+			fields[cs.FieldPageFaultMajor] = data.PageFaultsStat.MajorFaults - prevPageFaultsStat.MajorFaults
+			fields[cs.FieldPageFaultChildMinor] = data.PageFaultsStat.ChildMinorFaults - prevPageFaultsStat.ChildMinorFaults
+			fields[cs.FieldPageFaultChildMajor] = data.PageFaultsStat.ChildMajorFaults - prevPageFaultsStat.ChildMajorFaults
+
+			prevPageFaultsStat = data.PageFaultsStat
+		}
+
+		// fd 相关
+		fields[cs.FieldNumFds] = data.NumFds
+
+		// open files的统计
+		if len(data.OpenFilesStats) != 0 {
+			log.Default().Info().
+				Str("category", "openFiles").
+				Dict("stat", log.Struct(data.OpenFilesStats)).
+				Msg("")
+		}
+
+		prevMemMallocs = data.MemMallocs
 		prevMemFrees = data.MemFrees
 		prevNumGC = data.NumGC
 		prevPauseTotal = data.PauseTotalNs
