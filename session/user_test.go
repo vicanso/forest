@@ -15,6 +15,7 @@
 package session
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,8 +25,9 @@ import (
 
 func newUserSession(data string) *UserSession {
 	se := se.Session{}
-	_, _ = se.Fetch()
-	_ = se.Set(UserSessionInfoKey, data)
+	ctx := context.Background()
+	_, _ = se.Fetch(ctx)
+	_ = se.Set(ctx, UserSessionInfoKey, data)
 	return &UserSession{
 		se: &se,
 	}
@@ -33,6 +35,7 @@ func newUserSession(data string) *UserSession {
 
 func TestUserSession(t *testing.T) {
 	assert := assert.New(t)
+	ctx := context.Background()
 
 	t.Run("get info", func(t *testing.T) {
 		us := newUserSession(`{
@@ -58,7 +61,7 @@ func TestUserSession(t *testing.T) {
 	t.Run("set info", func(t *testing.T) {
 		us := newUserSession(`{}`)
 		assert.Equal("", us.MustGetInfo().Account)
-		err := us.SetInfo(UserInfo{
+		err := us.SetInfo(ctx, UserInfo{
 			Account: "treexie",
 		})
 		assert.Nil(err)

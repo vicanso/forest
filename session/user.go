@@ -15,6 +15,7 @@
 package session
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/vicanso/elton"
@@ -95,7 +96,7 @@ func (us *UserSession) IsLogin() bool {
 }
 
 // SetInfo 设置用户信息
-func (us *UserSession) SetInfo(info UserInfo) error {
+func (us *UserSession) SetInfo(ctx context.Context, info UserInfo) error {
 	// 登录时设置登录时间
 	if info.Account != "" && info.LoginAt == "" {
 		info.LoginAt = util.NowString()
@@ -107,7 +108,7 @@ func (us *UserSession) SetInfo(info UserInfo) error {
 	if err != nil {
 		return err
 	}
-	err = us.se.Set(UserSessionInfoKey, string(buf))
+	err = us.se.Set(ctx, UserSessionInfoKey, string(buf))
 	if err != nil {
 		return err
 	}
@@ -115,13 +116,13 @@ func (us *UserSession) SetInfo(info UserInfo) error {
 }
 
 // Destroy 清除用户session
-func (us *UserSession) Destroy() error {
-	return us.se.Destroy()
+func (us *UserSession) Destroy(ctx context.Context) error {
+	return us.se.Destroy(ctx)
 }
 
 // Refresh 刷新用户session ttl
-func (us *UserSession) Refresh() error {
-	return us.se.Refresh()
+func (us *UserSession) Refresh(ctx context.Context) error {
+	return us.se.Refresh(ctx)
 }
 
 // NewUserSession 创建新的用户session对象

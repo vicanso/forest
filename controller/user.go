@@ -546,14 +546,14 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) error {
 func (*userCtrl) getLoginToken(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
-	err := us.Destroy()
+	err := us.Destroy(c.Context())
 	if err != nil {
 		return err
 	}
 	userInfo := session.UserInfo{
 		Token: util.RandomString(8),
 	}
-	err = us.SetInfo(userInfo)
+	err = us.SetInfo(c.Context(), userInfo)
 	if err != nil {
 		return err
 	}
@@ -686,7 +686,7 @@ func (*userCtrl) login(c *elton.Context) error {
 	account := u.Account
 
 	// 设置session
-	err = us.SetInfo(session.UserInfo{
+	err = us.SetInfo(c.Context(), session.UserInfo{
 		Account: account,
 		ID:      u.ID,
 		Roles:   u.Roles,
@@ -717,7 +717,7 @@ func (*userCtrl) login(c *elton.Context) error {
 		province := ""
 		city := ""
 		isp := ""
-		if location.IP != "" {
+		if location != nil {
 			country = location.Country
 			province = location.Province
 			city = location.City
@@ -769,7 +769,7 @@ func (*userCtrl) login(c *elton.Context) error {
 func (*userCtrl) logout(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除session
-	err := us.Destroy()
+	err := us.Destroy(c.Context())
 	if err != nil {
 		return err
 	}
@@ -792,7 +792,7 @@ func (*userCtrl) refresh(c *elton.Context) error {
 		return nil
 	}
 
-	err := us.Refresh()
+	err := us.Refresh(c.Context())
 	if err != nil {
 		return err
 	}

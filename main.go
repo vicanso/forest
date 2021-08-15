@@ -180,6 +180,7 @@ func dependServiceCheck() (err error) {
 }
 
 func newOnErrorHandler(e *elton.Elton) {
+
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
 	// exception的warner只有一个key，因此无需定时清除

@@ -66,7 +66,7 @@ func (srv *InfluxSrv) ListTagValue(ctx context.Context, measurement, tag string)
 	key := fmt.Sprintf("tagValues:%s:%s", measurement, tag)
 	result := fluxCacheValues{}
 	// 忽略获取失败
-	_ = fluxCache.Get(key, &result)
+	_ = fluxCache.Get(ctx, key, &result)
 	if len(result.Values) != 0 {
 		values = result.Values
 		return
@@ -95,7 +95,7 @@ schema.measurementTagValues(
 	sort.Strings(values)
 	if len(values) != 0 {
 		result.Values = values
-		_ = fluxCache.Set(key, &result)
+		_ = fluxCache.Set(ctx, key, &result)
 	}
 	return
 }
@@ -108,7 +108,7 @@ func (srv *InfluxSrv) ListTag(ctx context.Context, measurement string) (tags []s
 	// 优先取缓存
 	key := fmt.Sprintf("tags:%s", measurement)
 	result := fluxCacheValues{}
-	_ = fluxCache.Get(key, &result)
+	_ = fluxCache.Get(ctx, key, &result)
 	if len(result.Values) != 0 {
 		tags = result.Values
 		return
@@ -138,7 +138,7 @@ schema.measurementTagKeys(
 	}
 	if len(tags) != 0 {
 		result.Values = tags
-		_ = fluxCache.Set(key, &result)
+		_ = fluxCache.Set(ctx, key, &result)
 	}
 	return
 }
@@ -160,7 +160,7 @@ func (srv *InfluxSrv) ListField(ctx context.Context, measurement, duration strin
 	// 优先取缓存
 	key := fmt.Sprintf("fields:%s:%s", measurement, duration)
 	result := fluxCacheValues{}
-	_ = fluxCache.Get(key, &result)
+	_ = fluxCache.Get(ctx, key, &result)
 	if len(result.Values) != 0 {
 		fields = result.Values
 		return
@@ -192,7 +192,7 @@ schema.measurementFieldKeys(
 	}
 	if len(fields) != 0 {
 		result.Values = fields
-		_ = fluxCache.Set(key, &result)
+		_ = fluxCache.Set(ctx, key, &result)
 	}
 	return
 }

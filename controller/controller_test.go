@@ -15,6 +15,7 @@
 package controller
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,8 +44,9 @@ func TestListParams(t *testing.T) {
 }
 
 func newContextAndUserSession() (*elton.Context, *session.UserSession) {
+	ctx := context.Background()
 	s := se.Session{}
-	_, _ = s.Fetch()
+	_, _ = s.Fetch(ctx)
 	c := elton.NewContext(nil, nil)
 	c.Set(se.Key, &s)
 	us := getUserSession(c)
@@ -53,9 +55,10 @@ func newContextAndUserSession() (*elton.Context, *session.UserSession) {
 
 func TestIsLogin(t *testing.T) {
 	assert := assert.New(t)
+	ctx := context.Background()
 	c, us := newContextAndUserSession()
 	assert.False(isLogin(c))
-	err := us.SetInfo(session.UserInfo{
+	err := us.SetInfo(ctx, session.UserInfo{
 		Account: "treexie",
 	})
 	assert.Nil(err)
@@ -67,7 +70,8 @@ func TestCheckLogin(t *testing.T) {
 	c, us := newContextAndUserSession()
 	err := checkLoginMiddleware(c)
 	assert.Equal("请先登录", err.(*hes.Error).Message)
-	err = us.SetInfo(session.UserInfo{
+	ctx := context.Background()
+	err = us.SetInfo(ctx, session.UserInfo{
 		Account: "treexie",
 	})
 	assert.Nil(err)
@@ -92,7 +96,8 @@ func TestCheckAnonymous(t *testing.T) {
 	err := checkAnonymousMiddleware(c)
 	assert.Nil(err)
 	assert.True(done)
-	err = us.SetInfo(session.UserInfo{
+	ctx := context.Background()
+	err = us.SetInfo(ctx, session.UserInfo{
 		Account: "treexie",
 	})
 	assert.Nil(err)
@@ -102,6 +107,7 @@ func TestCheckAnonymous(t *testing.T) {
 
 func TestNewCheckRolesMiddleware(t *testing.T) {
 	assert := assert.New(t)
+	ctx := context.Background()
 	fn := newCheckRolesMiddleware([]string{
 		schema.UserRoleAdmin,
 	})
@@ -111,7 +117,7 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	assert.Equal("请先登录", err.(*hes.Error).Message)
 
 	// 已登录但无权限
-	err = us.SetInfo(session.UserInfo{
+	err = us.SetInfo(ctx, session.UserInfo{
 		Account: "treexie",
 	})
 	assert.Nil(err)
@@ -119,7 +125,7 @@ func TestNewCheckRolesMiddleware(t *testing.T) {
 	assert.Equal("禁止使用该功能", err.(*hes.Error).Message)
 
 	// 已登录且权限允许
-	err = us.SetInfo(session.UserInfo{
+	err = us.SetInfo(ctx, session.UserInfo{
 		Account: "treexie",
 		Roles: []string{
 			schema.UserRoleAdmin,

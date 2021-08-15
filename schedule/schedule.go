@@ -147,7 +147,7 @@ const mb = 1024 * 1024
 // performanceStats 系统性能
 func performanceStats() {
 	doStatsTask("performance stats", func() map[string]interface{} {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		data := service.GetPerformance(ctx)
 		fields := map[string]interface{}{
