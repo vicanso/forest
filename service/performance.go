@@ -31,6 +31,11 @@ func GetHTTPServerConnState() func(net.Conn, http.ConnState) {
 	return httpServerConnStats.ConnState
 }
 
+// dec http connection processing
+func DecHTTPConnProcessing() {
+	httpServerConnStats.DecProcessing()
+}
+
 type (
 	// Performance 应用性能指标
 	Performance struct {

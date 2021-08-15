@@ -681,8 +681,8 @@ github.com/vicanso/go-cache v1.0.0 h1:BYf/QhI2QLUFUu19orA4g9sj7sSeqN6y8NMi6uDf0g
 github.com/vicanso/go-cache v1.0.0/go.mod h1:UT2sLuKIjwveaNefcYtPKYT0txDZjSVFOV3lAioeVDI=
 github.com/vicanso/go-gauge v0.0.1 h1:vJITZ0fJBNDiXGZSTVGLtS6sqjedVIuRu/wdn67QODI=
 github.com/vicanso/go-gauge v0.0.1/go.mod h1:jPUoC3eLv74QE/0bNZ9VouNQHHQ0WGpC/ckDB4rDtEo=
-github.com/vicanso/go-performance v0.2.1 h1:DRq2mhpxhQeRdPaWa5cNhA1ncro8ZadCWf87651RgT4=
-github.com/vicanso/go-performance v0.2.1/go.mod h1:9bIDhtTOkwEAkjWNqFgtV+Kbj6jGJeW3Bl80Jp1nbBw=
+github.com/vicanso/go-performance v0.3.0 h1:W23ysUp3EDBhTHUwDc9XD0d3vApuzFL33h8zCchPc2Q=
+github.com/vicanso/go-performance v0.3.0/go.mod h1:9bIDhtTOkwEAkjWNqFgtV+Kbj6jGJeW3Bl80Jp1nbBw=
 github.com/vicanso/hes v0.2.4/go.mod h1:QcxOFmFfBQMhASTaLgnFayXYCgevdSeBVprt+o+3eKo=
 github.com/vicanso/hes v0.3.9 h1:IO21yElX6Xp3w+Lc1O2QIySrJj2jEhnl5dWbqbDYunc=
 github.com/vicanso/hes v0.3.9/go.mod h1:B0l1NIQM/nYw7owAd+hyHuNnAD8Nsx0T6duhVxmXUBY=

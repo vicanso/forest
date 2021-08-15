@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
 
@@ -29,6 +30,11 @@ type ExitFunc func() int32
 // NewEntry create an entry middleware
 func NewEntry(entryFn EntryFunc, exitFn ExitFunc) elton.Handler {
 	return func(c *elton.Context) error {
+		// 如果请求头指定connection: close
+		// 处理完成时，需要手工将现在处理的连接数-1
+		if c.GetRequestHeader("Connection") == "close" {
+			defer service.DecHTTPConnProcessing()
+		}
 		entryFn()
 		defer exitFn()
 		if c.ID != "" {

@@ -47,7 +47,7 @@ require (
 	github.com/vicanso/go-axios v1.3.2
 	github.com/vicanso/go-cache v1.0.0
 	github.com/vicanso/go-gauge v0.0.1
-	github.com/vicanso/go-performance v0.2.1
+	github.com/vicanso/go-performance v0.3.0
 	github.com/vicanso/hes v0.3.9
 	github.com/vicanso/ips v1.2.1
 	github.com/vicanso/lru-ttl v1.0.0
