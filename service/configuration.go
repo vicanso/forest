@@ -23,12 +23,15 @@ import (
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
+	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/request"
+	routerconcurrency "github.com/vicanso/forest/router_concurrency"
+	routermock "github.com/vicanso/forest/router_mock"
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/util"
 )
@@ -41,14 +44,14 @@ type (
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
-		UpdatedAt          time.Time                `json:"updatedAt"`
-		MockTime           string                   `json:"mockTime"`
-		IPBlockList        []string                 `json:"ipBlockList"`
-		SignedKeys         []string                 `json:"signedKeys"`
-		RouterConcurrency  map[string]uint32        `json:"routerConcurrency"`
-		RouterMock         map[string]RouterConfig  `json:"routerMock"`
-		SessionInterceptor *interceptor.SessionData `json:"sessionInterceptor"`
-		Limits             map[string]int           `json:"limits"`
+		UpdatedAt          time.Time                        `json:"updatedAt"`
+		MockTime           string                           `json:"mockTime"`
+		IPBlockList        []string                         `json:"ipBlockList"`
+		SignedKeys         []string                         `json:"signedKeys"`
+		RouterConcurrency  map[string]uint32                `json:"routerConcurrency"`
+		RouterMock         map[string]routermock.RouterMock `json:"routerMock"`
+		SessionInterceptor *interceptor.SessionData         `json:"sessionInterceptor"`
+		Limits             map[string]int                   `json:"limits"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
@@ -95,8 +98,8 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		MockTime:          util.GetMockTime(),
 		IPBlockList:       GetIPBlockList(),
 		SignedKeys:        sessionSignedKeys.GetKeys(),
-		RouterConcurrency: GetRouterConcurrency(),
-		RouterMock:        GetRouterMockConfig(),
+		RouterConcurrency: routerconcurrency.List(),
+		RouterMock:        routermock.List(),
 		Limits:            limits,
 	}
 	// 复制数据，避免对此数据修改
@@ -136,6 +139,8 @@ func (srv *ConfigurationSrv) Refresh() error {
 
 	mailList := make(map[string]string)
 
+	httpInterceptors := make([]string, 0)
+
 	requestLimitConfigs := make(map[string]int)
 	for _, item := range configs {
 		switch item.Category {
@@ -167,13 +172,15 @@ func (srv *ConfigurationSrv) Refresh() error {
 				log.Default().Error().
 					Err(err).
 					Msg("request limit config is invalid")
-				AlarmError("request limit config is invalid:" + err.Error())
+				email.AlarmError("request limit config is invalid:" + err.Error())
 			}
 			if c.Name != "" {
 				requestLimitConfigs[c.Name] = c.Max
 			}
 		case schema.ConfigurationCategoryEmail:
 			mailList[item.Name] = item.Data
+		case schema.ConfigurationHTTPServerInterceptor:
+			httpInterceptors = append(httpInterceptors, item.Data)
 		}
 	}
 
@@ -183,7 +190,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 		log.Default().Error().
 			Err(err).
 			Msg("session interceptor config is invalid")
-		AlarmError("session interceptor config is invalid:" + err.Error())
+		email.AlarmError("session interceptor config is invalid:" + err.Error())
 	}
 
 	// 如果未配置mock time，则设置为空
@@ -201,7 +208,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 	}
 
 	// 更新router configs
-	updateRouterMockConfigs(routerConfigs)
+	routermock.Update(routerConfigs)
 
 	// 重置IP拦截列表
 	err = ResetIPBlocker(blockIPList)
@@ -212,7 +219,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 	}
 
 	// 重置路由并发限制
-	ResetRouterConcurrency(routerConcurrencyConfigs)
+	routerconcurrency.Update(routerConcurrencyConfigs)
 
 	// 更新HTTP请求实例并发限制
 	currentLimits.Lock()
@@ -220,7 +227,10 @@ func (srv *ConfigurationSrv) Refresh() error {
 	currentLimits.limits = requestLimitConfigs
 	request.UpdateConcurrencyLimit(requestLimitConfigs)
 
-	updateEmailList(mailList)
+	email.Update(mailList)
+
+	// 更新拦截配置
+	interceptor.UpdateHTTPInterceptors(httpInterceptors)
 
 	return nil
 }

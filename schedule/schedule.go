@@ -23,9 +23,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/request"
+	routerconcurrency "github.com/vicanso/forest/router_concurrency"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 )
@@ -66,7 +68,7 @@ func doTask(desc string, fn taskFn) {
 			Dur("use", use).
 			Err(err).
 			Msg(desc + " fail")
-		service.AlarmError(desc + " fail, " + err.Error())
+		email.AlarmError(desc + " fail, " + err.Error())
 	} else {
 		log.Default().Info().
 			Str("category", logCategory).
@@ -294,7 +296,7 @@ func influxdbPing() {
 // routerConcurrencyStats router concurrency stats
 func routerConcurrencyStats() {
 	doStatsTask("router concurrency stats", func() map[string]interface{} {
-		result := service.GetRouterConcurrencyLimiter().GetStats()
+		result := routerconcurrency.GetLimiter().GetStats()
 		fields := make(map[string]interface{})
 
 		influxSrv := helper.GetInfluxDB()

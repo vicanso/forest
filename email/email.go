@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package email
 
 import (
 	"crypto/tls"
@@ -43,7 +43,7 @@ var (
 )
 
 // 更新邮箱列表
-func updateEmailList(data map[string]string) {
+func Update(data map[string]string) {
 	currentEmailListRMutex.Lock()
 	defer currentEmailListRMutex.Unlock()
 	currentEmailList = make(map[string][]string)
@@ -53,7 +53,7 @@ func updateEmailList(data map[string]string) {
 }
 
 // 根据名称获取邮件列表
-func GetEmailList(name string) []string {
+func List(name string) []string {
 	currentEmailListRMutex.RLock()
 	defer currentEmailListRMutex.RUnlock()
 	emails := currentEmailList[name]
@@ -81,7 +81,7 @@ func AlarmError(message string) {
 		Str("category", "alarmError").
 		Msg(message)
 	d := newMailDialer()
-	receivers := GetEmailList("alarmReceivers")
+	receivers := List("alarmReceivers")
 
 	if d != nil && len(receivers) != 0 {
 		m := gomail.NewMessage()

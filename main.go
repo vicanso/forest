@@ -61,11 +61,14 @@ import (
 	"github.com/vicanso/forest/config"
 	_ "github.com/vicanso/forest/controller"
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/profiler"
 	"github.com/vicanso/forest/router"
+	routerconcurrency "github.com/vicanso/forest/router_concurrency"
+	routermock "github.com/vicanso/forest/router_mock"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/tracer"
@@ -186,7 +189,7 @@ func newOnErrorHandler(e *elton.Elton) {
 	// exception的warner只有一个key，因此无需定时清除
 	exceptionWarner := warner.NewWarner(5*time.Minute, 5)
 	exceptionWarner.On(func(_ string, _ int) {
-		service.AlarmError("too many uncaught exception")
+		email.AlarmError("too many uncaught exception")
 	})
 	// 只有未被处理的error才会触发此回调
 	e.OnError(func(c *elton.Context, err error) {
@@ -227,7 +230,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
 
-			service.AlarmError("panic recover:" + string(he.ToJSON()))
+			email.AlarmError("panic recover:" + string(he.ToJSON()))
 			// 由于此处的error由请求触发的，因为要另外启动一个goroutine重启，避免影响当前处理
 			go gracefulClose(e)
 		}
@@ -252,7 +255,7 @@ func main() {
 				Str("category", "panic").
 				Err(err).
 				Msg("")
-			service.AlarmError(fmt.Sprintf("panic recover:%v", r))
+			email.AlarmError(fmt.Sprintf("panic recover:%v", r))
 			// panic类的异常都graceful close
 			gracefulClose(e)
 		}
@@ -347,11 +350,11 @@ func main() {
 	e.UseWithName(middleware.NewIPBlocker(service.IsBlockIP), "ipBlocker")
 
 	// 根据配置对路由mock返回
-	e.UseWithName(middleware.NewRouterMocker(service.RouterGetConfig), "routerMocker")
+	e.UseWithName(middleware.NewRouterMocker(routermock.Get), "routerMocker")
 
 	// 路由并发限制
 	e.UseWithName(M.NewRCL(M.RCLConfig{
-		Limiter: service.GetRouterConcurrencyLimiter(),
+		Limiter: routerconcurrency.GetLimiter(),
 	}), "rcl")
 
 	// eTag与fresh的处理
@@ -362,7 +365,7 @@ func main() {
 	e.UseWithName(M.NewDefaultBodyParser(), "bodyParser")
 
 	// 拦截
-	// e.UseWithName(middleware.NewInterceptor(), "interceptor")
+	e.UseWithName(middleware.NewInterceptor(), "interceptor")
 
 	// 对响应数据 c.Body 转换为相应的json响应
 	e.UseWithName(M.NewDefaultResponder(), "responder")
@@ -373,11 +376,11 @@ func main() {
 	}
 
 	// 初始化路由并发限制配置
-	service.InitRouterConcurrencyLimiter(e.GetRouters())
+	routerconcurrency.InitLimiter(e.GetRouters())
 
 	err := dependServiceCheck()
 	if err != nil {
-		service.AlarmError("check depend service fail, " + err.Error())
+		email.AlarmError("check depend service fail, " + err.Error())
 		log.Default().Error().
 			Str("category", "depFail").
 			Err(err).
@@ -396,7 +399,7 @@ func main() {
 	err = e.ListenAndServe(basicConfig.Listen)
 	// 如果出错而且非主动关闭，则发送告警
 	if err != nil && !closedByUser {
-		service.AlarmError("listen and serve fail, " + err.Error())
+		email.AlarmError("listen and serve fail, " + err.Error())
 		log.Default().Error().
 			Err(err).
 			Msg("")

@@ -3,10 +3,10 @@ module github.com/vicanso/forest
 go 1.16
 
 require (
-	entgo.io/ent v0.9.0
+	entgo.io/ent v0.9.1
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect
 	github.com/disintegration/imaging v1.6.2
-	github.com/dop251/goja v0.0.0-20210810150349-acd0507c3d6f
+	github.com/dop251/goja v0.0.0-20210817151038-07a7fd9355b4
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
@@ -35,7 +35,7 @@ require (
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.23.0
 	github.com/shirou/gopsutil/v3 v3.21.7
-	github.com/spf13/cast v1.4.0
+	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1

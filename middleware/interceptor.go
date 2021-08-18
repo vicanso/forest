@@ -35,7 +35,7 @@ func NewInterceptor() elton.Handler {
 			return err
 		}
 		// 如果状态码不为0，则表示已设置响应数据
-		if resp.Status != 0 {
+		if resp != nil && resp.Status != 0 {
 			resp.SetResponse(c)
 			return nil
 		}
@@ -49,7 +49,7 @@ func NewInterceptor() elton.Handler {
 			return err
 		}
 		// 如果状态码不为0，则表示重设响应数据
-		if resp.Status != 0 {
+		if resp != nil && resp.Status != 0 {
 			resp.SetResponse(c)
 			return nil
 		}

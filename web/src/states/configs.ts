@@ -13,6 +13,7 @@ export enum ConfigCategory {
   RequestConcurrency = "requestConcurrency",
   Router = "router",
   Email = "email",
+  HTTPServerInterceptor = "httpServerInterceptor",
 }
 
 export enum ConfigStatus {

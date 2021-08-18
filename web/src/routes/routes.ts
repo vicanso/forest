@@ -24,6 +24,7 @@ export const names = {
   sessionInterceptors: "sessionInterceptors",
   caches: "caches",
   emails: "emails",
+  httpServerInterceptors: "httpServerInterceptors",
 };
 
 export const routes: Router[] = [
@@ -111,5 +112,10 @@ export const routes: Router[] = [
     path: "/emails",
     name: names.emails,
     component: () => import("../views/Emails"),
+  },
+  {
+    path: "/http-server-interceptors",
+    name: names.httpServerInterceptors,
+    component: () => import("../views/HTTPServerInterceptors"),
   },
 ];

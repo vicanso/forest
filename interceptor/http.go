@@ -26,8 +26,40 @@ import (
 	"github.com/vicanso/forest/util"
 )
 
-type httpServer struct {
-	mutex *sync.RWMutex
+type httpInterceptorScript struct {
+	Before string
+	After  string
+}
+type httpInterceptors struct {
+	sync.RWMutex
+	scripts    map[string]*httpInterceptorScript
+	baseScript string
+}
+
+func (interceptors *httpInterceptors) Get(router string) *httpInterceptorScript {
+	interceptors.RLock()
+	defer interceptors.RUnlock()
+	return interceptors.scripts[router]
+}
+
+func UpdateHTTPInterceptors(arr []string) {
+	scripts := make(map[string]*httpInterceptorScript)
+	for _, item := range arr {
+		script := make(map[string]string)
+		_ = json.Unmarshal([]byte(item), &script)
+		router := script["router"]
+		// 只根据是否有router来判断是否正确
+		if router == "" {
+			continue
+		}
+		scripts[router] = &httpInterceptorScript{
+			Before: script["before"],
+			After:  script["after"],
+		}
+	}
+	currentHTTPInterceptors.Lock()
+	defer currentHTTPInterceptors.Unlock()
+	currentHTTPInterceptors.scripts = scripts
 }
 
 // http服务器接收请求
@@ -57,18 +89,13 @@ type httpServerInterceptor struct {
 	After  func() (*httpServerResponse, error)
 }
 
-var _ = newHTTPServer()
+var currentHTTPInterceptors = newHTTPInterceptors()
 
-var httpServerScript = ""
-
-func init() {
+func newHTTPInterceptors() *httpInterceptors {
 	script, _ := asset.GetFS().ReadFile("http_server_interceptor.js")
-	httpServerScript = string(script)
-}
-
-func newHTTPServer() *httpServer {
-	return &httpServer{
-		mutex: &sync.RWMutex{},
+	return &httpInterceptors{
+		scripts:    make(map[string]*httpInterceptorScript),
+		baseScript: string(script),
 	}
 }
 
@@ -76,7 +103,7 @@ func newScript(script string) string {
 	return fmt.Sprintf(`%s;(function() {
 		%s
 	})();
-	`, httpServerScript, script)
+	`, currentHTTPInterceptors.baseScript, script)
 }
 
 func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
@@ -113,14 +140,11 @@ func (resp *httpServerResponse) SetResponse(c *elton.Context) {
 }
 
 func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
-	// TODO 获取before和after的脚本
-	beforeScript := `
-		setReqQuery("a", "1");
-	`
-	afterScript := `
-		setRespHeader("X-Test", "abc");
-		setRespBody("token", "123");
-	`
+	script := currentHTTPInterceptors.Get(c.Request.Method + " " + c.Route)
+	if script == nil {
+		return nil, nil
+	}
+
 	vm := goja.New()
 
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
@@ -138,7 +162,10 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 
 	inter = &httpServerInterceptor{
 		Before: func() (*httpServerResponse, error) {
-			_, err := vm.RunString(newScript(beforeScript))
+			if script.Before == "" {
+				return nil, nil
+			}
+			_, err := vm.RunString(newScript(script.Before))
 			if err != nil {
 				return nil, err
 			}
@@ -159,8 +186,11 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 			return resp, nil
 		},
 		After: func() (*httpServerResponse, error) {
+			if script.After == "" {
+				return nil, nil
+			}
 			_ = json.Unmarshal(c.BodyBuffer.Bytes(), &resp.Body)
-			_, err := vm.RunString(newScript(afterScript))
+			_, err := vm.RunString(newScript(script.After))
 			if err != nil {
 				return nil, err
 			}

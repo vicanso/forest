@@ -1,48 +1,22 @@
-// Copyright 2020 tree xie
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package service
+package routerconcurrency
 
 import (
 	"encoding/json"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	syncAtomic "sync/atomic"
 	"unsafe"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/log"
 	"go.uber.org/atomic"
 	"go.uber.org/ratelimit"
 )
 
 type (
-	// RouterConfig 路由配置信息
-	RouterConfig struct {
-		Router     string `json:"router"`
-		Route      string `json:"route"`
-		Method     string `json:"method"`
-		Status     int    `json:"status"`
-		CotentType string `json:"cotentType"`
-		Response   string `json:"response"`
-		// DelaySeconds 延时，单位秒
-		DelaySeconds int    `json:"delaySeconds"`
-		URL          string `json:"url"`
-	}
-	routerConcurrencyConfig struct {
+	routerConcurrency struct {
 		Route  string `json:"route"`
 		Method string `json:"method"`
 		Max    uint32 `json:"max"`
@@ -70,9 +44,7 @@ type (
 )
 
 var (
-	routerMutex          = new(sync.RWMutex)
-	currentRouterConfigs map[string]*RouterConfig
-	currentRCLimiter     = &rcLimiter{}
+	currentRCLimiter = &rcLimiter{}
 
 	// 无频率限制
 	routerRateUnlimited = &routerRateLimit{
@@ -81,7 +53,7 @@ var (
 )
 
 // SetRateLimiter 设置频率限制
-func (rc *RouterConcurrency) SetRateLimiter(limit string) {
+func (rc *RouterConcurrency) setRateLimiter(limit string) {
 	rc.RateLimit.Store(limit)
 	reg := regexp.MustCompile(`(\d+)/s`)
 	rate := 0
@@ -156,55 +128,8 @@ func (l *rcLimiter) GetStats() map[string]uint32 {
 	return result
 }
 
-// 更新router config配置
-func updateRouterMockConfigs(configs []string) {
-	result := make(map[string]*RouterConfig)
-	for _, item := range configs {
-		v := &RouterConfig{}
-		err := json.Unmarshal([]byte(item), v)
-		if err != nil {
-			log.Default().Error().
-				Err(err).
-				Msg("router config is invalid")
-			AlarmError("router config is invalid:" + err.Error())
-			continue
-		}
-		arr := strings.Split(v.Router, " ")
-		if len(arr) == 2 {
-			v.Method = arr[0]
-			v.Route = arr[1]
-		}
-		// 如果未配置Route或者method的则忽略
-		if v.Route == "" || v.Method == "" {
-			continue
-		}
-		result[v.Method+v.Route] = v
-	}
-	routerMutex.Lock()
-	defer routerMutex.Unlock()
-	currentRouterConfigs = result
-}
-
-// RouterGetConfig 获取路由配置
-func RouterGetConfig(method, route string) *RouterConfig {
-	routerMutex.RLock()
-	defer routerMutex.RUnlock()
-	return currentRouterConfigs[method+route]
-}
-
-// GetRouterMockConfig 获取路由mock配置
-func GetRouterMockConfig() map[string]RouterConfig {
-	routerMutex.RLock()
-	defer routerMutex.RUnlock()
-	result := make(map[string]RouterConfig)
-	for key, value := range currentRouterConfigs {
-		result[key] = *value
-	}
-	return result
-}
-
-// InitRouterConcurrencyLimiter 初始路由并发限制
-func InitRouterConcurrencyLimiter(routers []elton.RouterInfo) {
+// InitLimiter 初始路由并发限制
+func InitLimiter(routers []elton.RouterInfo) {
 	m := make(map[string]*RouterConcurrency)
 	for _, item := range routers {
 		m[item.Method+" "+item.Route] = &RouterConcurrency{}
@@ -212,22 +137,22 @@ func InitRouterConcurrencyLimiter(routers []elton.RouterInfo) {
 	currentRCLimiter.m = m
 }
 
-// GetRouterConcurrencyLimiter 获取路由并发限制器
-func GetRouterConcurrencyLimiter() *rcLimiter {
+// GetLimiter 获取路由并发限制器
+func GetLimiter() *rcLimiter {
 	return currentRCLimiter
 }
 
-// ResetRouterConcurrency 重置路由并发数
-func ResetRouterConcurrency(arr []string) {
-	concurrencyConfigList := make([]*routerConcurrencyConfig, 0)
+// Update 更新路由并发数
+func Update(arr []string) {
+	concurrencyConfigList := make([]*routerConcurrency, 0)
 	for _, str := range arr {
-		v := &routerConcurrencyConfig{}
+		v := &routerConcurrency{}
 		err := json.Unmarshal([]byte(str), v)
 		if err != nil {
 			log.Default().Error().
 				Err(err).
 				Msg("router concurrency config is invalid")
-			AlarmError("router concurrency config is invalid:" + err.Error())
+			email.AlarmError("router concurrency config is invalid:" + err.Error())
 			continue
 		}
 		concurrencyConfigList = append(concurrencyConfigList, v)
@@ -246,7 +171,7 @@ func ResetRouterConcurrency(arr []string) {
 				// 获取rate limit配置，如果有调整则需要重新设置
 				prevLimitDesc := r.RateLimit.Load()
 				if prevLimitDesc != item.RateLimit {
-					r.SetRateLimiter(item.RateLimit)
+					r.setRateLimiter(item.RateLimit)
 				}
 			}
 		}
@@ -257,8 +182,8 @@ func ResetRouterConcurrency(arr []string) {
 	}
 }
 
-// GetRouterConcurrency 获取路由并发限制数
-func GetRouterConcurrency() map[string]uint32 {
+// List 获取路由并发限制数
+func List() map[string]uint32 {
 	result := make(map[string]uint32)
 	for key, r := range currentRCLimiter.m {
 		v := r.Max.Load()

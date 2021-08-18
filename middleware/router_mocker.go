@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/service"
+	routermock "github.com/vicanso/forest/router_mock"
 )
 
-type GetConfigFunc func(method, route string) *service.RouterConfig
+type GetConfigFunc func(method, route string) *routermock.RouterMock
 
 // NewRouterMocker create a router mocker
 func NewRouterMocker(fn GetConfigFunc) elton.Handler {
