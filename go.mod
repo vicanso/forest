@@ -14,8 +14,6 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
 	github.com/google/pprof v0.0.0-20210827144239-02619b876842 // indirect
-	github.com/hashicorp/golang-lru v0.5.4
-	github.com/huandu/go-tls v1.0.1
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.0
 	github.com/influxdata/line-protocol v0.0.0-20210311194329-9aa0e372d097 // indirect
