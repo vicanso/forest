@@ -71,7 +71,6 @@ import (
 	routermock "github.com/vicanso/forest/router_mock"
 	_ "github.com/vicanso/forest/schedule"
 	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -100,7 +99,7 @@ func init() {
 
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
-		log.Default().Info().
+		log.Info(context.Background()).
 			Msg(value)
 	}))
 	service.SetApplicationVersion(Version)
@@ -120,7 +119,7 @@ func init() {
 var closedByUser = false
 
 func gracefulClose(e *elton.Elton) {
-	log.Default().Info().Msg("start to graceful close")
+	log.Info(context.Background()).Msg("start to graceful close")
 	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
 	service.SetApplicationStatus(service.ApplicationStatusStopping)
 	// docker 在10秒内退出，因此设置5秒后退出
@@ -137,7 +136,7 @@ func watchForClose(e *elton.Elton) {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for s := range c {
-			log.Default().Info().
+			log.Info(context.Background()).
 				Str("signal", s.String()).
 				Msg("server will be closed")
 			closedByUser = true
@@ -218,7 +217,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		})
 
 		// 可以针对实际场景输出更多的日志信息
-		log.Default().Error().
+		log.Error(c.Context()).
 			Str("category", "exception").
 			Str("ip", ip).
 			Str("route", c.Route).
@@ -238,7 +237,6 @@ func newOnErrorHandler(e *elton.Elton) {
 }
 
 func main() {
-	log.SetLogRegexp(cs.MaskRegExp, nil)
 	profiler.MustStartPyroscope()
 	e := elton.New()
 	// 记录server中连接的状态变化
@@ -251,7 +249,7 @@ func main() {
 			if !ok {
 				err = fmt.Errorf("%v", r)
 			}
-			log.Default().Error().
+			log.Error(context.Background()).
 				Str("category", "panic").
 				Err(err).
 				Msg("")
@@ -270,7 +268,7 @@ func main() {
 			pidData := []byte(strconv.Itoa(os.Getpid()))
 			err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
 			if err != nil {
-				log.Default().Error().
+				log.Error(context.Background()).
 					Err(err).
 					Msg("write pid fail")
 			}
@@ -332,7 +330,7 @@ func main() {
 		}), "requestLimit")
 	}
 	// tracer中间件在最大请求限制中间件之后，保证进入tracer的goroutine不要过多
-	e.UseWithName(tracer.New(), "tracer")
+	// e.UseWithName(tracer.New(), "tracer")
 
 	// 配置只针对snappy与zstd压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理完成）
 	compressMinLength := 2 * 1024
@@ -381,7 +379,7 @@ func main() {
 	err := dependServiceCheck()
 	if err != nil {
 		email.AlarmError("check depend service fail, " + err.Error())
-		log.Default().Error().
+		log.Error(context.Background()).
 			Str("category", "depFail").
 			Err(err).
 			Msg("")
@@ -395,12 +393,12 @@ func main() {
 	// e.Server = &http.Server{
 	// 	Handler: h2c.NewHandler(e, &http2.Server{}),
 	// }
-	log.Default().Info().Msg("server will listen on " + basicConfig.Listen)
+	log.Info(context.Background()).Msg("server will listen on " + basicConfig.Listen)
 	err = e.ListenAndServe(basicConfig.Listen)
 	// 如果出错而且非主动关闭，则发送告警
 	if err != nil && !closedByUser {
 		email.AlarmError("listen and serve fail, " + err.Error())
-		log.Default().Error().
+		log.Error(context.Background()).
 			Err(err).
 			Msg("")
 	}

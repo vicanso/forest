@@ -1,6 +1,7 @@
 package routermock
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"sync"
@@ -34,7 +35,7 @@ func Update(configs []string) {
 		v := &RouterMock{}
 		err := json.Unmarshal([]byte(item), v)
 		if err != nil {
-			log.Default().Error().
+			log.Error(context.Background()).
 				Err(err).
 				Msg("router config is invalid")
 			email.AlarmError("router config is invalid:" + err.Error())

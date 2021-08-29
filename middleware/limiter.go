@@ -51,7 +51,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			done = func() {
 				err := redisDone()
 				if err != nil {
-					log.Default().Error().
+					log.Error(ctx).
 						Str("category", "redisDelFail").
 						Str("key", k).
 						Err(err).

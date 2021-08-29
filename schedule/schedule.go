@@ -63,14 +63,14 @@ func doTask(desc string, fn taskFn) {
 	err := fn()
 	use := time.Since(startedAt)
 	if err != nil {
-		log.Default().Error().
+		log.Error(context.Background()).
 			Str("category", logCategory).
 			Dur("use", use).
 			Err(err).
 			Msg(desc + " fail")
 		email.AlarmError(desc + " fail, " + err.Error())
 	} else {
-		log.Default().Info().
+		log.Info(context.Background()).
 			Str("category", logCategory).
 			Dur("use", use).
 			Msg(desc + " success")
@@ -80,7 +80,7 @@ func doTask(desc string, fn taskFn) {
 func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
-	log.Default().Info().
+	log.Info(context.Background()).
 		Str("category", logCategory).
 		Dur("use", time.Since(startedAt)).
 		Dict("stats", zerolog.Dict().Fields(stats)).
@@ -225,9 +225,9 @@ func performanceStats() {
 				count[k] = strconv.Itoa(v)
 			}
 
-			log.Default().Info().
+			log.Info(context.Background()).
 				Str("category", "connStat").
-				Dict("count", log.MapStringString(count)).
+				Dict("count", log.Struct(count)).
 				Msg("")
 			fields[cs.FieldConnTotal] = data.ConnStat.Count
 		}
@@ -253,7 +253,7 @@ func performanceStats() {
 
 		// open files的统计
 		if len(data.OpenFilesStats) != 0 {
-			log.Default().Info().
+			log.Info(context.Background()).
 				Str("category", "openFiles").
 				Dict("stat", log.Struct(data.OpenFilesStats)).
 				Msg("")

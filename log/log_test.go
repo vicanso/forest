@@ -19,22 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/forest/cs"
 )
-
-func init() {
-	SetLogRegexp(cs.MaskRegExp, nil)
-}
-
-func TestCutOrMask(t *testing.T) {
-	assert := assert.New(t)
-
-	assert.Equal("***", cutOrMaskString("password", "abcd"))
-	assert.Equal(logFieldValueMaxSize+3, len(cutOrMaskString("abc", "0123456789012345678901234567890123456789")))
-
-	assert.Equal("***", cutOrMaskInterface("password", map[string]string{}))
-	assert.Equal(true, cutOrMaskInterface("bool", true))
-}
 
 func TestLogStruct(t *testing.T) {
 	assert := assert.New(t)

@@ -91,7 +91,7 @@ func newOnDone(serviceName string) axios.OnDone {
 			if resp != nil {
 				respData = string(resp.Data)
 			}
-			log.Default().Debug().
+			log.Debug(conf.Context).
 				Str("curl", conf.CURL()).
 				Str("data", respData).
 				Msg("request log")
@@ -101,14 +101,14 @@ func newOnDone(serviceName string) axios.OnDone {
 		if urlInfo != nil {
 			requestURL = urlInfo.RequestURI()
 		}
-		event := log.Default().Info().
+		event := log.Info(conf.Context).
 			Str("category", "requestStats").
 			Str("service", serviceName).
 			Str("method", stats.Method).
 			Str("route", stats.Route).
 			Str("url", requestURL)
 		if len(conf.Params) != 0 {
-			event = event.Dict("params", log.MapStringString(conf.Params))
+			event = event.Dict("params", log.Struct(conf.Params))
 		}
 		if len(conf.Query) != 0 {
 			event = event.Dict("query", log.URLValues(conf.Query))

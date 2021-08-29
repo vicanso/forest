@@ -56,7 +56,7 @@ func mustNewInfluxDB() *InfluxDB {
 	}
 	opts.SetPrecision(time.Nanosecond)
 	opts.SetUseGZip(influxdbConfig.Gzip)
-	log.Default().Info().
+	log.Info(context.Background()).
 		Str("uri", influxdbConfig.URI).
 		Str("org", influxdbConfig.Org).
 		Str("bucket", influxdbConfig.Bucket).
@@ -80,7 +80,7 @@ func mustNewInfluxDB() *InfluxDB {
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
 func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI, db *InfluxDB) {
 	for err := range writer.Errors() {
-		log.Default().Error().
+		log.Error(context.Background()).
 			Str("category", "influxdbError").
 			Err(err).
 			Msg("")

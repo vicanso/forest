@@ -1,6 +1,7 @@
 package routerconcurrency
 
 import (
+	"context"
 	"encoding/json"
 	"regexp"
 	"strconv"
@@ -149,7 +150,7 @@ func Update(arr []string) {
 		v := &routerConcurrency{}
 		err := json.Unmarshal([]byte(str), v)
 		if err != nil {
-			log.Default().Error().
+			log.Error(context.Background()).
 				Err(err).
 				Msg("router concurrency config is invalid")
 			email.AlarmError("router concurrency config is invalid:" + err.Error())

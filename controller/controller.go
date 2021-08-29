@@ -31,7 +31,6 @@ import (
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/session"
-	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
 )
@@ -170,7 +169,7 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 		MaxLength: 30,
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
-			tid := util.GetTrackID(c)
+			tid := util.GetDeviceID(c.Context())
 			us := session.NewUserSession(c)
 			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
@@ -200,7 +199,7 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 			if extraParams != nil {
 				currentStep = extraParams.Step
 			}
-			event := log.Default().Info().
+			event := log.Info(c.Context()).
 				Str("category", "tracker").
 				Str("action", action).
 				Str("ip", ip).
@@ -210,10 +209,10 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 				event = event.Str("step", currentStep)
 			}
 			if len(info.Query) != 0 {
-				event = event.Dict("query", log.MapStringString(info.Query))
+				event = event.Dict("query", log.Struct(info.Query))
 			}
 			if len(info.Params) != 0 {
-				event = event.Dict("params", log.MapStringString(info.Params))
+				event = event.Dict("params", log.Struct(info.Params))
 			}
 			if len(info.Form) != 0 {
 				event = event.Dict("form", zerolog.
@@ -256,9 +255,7 @@ func sessionHandle(c *elton.Context) error {
 	}
 
 	// 设置账号信息
-	info := tracer.GetTracerInfo()
-	info.Account = account
-	tracer.SetTracerInfo(info)
+	c.WithContext(util.SetAccount(c.Context(), account))
 
 	// 如果无配置，则直接跳过
 	if interData == nil {

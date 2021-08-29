@@ -169,7 +169,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 			c := RequestLimitConfiguration{}
 			err := json.Unmarshal([]byte(item.Data), &c)
 			if err != nil {
-				log.Default().Error().
+				log.Error(context.Background()).
 					Err(err).
 					Msg("request limit config is invalid")
 				email.AlarmError("request limit config is invalid:" + err.Error())
@@ -187,7 +187,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 	// 设置session interceptor的拦截信息
 	err = interceptor.UpdateSessionConfig(sessionInterceptorValue)
 	if err != nil {
-		log.Default().Error().
+		log.Error(context.Background()).
 			Err(err).
 			Msg("session interceptor config is invalid")
 		email.AlarmError("session interceptor config is invalid:" + err.Error())
@@ -213,7 +213,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 	// 重置IP拦截列表
 	err = ResetIPBlocker(blockIPList)
 	if err != nil {
-		log.Default().Error().
+		log.Error(context.Background()).
 			Err(err).
 			Msg("reset ip blocker fail")
 	}

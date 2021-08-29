@@ -106,7 +106,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		log.Default().Info().
+		log.Info(req.Context()).
 			Str("category", "404").
 			Str("ip", ip).
 			Str("method", req.Method).
@@ -118,7 +118,7 @@ func NewNotFoundHandler() http.HandlerFunc {
 		resp.WriteHeader(status)
 		_, err := resp.Write(notFoundErrBytes)
 		if err != nil {
-			log.Default().Error().
+			log.Error(req.Context()).
 				Str("ip", ip).
 				Str("uri", req.RequestURI).
 				Err(err).
@@ -147,7 +147,7 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 	}).ToJSON()
 	return func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetClientIP(req)
-		log.Default().Info().
+		log.Info(req.Context()).
 			Str("category", "405").
 			Str("ip", ip).
 			Str("method", req.Method).
@@ -158,7 +158,7 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 		resp.WriteHeader(status)
 		_, err := resp.Write(methodNotAllowedErrBytes)
 		if err != nil {
-			log.Default().Error().
+			log.Error(req.Context()).
 				Str("ip", ip).
 				Str("uri", req.RequestURI).
 				Err(err).

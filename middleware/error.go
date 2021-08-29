@@ -53,14 +53,14 @@ func NewError() elton.Handler {
 			he.Extra = make(map[string]interface{})
 		}
 		account := ""
-		tid := util.GetTrackID(c)
+		tid := util.GetDeviceID(c.Context())
 		us := session.NewUserSession(c)
 		if us != nil && us.IsLogin() {
 			account = us.MustGetInfo().Account
 		}
 
 		ip := c.RealIP()
-		log.Default().Info().
+		log.Info(c.Context()).
 			Str("catgory", "httpError").
 			Bool("exception", he.Exception).
 			Str("ip", ip).

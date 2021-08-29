@@ -66,7 +66,7 @@ func init() {
 }
 func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 	redisConfig := config.MustGetRedisConfig()
-	log.Default().Info().
+	log.Info(context.Background()).
 		Strs("addr", redisConfig.Addrs).
 		Msg("connect to redis")
 	hook := &redisHook{
@@ -85,7 +85,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 		MasterName:       redisConfig.Master,
 		PoolSize:         redisConfig.PoolSize,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
-			log.Default().Info().Msg("redis new connection is established")
+			log.Info(ctx).Msg("redis new connection is established")
 			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
 				cs.FieldCount: 1,
 			})
@@ -124,7 +124,7 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 	t := ctx.Value(startedAtKey).(*time.Time)
 	d := time.Since(*t)
 	if d > rh.slow || err != "" {
-		log.Default().Info().
+		log.Info(ctx).
 			Str("category", "redisSlowOrErr").
 			Str("cmd", cmd).
 			Str("use", d.String()).
@@ -164,7 +164,7 @@ func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	if log.DebugEnabled() {
 		// 由于redis是较频繁的操作
 		// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
-		log.Default().Debug().Msg(cmd.String())
+		log.Debug(ctx).Msg(cmd.String())
 	}
 	return nil
 }
@@ -221,7 +221,7 @@ func (*redisHook) ReportResult(result error) {
 	// 仅是调用redis完成时触发
 	// 如allow返回出错的不会触发
 	if result != nil && !RedisIsNilError(result) {
-		log.Default().Error().
+		log.Error(context.Background()).
 			Str("category", "redisProcessFail").
 			Err(result).
 			Msg("")

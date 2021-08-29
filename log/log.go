@@ -18,48 +18,32 @@ package log
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog"
-	"github.com/vicanso/forest/tracer"
+	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/util"
+	mask "github.com/vicanso/go-mask"
 )
-
-type tracerHook struct{}
-
-func (h tracerHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
-	if level == zerolog.NoLevel {
-		return
-	}
-	info := tracer.GetTracerInfo()
-	// 如果无trace id，则表示获取失
-	if info.TraceID == "" {
-		return
-	}
-	e.Str("deviceID", info.DeviceID).
-		Str("traceID", info.TraceID).
-		Str("account", info.Account)
-}
 
 var enabledDebugLog = false
 var defaultLogger = newLogger()
 
 // 日志中值的最大长度
 var logFieldValueMaxSize = 30
-var maskRegexp *regexp.Regexp
-var fullLogRegexp *regexp.Regexp
+var logMask = mask.New(
+	mask.RegExpOption(cs.MaskRegExp),
+	mask.MaxLengthOption(logFieldValueMaxSize),
+)
 
 type httpServerLogger struct{}
 
 func (hsl *httpServerLogger) Write(p []byte) (int, error) {
-	Default().Info().
+	Info(context.Background()).
 		Str("category", "httpServerLogger").
 		Msg(string(p))
 	return len(p), nil
@@ -68,7 +52,7 @@ func (hsl *httpServerLogger) Write(p []byte) (int, error) {
 type redisLogger struct{}
 
 func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
-	Default().Info().
+	Info(context.Background()).
 		Str("category", "redisLogger").
 		Msg(fmt.Sprintf(format, v...))
 }
@@ -76,7 +60,7 @@ func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface
 type entLogger struct{}
 
 func (el *entLogger) Log(args ...interface{}) {
-	Default().Info().
+	Info(context.Background()).
 		Msg(fmt.Sprint(args...))
 }
 
@@ -95,14 +79,12 @@ func newLogger() *zerolog.Logger {
 	var l zerolog.Logger
 	if util.IsDevelopment() {
 		l = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).
-			Hook(&tracerHook{}).
 			With().
 			Timestamp().
 			Logger()
 	} else {
 		l = zerolog.New(os.Stdout).
 			Level(zerolog.InfoLevel).
-			Hook(&tracerHook{}).
 			With().
 			Timestamp().
 			Logger()
@@ -121,9 +103,30 @@ func newLogger() *zerolog.Logger {
 	return &l
 }
 
-// Default 获取默认的logger
-func Default() *zerolog.Logger {
-	return defaultLogger
+func fillTraceInfos(ctx context.Context, e *zerolog.Event) *zerolog.Event {
+	deviceID := util.GetDeviceID(ctx)
+	if deviceID == "" {
+		return e
+	}
+	return e.Str("deviceID", deviceID).
+		Str("traceID", util.GetTraceID(ctx)).
+		Str("account", util.GetAccount(ctx))
+}
+
+func Info(ctx context.Context) *zerolog.Event {
+	return fillTraceInfos(ctx, defaultLogger.Info())
+}
+
+func Error(ctx context.Context) *zerolog.Event {
+	return fillTraceInfos(ctx, defaultLogger.Error())
+}
+
+func Debug(ctx context.Context) *zerolog.Event {
+	return fillTraceInfos(ctx, defaultLogger.Debug())
+}
+
+func Warn(ctx context.Context) *zerolog.Event {
+	return fillTraceInfos(ctx, defaultLogger.Warn())
 }
 
 // NewHTTPServerLogger create a http server logger
@@ -141,66 +144,12 @@ func NewEntLogger() *entLogger {
 	return &entLogger{}
 }
 
-// 设置log的两种正则处理
-func SetLogRegexp(mask, full *regexp.Regexp) {
-	maskRegexp = mask
-	fullLogRegexp = full
-}
-
-// cutOrMaskString 将输出数据***或截断处理
-func cutOrMaskString(k, v string) string {
-	if fullLogRegexp != nil && fullLogRegexp.MatchString(k) {
-		return v
-	}
-	if maskRegexp != nil && maskRegexp.MatchString(k) {
-		return "***"
-	}
-	return util.CutRune(v, logFieldValueMaxSize)
-}
-
-// cutOrMaskString 将输出数据***或截断处理
-func cutOrMaskInterface(k string, v interface{}) interface{} {
-	if fullLogRegexp != nil && fullLogRegexp.MatchString(k) {
-		return v
-	}
-	if maskRegexp != nil && maskRegexp.MatchString(k) {
-		return "***"
-	}
-	switch v := v.(type) {
-	case string:
-		return util.CutRune(v, logFieldValueMaxSize)
-	}
-	return v
-}
-func cutOrMaskMapInterface(m map[string]interface{}) map[string]interface{} {
-	for k, v := range m {
-		m[k] = cutOrMaskInterface(k, v)
-	}
-	return m
-}
-
-// MapStringString create a map[string]string log event
-func MapStringString(data map[string]string) *zerolog.Event {
-	if len(data) == 0 {
-		return zerolog.Dict()
-	}
-	m := make(map[string]interface{})
-	for k, v := range data {
-		m[k] = cutOrMaskString(k, v)
-	}
-	return zerolog.Dict().Fields(m)
-}
-
 // URLValues create a url.Values log event
 func URLValues(query url.Values) *zerolog.Event {
 	if len(query) == 0 {
 		return zerolog.Dict()
 	}
-	m := make(map[string]interface{})
-	for k, values := range query {
-		m[k] = cutOrMaskString(k, strings.Join(values, ","))
-	}
-	return zerolog.Dict().Fields(m)
+	return zerolog.Dict().Fields(logMask.URLValues(query))
 }
 
 // Struct create a struct log event
@@ -208,37 +157,8 @@ func Struct(data interface{}) *zerolog.Event {
 	if data == nil {
 		return zerolog.Dict()
 	}
-	m := make(map[string]interface{})
-	switch data := data.(type) {
-	case map[string]interface{}:
-		m = data
-	case map[string]string:
-		for k, v := range data {
-			m[k] = v
-		}
-	case url.Values:
-		for k, v := range data {
-			m[k] = strings.Join(v, ",")
-		}
-	default:
-		buf, _ := json.Marshal(data)
-		// 忽略错误，如果不成功则直接返回
-		if len(buf) == 0 {
-			break
-		}
-		// 数组
-		if buf[0] == '[' {
-			data := make([]map[string]interface{}, 0)
-			_ = json.Unmarshal(buf, &data)
-			for index, item := range data {
-				m[strconv.Itoa(index)] = cutOrMaskMapInterface(item)
-			}
-		} else {
-			// 出错忽略
-			_ = json.Unmarshal(buf, &m)
-		}
-	}
-	m = cutOrMaskMapInterface(m)
 
+	// 转换出错忽略
+	m, _ := logMask.Struct(data)
 	return zerolog.Dict().Fields(m)
 }

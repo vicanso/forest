@@ -15,6 +15,7 @@
 package email
 
 import (
+	"context"
 	"crypto/tls"
 	"strings"
 	"sync"
@@ -76,7 +77,7 @@ func newMailDialer() *gomail.Dialer {
 
 // AlarmError 发送出错警告
 func AlarmError(message string) {
-	log.Default().Error().
+	log.Error(context.Background()).
 		Str("app", basicInfo.Name).
 		Str("category", "alarmError").
 		Msg(message)
@@ -96,7 +97,7 @@ func AlarmError(message string) {
 			defer sendingMailMutex.Unlock()
 			err := d.DialAndSend(m)
 			if err != nil {
-				log.Default().Error().
+				log.Error(context.Background()).
 					Err(err).
 					Msg("send mail fail")
 			}

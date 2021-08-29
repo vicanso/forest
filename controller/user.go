@@ -39,7 +39,6 @@ import (
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/session"
-	"github.com/vicanso/forest/tracer"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
@@ -590,9 +589,7 @@ func (*userCtrl) me(c *elton.Context) error {
 		}
 
 		// 记录创建user track
-		tracerInfo := tracer.GetTracerInfo()
 		go func() {
-			tracer.SetTracerInfo(tracerInfo)
 			location, _ := location.GetByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
@@ -697,14 +694,14 @@ func (*userCtrl) login(c *elton.Context) error {
 	}
 
 	ip := c.RealIP()
-	tid := util.GetTrackID(c)
+	tid := util.GetDeviceID(c.Context())
 	sid := util.GetSessionID(c)
 	userAgent := c.GetRequestHeader("User-Agent")
 
 	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
-	tracerInfo := tracer.GetTracerInfo()
 	go func() {
-		tracer.SetTracerInfo(tracerInfo)
+		// 由于elton.context可利用
+		// 此函数中不可再使用elton.context的相关属性(c.Context()也不可以)
 		fields := map[string]interface{}{
 			cs.FieldAccount:   account,
 			cs.FieldUserAgent: userAgent,
@@ -743,7 +740,7 @@ func (*userCtrl) login(c *elton.Context) error {
 			SetIsp(isp).
 			Save(ctx)
 		if err != nil {
-			log.Default().Error().
+			log.Error(ctx).
 				Err(err).
 				Msg("save user login fail")
 		}
@@ -867,7 +864,7 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) error {
 
 // addUserAction add user action
 func (ctrl userCtrl) addUserAction(c *elton.Context) error {
-	tid := util.GetTrackID(c)
+	tid := util.GetDeviceID(c.Context())
 	// 如果没有tid，则直接返回
 	if tid == "" {
 		c.NoContent()
