@@ -19,7 +19,7 @@ require (
 	github.com/influxdata/line-protocol v0.0.0-20210311194329-9aa0e372d097 // indirect
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/jinzhu/now v1.1.2
-	github.com/klauspost/compress v1.13.4 // indirect
+	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/md5-simd v1.1.2 // indirect
@@ -27,13 +27,12 @@ require (
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/pyroscope-io/pyroscope v0.0.37
+	github.com/pyroscope-io/pyroscope v0.0.38
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.24.0
 	github.com/shirou/gopsutil/v3 v3.21.7
 	github.com/spf13/cast v1.4.1
-	github.com/spf13/viper v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1
 	github.com/tidwall/pretty v1.2.0 // indirect
