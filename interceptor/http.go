@@ -18,12 +18,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"sync"
 
 	"github.com/dop251/goja"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/asset"
 	"github.com/vicanso/forest/util"
+	"go.uber.org/atomic"
 )
 
 type httpInterceptorScript struct {
@@ -31,15 +31,28 @@ type httpInterceptorScript struct {
 	After  string
 }
 type httpInterceptors struct {
-	sync.RWMutex
-	scripts    map[string]*httpInterceptorScript
+	scripts    *atomic.Value
 	baseScript string
 }
 
+func (interceptors *httpInterceptors) getScripts() map[string]*httpInterceptorScript {
+	value := interceptors.scripts.Load()
+	if value == nil {
+		return nil
+	}
+	scripts, ok := value.(map[string]*httpInterceptorScript)
+	if !ok {
+		return nil
+	}
+	return scripts
+}
+
 func (interceptors *httpInterceptors) Get(router string) *httpInterceptorScript {
-	interceptors.RLock()
-	defer interceptors.RUnlock()
-	return interceptors.scripts[router]
+	scripts := interceptors.getScripts()
+	if scripts == nil {
+		return nil
+	}
+	return scripts[router]
 }
 
 func UpdateHTTPInterceptors(arr []string) {
@@ -57,9 +70,7 @@ func UpdateHTTPInterceptors(arr []string) {
 			After:  script["after"],
 		}
 	}
-	currentHTTPInterceptors.Lock()
-	defer currentHTTPInterceptors.Unlock()
-	currentHTTPInterceptors.scripts = scripts
+	currentHTTPInterceptors.scripts.Store(scripts)
 }
 
 // http服务器接收请求
@@ -94,7 +105,7 @@ var currentHTTPInterceptors = newHTTPInterceptors()
 func newHTTPInterceptors() *httpInterceptors {
 	script, _ := asset.GetFS().ReadFile("http_server_interceptor.js")
 	return &httpInterceptors{
-		scripts:    make(map[string]*httpInterceptorScript),
+		scripts:    &atomic.Value{},
 		baseScript: string(script),
 	}
 }

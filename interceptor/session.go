@@ -17,12 +17,14 @@ package interceptor
 import (
 	"encoding/json"
 	"strings"
-	"sync"
+
+	"go.uber.org/atomic"
 )
 
 type (
 	//  session拦截的数据
 	SessionData struct {
+		Enabled       bool     `json:"enabled"`
 		Message       string   `json:"message"`
 		AllowAccount  string   `json:"allowAccount"`
 		AllowAccounts []string `json:"allowAccounts"`
@@ -31,20 +33,17 @@ type (
 )
 
 //  session拦截的配置
-var sessionConfig = new(sync.Map)
-
-const (
-	sessionKey = "sessionInterceptor"
-)
+var sessionConfig = atomic.Value{}
 
 //  获取session拦截的配置信息
 func GetSessionData() (*SessionData, bool) {
-	value, ok := sessionConfig.Load(sessionKey)
-	if !ok {
+	value := sessionConfig.Load()
+	if value == nil {
 		return nil, false
 	}
 	data, ok := value.(*SessionData)
-	if !ok {
+	// 如果数据类型不对或非启用状态
+	if !ok || !data.Enabled {
 		return nil, false
 	}
 	return data, true
@@ -54,7 +53,7 @@ func GetSessionData() (*SessionData, bool) {
 func UpdateSessionConfig(value string) (err error) {
 	// 如果为空则清除
 	if value == "" {
-		sessionConfig.Delete(sessionKey)
+		sessionConfig.Store(&SessionData{})
 		return
 	}
 
@@ -66,6 +65,8 @@ func UpdateSessionConfig(value string) (err error) {
 	if len(interData.AllowAccounts) == 0 && interData.AllowAccount != "" {
 		interData.AllowAccounts = strings.Split(interData.AllowAccount, ",")
 	}
-	sessionConfig.Store(sessionKey, interData)
+	// 设置为启用
+	interData.Enabled = true
+	sessionConfig.Store(interData)
 	return
 }

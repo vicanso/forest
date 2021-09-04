@@ -329,7 +329,9 @@ func EntPing() error {
 func EntInitSchema() error {
 	var err error
 	initSchemaOnce.Do(func() {
-		err = defaultEntClient.Schema.Create(context.Background())
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		err = defaultEntClient.Schema.Create(ctx)
 	})
 	return err
 }

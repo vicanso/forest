@@ -77,7 +77,7 @@ func (Configuration) Fields() []ent.Field {
 		field.String("owner").
 			NotEmpty().
 			Comment("创建者"),
-		field.String("data").
+		field.Text("data").
 			NotEmpty().
 			Comment("配置信息"),
 		field.Time("started_at").

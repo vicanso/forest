@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
-	"sync"
+
+	"go.uber.org/atomic"
 
 	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/log"
@@ -25,8 +26,7 @@ type (
 	}
 )
 
-var currentRouterMocks map[string]*RouterMock
-var routerMutex = new(sync.RWMutex)
+var currentRouterMocks = atomic.Value{}
 
 // 更新router config配置
 func Update(configs []string) {
@@ -52,24 +52,35 @@ func Update(configs []string) {
 		}
 		result[v.Method+v.Route] = v
 	}
-	routerMutex.Lock()
-	defer routerMutex.Unlock()
-	currentRouterMocks = result
+
+	currentRouterMocks.Store(result)
+}
+
+func getRouterMocks() map[string]*RouterMock {
+	value := currentRouterMocks.Load()
+	if value == nil {
+		return nil
+	}
+	mocks, ok := value.(map[string]*RouterMock)
+	if !ok {
+		return nil
+	}
+	return mocks
 }
 
 // Get 获取路由配置
 func Get(method, route string) *RouterMock {
-	routerMutex.RLock()
-	defer routerMutex.RUnlock()
-	return currentRouterMocks[method+route]
+	mocks := getRouterMocks()
+	if mocks == nil {
+		return nil
+	}
+	return mocks[method+route]
 }
 
 // List 获取路由mock配置
 func List() map[string]RouterMock {
-	routerMutex.RLock()
-	defer routerMutex.RUnlock()
 	result := make(map[string]RouterMock)
-	for key, value := range currentRouterMocks {
+	for key, value := range getRouterMocks() {
 		result[key] = *value
 	}
 	return result

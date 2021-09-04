@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/vicanso/elton"
@@ -34,6 +33,7 @@ import (
 	routermock "github.com/vicanso/forest/router_mock"
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/util"
+	"go.uber.org/atomic"
 )
 
 // ConfigurationSrv 配置的相关函数
@@ -59,18 +59,18 @@ type (
 		Max  int    `json:"max"`
 	}
 
-	// 当前http请求实例并发限制
-	currentRequestLimits struct {
-		sync.RWMutex
-		limits map[string]int
-	}
+	// // 当前http请求实例并发限制
+	// currentRequestLimits struct {
+	// 	sync.RWMutex
+	// 	limits map[string]int
+	// }
 )
 
 var (
 	sessionSignedKeys = new(elton.RWMutexSignedKeys)
 
 	// 当前请求实例限制
-	currentLimits = new(currentRequestLimits)
+	currentLimits = atomic.Value{}
 )
 
 // 配置刷新时间
@@ -90,9 +90,6 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 // GetCurrentValidConfiguration 获取当前有效配置
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 	interData, _ := interceptor.GetSessionData()
-	currentLimits.RLock()
-	defer currentLimits.RUnlock()
-	limits := currentLimits.limits
 	result := &CurrentValidConfiguration{
 		UpdatedAt:         configurationRefreshedAt,
 		MockTime:          util.GetMockTime(),
@@ -100,7 +97,12 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		SignedKeys:        sessionSignedKeys.GetKeys(),
 		RouterConcurrency: routerconcurrency.List(),
 		RouterMock:        routermock.List(),
-		Limits:            limits,
+		// Limits:            limits,
+	}
+	value := currentLimits.Load()
+	if value != nil {
+		limits, _ := value.(map[string]int)
+		result.Limits = limits
 	}
 	// 复制数据，避免对此数据修改
 	if interData != nil {
@@ -222,9 +224,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 	routerconcurrency.Update(routerConcurrencyConfigs)
 
 	// 更新HTTP请求实例并发限制
-	currentLimits.Lock()
-	defer currentLimits.Unlock()
-	currentLimits.limits = requestLimitConfigs
+	currentLimits.Store(requestLimitConfigs)
 	request.UpdateConcurrencyLimit(requestLimitConfigs)
 
 	email.Update(mailList)
