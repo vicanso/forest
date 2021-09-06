@@ -15,7 +15,8 @@ install:
 	go install entgo.io/ent/cmd/entc
 
 generate: 
-	entc generate ./schema --target ./ent
+	rm -rf ./ent
+	entc generate ./schema --template ./template --target ./ent
 
 describe:
 	entc describe ./schema
