@@ -195,7 +195,7 @@ func performanceStats() {
 			cs.FieldMemOtherSys: data.MemOtherSys,
 
 			cs.FieldNumGC:   int(data.NumGC - prevNumGC),
-			cs.FieldPauseNS: int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
+			cs.FieldPauseMS: int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
 
 			cs.FieldConnProcessing:   int(data.HTTPServerConnStats.ConnProcessing),
 			cs.FieldConnAlive:        int(data.HTTPServerConnStats.ConnAlive),

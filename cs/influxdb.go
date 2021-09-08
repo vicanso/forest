@@ -255,8 +255,8 @@ const (
 	FieldNumGC = "numGC"
 	// num forced gc
 	FieldNumForcedGC = "numForcedGC"
-	// gc pause ns
-	FieldPauseNS = "pauseNS"
+	// gc pause ms
+	FieldPauseMS = "pauseMS"
 
 	// FieldConnProcessing conn processing
 	FieldConnProcessing = "connProcessing"

@@ -5,7 +5,7 @@ go 1.16
 require (
 	entgo.io/ent v0.9.1
 	github.com/disintegration/imaging v1.6.2
-	github.com/dop251/goja v0.0.0-20210817151038-07a7fd9355b4
+	github.com/dop251/goja v0.0.0-20210904102640-6338b3246846
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
@@ -37,11 +37,11 @@ require (
 	github.com/tidwall/gjson v1.9.0
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/vicanso/count-warner v1.2.0
-	github.com/vicanso/elton v1.4.3
+	github.com/vicanso/elton v1.5.0
 	github.com/vicanso/elton-compress v1.1.0
-	github.com/vicanso/elton-session v1.2.0
+	github.com/vicanso/elton-session v1.2.1
 	github.com/vicanso/go-axios v1.3.2
-	github.com/vicanso/go-cache v1.1.0
+	github.com/vicanso/go-cache v1.2.0
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v0.1.0
 	github.com/vicanso/go-performance v0.3.0
@@ -53,7 +53,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
-	golang.org/x/net v0.0.0-20210902165921-8d991716f632 // indirect
+	golang.org/x/net v0.0.0-20210907225631-ff17edfbf26d // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df

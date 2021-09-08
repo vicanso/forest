@@ -20,6 +20,7 @@ import (
 
 	"github.com/vicanso/elton"
 	se "github.com/vicanso/elton-session"
+	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/util"
 )
@@ -133,12 +134,12 @@ func NewUserSession(c *elton.Context) *UserSession {
 			return us
 		}
 	}
-	v, ok := c.Get(se.Key)
+	se, ok := session.Get(c)
 	if !ok {
 		return nil
 	}
 	us := &UserSession{
-		se: v.(*se.Session),
+		se: se,
 	}
 	c.Set(cs.UserSession, us)
 

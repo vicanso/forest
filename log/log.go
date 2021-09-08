@@ -22,6 +22,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 
 	"github.com/rs/zerolog"
@@ -38,6 +39,7 @@ var logFieldValueMaxSize = 30
 var logMask = mask.New(
 	mask.RegExpOption(cs.MaskRegExp),
 	mask.MaxLengthOption(logFieldValueMaxSize),
+	mask.NotMaskRegExpOption(regexp.MustCompile(`stack`)),
 )
 
 type httpServerLogger struct{}

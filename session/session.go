@@ -16,7 +16,7 @@ package session
 
 import (
 	"github.com/vicanso/elton"
-	se "github.com/vicanso/elton-session"
+	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/util"
@@ -27,7 +27,7 @@ var scf = config.MustGetSessionConfig()
 // New new session middleware
 func New() elton.Handler {
 	store := cache.GetRedisSession()
-	return se.NewByCookie(se.CookieConfig{
+	return session.NewByCookie(session.CookieConfig{
 		Store:   store,
 		Signed:  true,
 		Expired: scf.TTL,
