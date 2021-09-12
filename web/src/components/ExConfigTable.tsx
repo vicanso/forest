@@ -1,4 +1,4 @@
-import { defineComponent, onUnmounted } from "vue";
+import { defineComponent, onUnmounted, PropType } from "vue";
 import { NButton, NIcon } from "naive-ui";
 import { EditRegular } from "@vicons/fa";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
@@ -86,7 +86,7 @@ function getColumns(): TableColumn[] {
   ];
 }
 
-function noop(): void {
+function noop(id: number): void {
   // 无操作
 }
 
@@ -102,7 +102,9 @@ export default defineComponent({
       default: () => "",
     },
     onUpdate: {
-      type: Function,
+      type: Function as PropType<
+      (id: number) => void
+      >,
       default: noop,
     },
   },
@@ -135,7 +137,7 @@ export default defineComponent({
             <NButton
               bordered={false}
               onClick={() => {
-                onUpdate(row.id);
+                onUpdate(row.id as number);
               }}
             >
               <NIcon>

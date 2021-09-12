@@ -43,7 +43,9 @@ export default defineComponent({
       required: true,
     },
     onSubmit: {
-      type: Function as PropType<(data: Record<string, unknown>) => void>,
+      type: Function as PropType<
+        (data: Record<string, unknown>) => Promise<void>
+      >,
       required: true,
     },
     submitText: {
