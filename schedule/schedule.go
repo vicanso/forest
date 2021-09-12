@@ -120,7 +120,11 @@ func entStats() {
 
 // cpuUsageStats cpu使用率
 func cpuUsageStats() {
-	doTask("update cpu usage", service.UpdateCPUUsage)
+	doTask("update cpu usage", func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		return service.UpdateCPUUsage(ctx)
+	})
 }
 
 // prevMemFrees 上一次 memory objects 释放的数量

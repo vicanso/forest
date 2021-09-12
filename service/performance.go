@@ -91,6 +91,6 @@ func GetConcurrency() int32 {
 }
 
 // UpdateCPUUsage 更新cpu使用率
-func UpdateCPUUsage() error {
-	return performance.UpdateCPUUsage()
+func UpdateCPUUsage(ctx context.Context) error {
+	return performance.UpdateCPUUsage(ctx)
 }
