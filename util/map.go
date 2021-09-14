@@ -25,3 +25,14 @@ func MergeMapStringInterface(target map[string]interface{}, sources ...map[strin
 	}
 	return target
 }
+
+func MergeMapString(target map[string]string, sources ...map[string]string) map[string]string {
+	for _, source := range sources {
+		for key, value := range source {
+			if value != "" {
+				target[key] = value
+			}
+		}
+	}
+	return target
+}
