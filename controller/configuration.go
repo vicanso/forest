@@ -28,7 +28,6 @@ import (
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/service"
-	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 )
 
@@ -218,7 +217,7 @@ func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int
 // add 添加配置
 func (*configurationCtrl) add(c *elton.Context) error {
 	params := configurationAddParams{}
-	err := validate.Do(&params, c.RequestBody)
+	err := validateBody(c, &params)
 	if err != nil {
 		return err
 	}
@@ -234,7 +233,7 @@ func (*configurationCtrl) add(c *elton.Context) error {
 // list 查询配置列表
 func (*configurationCtrl) list(c *elton.Context) error {
 	params := configurationListParmas{}
-	err := validate.Do(&params, c.Query())
+	err := validateQuery(c, &params)
 	if err != nil {
 		return err
 	}
@@ -263,7 +262,7 @@ func (*configurationCtrl) update(c *elton.Context) error {
 		return err
 	}
 	params := configurationUpdateParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err = validateBody(c, &params)
 	if err != nil {
 		return err
 	}

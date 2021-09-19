@@ -32,6 +32,7 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 )
 
@@ -288,4 +289,12 @@ func isIntranet(c *elton.Context) error {
 		return c.Next()
 	}
 	return hes.NewWithStatusCode("Forbidden", 403)
+}
+
+func validateBody(c *elton.Context, params interface{}) error {
+	return validate.Do(params, c.RequestBody)
+}
+
+func validateQuery(c *elton.Context, params interface{}) error {
+	return validate.Query(params, c.Query())
 }

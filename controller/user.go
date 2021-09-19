@@ -40,7 +40,6 @@ import (
 	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/util"
-	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/hes"
 )
 
@@ -479,7 +478,7 @@ func pickUserInfo(c *elton.Context) (*userInfoResp, error) {
 
 func (*userCtrl) list(c *elton.Context) error {
 	params := userListParams{}
-	err := validate.Do(&params, c.Query())
+	err := validateQuery(c, &params)
 	if err != nil {
 		return err
 	}
@@ -523,7 +522,7 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) error {
 		return err
 	}
 	params := userUpdateParams{}
-	err = validate.Do(&params, c.RequestBody)
+	err = validateBody(c, &params)
 	if err != nil {
 		return err
 	}
@@ -630,7 +629,7 @@ func (*userCtrl) detail(c *elton.Context) error {
 // 	201: apiUserRegisterResponse
 func (*userCtrl) register(c *elton.Context) error {
 	params := userRegisterLoginParams{}
-	err := validate.Do(&params, c.RequestBody)
+	err := validateBody(c, &params)
 	if err != nil {
 		return err
 	}
@@ -662,7 +661,7 @@ func (*userCtrl) register(c *elton.Context) error {
 // 	200: apiUserInfoResponse
 func (*userCtrl) login(c *elton.Context) error {
 	params := userRegisterLoginParams{}
-	err := validate.Do(&params, c.RequestBody)
+	err := validateBody(c, &params)
 	if err != nil {
 		return err
 	}
@@ -814,7 +813,7 @@ func (ctrl *userCtrl) updateMe(c *elton.Context) error {
 	}
 	us := getUserSession(c)
 	params := userUpdateMeParams{}
-	err := validate.Do(&params, c.RequestBody)
+	err := validateBody(c, &params)
 	if err != nil {
 		return err
 	}
@@ -840,7 +839,7 @@ func (*userCtrl) getRoleList(c *elton.Context) error {
 // listLoginRecord list login record
 func (ctrl userCtrl) listLoginRecord(c *elton.Context) error {
 	params := userLoginListParams{}
-	err := validate.Do(&params, c.Query())
+	err := validateQuery(c, &params)
 	if err != nil {
 		return err
 	}
@@ -872,7 +871,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) error {
 	}
 
 	params := userActionAddParams{}
-	err := validate.Do(&params, c.RequestBody)
+	err := validateBody(c, &params)
 	if err != nil {
 		return err
 	}

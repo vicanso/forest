@@ -22,7 +22,6 @@ import (
 	"github.com/vicanso/forest/router"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
-	"github.com/vicanso/forest/validate"
 )
 
 type fileCtrl struct{}
@@ -61,7 +60,7 @@ func init() {
 // upload 上传文件
 func (*fileCtrl) upload(c *elton.Context) error {
 	params := fileUploadParams{}
-	err := validate.Do(&params, c.Query())
+	err := validateQuery(c, &params)
 	if err != nil {
 		return err
 	}

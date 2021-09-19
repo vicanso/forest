@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"reflect"
-	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mcuadros/go-defaults"
@@ -48,26 +47,26 @@ func toString(fl validator.FieldLevel) (string, bool) {
 }
 
 // newNumberRange 校验number是否>=min <=max
-func newNumberRange(min, max int) validator.Func {
-	return func(fl validator.FieldLevel) bool {
-		value := fl.Field()
-		// 如果是int
-		if value.Kind() == reflect.Int {
-			number := int(value.Int())
-			return number >= min && number <= max
-		}
-		// 如果是string
-		if value.Kind() == reflect.String {
-			number, err := strconv.Atoi(value.String())
-			// 如果无法转换为int，则不符合
-			if err != nil {
-				return false
-			}
-			return number >= min && number <= max
-		}
-		return false
-	}
-}
+// func newNumberRange(min, max int) validator.Func {
+// 	return func(fl validator.FieldLevel) bool {
+// 		value := fl.Field()
+// 		// 如果是int
+// 		if value.Kind() == reflect.Int {
+// 			number := int(value.Int())
+// 			return number >= min && number <= max
+// 		}
+// 		// 如果是string
+// 		if value.Kind() == reflect.String {
+// 			number, err := strconv.Atoi(value.String())
+// 			// 如果无法转换为int，则不符合
+// 			if err != nil {
+// 				return false
+// 			}
+// 			return number >= min && number <= max
+// 		}
+// 		return false
+// 	}
+// }
 
 // // isInt 判断是否int
 // func isInt(fl validator.FieldLevel) bool {
@@ -182,8 +181,7 @@ func doValidate(s interface{}, data interface{}) error {
 			}
 		}
 	}
-	defaults.SetDefaults(s)
-	return defaultValidator.Struct(s)
+	return Struct(s)
 }
 
 func wrapError(err error) error {
@@ -196,71 +194,81 @@ func wrapError(err error) error {
 	return he
 }
 
+func queryFillValue(value reflect.Value, field reflect.StructField, data map[string]string) error {
+	kind := value.Kind()
+	// 如果是struct，直接处理其内部属性
+	if kind == reflect.Struct {
+		for i := 0; i < value.NumField(); i++ {
+			err := queryFillValue(value.Field(i), value.Type().Field(i), data)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	tag := field.Tag.Get("json")
+	tagValue := data[tag]
+	// 如果值为空，则不做赋值处理
+	if tagValue == "" {
+		return nil
+	}
+	switch kind {
+	case reflect.Int:
+		fallthrough
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		v, e := cast.ToInt64E(tagValue)
+		if e != nil {
+			return wrapError(e)
+		}
+		value.SetInt(v)
+	case reflect.Float64:
+		fallthrough
+	case reflect.Float32:
+		v, e := cast.ToFloat64E(tagValue)
+		if e != nil {
+			return wrapError(e)
+		}
+		value.SetFloat(v)
+	case reflect.Bool:
+		v, e := cast.ToBoolE(tagValue)
+		if e != nil {
+			return wrapError(e)
+		}
+		value.SetBool(v)
+	case reflect.String:
+		value.SetString(tagValue)
+
+	default:
+		return wrapError(fmt.Errorf("not support the type:%s", tag))
+	}
+
+	return nil
+}
+
 // Query 转换数据后执行校验，用于将query转换为struct时使用
-func Query(s interface{}, data map[string]string) (err error) {
+func Query(s interface{}, data map[string]string) error {
 	v := reflect.ValueOf(s)
 	if v.Kind() != reflect.Ptr {
-		err = wrapError(errors.New("only support pointer"))
-		return
+		return wrapError(errors.New("only support pointer"))
 	}
 	v = v.Elem()
 	t := v.Type()
 	len := t.NumField()
 	for i := 0; i < len; i++ {
 		field := t.Field(i)
-		// we can't access the value of unexported fields
-		if field.PkgPath != "" {
-			continue
-		}
 		value := v.FieldByIndex(field.Index)
-		tag := field.Tag.Get("json")
-		tagValue := data[tag]
-		// 如果值为空，则不做赋值处理
-		if tagValue == "" {
-			continue
-		}
-		switch value.Kind() {
-		case reflect.Int:
-			fallthrough
-		case reflect.Int8:
-			fallthrough
-		case reflect.Int16:
-			fallthrough
-		case reflect.Int32:
-			fallthrough
-		case reflect.Int64:
-			v, e := cast.ToInt64E(tagValue)
-			if e != nil {
-				err = wrapError(e)
-				return
-			}
-			value.SetInt(v)
-		case reflect.Float64:
-			fallthrough
-		case reflect.Float32:
-			v, e := cast.ToFloat64E(tagValue)
-			if e != nil {
-				err = wrapError(e)
-				return
-			}
-			value.SetFloat(v)
-		case reflect.Bool:
-			v, e := cast.ToBoolE(tagValue)
-			if e != nil {
-				err = wrapError(e)
-				return
-			}
-			value.SetBool(v)
-		case reflect.String:
-			value.SetString(tagValue)
-		default:
-			err = wrapError(fmt.Errorf("not support the type:%s", tag))
-			return
+		err := queryFillValue(value, field, data)
+		if err != nil {
+			return err
 		}
 	}
-	defaults.SetDefaults(s)
-	err = defaultValidator.Struct(s)
-	return
+	return Struct(s)
 }
 
 // Do 执行校验

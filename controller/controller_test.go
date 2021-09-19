@@ -29,8 +29,8 @@ import (
 func TestListParams(t *testing.T) {
 	assert := assert.New(t)
 	params := listParams{
-		Limit:  "10",
-		Offset: "100",
+		Limit:  10,
+		Offset: 100,
 		Order:  "-id,name",
 		Fields: "id,updatedAt",
 	}
