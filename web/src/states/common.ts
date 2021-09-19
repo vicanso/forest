@@ -13,6 +13,12 @@ interface Captcha {
   type: string;
 }
 
+export enum Mode {
+  Add = "add",
+  Update = "update", 
+  List = "list",
+}
+
 interface Settings {
   theme: string;
   collapsed: boolean;
