@@ -15,7 +15,7 @@ interface Captcha {
 
 export enum Mode {
   Add = "add",
-  Update = "update", 
+  Update = "update",
   List = "list",
 }
 
