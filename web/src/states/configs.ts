@@ -23,6 +23,7 @@ export enum ConfigStatus {
 
 // 配置信息
 export interface Config {
+  [key: string]: unknown;
   key: string;
   id: number;
   createdAt: string;

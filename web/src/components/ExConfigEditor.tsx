@@ -202,47 +202,25 @@ export default defineComponent({
     const fetch = async () => {
       processing.value = true;
       try {
-        const data = await configFindByID(props.id);
-        currentConfig.value = data;
+        const configData = await configFindByID(props.id);
+        currentConfig.value = configData;
+        const result = configData as Record<string, unknown>;
         items.forEach((item) => {
-          if (!item.key) {
+          const { key } = item;
+          if (!key) {
             return;
           }
-          switch (item.key) {
-            case "name":
-              item.defaultValue = data.name;
-              break;
-            case "category":
-              item.defaultValue = data.category;
-              break;
-            case "status":
-              item.defaultValue = data.status;
-              break;
-            case "startedAt":
-              item.defaultValue = data.startedAt;
-              break;
-            case "endedAt":
-              item.defaultValue = data.endedAt;
-              break;
-            case "data":
-              item.defaultValue = data.data;
-              break;
-            case "description":
-              item.defaultValue = data.description;
-              break;
-            default:
-              {
-                const arr = item.key.split(".");
-                if (arr.length === 2 && arr[0] === "data") {
-                  try {
-                    item.defaultValue = JSON.parse(data.data)[arr[1]];
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }
-              }
-              break;
+          const arr = key.split(".");
+          if (arr.length === 2 && arr[0] === "data") {
+            try {
+              const data = result["data"] as string;
+              item.defaultValue = JSON.parse(data)[arr[1]];
+            } catch (err) {
+              console.error(err);
+            }
+            return;
           }
+          item.defaultValue = result[key];
         });
       } finally {
         processing.value = false;
