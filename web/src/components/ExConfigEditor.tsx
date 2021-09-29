@@ -189,8 +189,11 @@ export default defineComponent({
         processing.value = false;
       }
     };
-    // 后续再确认是否要deep clone
-    const items = props.formItems.slice(0);
+    const items: FormItem[] = [];
+    // 由于会对form item的元素填写默认值，因此重新clone
+    props.formItems.forEach((item) => {
+      items.push(Object.assign({}, item));
+    });
     items.push({
       name: "配置描述：",
       key: "description",

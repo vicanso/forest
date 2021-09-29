@@ -68,7 +68,7 @@ func doTask(desc string, fn taskFn) {
 			Dur("use", use).
 			Err(err).
 			Msg(desc + " fail")
-		email.AlarmError(desc + " fail, " + err.Error())
+		email.AlarmError(context.Background(), desc+" fail, "+err.Error())
 	} else {
 		log.Info(context.Background()).
 			Str("category", logCategory).

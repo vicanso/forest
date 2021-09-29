@@ -153,7 +153,7 @@ func Update(arr []string) {
 			log.Error(context.Background()).
 				Err(err).
 				Msg("router concurrency config is invalid")
-			email.AlarmError("router concurrency config is invalid:" + err.Error())
+			email.AlarmError(context.Background(), "router concurrency config is invalid:"+err.Error())
 			continue
 		}
 		concurrencyConfigList = append(concurrencyConfigList, v)

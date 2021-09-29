@@ -174,7 +174,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 				log.Error(context.Background()).
 					Err(err).
 					Msg("request limit config is invalid")
-				email.AlarmError("request limit config is invalid:" + err.Error())
+				email.AlarmError(context.Background(), "request limit config is invalid:"+err.Error())
 			}
 			if c.Name != "" {
 				requestLimitConfigs[c.Name] = c.Max
@@ -192,7 +192,7 @@ func (srv *ConfigurationSrv) Refresh() error {
 		log.Error(context.Background()).
 			Err(err).
 			Msg("session interceptor config is invalid")
-		email.AlarmError("session interceptor config is invalid:" + err.Error())
+		email.AlarmError(context.Background(), "session interceptor config is invalid:"+err.Error())
 	}
 
 	// 如果未配置mock time，则设置为空
