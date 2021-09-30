@@ -102,7 +102,7 @@ func Send(ctx context.Context, title, message string, receivers ...string) {
 
 // AlarmError 发送出错警告
 func AlarmError(ctx context.Context, message string) {
-	log.Error(context.Background()).
+	log.Error(ctx).
 		Str("app", basicInfo.Name).
 		Str("category", "alarmError").
 		Msg(message)

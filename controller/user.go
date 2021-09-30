@@ -587,8 +587,8 @@ func (*userCtrl) me(c *elton.Context) error {
 			cs.FieldIP:        ip,
 		}
 
-		// 记录创建user track
 		go func() {
+			// 新的go routine，因此不直接使用c.Context()
 			location, _ := location.GetByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
