@@ -6,11 +6,13 @@ import {
   USERS,
   USERS_LOGINS,
   USERS_ID,
+  USERS_ME_DETAIL,
 } from "../constants/url";
 // eslint-disable-next-line
 // @ts-ignore
 import { sha256 } from "../helpers/crypto";
 import request from "../helpers/request";
+import { IList } from "./interface";
 
 const hash = "JT";
 
@@ -34,6 +36,17 @@ const info: UserInfo = reactive({
   roles: [],
 });
 
+export interface UserDetailInfo {
+  createdAt: string;
+  updatedAt: string;
+  status: number;
+  account: string;
+  name: string;
+  roles: string[];
+  groups: string[];
+  email: string;
+}
+
 // 用户账户信息
 interface UserAccount {
   id: number;
@@ -45,12 +58,7 @@ interface UserAccount {
   statusDesc: string;
 }
 // 用户账户列表
-interface UserAccounts {
-  processing: boolean;
-  count: number;
-  items: UserAccount[];
-}
-const users: UserAccounts = reactive({
+const users: IList<UserAccount> = reactive({
   processing: false,
   count: -1,
   items: [],
@@ -84,13 +92,7 @@ interface UserLoginRecord {
   location?: string;
 }
 // 用户登录列表
-interface UserLoginRecords {
-  processing: boolean;
-  count: number;
-  items: UserLoginRecord[];
-}
-
-const logins: UserLoginRecords = reactive({
+const logins: IList<UserLoginRecord> = reactive({
   processing: false,
   count: -1,
   items: [],
@@ -281,11 +283,22 @@ export async function userUpdateByID(params: {
   await request.patch(USERS_ID.replace(":id", `${params.id}`), params.data);
 }
 
+export async function userMeDetail(): Promise<UserDetailInfo> {
+  const { data } = await request.get(USERS_ME_DETAIL);
+  return data as UserDetailInfo;
+}
+
+export async function userUpdateMe(
+  params: Record<string, unknown>
+): Promise<void> {
+  await request.patch(USERS_ME, params);
+}
+
 // 仅读用户state
 interface ReadonlyUserState {
   info: DeepReadonly<UserInfo>;
-  users: DeepReadonly<UserAccounts>;
-  logins: DeepReadonly<UserLoginRecords>;
+  users: DeepReadonly<IList<UserAccount>>;
+  logins: DeepReadonly<IList<UserLoginRecord>>;
 }
 
 const state = {

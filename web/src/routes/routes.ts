@@ -8,6 +8,7 @@ export interface Router {
 
 export const names = {
   home: "home",
+  profile: "profile",
   login: "logon",
   register: "register",
   users: "users",
@@ -32,6 +33,11 @@ export const routes: Router[] = [
     path: "/",
     name: names.home,
     component: () => import("../views/Home"),
+  },
+  {
+    path: "/profile",
+    name: names.profile,
+    component: () => import("../views/Profile"),
   },
   {
     path: "/login",

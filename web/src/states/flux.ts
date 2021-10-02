@@ -8,6 +8,7 @@ import {
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
 import { formatDate } from "../helpers/util";
+import { IList } from "./interface";
 
 export const measurementUserTracker = "userTracker";
 export const measurementHttpRequest = "httpRequest";
@@ -32,6 +33,7 @@ function sortByTime(
 
 // 用户行为轨迹
 interface UserTracker {
+  [key: string]: unknown;
   _time: string;
   key: string;
   createdAt: string;
@@ -48,10 +50,8 @@ interface UserTracker {
   params: string;
   error: string;
 }
-interface UserTrackers {
-  processing: boolean;
-  items: UserTracker[];
-  count: number;
+
+interface UserTrackers extends IList<UserTracker> {
   flux: string;
 }
 const userTrackers: UserTrackers = reactive({
@@ -62,13 +62,10 @@ const userTrackers: UserTrackers = reactive({
 });
 
 // 用户行为轨迹类型
-interface UserTrackerActions {
-  processing: boolean;
-  items: string[];
-}
-const userTrackerActions: UserTrackerActions = reactive({
+const userTrackerActions: IList<string> = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 function fillUserTrackerInfo(data: UserTracker) {
@@ -89,13 +86,10 @@ function fillUserTrackerInfo(data: UserTracker) {
 }
 
 // HTTP出错类型
-interface HTTPErrorCategories {
-  processing: boolean;
-  items: string[];
-}
-const httpErrorCategories: HTTPErrorCategories = reactive({
+const httpErrorCategories: IList<string> = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // HTTPError 客户端HTTP请求出错记录
@@ -116,10 +110,7 @@ interface HTTPError {
   tid: string;
   uri: string;
 }
-interface HTTPErrors {
-  processing: boolean;
-  items: HTTPError[];
-  count: number;
+interface HTTPErrors extends IList<HTTPError> {
   flux: string;
 }
 const httpErrors: HTTPErrors = reactive({
@@ -157,10 +148,7 @@ interface Request {
   error: string;
   exception: boolean;
 }
-interface Requests {
-  processing: boolean;
-  items: Request[];
-  count: number;
+interface Requests extends IList<Request> {
   flux: string;
 }
 const requests: Requests = reactive({
@@ -171,23 +159,17 @@ const requests: Requests = reactive({
 });
 
 // request 服务名称
-interface RequestServices {
-  processing: boolean;
-  items: string[];
-}
-const requestServices: RequestServices = reactive({
+const requestServices: IList<string> = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 // RequestRoutes 请求路由
-interface RequestRoutes {
-  processing: boolean;
-  items: string[];
-}
-const requestRoutes: RequestRoutes = reactive({
+const requestRoutes: IList<string> = reactive({
   processing: false,
   items: [],
+  count: -1,
 });
 
 function fillRequestInfo(data: Request) {
@@ -393,12 +375,12 @@ export async function fluxFindOne(params: {
 
 interface ReadonlyFluxState {
   userTrackers: DeepReadonly<UserTrackers>;
-  userTrackerActions: DeepReadonly<UserTrackerActions>;
+  userTrackerActions: DeepReadonly<IList<string>>;
   httpErrors: DeepReadonly<HTTPErrors>;
-  httpErrorCategories: DeepReadonly<HTTPErrorCategories>;
+  httpErrorCategories: DeepReadonly<IList<string>>;
   requests: DeepReadonly<Requests>;
-  requestServices: DeepReadonly<RequestServices>;
-  requestRoutes: DeepReadonly<RequestRoutes>;
+  requestServices: DeepReadonly<IList<string>>;
+  requestRoutes: DeepReadonly<IList<string>>;
 }
 
 const state = {

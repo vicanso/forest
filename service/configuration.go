@@ -58,12 +58,6 @@ type (
 		Name string `json:"name"`
 		Max  int    `json:"max"`
 	}
-
-	// // 当前http请求实例并发限制
-	// currentRequestLimits struct {
-	// 	sync.RWMutex
-	// 	limits map[string]int
-	// }
 )
 
 var (
@@ -97,7 +91,6 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		SignedKeys:        sessionSignedKeys.GetKeys(),
 		RouterConcurrency: routerconcurrency.List(),
 		RouterMock:        routermock.List(),
-		// Limits:            limits,
 	}
 	value := currentLimits.Load()
 	if value != nil {

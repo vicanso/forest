@@ -3,6 +3,7 @@ import { DeepReadonly, reactive, readonly } from "vue";
 import request from "../helpers/request";
 
 import { CONFIGS, CONFIGS_ID, CONFIGS_CURRENT_VALID } from "../constants/url";
+import { IList } from "./interface";
 
 export enum ConfigCategory {
   MockTime = "mockTime",
@@ -38,13 +39,7 @@ export interface Config {
   description?: string;
 }
 
-interface Configs {
-  processing: boolean;
-  current?: Config;
-  items: Config[];
-  count: number;
-}
-const configs: Configs = reactive({
+const configs: IList<Config> = reactive({
   processing: false,
   items: [],
   count: -1,
@@ -142,7 +137,7 @@ export async function configGetCurrentValid(): Promise<
 
 // 仅读配置state
 interface ReadonlyConfigState {
-  configs: DeepReadonly<Configs>;
+  configs: DeepReadonly<IList<Config>>;
 }
 
 const state = {
