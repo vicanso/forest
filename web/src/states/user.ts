@@ -12,7 +12,7 @@ import {
 // @ts-ignore
 import { sha256 } from "../helpers/crypto";
 import request from "../helpers/request";
-import { IList } from "./interface";
+import { IList, IStatus } from "./interface";
 
 const hash = "JT";
 
@@ -37,9 +37,10 @@ const info: UserInfo = reactive({
 });
 
 export interface UserDetailInfo {
+  [key: string]: unknown;
   createdAt: string;
   updatedAt: string;
-  status: number;
+  status: IStatus;
   account: string;
   name: string;
   roles: string[];
@@ -48,13 +49,14 @@ export interface UserDetailInfo {
 }
 
 // 用户账户信息
-interface UserAccount {
+export interface UserAccount {
+  [key: string]: unknown;
   id: number;
   account: string;
   groups: string[];
   roles: string[];
   email: string;
-  status: number;
+  status: IStatus;
   statusDesc: string;
 }
 // 用户账户列表
@@ -64,10 +66,10 @@ const users: IList<UserAccount> = reactive({
   items: [],
 });
 
-const accountStatusDesc = ["启用", "禁用"];
-function fillUserAccountInfo(data: UserAccount) {
-  data.statusDesc = accountStatusDesc[data.status - 1] || "未知";
-}
+// const accountStatusDesc = ["启用", "禁用"];
+// function fillUserAccountInfo(data: UserAccount) {
+// data.statusDesc = accountStatusDesc[data.status - 1] || "未知";
+// }
 function fillUserInfo(data: UserInfo) {
   info.account = data.account;
   info.date = data.date;
@@ -229,7 +231,7 @@ export async function userList(params: {
       users.count = count;
     }
     users.items = data.users || [];
-    users.items.forEach(fillUserAccountInfo);
+    // users.items.forEach(fillUserAccountInfo);
   } finally {
     users.processing = false;
   }

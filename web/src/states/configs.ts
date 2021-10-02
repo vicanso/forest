@@ -3,7 +3,7 @@ import { DeepReadonly, reactive, readonly } from "vue";
 import request from "../helpers/request";
 
 import { CONFIGS, CONFIGS_ID, CONFIGS_CURRENT_VALID } from "../constants/url";
-import { IList } from "./interface";
+import { IList, IStatus } from "./interface";
 
 export enum ConfigCategory {
   MockTime = "mockTime",
@@ -29,7 +29,7 @@ export interface Config {
   id: number;
   createdAt: string;
   updatedAt: string;
-  status: number;
+  status: IStatus;
   name: string;
   category: string;
   owner: string;
@@ -52,7 +52,7 @@ function fillConfigInfo(data: Config) {
 // configAdd
 export async function configAdd(params: {
   name: string;
-  status: number;
+  status: IStatus;
   category: string;
   startedAt: string;
   endedAt: string;

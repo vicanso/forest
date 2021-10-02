@@ -11,12 +11,13 @@ import {
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { defineComponent, onUnmounted, ref } from "vue";
 import ExForm, { FormItemTypes } from "../components/ExForm";
-import ExTable from "../components/ExTable";
+import ExTable, { newLevelValueColumn } from "../components/ExTable";
 import { diff, showError, showWarning } from "../helpers/util";
 import useUserState, {
   userList,
   userListClear,
   userUpdateByID,
+  UserAccount,
 } from "../states/user";
 
 const userRoleClass = css`
@@ -44,10 +45,10 @@ function getColumns(): TableColumn[] {
         return <ul class={userRoleClass}>{arr}</ul>;
       },
     },
-    {
+    newLevelValueColumn({
       title: "状态",
-      key: "statusDesc",
-    },
+      key: "status.desc",
+    }),
     {
       title: "邮箱",
       key: "email",
@@ -105,7 +106,7 @@ function getFilters() {
   ];
 }
 
-function getUpdateFormItems(updatedUser: Record<string, unknown>) {
+function getUpdateFormItems(updatedUser: UserAccount) {
   return [
     {
       name: "账号：",
@@ -117,7 +118,7 @@ function getUpdateFormItems(updatedUser: Record<string, unknown>) {
       name: "状态：",
       key: "status",
       type: FormItemTypes.Select,
-      defaultValue: updatedUser.status,
+      defaultValue: updatedUser.status.value,
       placeholder: "请选择账户状态",
       options: [
         {
@@ -159,7 +160,7 @@ export default defineComponent({
     const message = useMessage();
     const { users, info } = useUserState();
     const mode = ref(listMode);
-    const updatedUser = ref({} as Record<string, unknown>);
+    const updatedUser = ref({} as UserAccount);
     const updating = ref(false);
 
     const fetchUsers = async (params: {
@@ -246,7 +247,7 @@ export default defineComponent({
           <NButton
             bordered={false}
             onClick={() => {
-              this.updatedUser = row as Record<string, unknown>;
+              this.updatedUser = row as UserAccount;
               this.mode = updateMode;
             }}
           >

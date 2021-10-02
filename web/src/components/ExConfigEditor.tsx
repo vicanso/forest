@@ -1,5 +1,6 @@
 import { NCard, NPageHeader, NSpin, useMessage } from "naive-ui";
 import { defineComponent, PropType, ref, Ref } from "vue";
+import { get } from "lodash-es";
 import { showError, showWarning } from "../helpers/util";
 import {
   Config,
@@ -10,6 +11,8 @@ import {
 } from "../states/configs";
 import ExForm, { FormItem, FormItemTypes } from "./ExForm";
 import ExLoading from "./ExLoading";
+
+const statusKey = "status.value";
 
 export function getDefaultFormItems(params: {
   category: string;
@@ -31,7 +34,7 @@ export function getDefaultFormItems(params: {
     },
     {
       name: "状态：",
-      key: "status",
+      key: statusKey,
       type: FormItemTypes.Select,
       placeholder: "请选择配置状态",
       options: [
@@ -76,7 +79,9 @@ function convertDataToConfig(data: Record<string, unknown>): Config {
   }
   return {
     name: data.name,
-    status: data.status,
+    status: {
+      value: get(data, statusKey),
+    },
     category: data.category,
     startedAt: data.startedAt,
     endedAt: data.endedAt,
@@ -93,7 +98,7 @@ function diffConfig(
   if (newConfig.name != current.name) {
     data.name = newConfig.name;
   }
-  if (newConfig.status != current.status) {
+  if (newConfig.status.value != current.status.value) {
     data.status = newConfig.status;
   }
   if (newConfig.category !== current.category) {
@@ -156,7 +161,8 @@ export default defineComponent({
       if (processing.value) {
         return;
       }
-      const { name, category, status, startedAt, endedAt } = data;
+      const { name, category, startedAt, endedAt } = data;
+      const status = get(data, statusKey);
       if (!name || !category || !status || !startedAt || !endedAt) {
         showWarning(
           message,
@@ -223,7 +229,8 @@ export default defineComponent({
             }
             return;
           }
-          item.defaultValue = result[key];
+
+          item.defaultValue = get(result, key);
         });
       } finally {
         processing.value = false;

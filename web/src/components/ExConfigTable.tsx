@@ -3,13 +3,10 @@ import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExTable, {
   newOPColumn,
   newJSONRenderExpand,
+  newLevelValueColumn,
 } from "../components/ExTable";
 import { formatDate } from "../helpers/util";
-import useConfigState, {
-  configList,
-  configListClear,
-  ConfigStatus,
-} from "../states/configs";
+import useConfigState, { configList, configListClear } from "../states/configs";
 
 function getColumns(): TableColumn[] {
   return [
@@ -22,16 +19,10 @@ function getColumns(): TableColumn[] {
       title: "分类",
       key: "category",
     },
-    {
+    newLevelValueColumn({
       title: "状态",
-      key: "status",
-      render(row: Record<string, unknown>) {
-        if (row.status === ConfigStatus.Enabled) {
-          return "启用";
-        }
-        return "禁用";
-      },
-    },
+      key: "status.desc",
+    }),
     {
       title: "创建者",
       key: "owner",
