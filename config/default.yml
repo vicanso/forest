@@ -48,10 +48,7 @@ influxdb:
 
 # mail相关配置
 mail:
-  host: smtp.office365.com
-  port: 587
-  user: tree.xie@outlook.com
-  password: EMAIL_PASS
+  url: smtp://tree.xie@outlook.com:pass@smtp.office365.com:587
 
 # 告警接收邮件列表
 alarm:
