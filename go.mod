@@ -1,6 +1,6 @@
 module github.com/vicanso/forest
 
-go 1.16
+go 1.17
 
 require (
 	entgo.io/ent v0.9.1
@@ -54,4 +54,67 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+)
+
+require (
+	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
+	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/deepmap/oapi-codegen v1.8.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/go-playground/locales v0.14.0 // indirect
+	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
+	github.com/jackc/pgconn v1.10.0 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgproto3/v2 v2.1.1 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
+	github.com/jackc/pgtype v1.8.1 // indirect
+	github.com/json-iterator/go v1.1.11 // indirect
+	github.com/klauspost/compress v1.13.5 // indirect
+	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/mitchellh/go-ps v1.0.0 // indirect
+	github.com/mitchellh/mapstructure v1.4.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/pelletier/go-toml v1.9.3 // indirect
+	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pyroscope-io/dotnetdiag v1.2.1 // indirect
+	github.com/shirou/gopsutil v3.21.4+incompatible // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/afero v1.6.0 // indirect
+	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.8.1 // indirect
+	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/tidwall/match v1.0.3 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
+	github.com/tklauser/numcpus v0.3.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/vicanso/http-trace v1.0.5 // indirect
+	github.com/vicanso/intranet-ip v0.0.1 // indirect
+	github.com/vicanso/keygrip v1.2.1 // indirect
+	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
+	golang.org/x/sys v0.0.0-20210816074244-15123e1e1f71 // indirect
+	golang.org/x/text v0.3.6 // indirect
+	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
