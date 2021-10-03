@@ -83,10 +83,6 @@ const navigationOptions = [
         key: names.requestConcurrencies,
       },
       {
-        label: "Session拦截配置",
-        key: names.sessionInterceptors,
-      },
-      {
         label: "HTTP服务拦截配置",
         key: names.httpServerInterceptors,
       },

@@ -44,14 +44,13 @@ type (
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
-		UpdatedAt          time.Time                        `json:"updatedAt"`
-		MockTime           string                           `json:"mockTime"`
-		IPBlockList        []string                         `json:"ipBlockList"`
-		SignedKeys         []string                         `json:"signedKeys"`
-		RouterConcurrency  map[string]uint32                `json:"routerConcurrency"`
-		RouterMock         map[string]routermock.RouterMock `json:"routerMock"`
-		SessionInterceptor *interceptor.SessionData         `json:"sessionInterceptor"`
-		Limits             map[string]int                   `json:"limits"`
+		UpdatedAt         time.Time                        `json:"updatedAt"`
+		MockTime          string                           `json:"mockTime"`
+		IPBlockList       []string                         `json:"ipBlockList"`
+		SignedKeys        []string                         `json:"signedKeys"`
+		RouterConcurrency map[string]uint32                `json:"routerConcurrency"`
+		RouterMock        map[string]routermock.RouterMock `json:"routerMock"`
+		Limits            map[string]int                   `json:"limits"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
@@ -83,7 +82,6 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 
 // GetCurrentValidConfiguration 获取当前有效配置
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
-	interData, _ := interceptor.GetSessionData()
 	result := &CurrentValidConfiguration{
 		UpdatedAt:         configurationRefreshedAt,
 		MockTime:          util.GetMockTime(),
@@ -96,11 +94,6 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 	if value != nil {
 		limits, _ := value.(map[string]int)
 		result.Limits = limits
-	}
-	// 复制数据，避免对此数据修改
-	if interData != nil {
-		v := *interData
-		result.SessionInterceptor = &v
 	}
 	return result
 }
@@ -130,7 +123,6 @@ func (srv *ConfigurationSrv) Refresh() error {
 	routerConfigs := make([]string, 0)
 	var signedKeys []string
 	blockIPList := make([]string, 0)
-	sessionInterceptorValue := ""
 
 	mailList := make(map[string]string)
 
@@ -155,11 +147,6 @@ func (srv *ConfigurationSrv) Refresh() error {
 			routerConcurrencyConfigs = append(routerConcurrencyConfigs, item.Data)
 		case schema.ConfigurationCategoryRouter:
 			routerConfigs = append(routerConfigs, item.Data)
-		case schema.ConfigurationCategorySessionInterceptor:
-			// 按更新时间排序，因此如果已获取则不需要再更新
-			if sessionInterceptorValue == "" {
-				sessionInterceptorValue = item.Data
-			}
 		case schema.ConfigurationCategoryRequestConcurrency:
 			c := RequestLimitConfiguration{}
 			err := json.Unmarshal([]byte(item.Data), &c)
@@ -177,15 +164,6 @@ func (srv *ConfigurationSrv) Refresh() error {
 		case schema.ConfigurationHTTPServerInterceptor:
 			httpInterceptors = append(httpInterceptors, item.Data)
 		}
-	}
-
-	// 设置session interceptor的拦截信息
-	err = interceptor.UpdateSessionConfig(sessionInterceptorValue)
-	if err != nil {
-		log.Error(context.Background()).
-			Err(err).
-			Msg("session interceptor config is invalid")
-		email.AlarmError(context.Background(), "session interceptor config is invalid:"+err.Error())
 	}
 
 	// 如果未配置mock time，则设置为空

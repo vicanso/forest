@@ -25,7 +25,6 @@ import (
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/helper"
-	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/schema"
@@ -252,35 +251,17 @@ func getIDFromParams(c *elton.Context) (int, error) {
 
 // sessionHandle session的相关处理
 func sessionHandle(c *elton.Context) error {
-	interData, _ := interceptor.GetSessionData()
 
 	us := session.NewUserSession(c)
 	account := ""
 	if us.IsLogin() {
 		account = us.MustGetInfo().Account
 	}
-
 	// 设置账号信息
 	c.WithContext(util.SetAccount(c.Context(), account))
 
-	// 如果无配置，则直接跳过
-	if interData == nil {
-		return c.Next()
-	}
+	return c.Next()
 
-	// 如果配置该账号允许
-	if account != "" && util.ContainsString(interData.AllowAccounts, account) {
-		return c.Next()
-	}
-	// 如果路由配置允许
-	if util.ContainsString(interData.AllowRoutes, c.Route) {
-		return c.Next()
-	}
-
-	// 如果有配置拦截信息，则以出错返回
-	he := hes.New(interData.Message)
-	he.Category = "sessionInterceptorMiddleware"
-	return he
 }
 
 // isIntranet 判断是否内网访问

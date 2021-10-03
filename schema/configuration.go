@@ -31,8 +31,6 @@ const (
 	ConfigurationCategoryRouterConcurrency = "routerConcurrency"
 	// ConfigurationCategoryRouter router分类
 	ConfigurationCategoryRouter = "router"
-	// ConfigurationCategorySessionInterceptor session interceptor分类
-	ConfigurationCategorySessionInterceptor = "sessionInterceptor"
 	// ConfigurationCategoryRequestConcurrency request concurrency
 	ConfigurationCategoryRequestConcurrency = "requestConcurrency"
 	// ConfigurationCategoryEmail 邮箱配置
@@ -68,7 +66,6 @@ func (Configuration) Fields() []ent.Field {
 				ConfigurationCategorySignedKey,
 				ConfigurationCategoryRouterConcurrency,
 				ConfigurationCategoryRouter,
-				ConfigurationCategorySessionInterceptor,
 				ConfigurationCategoryRequestConcurrency,
 				ConfigurationCategoryEmail,
 				ConfigurationHTTPServerInterceptor,

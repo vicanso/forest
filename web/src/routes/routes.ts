@@ -22,7 +22,6 @@ export const names = {
   signedKeys: "signedKeys",
   routerMocks: "routerMocks",
   requestConcurrencies: "requestConcurrencies",
-  sessionInterceptors: "sessionInterceptors",
   caches: "caches",
   emails: "emails",
   httpServerInterceptors: "httpServerInterceptors",
@@ -103,11 +102,6 @@ export const routes: Router[] = [
     path: "/request-concurrencies",
     name: names.requestConcurrencies,
     component: () => import("../views/configurations/RequestConcurrencies"),
-  },
-  {
-    path: "/session-interceptors",
-    name: names.sessionInterceptors,
-    component: () => import("../views/configurations/SessionInterceptors"),
   },
   {
     path: "/caches",
