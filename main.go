@@ -369,9 +369,7 @@ func main() {
 	e.UseWithName(M.NewDefaultResponder(), "responder")
 
 	// 初始化路由
-	for _, g := range router.GetGroups() {
-		e.AddGroup(g)
-	}
+	e.AddGroup(router.GetGroups()...)
 
 	// 初始化路由并发限制配置
 	routerconcurrency.InitLimiter(e.GetRouters())

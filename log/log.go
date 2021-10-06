@@ -106,6 +106,9 @@ func newLogger() *zerolog.Logger {
 }
 
 func fillTraceInfos(ctx context.Context, e *zerolog.Event) *zerolog.Event {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	deviceID := util.GetDeviceID(ctx)
 	if deviceID == "" {
 		return e
