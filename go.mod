@@ -5,7 +5,7 @@ go 1.17
 require (
 	entgo.io/ent v0.9.1
 	github.com/disintegration/imaging v1.6.2
-	github.com/dop251/goja v0.0.0-20210926120033-6e5fa0950d16
+	github.com/dop251/goja v0.0.0-20211011172007-d99e4b8cbf48
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
@@ -13,7 +13,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
-	github.com/google/pprof v0.0.0-20211001005136-7fe48b4c820b // indirect
+	github.com/google/pprof v0.0.0-20211008130755-947d60d73cc0 // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/influxdata/line-protocol v0.0.0-20210922203350-b1ad95c89adf // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.21.9
 	github.com/spf13/cast v1.4.1
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/gjson v1.9.2
+	github.com/tidwall/gjson v1.9.4
 	github.com/vicanso/count-warner v1.2.0
 	github.com/vicanso/elton v1.6.0
 	github.com/vicanso/elton-compress v1.1.1
@@ -40,7 +40,7 @@ require (
 	github.com/vicanso/go-axios v1.3.2
 	github.com/vicanso/go-cache v1.3.0
 	github.com/vicanso/go-gauge v0.0.1
-	github.com/vicanso/go-mask v0.1.0
+	github.com/vicanso/go-mask v0.2.0
 	github.com/vicanso/go-performance v0.4.0
 	github.com/vicanso/hes v0.3.9
 	github.com/vicanso/ips v1.2.1
@@ -50,7 +50,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
-	golang.org/x/net v0.0.0-20211005215030-d2e5035098b3 // indirect
+	golang.org/x/net v0.0.0-20211013171255-e13a2654a71e // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -103,7 +103,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.9.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/tidwall/match v1.1.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
@@ -112,7 +112,7 @@ require (
 	github.com/vicanso/intranet-ip v0.0.1 // indirect
 	github.com/vicanso/keygrip v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef // indirect
+	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
