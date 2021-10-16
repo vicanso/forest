@@ -170,6 +170,7 @@ export default defineComponent({
               type="password"
               placeholder="请输入密码"
               clearable
+              show-password-on="click"
               onUpdateValue={(value) => {
                 model.password = value;
               }}

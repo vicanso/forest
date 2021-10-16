@@ -590,7 +590,7 @@ func (*userCtrl) me(c *elton.Context) error {
 		go func() {
 			// 新的go routine，因此不直接使用c.Context()
 			location, _ := location.GetByIP(context.Background(), ip)
-			if location.IP != "" {
+			if location != nil {
 				fields[cs.FieldCountry] = location.Country
 				fields[cs.FieldProvince] = location.Province
 				fields[cs.FieldCity] = location.City

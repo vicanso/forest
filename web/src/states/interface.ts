@@ -1,7 +1,7 @@
 export interface IList<T> {
   processing: boolean;
   items: T[];
-  count: -1;
+  count: number;
 }
 
 export interface IStatus {

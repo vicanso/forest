@@ -69,7 +69,7 @@ func TestMailConfig(t *testing.T) {
 	assert.Equal("smtp.office365.com", mailConfig.Host)
 	assert.Equal(587, mailConfig.Port)
 	assert.Equal("tree.xie@outlook.com", mailConfig.User)
-	assert.Equal("EMAIL_PASS", mailConfig.Password)
+	assert.Equal("pass", mailConfig.Password)
 }
 
 func TestInfluxdbConfig(t *testing.T) {
