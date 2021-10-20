@@ -85,11 +85,11 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert.False(influxdbConfig.Disabled)
 }
 
-func TestMustGetPostgresConfig(t *testing.T) {
+func TestMustGetBasicConfig(t *testing.T) {
 	assert := assert.New(t)
 
-	postgresConfig := MustGetPostgresConfig()
-	assert.NotNil(postgresConfig.URI)
+	databaseConfig := MustGetDatabaseConfig()
+	assert.NotNil(databaseConfig.URI)
 }
 
 func TestMustGetLocationConfig(t *testing.T) {

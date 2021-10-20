@@ -15,10 +15,11 @@
 package helper
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
-	"net/url"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -26,6 +27,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/iancoleman/strcase"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/rs/zerolog"
@@ -36,12 +38,14 @@ import (
 	"github.com/vicanso/forest/ent/migrate"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/hes"
 	"go.uber.org/atomic"
 )
 
 var (
 	defaultEntDriver, defaultEntClient = mustNewEntClient()
 )
+var databaseConfig = config.MustGetDatabaseConfig()
 var (
 	initSchemaOnce sync.Once
 )
@@ -75,37 +79,51 @@ type EntListParams struct {
 
 var currentEntProcessingStats = new(entProcessingStats)
 
+func getMaskURI(uri string) string {
+	reg := regexp.MustCompile(`://\S+?:(\S+?)@`)
+	result := reg.FindAllStringSubmatch(uri, 1)
+	if len(result) != 1 && len(result[0]) != 2 {
+		return uri
+	}
+	return strings.Replace(uri, result[0][1], "***", 1)
+}
+
+func newClientDB(uri string) (*sql.DB, string, error) {
+	if strings.HasPrefix(uri, "postgres://") {
+		db, err := sql.Open("pgx", uri)
+		return db, dialect.Postgres, err
+	}
+	mysqlPrefix := "mysql://"
+	if strings.HasPrefix(uri, mysqlPrefix) {
+		db, err := sql.Open("mysql", strings.Replace(uri, mysqlPrefix, "", 1))
+		return db, dialect.MySQL, err
+	}
+	return nil, "", hes.New("not support the database")
+}
+
 // mustNewEntClient 初始化客户端与driver
 func mustNewEntClient() (*entsql.Driver, *ent.Client) {
-	postgresConfig := config.MustGetPostgresConfig()
 
-	maskURI := postgresConfig.URI
-	urlInfo, _ := url.Parse(maskURI)
-	if urlInfo != nil {
-		pass, ok := urlInfo.User.Password()
-		if ok {
-			maskURI = strings.ReplaceAll(maskURI, pass, "***")
-		}
-	}
+	maskURI := getMaskURI(databaseConfig.URI)
 	log.Info(context.Background()).
 		Str("uri", maskURI).
-		Msg("connect postgres")
-	db, err := sql.Open("pgx", postgresConfig.URI)
+		Msg("connect databae")
+	db, driverType, err := newClientDB(databaseConfig.URI)
 	if err != nil {
 		panic(err)
 	}
-	if postgresConfig.MaxIdleConns != 0 {
-		db.SetMaxIdleConns(postgresConfig.MaxIdleConns)
+	if databaseConfig.MaxIdleConns != 0 {
+		db.SetMaxIdleConns(databaseConfig.MaxIdleConns)
 	}
-	if postgresConfig.MaxOpenConns != 0 {
-		db.SetMaxOpenConns(postgresConfig.MaxOpenConns)
+	if databaseConfig.MaxOpenConns != 0 {
+		db.SetMaxOpenConns(databaseConfig.MaxOpenConns)
 	}
-	if postgresConfig.MaxIdleTime != 0 {
-		db.SetConnMaxIdleTime(postgresConfig.MaxIdleTime)
+	if databaseConfig.MaxIdleTime != 0 {
+		db.SetConnMaxIdleTime(databaseConfig.MaxIdleTime)
 	}
 
 	// Create an ent.Driver from `db`.
-	driver := entsql.OpenDB(dialect.Postgres, db)
+	driver := entsql.OpenDB(driverType, db)
 	entLogger := log.NewEntLogger()
 	c := ent.NewClient(ent.Driver(driver), ent.Log(entLogger.Log))
 
@@ -328,8 +346,15 @@ func EntPing() error {
 func EntInitSchema() error {
 	var err error
 	initSchemaOnce.Do(func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		// defer cancel()
+		ctx := context.Background()
+		w := bytes.Buffer{}
+		_ = defaultEntClient.Schema.WriteTo(context.Background(), &w)
+		log.Info(ctx).
+			Str("category", "migrate").
+			Msg(w.String())
+
 		err = defaultEntClient.Schema.Create(ctx)
 	})
 	return err
