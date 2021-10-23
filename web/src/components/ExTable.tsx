@@ -17,6 +17,7 @@ import {
 } from "naive-ui";
 import { EditRegular } from "@vicons/fa";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { Value } from "naive-ui/lib/select/src/interface";
 import { Component, defineComponent, onMounted, ref, PropType } from "vue";
 import { css } from "@linaria/core";
 import { padding } from "../constants/style";
@@ -272,6 +273,7 @@ export default defineComponent({
             <NSelect
               filterable
               size={size}
+              defaultValue={filterItem.defaultValue as Value}
               options={filterItem.options || []}
               placeholder={filterItem.placeholder}
               onUpdateValue={(value) => {
@@ -286,6 +288,7 @@ export default defineComponent({
               class="widthFull"
               size={size}
               placeholder={filterItem.placeholder}
+              defaultValue={filterItem.defaultValue as number}
               onUpdate:value={(value) => {
                 filterParams[filterItem.key] = value;
               }}
@@ -331,6 +334,7 @@ export default defineComponent({
             <NInput
               clearable
               size={size}
+              defaultValue={filterItem.defaultValue as string}
               placeholder={filterItem.placeholder}
               onUpdateValue={(value) => {
                 filterParams[filterItem.key] = value.trim();
