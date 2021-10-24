@@ -69,7 +69,7 @@ jobs:
       run: make test
       env:
         GO_ENV: test
-        POSTGRES_URI: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+        DATABASE_URI: postgres://postgres:postgres@127.0.0.1:5432/postgres
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
