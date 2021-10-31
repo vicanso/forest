@@ -1,6 +1,13 @@
-import { NCard, NPageHeader, NSpin, useMessage } from "naive-ui";
+import {
+  NCard,
+  NPageHeader,
+  NSpin,
+  useMessage,
+  FormRules,
+  FormItemRule,
+} from "naive-ui";
 import { defineComponent, PropType, ref, Ref } from "vue";
-import { get } from "lodash-es";
+import { get, isObject } from "lodash-es";
 import { showError, showWarning } from "../helpers/util";
 import {
   Config,
@@ -14,6 +21,14 @@ import ExLoading from "./ExLoading";
 
 const statusKey = "status.value";
 
+export enum FormItemKey {
+  name = "name",
+  category = "category",
+  status = "status",
+  startedAt = "startedAt",
+  endedAt = "endedAt",
+}
+
 export function getDefaultFormItems(params: {
   category: string;
   name?: string;
@@ -21,14 +36,14 @@ export function getDefaultFormItems(params: {
   return [
     {
       name: "名称：",
-      key: "name",
+      key: FormItemKey.name,
       disabled: params.name != null,
       defaultValue: params.name,
       placeholder: "请输入配置名称",
     },
     {
       name: "分类：",
-      key: "category",
+      key: FormItemKey.category,
       disabled: true,
       defaultValue: params.category,
     },
@@ -50,23 +65,60 @@ export function getDefaultFormItems(params: {
     },
     {
       name: "开始时间：",
-      key: "startedAt",
+      key: FormItemKey.startedAt,
       type: FormItemTypes.DateTime,
       placeholder: "请选择配置生效开始时间",
     },
     {
       name: "结束时间：",
-      key: "endedAt",
+      key: FormItemKey.endedAt,
       type: FormItemTypes.DateTime,
       placeholder: "请选择配置生效结束时间",
     },
   ];
 }
 
+export function newRequireRule(message: string): FormItemRule {
+  return {
+    required: true,
+    message: message,
+    trigger: "blur",
+  };
+}
+
+export function getDefaultFormRules(extra?: FormRules): FormRules {
+  const defaultRules: FormRules = {
+    [FormItemKey.name]: newRequireRule("配置名称不能为空"),
+    [FormItemKey.category]: newRequireRule("配置分类不能为空"),
+    [FormItemKey.status]: {
+      value: {
+        required: true,
+        message: "配置状态不能为空",
+        trigger: "blur",
+        validator(rule, value) {
+          if (!value) {
+            return false;
+          }
+          return true;
+        },
+      },
+    },
+    [FormItemKey.startedAt]: newRequireRule("配置生效开始时间不能为空"),
+    [FormItemKey.endedAt]: newRequireRule("配置生效结束时间不能为空"),
+  };
+  if (!extra) {
+    return defaultRules;
+  }
+  return Object.assign(defaultRules, extra);
+}
+
 function convertDataToConfig(data: Record<string, unknown>): Config {
   // 转换配置数据
   const dataKeyPrefix = "data.";
   const configData: Record<string, unknown> = {};
+  if (isObject(data.data)) {
+    Object.assign(configData, data.data);
+  }
   Object.keys(data).forEach((key) => {
     if (!key.startsWith(dataKeyPrefix)) {
       return;
@@ -149,6 +201,10 @@ export default defineComponent({
     onBack: {
       type: Function as PropType<() => void>,
       default: noop,
+    },
+    rules: {
+      type: Object as PropType<FormRules>,
+      default: null,
     },
   },
   setup(props) {
@@ -248,7 +304,7 @@ export default defineComponent({
     };
   },
   render() {
-    const { title, description, id, onBack } = this.$props;
+    const { title, description, id, onBack, rules } = this.$props;
     const { onSubmit, processing, items, currentConfig } = this;
     // 如果指定了id，则展示加载中
     if (processing && id && !currentConfig.id) {
@@ -264,6 +320,7 @@ export default defineComponent({
           >
             <ExForm
               formItems={items}
+              rules={rules}
               onSubmit={onSubmit}
               submitText={id !== 0 ? "更新" : "添加"}
             />

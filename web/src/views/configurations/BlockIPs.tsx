@@ -1,6 +1,7 @@
 import { defineComponent } from "vue";
 import ExConfigEditorList from "../../components/ExConfigEditorList";
 import { ConfigCategory } from "../../states/configs";
+import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
   name: "Configs",
@@ -12,6 +13,9 @@ export default defineComponent({
         placeholder: "请输入IP地址或网段",
       },
     ];
+    const rules = getDefaultFormRules({
+      data: newRequireRule("IP地址或网段不能为空"),
+    });
     return (
       <ExConfigEditorList
         listTitle="黑名单IP配置"
@@ -19,6 +23,7 @@ export default defineComponent({
         editorDescription="用于拦截访问IP"
         category={ConfigCategory.BlockIP}
         extraFormItems={extraFormItems}
+        rules={rules}
       />
     );
   },

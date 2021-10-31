@@ -6,6 +6,7 @@ import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
 import useCommonState, { commonListRequestInstance } from "../../states/common";
 import { ConfigCategory } from "../../states/configs";
+import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
   name: "RequestCOncurrencies",
@@ -56,6 +57,20 @@ export default defineComponent({
         placeholder: "请输入并发限制",
       },
     ];
+    const rules = getDefaultFormRules({
+      "data.name": newRequireRule("服务实例不能为空"),
+      "data.max": {
+        required: true,
+        message: "并发限制不能为空",
+        trigger: "blur",
+        validator(rule, value) {
+          if (!value) {
+            return false;
+          }
+          return true;
+        },
+      }
+    });
 
     return (
       <ExConfigEditorList
@@ -64,6 +79,7 @@ export default defineComponent({
         editorDescription="设置各HTTP请求实例的并发请求数"
         category={ConfigCategory.RequestConcurrency}
         extraFormItems={extraFormItems}
+        rules={rules}
       />
     );
   },

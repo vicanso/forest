@@ -2,6 +2,7 @@ import { defineComponent } from "vue";
 import ExConfigEditorList from "../../components/ExConfigEditorList";
 import { ConfigCategory } from "../../states/configs";
 import { FormItem, FormItemTypes } from "../../components/ExForm";
+import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
   name: "Emails",
@@ -15,6 +16,9 @@ export default defineComponent({
         placeholder: "请输入邮箱地址，多个地址以,分隔",
       },
     ];
+    const rules = getDefaultFormRules({
+      "data": newRequireRule("邮箱地址不能为空"),
+    });
     return (
       <ExConfigEditorList
         listTitle="邮箱地址配置"
@@ -22,6 +26,7 @@ export default defineComponent({
         editorDescription="配置各类邮件接收列表"
         category={ConfigCategory.Email}
         extraFormItems={extraFormItems}
+        rules={rules}
       />
     );
   },

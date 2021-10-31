@@ -7,6 +7,7 @@ import ExLoading from "../../components/ExLoading";
 import { FormItemTypes, FormItem } from "../../components/ExForm";
 import ExConfigEditorList from "../../components/ExConfigEditorList";
 import { ConfigCategory } from "../../states/configs";
+import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
   name: "HTTPServerInterceptors",
@@ -60,6 +61,9 @@ export default defineComponent({
         placeholder: "请输入请求处理后的相关处理脚本",
       },
     ];
+    const rules = getDefaultFormRules({
+      "data.router": newRequireRule("路由不能为空"),
+    });
     return (
       <ExConfigEditorList
         listTitle="HTTP服务拦截配置"
@@ -67,6 +71,7 @@ export default defineComponent({
         editorDescription="设置HTTP服务各路由的拦截配置"
         category={ConfigCategory.HTTPServerInterceptor}
         extraFormItems={extraFormItems}
+        rules={rules}
       />
     );
   },

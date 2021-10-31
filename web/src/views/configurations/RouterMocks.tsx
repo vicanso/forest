@@ -6,6 +6,7 @@ import useCommonState, { commonListRouter } from "../../states/common";
 import { useMessage } from "naive-ui";
 import { showError } from "../../helpers/util";
 import ExLoading from "../../components/ExLoading";
+import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
   name: "RouterMocks",
@@ -92,6 +93,22 @@ export default defineComponent({
         placeholder: "请输入响应数据",
       },
     ];
+    const rules = getDefaultFormRules({
+      "data.router": newRequireRule("路由不能为空"),
+      "data.status": {
+        required: true,
+        message: "配置状态不能为空",
+        trigger: "blur",
+        validator(rule, value) {
+          if (!value) {
+            return false;
+          }
+          return true;
+        },
+      },
+      "data.contentType": newRequireRule("响应类型不能为空"),
+      "data.response": newRequireRule("响应数据不能为空"),
+    });
     return (
       <ExConfigEditorList
         listTitle="路由Mock配置"
@@ -99,6 +116,7 @@ export default defineComponent({
         editorDescription="设置各路由的Mock响应"
         category={ConfigCategory.Router}
         extraFormItems={extraFormItems}
+        rules={rules}
       />
     );
   },

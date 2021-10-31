@@ -2,6 +2,8 @@ import { useMessage } from "naive-ui";
 import { defineComponent, ref } from "vue";
 import ExConfigEditor, {
   getDefaultFormItems,
+  getDefaultFormRules,
+  newRequireRule,
 } from "../../components/ExConfigEditor";
 import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
@@ -49,12 +51,16 @@ export default defineComponent({
       type: "datetime",
       placeholder: "请选择要Mock的时间",
     });
+    const rules = getDefaultFormRules({
+      data: newRequireRule("Mock时间不能为空"),
+    });
     return (
       <ExConfigEditor
         id={id}
         title="添加/更新MockTime配置"
         description="针对应用时间Mock，用于测试环境中调整应用时间"
         formItems={formItems}
+        rules={rules}
       />
     );
   },

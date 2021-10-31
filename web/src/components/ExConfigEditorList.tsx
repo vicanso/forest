@@ -1,6 +1,6 @@
 // 配置的列表展示与更新
 
-import { NButton, NCard } from "naive-ui";
+import { NButton, NCard, FormRules } from "naive-ui";
 import { css } from "@linaria/core";
 import { defineComponent, PropType, ref } from "vue";
 import { padding } from "../constants/style";
@@ -37,6 +37,10 @@ export default defineComponent({
       type: Array as PropType<FormItem[]>,
       default: () => [],
     },
+    rules: {
+      type: Object as PropType<FormRules>,
+      default: null,
+    },
   },
   setup() {
     const mode = ref(Mode.List);
@@ -57,6 +61,7 @@ export default defineComponent({
       category,
       editorDescription,
       extraFormItems,
+      rules,
     } = this.$props;
     const { mode, toggle, updatedID } = this;
     if (mode === Mode.List) {
@@ -103,6 +108,7 @@ export default defineComponent({
         onBack={() => {
           toggle(Mode.List);
         }}
+        rules={rules}
       ></ExConfigEditor>
     );
   },
