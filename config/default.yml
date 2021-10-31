@@ -40,7 +40,7 @@ influxdb:
   uri: http://127.0.0.1:8086
   bucket: forest 
   org: bigTree
-  token: YcAmMWPl0XR_OKJYNIozsiBI0qBGIe4-Y_rWKUcNbQ8sYobWFrsMCgY_t0FRlpAMkVNgghhcQ1TgDixt92Qe6w==
+  token: Hv6UxCWbj1Vp-W7NHqa3HS5ph5iowx1AedA6Po3NtlbyYcjZxuLYhSkqkv178etsJijLUooRtSOJi0NLi_irZA==
   # batchSize: 100
   # flushInterval: 10s
   # 如果与influxdb非同一内网，建议设置为true
