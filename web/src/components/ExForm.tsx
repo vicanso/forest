@@ -103,14 +103,12 @@ export default defineComponent({
   render() {
     const { submitText, rules } = this.$props;
     const { params, handleSubmit } = this;
-    const size = "large";
     const createSelect = (item: FormItem, multiple: boolean) => {
       return (
         <NSelect
           filterable
           multiple={multiple}
           defaultValue={item.defaultValue as Value}
-          size={size}
           options={item.options || []}
           placeholder={item.placeholder}
           onUpdateValue={(value) => {
@@ -142,7 +140,6 @@ export default defineComponent({
               <NDatePicker
                 type="datetime"
                 class="widthFull"
-                size={size}
                 placeholder={item.placeholder}
                 defaultValue={defaultValue}
                 clearable
@@ -163,7 +160,6 @@ export default defineComponent({
               <NInputNumber
                 class="widthFull"
                 disabled={item.disabled || false}
-                size={size}
                 placeholder={item.placeholder}
                 defaultValue={(item.defaultValue || null) as number}
                 onUpdate:value={(value) => {
@@ -183,7 +179,6 @@ export default defineComponent({
                   maxRows: 5,
                 }}
                 disabled={item.disabled || false}
-                size={size}
                 placeholder={item.placeholder}
                 defaultValue={(item.defaultValue || "") as string}
                 onUpdateValue={(value) => {
@@ -198,7 +193,6 @@ export default defineComponent({
           component = (
             <NInput
               disabled={item.disabled || false}
-              size={size}
               placeholder={item.placeholder}
               defaultValue={(item.defaultValue || "") as string}
               onUpdateValue={(value) => {
@@ -219,17 +213,21 @@ export default defineComponent({
     });
     arr.push(
       <NGridItem span={24}>
-        <NButton
-          size={size}
-          class="widthFull"
-          onClick={() => handleSubmit(params)}
-        >
-          {submitText}
-        </NButton>
+        <NFormItem>
+          <NButton class="widthFull" onClick={() => handleSubmit(params)}>
+            {submitText}
+          </NButton>
+        </NFormItem>
       </NGridItem>
     );
     return (
-      <NForm labelPlacement="left" rules={rules} model={params} ref="formRef">
+      <NForm
+        labelPlacement="left"
+        rules={rules}
+        model={params}
+        ref="formRef"
+        size="large"
+      >
         <NGrid xGap={24}>{arr}</NGrid>
       </NForm>
     );

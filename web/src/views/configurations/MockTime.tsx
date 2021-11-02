@@ -5,6 +5,7 @@ import ExConfigEditor, {
   getDefaultFormRules,
   newRequireRule,
 } from "../../components/ExConfigEditor";
+import { FormItemTypes } from "../../components/ExForm";
 import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
 import { ConfigCategory, configGetMockTime } from "../../states/configs";
@@ -48,7 +49,7 @@ export default defineComponent({
     formItems.push({
       name: "时间配置：",
       key: "data",
-      type: "datetime",
+      type: FormItemTypes.DateTime,
       placeholder: "请选择要Mock的时间",
     });
     const rules = getDefaultFormRules({

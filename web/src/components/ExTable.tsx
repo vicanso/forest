@@ -306,6 +306,15 @@ export default defineComponent({
               }
             });
           }
+          let startPlaceholder = filterItem.placeholder;
+          let endPlaceholder = filterItem.placeholder;
+          if (filterItem.placeholder) {
+            const arr = filterItem.placeholder.split(":");
+            if (arr.length === 2) {
+              startPlaceholder = arr[0];
+              endPlaceholder = arr[1];
+            }
+          }
           component = (
             <NDatePicker
               class="widthFull"
@@ -314,6 +323,8 @@ export default defineComponent({
               defaultValue={defaultValue}
               ranges={ranges}
               type="daterange"
+              startPlaceholder={startPlaceholder}
+              endPlaceholder={endPlaceholder}
               clearable
               onUpdateValue={(value) => {
                 const arr = filterItem.key.split(":");
