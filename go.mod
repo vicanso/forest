@@ -14,7 +14,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
-	github.com/google/pprof v0.0.0-20211008130755-947d60d73cc0 // indirect
+	github.com/google/pprof v0.0.0-20211108044417-e9b028704de0 // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/influxdata/line-protocol v0.0.0-20210922203350-b1ad95c89adf // indirect
@@ -26,11 +26,11 @@ require (
 	github.com/minio/minio-go/v7 v7.0.15
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mozillazg/go-pinyin v0.18.0
-	github.com/pyroscope-io/pyroscope v0.2.2
+	github.com/pyroscope-io/pyroscope v0.2.5
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.3.0
-	github.com/rs/zerolog v1.25.0
-	github.com/shirou/gopsutil/v3 v3.21.9
+	github.com/rs/zerolog v1.26.0
+	github.com/shirou/gopsutil/v3 v3.21.10
 	github.com/spf13/cast v1.4.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.11.0
@@ -41,7 +41,7 @@ require (
 	github.com/vicanso/go-axios v1.3.2
 	github.com/vicanso/go-cache v1.4.0
 	github.com/vicanso/go-gauge v0.0.1
-	github.com/vicanso/go-mask v0.2.0
+	github.com/vicanso/go-mask v0.3.0
 	github.com/vicanso/go-performance v0.4.0
 	github.com/vicanso/hes v0.3.9
 	github.com/vicanso/ips v1.2.1
@@ -51,7 +51,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
-	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -61,10 +61,10 @@ require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
-	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deepmap/oapi-codegen v1.8.3 // indirect
+	github.com/deepmap/oapi-codegen v1.9.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -86,6 +86,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
@@ -97,7 +98,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pyroscope-io/dotnetdiag v1.2.1 // indirect
-	github.com/shirou/gopsutil v3.21.9+incompatible // indirect
+	github.com/shirou/gopsutil v3.21.10+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -112,10 +113,10 @@ require (
 	github.com/vicanso/http-trace v1.0.6 // indirect
 	github.com/vicanso/intranet-ip v0.0.1 // indirect
 	github.com/vicanso/keygrip v1.2.1 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/sys v0.0.0-20211030160813-b3129d9d1021 // indirect
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa // indirect
+	golang.org/x/sys v0.0.0-20211113001501-0c823b97ae02 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
+	gopkg.in/ini.v1 v1.64.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

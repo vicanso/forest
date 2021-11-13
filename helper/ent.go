@@ -29,6 +29,8 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/iancoleman/strcase"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/rs/zerolog"
 	"github.com/vicanso/forest/config"
@@ -88,9 +90,33 @@ func getMaskURI(uri string) string {
 	return strings.Replace(uri, result[0][1], "***", 1)
 }
 
+func pgOnBeforeConnect(ctx context.Context, config *pgx.ConnConfig) error {
+	log.Info(ctx).
+		Str("category", "pgEvent").
+		Str("host", config.Host).
+		Msg("pg connectting")
+	return nil
+}
+
+func pgOnAfterConnect(ctx context.Context, conn *pgx.Conn) error {
+	log.Info(ctx).
+		Str("category", "pgEvent").
+		Str("host", conn.Config().Host).
+		Msg("pg connected")
+	return nil
+}
+
 func newClientDB(uri string) (*sql.DB, string, error) {
 	if strings.HasPrefix(uri, "postgres://") {
-		db, err := sql.Open("pgx", uri)
+		config, err := pgx.ParseConfig(uri)
+		if err != nil {
+			return nil, "", err
+		}
+		db := stdlib.OpenDB(
+			*config,
+			stdlib.OptionBeforeConnect(pgOnBeforeConnect),
+			stdlib.OptionAfterConnect(pgOnAfterConnect),
+		)
 		return db, dialect.Postgres, err
 	}
 	mysqlPrefix := "mysql://"
