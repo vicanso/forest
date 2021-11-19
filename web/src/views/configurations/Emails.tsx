@@ -5,7 +5,7 @@ import { FormItem, FormItemTypes } from "../../components/ExForm";
 import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
-  name: "Emails",
+  name: "EmailConfigs",
   render() {
     const extraFormItems: FormItem[] = [
       {

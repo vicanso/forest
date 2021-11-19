@@ -9,7 +9,7 @@ import ExLoading from "../../components/ExLoading";
 import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
-  name: "RouterMocks",
+  name: "RouterMockConfigs",
   setup() {
     const { routers } = useCommonState();
     const message = useMessage();

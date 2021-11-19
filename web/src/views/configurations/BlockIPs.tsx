@@ -4,7 +4,7 @@ import { ConfigCategory } from "../../states/configs";
 import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
-  name: "Configs",
+  name: "BlockIPConfigs",
   render() {
     const extraFormItems = [
       {

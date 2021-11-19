@@ -1,4 +1,4 @@
-FROM node:14-alpine as webbuilder
+FROM node:16-alpine as webbuilder
 
 COPY . /forest
 RUN cd /forest/web \

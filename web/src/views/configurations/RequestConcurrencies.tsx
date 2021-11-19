@@ -9,7 +9,7 @@ import { ConfigCategory } from "../../states/configs";
 import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
-  name: "RequestCOncurrencies",
+  name: "RequestConcurrencyConfigs",
   setup() {
     const { requestInstances } = useCommonState();
     const message = useMessage();

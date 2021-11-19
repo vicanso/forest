@@ -10,7 +10,7 @@ import { ConfigCategory } from "../../states/configs";
 import { getDefaultFormRules, newRequireRule } from "../../components/ExConfigEditor";
 
 export default defineComponent({
-  name: "HTTPServerInterceptors",
+  name: "HTTPServerInterceptorConfigs",
   setup() {
     const message = useMessage();
     const { routers } = useCommonState();

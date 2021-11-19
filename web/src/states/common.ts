@@ -72,6 +72,11 @@ export function commonGetSettings(): void {
   const data = settingStorage.getData();
   if (data.theme) {
     settings.theme = data.theme as string;
+  } else if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: light)").matches
+  ) {
+    settings.theme = "light";
   }
   settings.collapsed = data.collapsed as boolean;
 }

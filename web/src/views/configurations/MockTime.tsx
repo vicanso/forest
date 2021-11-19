@@ -11,7 +11,7 @@ import { showError } from "../../helpers/util";
 import { ConfigCategory, configGetMockTime } from "../../states/configs";
 
 export default defineComponent({
-  name: "MockTime",
+  name: "MockTimeConfigs",
   setup() {
     const message = useMessage();
     const id = ref(0);

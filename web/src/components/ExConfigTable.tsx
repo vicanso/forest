@@ -57,7 +57,7 @@ function noop(): void {
 }
 
 export default defineComponent({
-  name: "Configs",
+  name: "ConfigTable",
   props: {
     title: {
       type: String,
