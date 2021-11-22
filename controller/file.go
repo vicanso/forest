@@ -17,10 +17,9 @@ package controller
 import (
 	"strings"
 
-	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/router"
-	"github.com/vicanso/forest/service"
+	"github.com/vicanso/forest/storage"
 	"github.com/vicanso/forest/util"
 )
 
@@ -74,24 +73,20 @@ func (*fileCtrl) upload(c *elton.Context) error {
 	contentType := header.Header.Get("Content-Type")
 	fileType := strings.Split(contentType, "/")[1]
 	name := util.GenXID() + "." + fileType
-	info, err := fileSrv.Upload(c.Context(), service.UploadParams{
-		Bucket: params.Bucket,
-		Name:   name,
-		Reader: file,
-		Size:   header.Size,
-		Opts: minio.PutObjectOptions{
-			ContentType: contentType,
-			UserTags: map[string]string{
-				"account": us.MustGetInfo().Account,
-			},
-		},
+	err = storage.Minio().Put(c.Context(), storage.File{
+		Bucket:      params.Bucket,
+		Filename:    name,
+		ContentType: contentType,
+		Size:        header.Size,
+		Creator:     us.MustGetInfo().Account,
 	})
 	if err != nil {
 		return err
 	}
+
 	c.Body = &fileUploadResp{
-		Name: info.Key,
-		Size: info.Size,
+		Name: name,
+		Size: header.Size,
 	}
 	return nil
 }

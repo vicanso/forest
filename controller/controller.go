@@ -73,8 +73,6 @@ var (
 	GetInfluxDB = helper.GetInfluxDB
 	// 获取influx service
 	GetInfluxSrv = service.GetInfluxSrv
-	// 文件服务
-	fileSrv = &service.FileSrv{}
 )
 
 type (

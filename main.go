@@ -194,18 +194,14 @@ func newOnErrorHandler(e *elton.Elton) {
 	e.OnError(func(c *elton.Context, err error) {
 		he := hes.Wrap(err)
 
-		if he.Extra == nil {
-			he.Extra = make(map[string]interface{})
-		}
 		stack := util.GetStack(5)
 		if len(stack) != 0 {
 			stack = stack[1:]
 		}
 		ip := c.RealIP()
 		uri := c.Request.RequestURI
-
-		he.Extra["route"] = c.Route
-		he.Extra["uri"] = uri
+		he.AddExtra("route", c.Route)
+		he.AddExtra("uri", uri)
 
 		// 记录exception
 		service.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{

@@ -49,9 +49,6 @@ func NewError() elton.Handler {
 		if he.StatusCode == 0 {
 			he.StatusCode = http.StatusInternalServerError
 		}
-		if he.Extra == nil {
-			he.Extra = make(map[string]interface{})
-		}
 		account := ""
 		tid := util.GetDeviceID(c.Context())
 		us := session.NewUserSession(c)
@@ -72,7 +69,7 @@ func NewError() elton.Handler {
 
 		sid := util.GetSessionID(c)
 
-		he.Extra["route"] = c.Route
+		he.AddExtra("route", c.Route)
 		// 记录用户相关信息
 		fields := map[string]interface{}{
 			cs.FieldStatus:    he.StatusCode,

@@ -4,8 +4,7 @@ go 1.17
 
 require (
 	entgo.io/ent v0.9.1
-	github.com/disintegration/imaging v1.6.2
-	github.com/dop251/goja v0.0.0-20211115154819-26ebff68a7d5
+	github.com/dop251/goja v0.0.0-20211121151210-cc28e89bfc81
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
@@ -14,7 +13,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
-	github.com/google/pprof v0.0.0-20211108044417-e9b028704de0 // indirect
+	github.com/google/pprof v0.0.0-20211122080402-44fc4e887b6b // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/influxdata/line-protocol v0.0.0-20210922203350-b1ad95c89adf // indirect
@@ -35,17 +34,17 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.11.0
 	github.com/vicanso/count-warner v1.2.0
-	github.com/vicanso/elton v1.7.0
+	github.com/vicanso/elton v1.8.0
 	github.com/vicanso/elton-compress v1.2.1
-	github.com/vicanso/elton-session v1.2.2
+	github.com/vicanso/elton-session v1.2.3
 	github.com/vicanso/go-axios v1.3.2
-	github.com/vicanso/go-cache v1.4.0
+	github.com/vicanso/go-cache v1.4.1
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v0.3.0
 	github.com/vicanso/go-performance v0.4.0
-	github.com/vicanso/hes v0.3.9
+	github.com/vicanso/hes v0.4.1
 	github.com/vicanso/ips v1.2.1
-	github.com/vicanso/lru-ttl v1.3.1
+	github.com/vicanso/lru-ttl v1.3.2
 	github.com/vicanso/viperx v0.2.0
 	go.uber.org/atomic v1.9.0
 	go.uber.org/automaxprocs v1.4.0
@@ -77,12 +76,12 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.10.0 // indirect
+	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgproto3/v2 v2.1.1 // indirect
+	github.com/jackc/pgproto3/v2 v2.2.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/pgtype v1.8.1 // indirect
+	github.com/jackc/pgtype v1.9.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect

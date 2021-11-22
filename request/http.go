@@ -170,10 +170,6 @@ func newOnError(serviceName string) axios.OnError {
 			he.StatusCode = http.StatusInternalServerError
 		}
 
-		if he.Extra == nil {
-			he.Extra = make(map[string]interface{})
-		}
-
 		// 如果为空，则通过error获取
 		if he.Category == "" {
 			he.Category = axios.GetInternalErrorCategory(err)
@@ -185,9 +181,9 @@ func newOnError(serviceName string) axios.OnError {
 		}
 
 		if !util.IsProduction() {
-			he.Extra["requestRoute"] = conf.Route
-			he.Extra["requestService"] = serviceName
-			he.Extra["requestCURL"] = conf.CURL()
+			he.AddExtra("requestRoute", conf.Route)
+			he.AddExtra("requestService", serviceName)
+			he.AddExtra("requestCURL", conf.CURL())
 		}
 		return he
 	}
