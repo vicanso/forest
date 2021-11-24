@@ -65,8 +65,8 @@ func (m *minioStorage) Get(ctx context.Context, bucket, filename string) (*File,
 		ContentType: statsInfo.ContentType,
 		Size:        statsInfo.Size,
 		Metadata:    statsInfo.Metadata,
-		// Creator:     statsInfo.Owner.DisplayName,
-		Data: data,
+		Creator:     statsInfo.Metadata.Get(creatorField),
+		Data:        data,
 	}, nil
 }
 
@@ -82,6 +82,7 @@ func (m *minioStorage) Put(ctx context.Context, file File) error {
 	for key, values := range file.Metadata {
 		metadata[key] = strings.Join(values, ",")
 	}
+	metadata[creatorField] = file.Creator
 
 	_, err = m.client.PutObject(
 		ctx,

@@ -61,8 +61,10 @@ redis模块记录了当前并发请求以及pipeline请求量，可以设置最�
 
 ## entc
 
+编译schema对应代码
+
 ```bash
-go get entgo.io/ent/cmd/entc
+make install && make generate
 ```
 
 

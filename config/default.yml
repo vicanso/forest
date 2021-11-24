@@ -31,21 +31,14 @@ redis:
 # database配置
 database:
   # 可以配置为下面的形式，则从env中获取DATABASE_URI对应的字符串来当database连接串
-  # uri: DATABASE_URI
+  # 或者直接env中指定DATABASE_URI
   # uri: mysql://root:pass@tcp(127.0.0.1:3306)/forest?timeout=30s&parseTime=true&maxIdleConns=5&maxIdleTime=30m&maxOpenConns=100
   uri: postgres://vicanso:A123456@127.0.0.1:5432/forest?maxIdleConns=5&maxIdleTime=30m&maxOpenConns=100
 
 # influxdb 配置
 influxdb:
-  uri: http://127.0.0.1:8086
-  bucket: forest 
-  org: bigTree
-  token: Hv6UxCWbj1Vp-W7NHqa3HS5ph5iowx1AedA6Po3NtlbyYcjZxuLYhSkqkv178etsJijLUooRtSOJi0NLi_irZA==
-  # batchSize: 100
-  # flushInterval: 10s
-  # 如果与influxdb非同一内网，建议设置为true
-  gzip: false
-  disabled: false 
+  # 如果与influxdb非同一内网，建议设置为gzip=true
+  uri: http://127.0.0.1:8086/?bucket=forest&org=bigTree&token=Hv6UxCWbj1Vp-W7NHqa3HS5ph5iowx1AedA6Po3NtlbyYcjZxuLYhSkqkv178etsJijLUooRtSOJi0NLi_irZA==&batchSize=100&flushInterval=10s&gzip=false&disabled=false
 
 # mail相关配置
 mail:
@@ -63,10 +56,7 @@ location:
 
 # minio配置
 minio:
-  endpoint: 127.0.0.1:9000
-  accessKeyID: origin 
-  secretAccessKey: test123456
-  ssl: false
+  uri: minio://127.0.0.1:9000/?accessKeyID=origin&secretAccessKey=test123456&ssl=false
 
 # pyroscope配置
 pyroscope:

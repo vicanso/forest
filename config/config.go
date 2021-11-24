@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cast"
 	"github.com/vicanso/forest/validate"
 	"github.com/vicanso/viperx"
 )
@@ -205,7 +206,7 @@ func MustGetBasicConfig() *BasicConfig {
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
 		Prefixes:     defaultViperX.GetStringSlice(prefix + "prefixes"),
-		Timeout:      defaultViperX.GetDuration(prefix + "timeout"),
+		Timeout:      defaultViperX.GetDurationFromENV(prefix + "timeout"),
 	}
 	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
 	pwd, _ := os.Getwd()
@@ -221,7 +222,7 @@ func MustGetBasicConfig() *BasicConfig {
 func MustGetSessionConfig() *SessionConfig {
 	prefix := "session."
 	sessConfig := &SessionConfig{
-		TTL:        defaultViperX.GetDuration(prefix + "ttl"),
+		TTL:        defaultViperX.GetDurationFromENV(prefix + "ttl"),
 		Key:        defaultViperX.GetString(prefix + "key"),
 		CookiePath: defaultViperX.GetString(prefix + "path"),
 		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
@@ -295,13 +296,17 @@ func MustGetDatabaseConfig() *DatabaseConfig {
 	arr := strings.Split(uri, "?")
 	if len(arr) == 2 {
 		query, _ := url.ParseQuery(arr[1])
-		maxIdleConns, _ = strconv.Atoi(query.Get("maxIdleConns"))
-		maxOpenConns, _ = strconv.Atoi(query.Get("maxOpenConns"))
-		maxIdleTime, _ = time.ParseDuration(query.Get("maxIdleTime"))
+		maxIdleConns = cast.ToInt(query.Get("maxIdleConns"))
+		maxOpenConns = cast.ToInt(query.Get("maxOpenConns"))
+		maxIdleTime = cast.ToDuration(query.Get("maxIdleTime"))
 		query.Del("maxIdleConns")
 		query.Del("maxOpenConns")
 		query.Del("maxIdleTime")
-		uri = arr[0] + "?" + query.Encode()
+		uri = arr[0]
+		s := query.Encode()
+		if s != "" {
+			uri += ("?" + s)
+		}
 	}
 
 	databaseConfig := &DatabaseConfig{
@@ -317,7 +322,7 @@ func MustGetDatabaseConfig() *DatabaseConfig {
 // MustGetMailConfig 获取邮件配置
 func MustGetMailConfig() *MailConfig {
 	prefix := "mail."
-	urlInfo, err := url.Parse(defaultViperX.GetString(prefix + "url"))
+	urlInfo, err := url.Parse(defaultViperX.GetStringFromENV(prefix + "url"))
 	if err != nil {
 		panic(err)
 	}
@@ -339,15 +344,34 @@ func MustGetMailConfig() *MailConfig {
 // MustGetInfluxdbConfig 获取influxdb配置
 func MustGetInfluxdbConfig() *InfluxdbConfig {
 	prefix := "influxdb."
+	urlInfo, err := url.Parse(defaultViperX.GetStringFromENV(prefix + "uri"))
+	if err != nil {
+		panic(err)
+	}
+	query := urlInfo.Query()
+
+	// 批量提交默认为100条
+	batchSize := uint(100)
+	batchSizeValue := query.Get("batchSize")
+	if batchSizeValue != "" {
+		batchSize = cast.ToUint(batchSizeValue)
+	}
+	// 定时刷新间隔10秒
+	flushInterval := 10 * time.Second
+	flushIntervalValue := query.Get("flushInterval")
+	if flushIntervalValue != "" {
+		flushInterval = cast.ToDuration(flushIntervalValue)
+	}
+
 	influxdbConfig := &InfluxdbConfig{
-		URI:           defaultViperX.GetStringFromENV(prefix + "uri"),
-		Bucket:        defaultViperX.GetString(prefix + "bucket"),
-		Org:           defaultViperX.GetString(prefix + "org"),
-		Token:         defaultViperX.GetStringFromENV(prefix + "token"),
-		BatchSize:     defaultViperX.GetUint(prefix + "batchSize"),
-		FlushInterval: defaultViperX.GetDuration(prefix + "flushInterval"),
-		Gzip:          defaultViperX.GetBool(prefix + "gzip"),
-		Disabled:      defaultViperX.GetBool(prefix + "disabled"),
+		URI:           fmt.Sprintf("%s://%s", urlInfo.Scheme, urlInfo.Host),
+		Bucket:        query.Get("bucket"),
+		Org:           query.Get("org"),
+		Token:         query.Get("token"),
+		BatchSize:     batchSize,
+		FlushInterval: flushInterval,
+		Gzip:          cast.ToBool(query.Get("gzip")),
+		Disabled:      cast.ToBool(query.Get("disabled")),
 	}
 	mustValidate(influxdbConfig)
 	return influxdbConfig
@@ -367,11 +391,16 @@ func MustGetLocationConfig() *LocationConfig {
 // MustGetMinioConfig 获取minio的配置
 func MustGetMinioConfig() *MinioConfig {
 	prefix := "minio."
+	urlInfo, err := url.Parse(defaultViperX.GetStringFromENV(prefix + "uri"))
+	if err != nil {
+		panic(err)
+	}
+	query := urlInfo.Query()
 	minioConfig := &MinioConfig{
-		Endpoint:        defaultViperX.GetString(prefix + "endpoint"),
-		AccessKeyID:     defaultViperX.GetStringFromENV(prefix + "accessKeyID"),
-		SecretAccessKey: defaultViperX.GetStringFromENV(prefix + "secretAccessKey"),
-		SSL:             defaultViperX.GetBool(prefix + "ssl"),
+		Endpoint:        urlInfo.Host,
+		AccessKeyID:     query.Get("accessKeyID"),
+		SecretAccessKey: query.Get("secretAccessKey"),
+		SSL:             cast.ToBool(query.Get("ssl")),
 	}
 	mustValidate(minioConfig)
 	return minioConfig

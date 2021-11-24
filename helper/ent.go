@@ -133,7 +133,7 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	maskURI := getMaskURI(databaseConfig.URI)
 	log.Info(context.Background()).
 		Str("uri", maskURI).
-		Msg("connect databae")
+		Msg("connect database")
 	db, driverType, err := newClientDB(databaseConfig.URI)
 	if err != nil {
 		panic(err)

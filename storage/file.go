@@ -19,8 +19,12 @@ import (
 	"net/http"
 )
 
+const creatorField = "creator"
+
 // 文件
 type File struct {
+	// 文件id
+	ID     int    `json:"id"`
 	Bucket string `json:"bucket" validate:"required"`
 	// 文件名
 	Filename string `json:"filename" validate:"required"`
@@ -52,7 +56,12 @@ type FileStorage interface {
 }
 
 var minioStorageClient = mustNewMinioStorage()
+var entStorageClient = mustNewEntStorage()
 
 func Minio() FileStorage {
 	return minioStorageClient
+}
+
+func Ent() FileStorage {
+	return entStorageClient
 }
