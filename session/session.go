@@ -36,7 +36,7 @@ func New() elton.Handler {
 		},
 		Name:     scf.Key,
 		Path:     scf.CookiePath,
-		MaxAge:   int(scf.TTL.Seconds()),
+		MaxAge:   int(scf.MaxAge.Seconds()),
 		HttpOnly: true,
 	})
 }

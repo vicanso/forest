@@ -21,6 +21,7 @@ export const names = {
   blockIPs: "blockIPs",
   signedKeys: "signedKeys",
   routerMocks: "routerMocks",
+  routerConcurrencies: "routerConcurrencies",
   requestConcurrencies: "requestConcurrencies",
   caches: "caches",
   emails: "emails",
@@ -97,6 +98,11 @@ export const routes: Router[] = [
     path: "/router-mocks",
     name: names.routerMocks,
     component: () => import("../views/configurations/RouterMocks"),
+  },
+  {
+    path: "/router-concurrencies",
+    name: names.routerConcurrencies,
+    component: () => import("../views/configurations/RouterConcurrencies"),
   },
   {
     path: "/request-concurrencies",

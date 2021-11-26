@@ -3,11 +3,8 @@ package routerconcurrency
 import (
 	"context"
 	"encoding/json"
-	"regexp"
-	"strconv"
-	"strings"
-	syncAtomic "sync/atomic"
-	"unsafe"
+	"fmt"
+	"time"
 
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/email"
@@ -17,26 +14,25 @@ import (
 )
 
 type (
-	routerConcurrency struct {
-		Route  string `json:"route"`
-		Method string `json:"method"`
-		Max    uint32 `json:"max"`
-		// RateLimit 频率限制，如100/s
-		RateLimit string `json:"rateLimit"`
-	}
 	// routerRateLimit 路由频率限制
 	routerRateLimit struct {
 		Limiter ratelimit.Limiter
 	}
 	// RouterConcurrency 路由并发配置
 	RouterConcurrency struct {
-		Route     string
-		Method    string
-		Current   atomic.Uint32
-		Max       atomic.Uint32
-		RateLimit atomic.String
+		Router string `json:"router"`
+		Max    uint32 `json:"max"`
+		// 频率限制
+		Rate int `json:"rate"`
+		// 间隔
+		Interval string `json:"interval"`
+
+		// aotmic
+		current       atomic.Uint32
+		max           atomic.Uint32
+		rateLimitDesc atomic.String
 		// limit 保存routerRateLimit对象
-		limit unsafe.Pointer
+		limit atomic.Value
 	}
 	// rcLimiter 路由请求限制
 	rcLimiter struct {
@@ -54,34 +50,40 @@ var (
 )
 
 // SetRateLimiter 设置频率限制
-func (rc *RouterConcurrency) setRateLimiter(limit string) {
-	rc.RateLimit.Store(limit)
-	reg := regexp.MustCompile(`(\d+)/s`)
-	rate := 0
-	if reg.MatchString(limit) {
-		result := reg.FindStringSubmatch(limit)
-		if len(result) == 2 {
-			rate, _ = strconv.Atoi(result[1])
-		}
+func (rc *RouterConcurrency) update(item *RouterConcurrency) {
+	// 设置并发请求量
+	rc.max.Store(item.Max)
+	rate := item.Rate
+	interval := item.Interval
+	// 获取rate limit配置，如果有调整则需要重新设置
+	rateDesc := fmt.Sprintf("%d-%s", rate, interval)
+	if rateDesc == rc.rateLimitDesc.Load() {
+		return
 	}
+	d, _ := time.ParseDuration(interval)
+	rc.rateLimitDesc.Store(rateDesc)
 	// 如果未设置限制，则使用无限制频率
-	if rate <= 0 {
-		syncAtomic.StorePointer(&rc.limit, unsafe.Pointer(routerRateUnlimited))
+	// 如果未设置时长
+	if rate <= 0 || d == 0 {
+		rc.limit.Store(routerRateUnlimited)
 		return
 	}
 	rrl := &routerRateLimit{
-		Limiter: ratelimit.New(rate),
+		Limiter: ratelimit.New(rate, ratelimit.Per(d)),
 	}
-	syncAtomic.StorePointer(&rc.limit, unsafe.Pointer(rrl))
+	rc.limit.Store(rrl)
 }
 
 // Take 执行一次频率限制，此执行会根据当时频率延时
 func (rc *RouterConcurrency) Take() {
-	p := syncAtomic.LoadPointer(&rc.limit)
+	p := rc.limit.Load()
 	if p == nil {
 		return
 	}
-	limit := (*routerRateLimit)(p)
+	limit, _ := p.(*routerRateLimit)
+	if limit == nil {
+		return
+	}
 	limit.Limiter.Take()
 }
 
@@ -92,8 +94,8 @@ func (l *rcLimiter) IncConcurrency(key string) (uint32, uint32) {
 	if !ok {
 		return 0, 0
 	}
-	current := r.Current.Inc()
-	max := r.Max.Load()
+	current := r.current.Inc()
+	max := r.max.Load()
 	// 如果设置为0或已超出最大并发限制，则直接返回
 	if max == 0 || current > max {
 		return current, max
@@ -108,7 +110,7 @@ func (l *rcLimiter) DecConcurrency(key string) {
 	if !ok {
 		return
 	}
-	r.Current.Dec()
+	r.current.Dec()
 }
 
 // GetConcurrency 获取当前路由处理数
@@ -117,14 +119,14 @@ func (l *rcLimiter) GetConcurrency(key string) uint32 {
 	if !ok {
 		return 0
 	}
-	return r.Current.Load()
+	return r.current.Load()
 }
 
 // GetStats 获取统计
 func (l *rcLimiter) GetStats() map[string]uint32 {
 	result := make(map[string]uint32)
 	for key, r := range l.m {
-		result[key] = r.Current.Load()
+		result[key] = r.current.Load()
 	}
 	return result
 }
@@ -145,9 +147,9 @@ func GetLimiter() *rcLimiter {
 
 // Update 更新路由并发数
 func Update(arr []string) {
-	concurrencyConfigList := make([]*routerConcurrency, 0)
+	concurrencyConfigList := make([]*RouterConcurrency, 0)
 	for _, str := range arr {
-		v := &routerConcurrency{}
+		v := &RouterConcurrency{}
 		err := json.Unmarshal([]byte(str), v)
 		if err != nil {
 			log.Error(context.Background()).
@@ -159,26 +161,16 @@ func Update(arr []string) {
 		concurrencyConfigList = append(concurrencyConfigList, v)
 	}
 	for key, r := range currentRCLimiter.m {
-		keys := strings.Split(key, " ")
-		if len(keys) != 2 {
-			continue
-		}
 		found := false
 		for _, item := range concurrencyConfigList {
-			if item.Method == keys[0] && item.Route == keys[1] {
+			if item.Router == key {
 				found = true
-				// 设置并发请求量
-				r.Max.Store(item.Max)
-				// 获取rate limit配置，如果有调整则需要重新设置
-				prevLimitDesc := r.RateLimit.Load()
-				if prevLimitDesc != item.RateLimit {
-					r.setRateLimiter(item.RateLimit)
-				}
+				r.update(item)
 			}
 		}
 		// 如果未配置，则设置为限制0（无限制）
 		if !found {
-			r.Max.Store(0)
+			r.max.Store(0)
 		}
 	}
 }
@@ -187,7 +179,7 @@ func Update(arr []string) {
 func List() map[string]uint32 {
 	result := make(map[string]uint32)
 	for key, r := range currentRCLimiter.m {
-		v := r.Max.Load()
+		v := r.max.Load()
 		if v != 0 {
 			result[key] = v
 		}

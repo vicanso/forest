@@ -10,12 +10,14 @@ import {
   NInput,
   NInputNumber,
   NSelect,
+  NInputGroup,
+  NInputGroupLabel,
   useMessage,
 } from "naive-ui";
 import { set } from "lodash-es";
 import { Value } from "naive-ui/lib/select/src/interface";
 import { Component, defineComponent, PropType, ref } from "vue";
-import { showError } from "../helpers/util";
+import { showError, durationToSeconds } from "../helpers/util";
 
 export interface FormItem {
   name: string;
@@ -36,6 +38,7 @@ export enum FormItemTypes {
   DateTime = "datetime",
   DateRange = "datrange",
   InputNumber = "inputnumber",
+  InputDuration = "inputDuration",
   TextArea = "textarea",
   Blank = "blank",
 }
@@ -103,6 +106,7 @@ export default defineComponent({
   render() {
     const { submitText, rules } = this.$props;
     const { params, handleSubmit } = this;
+    const size = "large";
     const createSelect = (item: FormItem, multiple: boolean) => {
       return (
         <NSelect
@@ -169,6 +173,26 @@ export default defineComponent({
             );
           }
           break;
+        case FormItemTypes.InputDuration:
+          {
+            component = (
+              <NInputGroup>
+                <NInputNumber
+                  class="widthFull"
+                  placeholder={item.placeholder}
+                  defaultValue={
+                    (durationToSeconds(item.defaultValue as string) ||
+                      null) as number
+                  }
+                  onUpdate:value={(value) => {
+                    params[item.key] = `${value || 0}s`;
+                  }}
+                />
+                <NInputGroupLabel size={size}>秒</NInputGroupLabel>
+              </NInputGroup>
+            );
+          }
+          break;
         case FormItemTypes.TextArea:
           {
             component = (
@@ -226,7 +250,7 @@ export default defineComponent({
         rules={rules}
         model={params}
         ref="formRef"
-        size="large"
+        size={size}
       >
         <NGrid xGap={24}>{arr}</NGrid>
       </NForm>

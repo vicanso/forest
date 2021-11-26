@@ -79,6 +79,10 @@ const navigationOptions = [
         key: names.routerMocks,
       },
       {
+        label: "路由并发配置",
+        key: names.routerConcurrencies,
+      },
+      {
         label: "HTTP实例并发配置",
         key: names.requestConcurrencies,
       },

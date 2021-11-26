@@ -17,12 +17,12 @@ package session
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/vicanso/elton"
 	se "github.com/vicanso/elton-session"
 	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/forest/cs"
-	"github.com/vicanso/forest/util"
 )
 
 const (
@@ -43,10 +43,6 @@ type (
 		Roles []string `json:"roles"`
 		// 用户分组列表
 		Groups []string `json:"groups"`
-		// Session信息更新时间
-		UpdatedAt string `json:"updatedAt"`
-		// Session信息创建时间
-		LoginAt string `json:"loginAt"`
 	}
 	// UserSession 用户session
 	UserSession struct {
@@ -98,11 +94,6 @@ func (us *UserSession) IsLogin() bool {
 
 // SetInfo 设置用户信息
 func (us *UserSession) SetInfo(ctx context.Context, info UserInfo) error {
-	// 登录时设置登录时间
-	if info.Account != "" && info.LoginAt == "" {
-		info.LoginAt = util.NowString()
-	}
-	info.UpdatedAt = util.NowString()
 	us.info = info
 	us.unmarshalDone = true
 	buf, err := json.Marshal(&info)
@@ -124,6 +115,17 @@ func (us *UserSession) Destroy(ctx context.Context) error {
 // Refresh 刷新用户session ttl
 func (us *UserSession) Refresh(ctx context.Context) error {
 	return us.se.Refresh(ctx)
+}
+
+// AutoRefresh 判断session是否准备过期，如果是，则刷新 
+func (us *UserSession) AutoRefresh(ctx context.Context) error {
+	value := us.se.GetUpdatedAt()
+	t, _ := time.Parse(value, time.RFC3339)
+	// 如果上一次更新时间在12小时之前
+	if t.Before(time.Now().Add(-12 * time.Hour)) {
+		return us.Refresh(ctx)
+	}
+	return nil
 }
 
 // NewUserSession 创建新的用户session对象

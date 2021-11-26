@@ -752,6 +752,8 @@ func (*userCtrl) login(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
+	// 如果刷新ttl失败，则忽略错误
+	_ = us.AutoRefresh(c.Context())
 	c.Body = resp
 	return nil
 }
@@ -792,14 +794,18 @@ func (*userCtrl) refresh(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	// 更新session
-	c.AddSignedCookie(&http.Cookie{
-		Name:     sessionConfig.Key,
-		Value:    cookie.Value,
-		Path:     sessionConfig.CookiePath,
-		MaxAge:   int(sessionConfig.TTL.Seconds()),
-		HttpOnly: true,
-	})
+	// 如果cookie的有效期设置为session
+	// 则不需要更新
+	if sessionConfig.MaxAge != 0 {
+		// 更新session
+		c.AddSignedCookie(&http.Cookie{
+			Name:     sessionConfig.Key,
+			Value:    cookie.Value,
+			Path:     sessionConfig.CookiePath,
+			MaxAge:   int(sessionConfig.MaxAge.Seconds()),
+			HttpOnly: true,
+		})
+	}
 
 	c.NoContent()
 	return nil

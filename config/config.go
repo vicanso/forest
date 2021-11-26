@@ -74,7 +74,9 @@ type (
 		CookiePath string `validate:"required,ascii"`
 		// cookie的key
 		Key string `validate:"required,ascii"`
-		// cookie的有效期
+		// cookie的有效期（允许为空)
+		MaxAge time.Duration
+		// session的有效期
 		TTL time.Duration `validate:"required"`
 		// 用于加密cookie的key
 		Keys []string `validate:"required"`
@@ -222,6 +224,7 @@ func MustGetBasicConfig() *BasicConfig {
 func MustGetSessionConfig() *SessionConfig {
 	prefix := "session."
 	sessConfig := &SessionConfig{
+		MaxAge:     defaultViperX.GetDurationFromENV(prefix + "maxAge"),
 		TTL:        defaultViperX.GetDurationFromENV(prefix + "ttl"),
 		Key:        defaultViperX.GetString(prefix + "key"),
 		CookiePath: defaultViperX.GetString(prefix + "path"),
