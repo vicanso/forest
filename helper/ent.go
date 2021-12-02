@@ -319,7 +319,7 @@ func initSchemaHooks(c *ent.Client) {
 			fields := map[string]interface{}{
 				cs.FieldProcessing:      int(processing),
 				cs.FieldTotalProcessing: int(totalProcessing),
-				cs.FieldUse:             int(d.Milliseconds()),
+				cs.FieldLatency:         int(d.Milliseconds()),
 				cs.FieldData:            data,
 			}
 			if message != "" {

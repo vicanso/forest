@@ -123,8 +123,8 @@ const (
 	FieldTotalProcessing = "totalProcessing"
 	// FilePipeProcessing pipe的正在处理请求数
 	FilePipeProcessing = "pipeProcessing"
-	// FieldUse 耗时
-	FieldUse = "use"
+	// FieldLatency 耗时
+	FieldLatency = "latency"
 	// FieldStatus 状态码
 	FieldStatus = "status"
 	// FieldDNSUse dns耗时

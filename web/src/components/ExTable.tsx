@@ -180,7 +180,7 @@ export default defineComponent({
     },
     scrollX: {
       type: Number,
-      default: () => 0,
+      default: () => null,
     },
   },
   setup(props) {

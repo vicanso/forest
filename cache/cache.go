@@ -40,7 +40,7 @@ func newCompressRedisCache() *goCache.RedisCache {
 	// 大于10KB以上的数据压缩
 	// 适用于数据量较大，而且数据内容重复较多的场景
 	minCompressSize := 10 * 1024
-	return goCache.NewCompressRedisCache(
+	return goCache.NewLZ4RedisCache(
 		helper.RedisGetClient(),
 		minCompressSize,
 		goCache.RedisCachePrefixOption(redisConfig.Prefix),

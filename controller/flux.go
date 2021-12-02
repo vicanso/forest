@@ -186,14 +186,14 @@ func (params *fluxListParams) Query() string {
 	}
 	// 耗时大于
 	if params.UseGT != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s > %s)`, cs.FieldUse, params.UseGT)
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s > %s)`, cs.FieldLatency, params.UseGT)
 	}
 
 	return query
 }
 
 func (params *fluxListParams) Do(ctx context.Context) ([]map[string]interface{}, error) {
-	items, err := GetInfluxSrv().Query(ctx, params.Query())
+	items, err := getInfluxSrv().Query(ctx, params.Query())
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (ctrl fluxCtrl) listTag(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	tags, err := GetInfluxSrv().ListTag(c.Context(), params.Measurement)
+	tags, err := getInfluxSrv().ListTag(c.Context(), params.Measurement)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (ctrl fluxCtrl) ListField(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	fields, err := GetInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
+	fields, err := getInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
 	if err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ func (ctrl fluxCtrl) listTagValue(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	values, err := GetInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
+	values, err := getInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
 	if err != nil {
 		return err
 	}
@@ -274,7 +274,7 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) err
 	}
 
 	fromBucket := fmt.Sprintf(`from(bucket: "%s")
-`, GetInfluxDB().GetBucket())
+`, getInfluxDB().GetBucket())
 	c.Body = map[string]interface{}{
 		responseKey: result,
 		"count":     len(result),
@@ -329,7 +329,7 @@ func (ctrl fluxCtrl) findOne(c *elton.Context) error {
 		valueColumn: "_value"
 	)
 	`, start, stop, measurement, filter)
-	items, err := GetInfluxSrv().Query(c.Context(), ql)
+	items, err := getInfluxSrv().Query(c.Context(), ql)
 	if err != nil {
 		return err
 	}

@@ -134,8 +134,8 @@ func (rh *redisHook) logSlowOrError(ctx context.Context, cmd, err string) {
 			cs.TagOP: cmd,
 		}
 		fields := map[string]interface{}{
-			cs.FieldUse:   int(d.Milliseconds()),
-			cs.FieldError: err,
+			cs.FieldLatency: int(d.Milliseconds()),
+			cs.FieldError:   err,
 		}
 		GetInfluxDB().Write(cs.MeasurementRedisOP, tags, fields)
 	}

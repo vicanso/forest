@@ -73,6 +73,8 @@ func DebugEnabled() bool {
 
 // newLogger 初始化logger
 func newLogger() *zerolog.Logger {
+	// 全局禁用sampling
+	zerolog.DisableSampling(true)
 	// 如果要节约日志空间，可以配置
 	zerolog.TimestampFieldName = "t"
 	zerolog.LevelFieldName = "l"

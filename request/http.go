@@ -48,7 +48,7 @@ func newOnDone(serviceName string) axios.OnDone {
 		if ht != nil {
 			use = ht.Stats().String()
 			fields[cs.FieldReused] = stats.Reused
-			fields[cs.FieldUse] = stats.Use
+			fields[cs.FieldLatency] = stats.Use
 			if stats.DNSUse != 0 {
 				fields[cs.FieldDNSUse] = stats.DNSUse
 			}

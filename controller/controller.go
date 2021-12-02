@@ -70,9 +70,9 @@ var (
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()
 	// GetInfluxDB 仅提供基础服务
-	GetInfluxDB = helper.GetInfluxDB
+	getInfluxDB = helper.GetInfluxDB
 	// 获取influx service
-	GetInfluxSrv = service.GetInfluxSrv
+	getInfluxSrv = service.GetInfluxSrv
 )
 
 type (
@@ -231,7 +231,7 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 			if extraParams != nil && extraParams.CustomTags != nil {
 				util.MergeMapString(tags, extraParams.CustomTags(c))
 			}
-			GetInfluxSrv().Write(cs.MeasurementUserTracker, tags, fields)
+			getInfluxSrv().Write(cs.MeasurementUserTracker, tags, fields)
 		},
 	})
 }
