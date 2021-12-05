@@ -34,10 +34,10 @@ func TestRouterLimiter(t *testing.T) {
 	// 重置路由并发配置
 	Update([]string{
 		`{
-			"route": "/",
-			"method": "GET",
+			"router": "GET /",
 			"max": 10,
-			"rateLimit": "100/s"
+			"rate": 100,
+			"interval": "1s"
 		}`,
 	})
 	count, max = rc.IncConcurrency(key)
