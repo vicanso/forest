@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	entgo.io/ent v0.9.1
-	github.com/dop251/goja v0.0.0-20211202112530-b5faa82cee51
+	github.com/dop251/goja v0.0.0-20211203105952-bf6af58bbcc8
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1
 	github.com/fogleman/gg v1.3.0
@@ -13,12 +13,12 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
-	github.com/google/pprof v0.0.0-20211122183932-1daafda22083 // indirect
+	github.com/google/pprof v0.0.0-20211204230040-2007db6d4f53 // indirect
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.6.0
 	github.com/influxdata/line-protocol v0.0.0-20210922203350-b1ad95c89adf // indirect
 	github.com/jackc/pgx/v4 v4.14.1
-	github.com/jinzhu/now v1.1.3
+	github.com/jinzhu/now v1.1.4
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/md5-simd v1.1.2 // indirect
@@ -50,7 +50,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
-	golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c // indirect
+	golang.org/x/net v0.0.0-20211203184738-4852103109b8 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -112,10 +112,10 @@ require (
 	github.com/vicanso/intranet-ip v0.0.1 // indirect
 	github.com/vicanso/keygrip v1.2.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
+	golang.org/x/sys v0.0.0-20211204120058-94396e421777 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/ini.v1 v1.66.1 // indirect
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
