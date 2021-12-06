@@ -156,10 +156,10 @@ func (params *configurationAddParams) save(ctx context.Context, owner string) (*
 // where 将查询条件中的参数转换为对应的where条件
 func (params *configurationListParmas) where(query *ent.ConfigurationQuery) *ent.ConfigurationQuery {
 	if params.Name != "" {
-		query = query.Where(configuration.Name(params.Name))
+		query.Where(configuration.Name(params.Name))
 	}
 	if params.Category != "" {
-		query = query.Where(configuration.CategoryEQ(params.Category))
+		query.Where(configuration.CategoryEQ(params.Category))
 	}
 	return query
 }

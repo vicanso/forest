@@ -32,7 +32,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/rs/zerolog"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
@@ -313,7 +312,7 @@ func initSchemaHooks(c *ent.Client) {
 				Int32("processing", processing).
 				Int32("totalProcessing", totalProcessing).
 				Str("use", d.String()).
-				Dict("data", zerolog.Dict().Fields(data)).
+				Dict("data", log.Struct(data)).
 				Str("message", message).
 				Msg("")
 			fields := map[string]interface{}{

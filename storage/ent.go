@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/vicanso/forest/ent"
+	"github.com/vicanso/forest/ent/file"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/validate"
 )
@@ -46,7 +47,10 @@ func convertToFile(data *ent.File) *File {
 
 // Get gets file from ent(mysql or postgres)
 func (e *entStorage) Get(ctx context.Context, bucket, filename string) (*File, error) {
-	result, err := e.client.File.Query().First(ctx)
+	result, err := e.client.File.Query().
+		Where(file.Bucket(bucket)).
+		Where(file.Filename(filename)).
+		First(ctx)
 	if err != nil {
 		return nil, err
 	}

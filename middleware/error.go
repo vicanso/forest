@@ -93,6 +93,7 @@ func NewError() elton.Handler {
 
 		helper.GetInfluxDB().Write(cs.MeasurementHTTPError, tags, fields)
 		c.StatusCode = he.StatusCode
+		c.SetContentTypeByExt(".json")
 		c.BodyBuffer = bytes.NewBuffer(he.ToJSON())
 		return nil
 	}
