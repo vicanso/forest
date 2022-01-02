@@ -29,7 +29,7 @@ func TestNewError(t *testing.T) {
 
 	fn := NewError()
 	req := httptest.NewRequest("GET", "/", nil)
-	c := elton.NewContext(nil, req)
+	c := elton.NewContext(httptest.NewRecorder(), req)
 	c.Route = "/"
 	c.Next = func() error {
 		return nil

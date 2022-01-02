@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -248,7 +249,11 @@ func queryFillValue(value reflect.Value, field reflect.StructField, data map[str
 		return nil
 	}
 	kind := value.Kind()
-	tag := field.Tag.Get("json")
+	tag := ""
+	arr := strings.Split(field.Tag.Get("json"), ",")
+	if len(arr) != 0 {
+		tag = arr[0]
+	}
 	tagValue := data[tag]
 	// 如果值为空，则不做赋值处理
 	if tagValue == "" {
