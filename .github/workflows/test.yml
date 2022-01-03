@@ -19,8 +19,8 @@ jobs:
         image: postgres:alpine
         # Provide the password for postgres
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: forest
+          REDIS_URI: redis://127.0.0.1:6379/?slow=200ms&maxProcessing=1000
+          DATABASE_URI: postgres://vicanso:postgres@127.0.0.1:5432/forest?maxIdleConns=5&maxIdleTime=30m&maxOpenConns=100
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready

@@ -93,7 +93,8 @@ docker pull postgres:alpine
 
 docker run -d --restart=always \
   -v $PWD/forest:/var/lib/postgresql/data \
-  -e POSTGRES_PASSWORD=A123456 \
+  -e DATABASE_URI=postgres://vicanso:postgres@127.0.0.1:5432/forest?maxIdleConns=5&maxIdleTime=30m&maxOpenConns=100 \
+  -e REDIS_URI=redis://127.0.0.1:6379/?slow=200ms&maxProcessing=1000 \
   -p 5432:5432 \
   --name=forest \
   postgres:alpine
