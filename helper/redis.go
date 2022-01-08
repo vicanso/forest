@@ -88,6 +88,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 			log.Info(ctx).Msg("redis new connection is established")
 			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
 				cs.FieldCount: 1,
+				cs.FieldAddr:  cn.String(),
 			})
 			return nil
 		},
