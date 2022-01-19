@@ -21,7 +21,6 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
-	"github.com/shirou/gopsutil/v3/process"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/helper"
@@ -30,6 +29,7 @@ import (
 	routerconcurrency "github.com/vicanso/forest/router_concurrency"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
+	"github.com/vicanso/go-performance"
 )
 
 type (
@@ -140,13 +140,13 @@ var prevNumGC uint32
 var prevPauseTotal time.Duration
 
 // 上一次的 io counter记录
-var prevIOCountersStat = &process.IOCountersStat{}
+var prevIOCountersStat = &performance.IOCountersStat{}
 
 // 上一次context切换记录
-var prevNumCtxSwitchesStat = &process.NumCtxSwitchesStat{}
+var prevNumCtxSwitchesStat = &performance.NumCtxSwitchesStat{}
 
 // 上一次的page faults记录
-var prevPageFaultsStat = &process.PageFaultsStat{}
+var prevPageFaultsStat = &performance.PageFaultsStat{}
 
 const mb = 1024 * 1024
 
@@ -253,10 +253,14 @@ func performanceStats() {
 		}
 
 		// fd 相关
-		fields[cs.FieldNumFds] = data.NumFds
+		if data.NumFdsStat != nil {
+			fields[cs.FieldNumFds] = data.NumFdsStat.Fds
+
+		}
 
 		// open files的统计
-		if len(data.OpenFilesStats) != 0 {
+		if data.OpenFilesStats != nil &&
+			len(data.OpenFilesStats.OpenFiles) != 0 {
 			log.Info(context.Background()).
 				Str("category", "openFiles").
 				Dict("stat", log.Struct(data.OpenFilesStats)).

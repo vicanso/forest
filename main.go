@@ -384,6 +384,11 @@ func main() {
 	}
 
 	service.SetApplicationStatus(service.ApplicationStatusRunning)
+	service.GetInfluxSrv().Write(cs.MeasurementEvent, map[string]string{
+		cs.TagCategory: "start",
+	}, map[string]interface{}{
+		cs.FieldCount: 1,
+	})
 
 	// http1与http2均支持
 	// 一般后端服务可以不需要启用

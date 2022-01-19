@@ -50,6 +50,8 @@ const (
 	MeasurementUserAddTrack = "userAddTrack"
 	// MeasurementException 异常
 	MeasurementException = "exception"
+	// MeasurementEvent 事件
+	MeasurementEvent = "event"
 )
 
 const (
