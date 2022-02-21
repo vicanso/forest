@@ -47,8 +47,9 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 1m", redisStats)
 	_, _ = c.AddFunc("@every 1m", entStats)
+	_, _ = c.AddFunc("@every 1m", influxdbStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
-	_, _ = c.AddFunc("@every 1m", performanceStats)
+	_, _ = c.AddFunc("@every 10s", performanceStats)
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
 	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
 	// 如果是开发环境，则不执行定时任务
@@ -124,6 +125,21 @@ func cpuUsageStats() {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		return service.UpdateCPUUsage(ctx)
+	})
+}
+
+// influxdbStats influxdb统计
+func influxdbStats() {
+	doStatsTask("influxdb stats", func() map[string]interface{} {
+		db := helper.GetInfluxDB()
+		writeCount := db.GetAndResetWriteCount()
+		writtingCount := db.GetWrittingCount()
+		fields := map[string]interface{}{
+			cs.FieldProcessing: writtingCount,
+			cs.FieldCount:      writeCount,
+		}
+		db.Write(cs.MeasurementInfluxdbStats, nil, fields)
+		return fields
 	})
 }
 
@@ -223,6 +239,10 @@ func performanceStats() {
 			count := make(map[string]string)
 
 			for k, v := range data.ConnStat.Status {
+				// 如果该状态下对应的连接大于0，则记录此连接数
+				if v > 0 {
+					fields[cs.FieldConnTotal+k] = v
+				}
 				count[k] = strconv.Itoa(v)
 			}
 			for k, v := range data.ConnStat.RemoteAddr {

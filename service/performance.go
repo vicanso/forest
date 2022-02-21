@@ -56,9 +56,17 @@ func GetPerformance(ctx context.Context) *Performance {
 	ioCountersStat, _ := performance.IOCounters(ctx)
 	connStat, _ := performance.ConnectionsStat(ctx)
 	numCtxSwitchesStat, _ := performance.NumCtxSwitches(ctx)
-	numFdsStat, _ := performance.NumFds(ctx)
+
 	pageFaults, _ := performance.PageFaults(ctx)
 	openFilesStats, _ := performance.OpenFiles(ctx)
+	// fd 可以通过open files获取，减少一次查询
+	var numFdsStat *performance.NumFdsStat
+	if openFilesStats != nil {
+		numFdsStat = &performance.NumFdsStat{
+			Fds:  int32(len(openFilesStats.OpenFiles)),
+			Took: openFilesStats.Took,
+		}
+	}
 	httpServerConnStats := httpServerConnStats.Stats()
 	return &Performance{
 		Concurrency:           GetConcurrency(),
