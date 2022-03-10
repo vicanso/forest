@@ -7,7 +7,6 @@ import useFluxState, {
   fluxListHTTPCategory,
   fluxListHTTPError,
   fluxListHTTPErrorClear,
-  measurementHttpError,
 } from "../../states/flux";
 import { today } from "../../helpers/util";
 import ExLoading from "../../components/ExLoading";
@@ -82,13 +81,7 @@ function getColumns(): TableColumn[] {
       width: 90,
       align: "center",
       render(row: Record<string, unknown>) {
-        return (
-          <ExFluxDetail
-            measurement={measurementHttpError}
-            data={row}
-            tagKeys={["method", "route", "category"]}
-          />
-        );
+        return <ExFluxDetail data={row} />;
       },
     },
     {

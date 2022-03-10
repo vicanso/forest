@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/vicanso/forest/cs"
+	"github.com/vicanso/forest/influx"
 	"github.com/vicanso/forest/log"
 )
 
@@ -37,7 +38,7 @@ func finalizerHandler(f *finalizerRef) {
 	select {
 	case f.parent.ch <- time.Time{}:
 	default:
-		GetInfluxSrv().Write(cs.MeasurementEvent, map[string]string{
+		influx.New().Write(cs.MeasurementEvent, map[string]string{
 			cs.TagCategory: "gc",
 		}, map[string]interface{}{
 			cs.FieldCount: 1,

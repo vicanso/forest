@@ -9,7 +9,6 @@ import useFluxState, {
   fluxListRequestClear,
   fluxListRequestRoute,
   fluxListRequestService,
-  measurementHttpRequest,
 } from "../../states/flux";
 import ExTable from "../../components/ExTable";
 import { getHoursAge } from "../../helpers/util";
@@ -39,7 +38,7 @@ const useTimeListClass = css`
 function getFilters() {
   return [
     {
-      key: "result",
+      key: "rslt",
       name: "结果：",
       type: FormItemTypes.Select,
       placeholder: "请选择要筛选的结果",
@@ -135,10 +134,10 @@ function getColumns(): TableColumn[] {
     },
     {
       title: "结果",
-      key: "result",
+      key: "rslt",
       width: 80,
       render(row: Record<string, unknown>) {
-        if (row.result === "0") {
+        if (row.rslt === "0") {
           return "成功";
         }
         return "失败";
@@ -219,13 +218,7 @@ function getColumns(): TableColumn[] {
       key: "requestDetail",
       width: 90,
       render(row: Record<string, unknown>) {
-        return (
-          <ExFluxDetail
-            measurement={measurementHttpRequest}
-            data={row}
-            tagKeys={["service", "route", "method", "result"]}
-          />
-        );
+        return <ExFluxDetail data={row} />;
       },
     },
     {

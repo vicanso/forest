@@ -25,14 +25,11 @@ export const COMMONS_HTTP_STATS = "/commons/http-stats";
 export const FLUXES_TRACKERS = "/fluxes/v1/trackers";
 // http出错列表
 export const FLUXES_HTTP_ERRORS = "/fluxes/v1/http-errors";
-// 客户端上传的action日志列表
-export const FLUXES_ACTIONS = "/fluxes/v1/actions";
 // 后端HTTP调用列表
 export const FLUXES_REQUESTS = "/fluxes/v1/requests";
 // tag value列表
 export const FLUXES_TAG_VALUES = "/fluxes/v1/tag-values/:measurement/:tag";
 // flux单条记录查询
-export const FLUXES_FIND_ONE = "/fluxes/v1/one/:measurement";
 
 // 系统配置相关url
 // 配置列表

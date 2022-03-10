@@ -19,7 +19,7 @@ import {
 import ExForm, { FormItem, FormItemTypes } from "./ExForm";
 import ExLoading from "./ExLoading";
 
-const statusKey = "status.value";
+const statusKey = "status";
 
 export enum FormItemKey {
   name = "name",
@@ -91,16 +91,15 @@ export function getDefaultFormRules(extra?: FormRules): FormRules {
     [FormItemKey.name]: newRequireRule("配置名称不能为空"),
     [FormItemKey.category]: newRequireRule("配置分类不能为空"),
     [FormItemKey.status]: {
-      value: {
-        required: true,
-        message: "配置状态不能为空",
-        trigger: "blur",
-        validator(rule, value) {
-          if (!value) {
-            return false;
-          }
-          return true;
-        },
+      type: "number",
+      required: true,
+      message: "配置状态不能为空",
+      trigger: "blur",
+      validator(rule, value) {
+        if (!value) {
+          return false;
+        }
+        return true;
       },
     },
     [FormItemKey.startedAt]: newRequireRule("配置生效开始时间不能为空"),
@@ -131,9 +130,7 @@ function convertDataToConfig(data: Record<string, unknown>): Config {
   }
   return {
     name: data.name,
-    status: {
-      value: get(data, statusKey),
-    },
+    status: get(data, statusKey),
     category: data.category,
     startedAt: data.startedAt,
     endedAt: data.endedAt,
@@ -150,7 +147,7 @@ function diffConfig(
   if (newConfig.name != current.name) {
     data.name = newConfig.name;
   }
-  if (newConfig.status.value != current.status.value) {
+  if (newConfig.status != current.status) {
     data.status = newConfig.status;
   }
   if (newConfig.category !== current.category) {

@@ -87,6 +87,55 @@ export function newLevelValueColumn(params: {
   };
 }
 
+function newConvertValueColumn(
+  covertMap: Record<string | number, string>,
+  params: {
+    key: string;
+    title: string;
+    width?: number;
+  }
+): TableColumn {
+  return {
+    title: params.title,
+    width: params.width,
+    key: params.key,
+    render: (row: Record<string, unknown>) => {
+      const value = row[params.key] as string | number;
+      const desc = covertMap[value];
+      return <span>{desc}</span>;
+    },
+  };
+}
+
+export function newStatusValueColumn(params: {
+  key: string;
+  title: string;
+  width?: number;
+}): TableColumn {
+  return newConvertValueColumn(
+    {
+      1: "启用",
+      2: "禁用",
+      0: "未知",
+    },
+    params
+  );
+}
+
+export function newResultValueColumn(params: {
+  key: string;
+  title: string;
+  width?: number;
+}): TableColumn {
+  return newConvertValueColumn(
+    {
+      "0": "成功",
+      "1": "失败",
+    },
+    params
+  );
+}
+
 // 操作相关
 export function newOPColumn(
   fn: (params: Record<string, unknown>) => void

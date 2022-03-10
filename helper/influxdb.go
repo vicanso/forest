@@ -114,7 +114,8 @@ func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI, db *InfluxDB) {
 			Str("category", "influxdbError").
 			Err(err).
 			Msg("")
-		db.Write(cs.MeasurementException, map[string]string{
+		// 避免 write的时候卡住，导致err channel一直没处理而导致定入卡住
+		go db.Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "influxdbError",
 		}, map[string]interface{}{
 			cs.FieldError: err.Error(),

@@ -4,13 +4,12 @@ import { defineComponent, onMounted, onUnmounted } from "vue";
 import ExFluxDetail from "../../components/ExFluxDetail";
 import { FormItemTypes } from "../../components/ExForm";
 import ExLoading from "../../components/ExLoading";
-import ExTable from "../../components/ExTable";
+import ExTable, { newResultValueColumn } from "../../components/ExTable";
 import { formatJSON, showError, today } from "../../helpers/util";
 import useFluxState, {
   fluxListUserTrackAction,
   fluxListUserTracker,
   fluxListUserTrackerClear,
-  measurementUserTracker,
 } from "../../states/flux";
 
 function getColumns(): TableColumn[] {
@@ -43,11 +42,10 @@ function getColumns(): TableColumn[] {
       key: "action",
       width: 160,
     },
-    {
+    newResultValueColumn({
+      key: "rslt",
       title: "结果",
-      key: "resultDesc",
-      width: 80,
-    },
+    }),
     {
       title: "TrackID",
       key: "tid",
@@ -88,13 +86,7 @@ function getColumns(): TableColumn[] {
       width: 90,
       align: "center",
       render(row: Record<string, unknown>) {
-        return (
-          <ExFluxDetail
-            measurement={measurementUserTracker}
-            data={row}
-            tagKeys={["action", "result", "step"]}
-          />
-        );
+        return <ExFluxDetail data={row} />;
       },
     },
     {
@@ -127,7 +119,7 @@ function getFilters() {
       options: actionOptions,
     },
     {
-      key: "result",
+      key: "rslt",
       name: "结果：",
       type: FormItemTypes.Select,
       placeholder: "请选择要筛选的结果",

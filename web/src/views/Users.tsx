@@ -11,7 +11,7 @@ import {
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { defineComponent, onUnmounted, ref } from "vue";
 import ExForm, { FormItemTypes } from "../components/ExForm";
-import ExTable, { newLevelValueColumn } from "../components/ExTable";
+import ExTable, { newStatusValueColumn } from "../components/ExTable";
 import { diff, showError, showWarning } from "../helpers/util";
 import useUserState, {
   userList,
@@ -45,9 +45,9 @@ function getColumns(): TableColumn[] {
         return <ul class={userRoleClass}>{arr}</ul>;
       },
     },
-    newLevelValueColumn({
+    newStatusValueColumn({
       title: "状态",
-      key: "status.desc",
+      key: "status",
     }),
     {
       title: "邮箱",
@@ -118,7 +118,7 @@ function getUpdateFormItems(updatedUser: UserAccount) {
       name: "状态：",
       key: "status",
       type: FormItemTypes.Select,
-      defaultValue: updatedUser.status.value,
+      defaultValue: updatedUser.status,
       placeholder: "请选择账户状态",
       options: [
         {

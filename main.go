@@ -63,6 +63,7 @@ import (
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/email"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/influx"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/profiler"
@@ -207,7 +208,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		he.AddExtra("uri", uri)
 
 		// 记录exception
-		service.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
+		influx.New().Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "routeError",
 			cs.TagRoute:    c.Route,
 		}, map[string]interface{}{
@@ -384,7 +385,7 @@ func main() {
 	}
 
 	service.SetApplicationStatus(service.ApplicationStatusRunning)
-	service.GetInfluxSrv().Write(cs.MeasurementEvent, map[string]string{
+	influx.New().Write(cs.MeasurementEvent, map[string]string{
 		cs.TagCategory: "start",
 	}, map[string]interface{}{
 		cs.FieldCount: 1,

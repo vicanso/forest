@@ -4,7 +4,6 @@ import {
   FLUXES_HTTP_ERRORS,
   FLUXES_TAG_VALUES,
   FLUXES_REQUESTS,
-  FLUXES_FIND_ONE,
 } from "../constants/url";
 import { DeepReadonly, reactive, readonly } from "vue";
 import { formatDate } from "../helpers/util";
@@ -41,8 +40,7 @@ interface UserTracker {
   action: string;
   hostname: string;
   ip: string;
-  result: string;
-  resultDesc: string;
+  rslt: string;
   sid: string;
   tid: string;
   form: string;
@@ -76,11 +74,11 @@ function fillUserTrackerInfo(data: UserTracker) {
       data.error = `${result[1]}, ${data.error.replace(result[0], "")}`;
     }
   }
-  if (data.result === "0") {
-    data.resultDesc = "成功";
-  } else {
-    data.resultDesc = "失败";
-  }
+  // if (data.rslt === "0") {
+  //   data.resultDesc = "成功";
+  // } else {
+  //   data.resultDesc = "失败";
+  // }
   data.key = data._time;
   data.createdAt = formatDate(data._time);
 }
@@ -373,24 +371,6 @@ export async function fluxListRequestRoute(): Promise<void> {
   } finally {
     requestRoutes.processing = false;
   }
-}
-
-// flux查询单条记录
-export async function fluxFindOne(params: {
-  measurement: string;
-  time: string;
-  tags: Record<string, string>;
-}): Promise<Record<string, unknown>> {
-  const url = FLUXES_FIND_ONE.replace(":measurement", params.measurement);
-  const { data } = await request.get<Record<string, unknown>>(url, {
-    params: Object.assign(
-      {
-        time: params.time,
-      },
-      params.tags
-    ),
-  });
-  return data;
 }
 
 interface ReadonlyFluxState {

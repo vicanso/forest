@@ -15,17 +15,12 @@
 package schema
 
 import (
-	"encoding/json"
-	"reflect"
-	"regexp"
-	"strconv"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
-	"github.com/tidwall/gjson"
 )
 
 type Status int8
@@ -34,30 +29,6 @@ type Status int8
 type StatusInfo struct {
 	Name  string `json:"name"`
 	Value Status `json:"value"`
-}
-
-func (s *Status) MarshalJSON() ([]byte, error) {
-	str := s.String()
-	return json.Marshal(map[string]interface{}{
-		"value": int(*s),
-		"desc":  str,
-	})
-}
-
-func (s *Status) UnmarshalJSON(data []byte) error {
-	if len(data) == 0 {
-		return nil
-	}
-	var value int64
-	// 兼容两种方式
-	if regexp.MustCompile(`^\d+$`).Match(data) {
-		v, _ := strconv.Atoi(string(data))
-		value = int64(v)
-	} else {
-		value = gjson.GetBytes(data, "value").Int()
-	}
-	reflect.ValueOf(s).Elem().SetInt(value)
-	return nil
 }
 
 const (

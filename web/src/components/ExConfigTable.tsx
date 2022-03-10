@@ -3,7 +3,7 @@ import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExTable, {
   newOPColumn,
   newJSONRenderExpand,
-  newLevelValueColumn,
+  newStatusValueColumn,
 } from "../components/ExTable";
 import { formatDate } from "../helpers/util";
 import useConfigState, { configList, configListClear } from "../states/configs";
@@ -19,9 +19,9 @@ function getColumns(): TableColumn[] {
       title: "分类",
       key: "category",
     },
-    newLevelValueColumn({
+    newStatusValueColumn({
       title: "状态",
-      key: "status.desc",
+      key: "status",
     }),
     {
       title: "创建者",

@@ -25,10 +25,10 @@ import (
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/influx"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/middleware"
 	"github.com/vicanso/forest/schema"
-	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/session"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
@@ -69,10 +69,8 @@ var (
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()
-	// GetInfluxDB 仅提供基础服务
-	getInfluxDB = helper.GetInfluxDB
 	// 获取influx service
-	getInfluxSrv = service.GetInfluxSrv
+	getInfluxSrv = influx.New
 )
 
 type (
