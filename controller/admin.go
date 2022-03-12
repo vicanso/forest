@@ -17,10 +17,13 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/router"
+	"github.com/vicanso/hes"
 )
 
 type (
@@ -29,12 +32,19 @@ type (
 	findCacheResp struct {
 		Data string `json:"data"`
 	}
+	listCacheResp struct {
+		Keys []string `json:"keys"`
+	}
 )
 
 func init() {
 	ctrl := adminCtrl{}
 	g := router.NewGroup("/@admin", loadUserSession, shouldBeAdmin)
 
+	g.GET(
+		"/v1/caches",
+		ctrl.listCache,
+	)
 	// 查询缓存数据
 	g.GET(
 		"/v1/caches/{key}",
@@ -46,6 +56,22 @@ func init() {
 		newTrackerMiddleware(cs.ActionAdminCleanCache),
 		ctrl.cleanCacheByKey,
 	)
+}
+
+func (*adminCtrl) listCache(c *elton.Context) error {
+	keyword := c.QueryParam("keyword")
+	if keyword == "" {
+		return hes.New("keyword can't be nil")
+	}
+	keys, _, err := helper.RedisGetClient().Scan(c.Context(), 0, keyword, 100).Result()
+	if err != nil {
+		return err
+	}
+	fmt.Println(keys)
+	c.Body = &listCacheResp{
+		Keys: keys,
+	}
+	return nil
 }
 
 // findCacheByKey find cache by key
