@@ -9,20 +9,21 @@ import {
   NNotificationProvider,
   zhCN,
 } from "naive-ui";
-import useCommonState from "./states/common";
 
 import App from "./App";
+import { storeToRefs } from "pinia";
+import { useCommonStore } from "./stores/common";
 
 export default defineComponent({
   name: "RootPage",
   setup() {
-    const { settings } = useCommonState();
+    const { setting } = storeToRefs(useCommonStore());
     return {
-      settings,
+      setting,
     };
   },
   render() {
-    const isDark = this.settings.theme === "dark";
+    const isDark = this.setting.theme === "dark";
     return (
       <NConfigProvider theme={isDark ? darkTheme : null} locale={zhCN}>
         <NLoadingBarProvider>

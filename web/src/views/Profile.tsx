@@ -9,22 +9,23 @@ import {
   useMessage,
 } from "naive-ui";
 import { defineComponent, ref } from "vue";
+import { storeToRefs } from "pinia";
 
-import { userMeDetail, UserDetailInfo, userUpdateMe } from "../states/user";
 import ExLoading from "../components/ExLoading";
 import { showError, showWarning } from "../helpers/util";
+import { useUserStore } from "../stores/user";
 
 export default defineComponent({
   name: "ProfileView",
   setup() {
     const message = useMessage();
     const processing = ref(false);
-    const detail = ref({} as UserDetailInfo);
+    const userStore = useUserStore();
+    const { account, email, name } = storeToRefs(userStore);
     const fetch = async () => {
       processing.value = true;
       try {
-        const data = await userMeDetail();
-        detail.value = data;
+        await userStore.detail();
       } catch (err) {
         showError(message, err);
       } finally {
@@ -46,7 +47,7 @@ export default defineComponent({
       }
       processing.value = true;
       try {
-        await userUpdateMe({
+        await userStore.update({
           name,
           email,
         });
@@ -59,14 +60,16 @@ export default defineComponent({
     fetch();
     return {
       processing,
-      detail,
+      name,
+      account,
+      email,
       form,
       update,
     };
   },
   render() {
-    const { processing, detail, form, update } = this;
-    if (processing && !detail.account) {
+    const { processing, name, email, account, form, update } = this;
+    if (processing && !account) {
       return <ExLoading />;
     }
     let text = "更新";
@@ -82,7 +85,7 @@ export default defineComponent({
               <NFormItem label="用户：">
                 <NInput
                   placeholder="请输入用户名称"
-                  defaultValue={detail.name}
+                  defaultValue={name}
                   clearable
                   size={size}
                   onUpdateValue={(value) => {
@@ -95,7 +98,7 @@ export default defineComponent({
               <NFormItem label="邮箱地址：">
                 <NInput
                   placeholder="请输入邮箱地址"
-                  defaultValue={detail.email}
+                  defaultValue={email}
                   clearable
                   size={size}
                   onUpdateValue={(value) => {

@@ -3,15 +3,12 @@ import { defineComponent, onMounted, onUnmounted } from "vue";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExTable from "../../components/ExTable";
 import { showError } from "../../helpers/util";
-import useFluxState, {
-  fluxListHTTPCategory,
-  fluxListHTTPError,
-  fluxListHTTPErrorClear,
-} from "../../states/flux";
 import { today } from "../../helpers/util";
 import ExLoading from "../../components/ExLoading";
 import { FormItemTypes } from "../../components/ExForm";
 import ExFluxDetail from "../../components/ExFluxDetail";
+import { useHTTPErrorsStore } from "../../stores/http-errors";
+import { storeToRefs } from "pinia";
 
 function getColumns(): TableColumn[] {
   return [
@@ -154,12 +151,14 @@ export default defineComponent({
   name: "HTTPErrorStats",
   setup() {
     const message = useMessage();
-    const { httpErrorCategories, httpErrors } = useFluxState();
+    const httpErrorsStore = useHTTPErrorsStore();
+    const { httpErrors, count, fetchingCategories, categories } =
+      storeToRefs(httpErrorsStore);
 
     // 加载http响应出错依赖服务分类（服务名称)
     onMounted(async () => {
       try {
-        await fluxListHTTPCategory();
+        await httpErrorsStore.listCategory();
       } catch (err) {
         showError(message, err);
       }
@@ -167,24 +166,24 @@ export default defineComponent({
 
     // 清除数据
     onUnmounted(() => {
-      fluxListHTTPErrorClear();
+      httpErrorsStore.$reset();
     });
 
     return {
-      httpErrorCategories,
+      fetch: httpErrorsStore.list,
+      fetchingCategories,
+      categories,
+      count,
       httpErrors,
     };
   },
   render() {
-    const { httpErrors, httpErrorCategories } = this;
-    if (httpErrorCategories.processing) {
+    const { httpErrors, count, fetch, fetchingCategories, categories } = this;
+    if (fetchingCategories) {
       return <ExLoading />;
     }
-    if (
-      categoryOptions.length === 1 &&
-      httpErrorCategories.items.length !== 0
-    ) {
-      httpErrorCategories.items.forEach((item) => {
+    if (categoryOptions.length === 1 && categories.length !== 0) {
+      categories.forEach((item) => {
         categoryOptions.push({
           label: item,
           value: item,
@@ -198,8 +197,11 @@ export default defineComponent({
         title={"HTTP响应出错"}
         filters={getFilters()}
         columns={getColumns()}
-        data={httpErrors}
-        fetch={fluxListHTTPError}
+        data={{
+          items: httpErrors,
+          count,
+        }}
+        fetch={fetch}
       />
     );
   },

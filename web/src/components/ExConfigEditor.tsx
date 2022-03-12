@@ -9,15 +9,9 @@ import {
 import { defineComponent, PropType, ref, Ref } from "vue";
 import { get, isObject } from "lodash-es";
 import { showError, showWarning } from "../helpers/util";
-import {
-  Config,
-  configAdd,
-  configFindByID,
-  ConfigStatus,
-  configUpdateByID,
-} from "../states/configs";
 import ExForm, { FormItem, FormItemTypes } from "./ExForm";
 import ExLoading from "./ExLoading";
+import { useConfigsStore, Config, ConfigStatus } from "../stores/configs";
 
 const statusKey = "status";
 
@@ -209,6 +203,7 @@ export default defineComponent({
     const isUpdatedMode = props.id !== 0;
     const processing = ref(false);
     const currentConfig: Ref<Config> = ref({} as Config);
+    const configsStore = useConfigsStore();
     // 提交数据
     const onSubmit = async (data: Record<string, unknown>) => {
       if (processing.value) {
@@ -233,13 +228,13 @@ export default defineComponent({
             showWarning(message, "数据未修改无需要更新");
             return;
           }
-          await configUpdateByID({
+          await configsStore.updateByID({
             id: props.id,
             data: updateData,
           });
           currentConfig.value = configData;
         } else {
-          await configAdd(configData);
+          await configsStore.add(configData);
         }
         props.onSubmitDone();
       } catch (err) {
@@ -264,7 +259,7 @@ export default defineComponent({
     const fetch = async () => {
       processing.value = true;
       try {
-        const configData = await configFindByID(props.id);
+        const configData = await configsStore.findByID(props.id);
         currentConfig.value = configData;
         const result = configData as Record<string, unknown>;
         items.forEach((item) => {

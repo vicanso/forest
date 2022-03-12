@@ -1,16 +1,13 @@
 import { NEllipsis, useMessage } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, onUnmounted } from "vue";
 import ExFluxDetail from "../../components/ExFluxDetail";
 import { FormItemTypes } from "../../components/ExForm";
 import ExLoading from "../../components/ExLoading";
 import ExTable, { newResultValueColumn } from "../../components/ExTable";
 import { formatJSON, showError, today } from "../../helpers/util";
-import useFluxState, {
-  fluxListUserTrackAction,
-  fluxListUserTracker,
-  fluxListUserTrackerClear,
-} from "../../states/flux";
+import { useUserTrackersStore } from "../../stores/user-trackers";
 
 function getColumns(): TableColumn[] {
   return [
@@ -158,33 +155,35 @@ export default defineComponent({
   name: "UserTrackerStats",
   setup() {
     const message = useMessage();
-    const { userTrackers, userTrackerActions } = useFluxState();
+    const userTrackersStore = useUserTrackersStore();
+    const { trackers, count, actions, fetchingActions } =
+      storeToRefs(userTrackersStore);
     // 加载用户行为类别
     onMounted(async () => {
       try {
-        await fluxListUserTrackAction();
+        await userTrackersStore.listActions();
       } catch (err) {
         showError(message, err);
       }
     });
-    // 清除数据
-    onUnmounted(() => {
-      fluxListUserTrackerClear();
-    });
+    onUnmounted(() => userTrackersStore.$reset());
 
     return {
-      userTrackers,
-      userTrackerActions,
+      fetch: userTrackersStore.list,
+      count,
+      trackers,
+      fetchingActions,
+      actions,
     };
   },
   render() {
-    const { userTrackers, userTrackerActions } = this;
-    if (userTrackerActions.processing) {
+    const { actions, fetch, count, trackers, fetchingActions } = this;
+    if (fetchingActions) {
       return <ExLoading />;
     }
     // 添加类别选项
-    if (actionOptions.length === 1 && userTrackerActions.items.length !== 0) {
-      userTrackerActions.items.forEach((item) =>
+    if (actionOptions.length === 1 && actions.length !== 0) {
+      actions.forEach((item) =>
         actionOptions.push({
           label: item,
           value: item,
@@ -198,8 +197,11 @@ export default defineComponent({
         filters={getFilters()}
         title={"用户行为查询"}
         columns={getColumns()}
-        data={userTrackers}
-        fetch={fluxListUserTracker}
+        data={{
+          items: trackers,
+          count,
+        }}
+        fetch={fetch}
       />
     );
   },

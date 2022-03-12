@@ -4,16 +4,12 @@ import { css } from "@linaria/core";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
-import useFluxState, {
-  fluxListRequest,
-  fluxListRequestClear,
-  fluxListRequestRoute,
-  fluxListRequestService,
-} from "../../states/flux";
 import ExTable from "../../components/ExTable";
 import { getHoursAge } from "../../helpers/util";
 import { FormItemTypes } from "../../components/ExForm";
 import ExFluxDetail from "../../components/ExFluxDetail";
+import { useRequestsStore } from "../../stores/requests";
+import { storeToRefs } from "pinia";
 
 const serviceOptions = [
   {
@@ -233,34 +229,55 @@ export default defineComponent({
   name: "RequestStats",
   setup() {
     const message = useMessage();
-    const { requestServices, requests, requestRoutes } = useFluxState();
+    // const { requestServices, requestRoutes } = useFluxState();
+    const requestsStore = useRequestsStore();
+    const {
+      requests,
+      count,
+      routes,
+      fetchingRoutes,
+      services,
+      fetchingServices,
+    } = storeToRefs(requestsStore);
 
     onMounted(async () => {
       try {
-        await fluxListRequestService();
-        await fluxListRequestRoute();
+        await requestsStore.listRoute();
+        await requestsStore.listService();
       } catch (err) {
         showError(message, err);
       }
     });
 
     onUnmounted(() => {
-      fluxListRequestClear();
+      requestsStore.$reset();
     });
 
     return {
+      fetch: requestsStore.list,
       requests,
-      requestServices,
-      requestRoutes,
+      count,
+      routes,
+      fetchingRoutes,
+      services,
+      fetchingServices,
     };
   },
   render() {
-    const { requests, requestServices, requestRoutes } = this;
-    if (requestServices.processing || requestRoutes.processing) {
+    const {
+      requests,
+      count,
+      routes,
+      fetchingRoutes,
+      services,
+      fetchingServices,
+      fetch,
+    } = this;
+    if (fetchingServices || fetchingRoutes) {
       return <ExLoading />;
     }
-    if (serviceOptions.length === 1 && requestServices.items.length !== 0) {
-      requestServices.items.forEach((item) => {
+    if (serviceOptions.length === 1 && services.length !== 0) {
+      services.forEach((item) => {
         serviceOptions.push({
           label: item,
           value: item,
@@ -268,8 +285,8 @@ export default defineComponent({
       });
     }
 
-    if (routeOptions.length === 1 && requestRoutes.items.length !== 0) {
-      requestRoutes.items.forEach((item) => {
+    if (routeOptions.length === 1 && routes.length !== 0) {
+      routes.forEach((item) => {
         routeOptions.push({
           label: item,
           value: item,
@@ -282,10 +299,13 @@ export default defineComponent({
         disableAutoFetch={true}
         hidePagination={true}
         title={"HTTP请求统计"}
-        data={requests}
+        data={{
+          items: requests,
+          count,
+        }}
         filters={getFilters()}
         columns={getColumns()}
-        fetch={fluxListRequest}
+        fetch={fetch}
       />
     );
   },

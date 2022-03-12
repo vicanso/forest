@@ -3,8 +3,3 @@ export interface IList<T> {
   items: T[];
   count: number;
 }
-
-export interface IStatus {
-  desc: string;
-  value: number;
-}

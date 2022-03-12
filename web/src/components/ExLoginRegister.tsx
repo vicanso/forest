@@ -11,9 +11,10 @@ import {
 import { css } from "@linaria/core";
 import { defineComponent, onMounted, ref, PropType } from "vue";
 import { showError, showWarning } from "../helpers/util";
-import { commonGetCaptcha, commonGetEmptyCaptcha } from "../states/common";
-import { userLogin, userRegister } from "../states/user";
 import { goToHome, goToLogin } from "../routes";
+import { useUserStore } from "../stores/user";
+import { storeToRefs } from "pinia";
+import { useCommonStore, Captcha } from "../stores/common";
 
 const loginType = "login";
 
@@ -51,14 +52,17 @@ export default defineComponent({
     });
     const message = useMessage();
     const isLogin = props.type === loginType;
+    const captchaData = ref({} as Captcha);
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
     // 登录或注册中
-    const processing = ref(false);
-    const captchaData = ref(commonGetEmptyCaptcha());
+    const { processing } = storeToRefs(userStore);
+
     // 刷新图形验证码
     const refreshCaptcha = async () => {
       try {
         captchaData.value.id = "";
-        const data = await commonGetCaptcha();
+        const data = await commonStore.getCaptcha();
         captchaData.value = data;
       } catch (err) {
         showError(message, err);
@@ -75,16 +79,15 @@ export default defineComponent({
         return;
       }
       try {
-        processing.value = true;
         const params = {
           account,
           password,
           captcha: `${captchaData.value.id}:${captcha}`,
         };
         if (isLogin) {
-          await userLogin(params);
+          await userStore.login(params);
         } else {
-          await userRegister(params);
+          await userStore.register(params);
         }
         // 跳转至首页
         if (isLogin) {
@@ -97,8 +100,6 @@ export default defineComponent({
         // 因为图形验证码仅一次有效
         // 如果出错，自动刷新图形验证码
         refreshCaptcha();
-      } finally {
-        processing.value = false;
       }
     };
     const handleEnterPress = (e: KeyboardEvent) => {

@@ -10,7 +10,8 @@ import {
 } from "./constants/style";
 import "./main.css";
 import { setLoadingEvent } from "./routes/router";
-import useCommonState, { commonUpdateSettingCollapsed } from "./states/common";
+import { storeToRefs } from "pinia";
+import { useCommonStore } from "./stores/common";
 
 const layoutClass = css`
   top: ${mainHeaderHeight}px !important;
@@ -23,7 +24,8 @@ const contentLayoutClass = css`
 export default defineComponent({
   name: "App",
   setup() {
-    const { settings } = useCommonState();
+    const commonStore = useCommonStore();
+    const { setting } = storeToRefs(commonStore);
     const loadingBar = useLoadingBar();
     if (loadingBar != undefined) {
       setLoadingEvent(loadingBar.start, loadingBar.finish);
@@ -32,11 +34,12 @@ export default defineComponent({
       });
     }
     return {
-      settings,
+      setting,
+      setCollapsed: commonStore.setCollapsed,
     };
   },
   render() {
-    const { settings } = this;
+    const { setting, setCollapsed } = this;
     return (
       <div>
         <AppHeader />
@@ -44,15 +47,15 @@ export default defineComponent({
           <NLayoutSider
             bordered
             collapseMode="width"
-            collapsed={settings.collapsed}
+            collapsed={setting.collapsed}
             collapsedWidth={64}
             width={mainNavigationWidth}
             showTrigger
             onCollapse={() => {
-              commonUpdateSettingCollapsed(true);
+              setCollapsed(true);
             }}
             onExpand={() => {
-              commonUpdateSettingCollapsed(false);
+              setCollapsed(false);
             }}
           >
             <AppNavigation />

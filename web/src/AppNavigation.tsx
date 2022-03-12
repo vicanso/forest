@@ -5,8 +5,9 @@ import { Component, defineComponent, h } from "vue";
 import { containsAny } from "./helpers/util";
 import { goTo, goToLogin } from "./routes";
 import { names } from "./routes/routes";
-import useCommonState from "./states/common";
-import useUserState from "./states/user";
+import { useUserStore } from "./stores/user";
+import { storeToRefs } from "pinia";
+import { useCommonStore } from "./stores/common";
 
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
@@ -113,11 +114,14 @@ const navigationOptions = [
 export default defineComponent({
   name: "AppNavigation",
   setup() {
-    const { info } = useUserState();
-    const { settings } = useCommonState();
+    const userStore = useUserStore();
+    const { processing, account, roles } = storeToRefs(userStore);
+    const { setting } = storeToRefs(useCommonStore());
     return {
-      settings,
-      userInfo: info,
+      setting,
+      processing,
+      account,
+      roles,
       handleNavigation(key: string): void {
         goTo(key, {
           replace: false,
@@ -126,12 +130,12 @@ export default defineComponent({
     };
   },
   render() {
-    const { userInfo, $router, settings } = this;
-    if (userInfo.processing) {
+    const { account, processing, roles, $router, setting } = this;
+    if (processing) {
       return <p class="tac">...</p>;
     }
-    if (!userInfo.account) {
-      if (settings.collapsed) {
+    if (!account) {
+      if (setting.collapsed) {
         return <div />;
       }
       return (
@@ -143,7 +147,7 @@ export default defineComponent({
       );
     }
     const options = navigationOptions.slice(0);
-    if (containsAny(userInfo.roles, ["su", "admin"])) {
+    if (containsAny(roles, ["su", "admin"])) {
       options.forEach((item) => {
         if (item.disabled) {
           item.disabled = false;
@@ -158,7 +162,7 @@ export default defineComponent({
         onUpdate:value={this.handleNavigation}
         options={options}
         collapsedWidth={64}
-        collapsed={settings.collapsed}
+        collapsed={setting.collapsed}
       />
     );
   },

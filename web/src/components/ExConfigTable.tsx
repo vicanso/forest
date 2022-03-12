@@ -6,7 +6,8 @@ import ExTable, {
   newStatusValueColumn,
 } from "../components/ExTable";
 import { formatDate } from "../helpers/util";
-import useConfigState, { configList, configListClear } from "../states/configs";
+import { useConfigsStore } from "../stores/configs";
+import { storeToRefs } from "pinia";
 
 function getColumns(): TableColumn[] {
   return [
@@ -73,24 +74,26 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { configs } = useConfigState();
+    const configsStore = useConfigsStore();
+    const { configs, count } = storeToRefs(configsStore);
 
     const fetchConfigs = () =>
-      configList({
+      configsStore.list({
         category: props.category,
       });
 
     onUnmounted(() => {
-      configListClear();
+      configsStore.$reset();
     });
     return {
       fetchConfigs,
+      count,
       configs,
     };
   },
   render() {
     const { title, onUpdate } = this.$props;
-    const { configs, fetchConfigs, $slots } = this;
+    const { configs, fetchConfigs, $slots, count } = this;
     const columns = getColumns();
     if (onUpdate !== noop) {
       columns.push(
@@ -103,7 +106,10 @@ export default defineComponent({
       <ExTable
         title={title}
         columns={columns}
-        data={configs}
+        data={{
+          items: configs,
+          count,
+        }}
         fetch={fetchConfigs}
       >
         {$slots}

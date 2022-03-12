@@ -93,7 +93,7 @@ func pgOnBeforeConnect(ctx context.Context, config *pgx.ConnConfig) error {
 	log.Info(ctx).
 		Str("category", "pgEvent").
 		Str("host", config.Host).
-		Msg("pg connectting")
+		Msg("pg connecting")
 	return nil
 }
 

@@ -9,16 +9,13 @@ import {
   useMessage,
 } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { storeToRefs } from "pinia";
 import { defineComponent, onUnmounted, ref } from "vue";
 import ExForm, { FormItemTypes } from "../components/ExForm";
 import ExTable, { newStatusValueColumn } from "../components/ExTable";
 import { diff, showError, showWarning } from "../helpers/util";
-import useUserState, {
-  userList,
-  userListClear,
-  userUpdateByID,
-  UserAccount,
-} from "../states/user";
+import { useUserStore } from "../stores/user";
+import { useUsersStore, UserAccount } from "../stores/users";
 
 const userRoleClass = css`
   margin: 0;
@@ -158,25 +155,14 @@ export default defineComponent({
   name: "UsersView",
   setup() {
     const message = useMessage();
-    const { users, info } = useUserState();
+    const { roles } = storeToRefs(useUserStore());
     const mode = ref(listMode);
     const updatedUser = ref({} as UserAccount);
     const updating = ref(false);
 
-    const fetchUsers = async (params: {
-      limit: number;
-      offset: number;
-      keyword?: string;
-      status?: string;
-      role?: string;
-    }) =>
-      userList({
-        limit: params.limit,
-        offset: params.offset,
-        keyword: params.keyword || "",
-        status: params.status || "",
-        role: params.role || "",
-      });
+    const usersStore = useUsersStore();
+
+    const { users, processing, count } = storeToRefs(usersStore);
 
     const update = async (data: Record<string, unknown>) => {
       const diffInfo = diff(data, updatedUser.value);
@@ -189,7 +175,7 @@ export default defineComponent({
       }
       try {
         updating.value = true;
-        await userUpdateByID({
+        await usersStore.update({
           id: updatedUser.value.id as number,
           data: diffInfo.data,
         });
@@ -202,22 +188,33 @@ export default defineComponent({
     };
 
     onUnmounted(() => {
-      userListClear();
+      usersStore.$reset();
     });
 
     return {
       mode,
       updatedUser,
-      userInfo: info,
+      roles,
       users,
+      processing,
+      count,
       updating,
-      fetchUsers,
+      fetchUsers: usersStore.list,
       update,
     };
   },
   render() {
-    const { users, fetchUsers, userInfo, mode, updatedUser, update, updating } =
-      this;
+    const {
+      users,
+      processing,
+      count,
+      fetchUsers,
+      roles,
+      mode,
+      updatedUser,
+      update,
+      updating,
+    } = this;
     if (mode === updateMode) {
       const formItems = getUpdateFormItems(updatedUser);
       return (
@@ -240,7 +237,6 @@ export default defineComponent({
       );
     }
     const columns = getColumns();
-    const { roles } = userInfo;
     if (roles.includes("su") || roles.includes("admin")) {
       const render = (row: Record<string, unknown>) => {
         return (
@@ -269,7 +265,11 @@ export default defineComponent({
         title={"用户查询"}
         columns={columns}
         filters={getFilters()}
-        data={users}
+        data={{
+          items: users,
+          count: count,
+          processing: processing,
+        }}
         fetch={fetchUsers}
       />
     );

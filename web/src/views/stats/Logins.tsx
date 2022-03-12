@@ -2,9 +2,10 @@ import { defineComponent, onUnmounted } from "vue";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 
 import ExTable from "../../components/ExTable";
-import useUserState, { userListLogin, userLoginClear } from "../../states/user";
 import { today } from "../../helpers/util";
 import { FormItemTypes } from "../../components/ExForm";
+import { useUserLoginsStore } from "../../stores/user-logins";
+import { storeToRefs } from "pinia";
 
 function getColumns(): TableColumn[] {
   return [
@@ -82,41 +83,32 @@ function getFilters() {
 export default defineComponent({
   name: "LoginStats",
   setup() {
-    const { logins } = useUserState();
-
-    const fetchLogins = async (params: {
-      limit: number;
-      offset: number;
-      account?: string;
-      begin?: string;
-      end?: string;
-    }) =>
-      userListLogin({
-        limit: params.limit,
-        offset: params.offset,
-        account: params.account || "",
-        begin: params.begin || "",
-        end: params.end || "",
-        order: "-updatedAt",
-      });
+    const userLoginsStore = useUserLoginsStore();
+    const { processing, logins, count } = storeToRefs(userLoginsStore);
 
     onUnmounted(() => {
-      userLoginClear();
+      userLoginsStore.$reset();
     });
 
     return {
+      processing,
       logins,
-      fetchLogins,
+      count,
+      fetchLogins: userLoginsStore.list,
     };
   },
   render() {
-    const { logins, fetchLogins } = this;
+    const { processing, logins, count, fetchLogins } = this;
     return (
       <ExTable
         title={"登录查询"}
         filters={getFilters()}
         columns={getColumns()}
-        data={logins}
+        data={{
+          count,
+          items: logins,
+          processing,
+        }}
         fetch={fetchLogins}
       />
     );

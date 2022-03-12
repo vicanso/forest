@@ -7,7 +7,7 @@ import { padding } from "../constants/style";
 import ExConfigEditor, { getDefaultFormItems } from "./ExConfigEditor";
 import ExConfigTable from "./ExConfigTable";
 import { FormItem } from "./ExForm";
-import { Mode } from "../states/common";
+import { Mode } from "../stores/common";
 
 const addButtonClass = css`
   width: 100%;

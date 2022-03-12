@@ -4,35 +4,38 @@ import ExConfigEditorList from "../../components/ExConfigEditorList";
 import { FormItemTypes, FormItem } from "../../components/ExForm";
 import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
-import useCommonState, { commonListRequestInstance } from "../../states/common";
-import { ConfigCategory } from "../../states/configs";
+import { ConfigCategory } from "../../stores/configs";
 import {
   getDefaultFormRules,
   newRequireRule,
 } from "../../components/ExConfigEditor";
+import { useCommonStore } from "../../stores/common";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "RequestConcurrencyConfigs",
   setup() {
-    const { requestInstances } = useCommonState();
     const message = useMessage();
+    const commonStore = useCommonStore();
+    const { httpInstances, fetchingHTTPInstances } = storeToRefs(commonStore);
 
     onMounted(async () => {
       try {
-        await commonListRequestInstance();
+        await commonStore.listHTTPInstance();
       } catch (err) {
         showError(message, err);
       }
     });
 
     return {
-      requestInstances,
+      processing: fetchingHTTPInstances,
+      httpInstances,
     };
   },
 
   render() {
-    const { requestInstances } = this;
-    if (requestInstances.processing) {
+    const { httpInstances, processing } = this;
+    if (processing) {
       return <ExLoading />;
     }
     const extraFormItems: FormItem[] = [
@@ -46,7 +49,7 @@ export default defineComponent({
         key: "data.name",
         type: FormItemTypes.Select,
         placeholder: "请选择限制并发数的实例",
-        options: requestInstances.items.map((item) => {
+        options: httpInstances.map((item) => {
           return {
             label: item.name,
             value: item.name,

@@ -1,26 +1,28 @@
 import { useMessage } from "naive-ui";
 import { defineComponent, onMounted } from "vue";
 
-import useCommonState, { commonListRouter } from "../../states/common";
 import { showError } from "../../helpers/util";
 import ExLoading from "../../components/ExLoading";
 import { FormItemTypes, FormItem } from "../../components/ExForm";
 import ExConfigEditorList from "../../components/ExConfigEditorList";
-import { ConfigCategory } from "../../states/configs";
+import { ConfigCategory } from "../../stores/configs";
 import {
   getDefaultFormRules,
   newRequireRule,
 } from "../../components/ExConfigEditor";
+import { useCommonStore } from "../../stores/common";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "HTTPServerInterceptorConfigs",
   setup() {
     const message = useMessage();
-    const { routers } = useCommonState();
+    const commonStore = useCommonStore();
+    const { routers, fetchingRouters } = storeToRefs(commonStore);
 
     onMounted(async () => {
       try {
-        await commonListRouter();
+        await commonStore.listRouter();
       } catch (err) {
         showError(message, err);
       }
@@ -28,11 +30,12 @@ export default defineComponent({
 
     return {
       routers,
+      processing: fetchingRouters,
     };
   },
   render() {
-    const { routers } = this;
-    if (routers.processing) {
+    const { routers, processing } = this;
+    if (processing) {
       return <ExLoading />;
     }
     const extraFormItems: FormItem[] = [
@@ -41,7 +44,7 @@ export default defineComponent({
         key: "data.router",
         type: FormItemTypes.Select,
         placeholder: "请选择路由",
-        options: routers.items.map((item) => {
+        options: routers.map((item) => {
           const value = `${item.method} ${item.route}`;
           return {
             label: value,

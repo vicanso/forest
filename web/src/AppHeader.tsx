@@ -10,14 +10,12 @@ import {
 } from "naive-ui";
 import { css } from "@linaria/core";
 import { defineComponent, onBeforeMount } from "vue";
+import { storeToRefs } from "pinia";
 import { mainHeaderHeight, padding } from "./constants/style";
 import { showError } from "./helpers/util";
 import { goToHome, goToLogin, goToRegister, goToProfile } from "./routes";
-import useUserState, { userFetchInfo, userLogout } from "./states/user";
-import useCommonState, {
-  commonGetSettings,
-  commonUpdateSettingTheme,
-} from "./states/common";
+import { useUserStore } from "./stores/user";
+import { useCommonStore } from "./stores/common";
 
 const userInfoClass = css`
   margin-right: 5px;
@@ -36,17 +34,19 @@ const logoClass = css`
 export default defineComponent({
   name: "AppHeader",
   setup() {
-    const { info } = useUserState();
-    const { settings } = useCommonState();
     const message = useMessage();
+    const userStore = useUserStore();
+    const commonStore = useCommonStore();
+    const { anonymous, processing, account } = storeToRefs(userStore);
+    const { setting } = storeToRefs(commonStore);
     onBeforeMount(async () => {
       try {
-        await commonGetSettings();
-        await userFetchInfo();
+        await commonStore.getSetting();
+        await userStore.fetch();
       } catch (err) {
         showError(message, err);
       } finally {
-        if (!info.account) {
+        if (anonymous.value) {
           goToLogin();
         }
       }
@@ -55,7 +55,7 @@ export default defineComponent({
     // 退出登录
     const logout = async () => {
       try {
-        await userLogout();
+        await userStore.logout();
       } catch (err) {
         showError(message, err);
       }
@@ -63,7 +63,7 @@ export default defineComponent({
 
     // 主题选择
     const renderToggleTheme = () => {
-      const isDark = settings.theme === "dark";
+      const isDark = setting.value.theme === "dark";
       const toggleTheme = isDark ? "light" : "dark";
       const text = isDark ? "浅色" : "深色";
       return (
@@ -71,7 +71,7 @@ export default defineComponent({
           bordered={false}
           onClick={async () => {
             try {
-              await commonUpdateSettingTheme(toggleTheme);
+              await commonStore.setTheme(toggleTheme);
             } catch (err) {
               showError(message, err);
             }
@@ -89,7 +89,7 @@ export default defineComponent({
           <NIcon class={userInfoClass}>
             <User />
           </NIcon>
-          {info.account}
+          {account.value}
         </NButton>
         <NButton bordered={false} onClick={logout}>
           退出登录
@@ -111,11 +111,12 @@ export default defineComponent({
       renderToggleTheme,
       renderUserInfo,
       renderCtrls,
-      userInfo: info,
+      anonymous,
+      processing,
     };
   },
   render() {
-    const { processing, account } = this.userInfo;
+    const { processing, anonymous } = this;
     return (
       <NLayoutHeader bordered class={headerClass}>
         <NText tag="div" class={logoClass}>
@@ -135,8 +136,8 @@ export default defineComponent({
         <NSpace justify="end">
           {this.renderToggleTheme()}
           {processing && <span>正在加载中，请稍候...</span>}
-          {!processing && account != "" && this.renderUserInfo()}
-          {!processing && account === "" && this.renderCtrls()}
+          {!processing && !anonymous && this.renderUserInfo()}
+          {!processing && anonymous && this.renderCtrls()}
         </NSpace>
       </NLayoutHeader>
     );

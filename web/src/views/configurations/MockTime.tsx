@@ -8,19 +8,20 @@ import ExConfigEditor, {
 import { FormItemTypes } from "../../components/ExForm";
 import ExLoading from "../../components/ExLoading";
 import { showError } from "../../helpers/util";
-import { ConfigCategory, configGetMockTime } from "../../states/configs";
+import { useConfigsStore, ConfigCategory } from "../../stores/configs";
 
 export default defineComponent({
   name: "MockTimeConfigs",
   setup() {
     const message = useMessage();
+    const configsStore = useConfigsStore();
     const id = ref(0);
     const processing = ref(true);
 
     const fetchMockTimeID = async () => {
       processing.value = true;
       try {
-        const data = await configGetMockTime();
+        const data = await configsStore.getMockTime();
         if (data.id) {
           id.value = data.id;
         }
