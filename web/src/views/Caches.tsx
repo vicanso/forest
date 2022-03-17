@@ -10,12 +10,12 @@ import {
   useMessage,
   NSpin,
   NDataTable,
-  NIcon,
+  NPopconfirm,
+  NPopover,
 } from "naive-ui";
-import { Trash } from "@vicons/fa";
-import { showError, showWarning, toast } from "../helpers/util";
-import { useAdminStore } from "../stores/admin";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
+import { showError, showWarning, toast, formatJSON } from "../helpers/util";
+import { useAdminStore } from "../stores/admin";
 
 const cacheTableClass = css`
   top: 10px;
@@ -28,6 +28,7 @@ export default defineComponent({
     const keyword = ref("");
     const adminStore = useAdminStore();
     const { cacheKeys, fetchingCacheKeys } = storeToRefs(adminStore);
+    const cacheData = ref("");
 
     const fetch = async () => {
       if (!keyword.value) {
@@ -44,13 +45,18 @@ export default defineComponent({
     };
 
     const del = async (key: string) => {
-      if (!key) {
-        showWarning(message, "请输入要删除的key");
-        return;
-      }
       try {
         await adminStore.removeCache(key);
         toast(message, "已成功清除数据");
+      } catch (err) {
+        showError(message, err);
+      }
+    };
+    const getCache = async (key: string) => {
+      try {
+        cacheData.value = "正在获取中，请稍候...";
+        const data = await adminStore.getCache(key);
+        cacheData.value = formatJSON(data);
       } catch (err) {
         showError(message, err);
       }
@@ -62,11 +68,14 @@ export default defineComponent({
       keyword,
       fetch,
       del,
+      getCache,
+      cacheData,
     };
   },
   render() {
     const size = "large";
-    const { fetch, fetchingCacheKeys, cacheKeys, del } = this;
+    const { fetch, fetchingCacheKeys, cacheKeys, del, getCache, cacheData } =
+      this;
     const columns: TableColumn[] = [
       {
         title: "KEY",
@@ -75,19 +84,38 @@ export default defineComponent({
       {
         title: "操作",
         key: "actions",
+        width: 150,
+        align: "center",
         render: (row) => {
+          const delSlots = {
+            trigger: () => <NButton bordered={false}>删除</NButton>,
+          };
+          const viewSlots = {
+            trigger: () => (
+              <NButton
+                bordered={false}
+                onClick={() => {
+                  getCache(row.key as string);
+                }}
+              >
+                查看
+              </NButton>
+            ),
+          };
           return (
-            <NButton
-              bordered={false}
-              onClick={() => {
-                del(row.key as string);
-              }}
-            >
-              <NIcon>
-                <Trash />
-              </NIcon>
-              删除
-            </NButton>
+            <div>
+              <NPopover v-slots={viewSlots} trigger="click" placement="left">
+                <pre>{cacheData}</pre>
+              </NPopover>
+              <NPopconfirm
+                v-slots={delSlots}
+                onPositiveClick={() => {
+                  del(row.key as string);
+                }}
+              >
+                <span>确认要删除此数据吗？</span>
+              </NPopconfirm>
+            </div>
           );
         },
       },

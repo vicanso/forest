@@ -8,7 +8,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.2
 	github.com/fogleman/gg v1.3.0
-	github.com/go-playground/validator/v10 v10.10.0
+	github.com/go-playground/validator/v10 v10.10.1
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
@@ -16,16 +16,16 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/influxdata/influxdb-client-go/v2 v2.8.0
 	github.com/jackc/pgx/v4 v4.15.0
-	github.com/jinzhu/now v1.1.4
+	github.com/jinzhu/now v1.1.5
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/minio-go/v7 v7.0.23
 	github.com/mozillazg/go-pinyin v0.19.0
-	github.com/pyroscope-io/pyroscope v0.11.0
+	github.com/pyroscope-io/pyroscope v0.12.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cast v1.4.1
-	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
+	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.14.0
 	github.com/vicanso/count-warner v1.2.0
 	github.com/vicanso/elton v1.8.3
@@ -40,7 +40,7 @@ require (
 	github.com/vicanso/hes v0.5.0
 	github.com/vicanso/http-trace v1.0.6
 	github.com/vicanso/ips v1.2.1
-	github.com/vicanso/lru-ttl v1.3.2
+	github.com/vicanso/lru-ttl v1.4.0
 	github.com/vicanso/viperx v0.6.0
 	go.uber.org/atomic v1.9.0
 	go.uber.org/automaxprocs v1.4.0
@@ -50,7 +50,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 // indirect
+	ariga.io/atlas v0.3.7 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
-	github.com/google/pprof v0.0.0-20220218203455-0368bd9e19a7 // indirect
+	github.com/google/pprof v0.0.0-20220314021825-5bba342933ea // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -84,7 +84,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.10.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.15.0 // indirect
+	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.11 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20220305071607-d0b38dbe16db // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/shirou/gopsutil/v3 v3.22.2 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/spf13/afero v1.8.1 // indirect
+	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.10.1 // indirect
@@ -120,10 +120,10 @@ require (
 	github.com/vicanso/keygrip v1.2.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
+	golang.org/x/sys v0.0.0-20220317061510-51cd9980dadf // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

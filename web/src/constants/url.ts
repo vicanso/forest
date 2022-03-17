@@ -40,5 +40,5 @@ export const CONFIGS_ID = "/configurations/v1/:id";
 export const CONFIGS_CURRENT_VALID = "/configurations/v1/current-valid";
 
 // 管理员相关接口
-export const ADMINS_CACHES_ID = "/@admin/v1/caches/:key";
+export const ADMINS_CACHES_KEY = "/@admin/v1/caches/:key";
 export const ADMINS_CACHES = "/@admin/v1/caches";

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
 import request from "../helpers/request";
-import { ADMINS_CACHES, ADMINS_CACHES_ID } from "../constants/url";
+import { ADMINS_CACHES, ADMINS_CACHES_KEY } from "../constants/url";
 
 export const useAdminStore = defineStore("admin", {
   state: () => {
@@ -35,12 +35,20 @@ export const useAdminStore = defineStore("admin", {
       }
       try {
         this.fetchingCacheKeys = true;
-        const url = ADMINS_CACHES_ID.replace(":key", key);
+        const url = ADMINS_CACHES_KEY.replace(":key", key);
         await request.delete(url);
         this.cacheKeys = this.cacheKeys.filter((item) => item !== key);
       } finally {
         this.fetchingCacheKeys = false;
       }
+    },
+    // 获取缓存
+    async getCache(key: string): Promise<string> {
+      const url = ADMINS_CACHES_KEY.replace(":key", key);
+      const { data } = await request.get<{
+        data: string;
+      }>(url);
+      return data.data;
     },
   },
 });
