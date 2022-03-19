@@ -90,12 +90,30 @@ func init() {
 	router.NewGroup("").GET("/ping", ctrl.ping)
 	g := router.NewGroup("/commons")
 
-	g.GET("/application", ctrl.getApplicationInfo)
-	g.GET("/routers", ctrl.getRouters)
-	g.GET("/captcha", ctrl.getCaptcha)
-	g.GET("/performance", ctrl.getPerformance)
-	g.GET("/schema-statuses", ctrl.listStatus)
-	g.GET("/random-keys", ctrl.getRandomKeys)
+	g.GET(
+		"/application",
+		ctrl.getApplicationInfo,
+	)
+	g.GET(
+		"/routers",
+		ctrl.getRouters,
+	)
+	g.GET(
+		"/captcha",
+		ctrl.getCaptcha,
+	)
+	g.GET(
+		"/performance",
+		ctrl.getPerformance,
+	)
+	g.GET(
+		"/schema-statuses",
+		ctrl.listStatus,
+	)
+	g.GET(
+		"/random-keys",
+		ctrl.getRandomKeys,
+	)
 	// 获取系统prof指标
 	g.GET(
 		"/prof",

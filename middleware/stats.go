@@ -22,9 +22,10 @@ import (
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
+	"go.uber.org/atomic"
 )
 
-func NewStats() elton.Handler {
+func NewStats(processingCount *atomic.Int32) elton.Handler {
 	return M.NewStats(M.StatsConfig{
 		OnStats: func(info *M.StatsInfo, c *elton.Context) {
 			// ping 的日志忽略
@@ -36,6 +37,7 @@ func NewStats() elton.Handler {
 			// us := service.NewUserSession(c)
 			sid := util.GetSessionID(c)
 			requestBodySize := len(c.RequestBody)
+			processing := processingCount.Load()
 			// 由客户端设置的uuid
 			// zap.String("uuid", c.GetRequestHeader("X-UUID")),
 			log.Info(c.Context()).
@@ -46,7 +48,7 @@ func NewStats() elton.Handler {
 				Str("route", info.Route).
 				Str("uri", info.URI).
 				Int("status", info.Status).
-				Uint32("connecting", info.Connecting).
+				Int32("connecting", processing).
 				Str("latency", info.Latency.String()).
 				Str("requestBodySize", humanize.Bytes(uint64(requestBodySize))).
 				Str("size", humanize.Bytes(uint64(info.Size))).
@@ -58,14 +60,15 @@ func NewStats() elton.Handler {
 				cs.TagRoute:  info.Route,
 			}
 			fields := map[string]interface{}{
-				cs.FieldIP:         info.IP,
-				cs.FieldSID:        sid,
-				cs.FieldURI:        info.URI,
-				cs.FieldStatus:     info.Status,
-				cs.FieldLatency:    int(info.Latency.Milliseconds()),
-				cs.FieldBodySize:   requestBodySize,
-				cs.FieldSize:       info.Size,
-				cs.FieldProcessing: info.Connecting,
+				cs.FieldIP:       info.IP,
+				cs.FieldSID:      sid,
+				cs.FieldURI:      info.URI,
+				cs.FieldStatus:   info.Status,
+				cs.FieldLatency:  int(info.Latency.Milliseconds()),
+				cs.FieldBodySize: requestBodySize,
+				cs.FieldSize:     info.Size,
+				// 以前的数据记录为uint32
+				cs.FieldProcessing: uint32(processing),
 			}
 			helper.GetInfluxDB().Write(cs.MeasurementHTTPStats, tags, fields)
 		},

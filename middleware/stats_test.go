@@ -20,12 +20,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
+	"go.uber.org/atomic"
 )
 
 func TestNewStats(t *testing.T) {
 	assert := assert.New(t)
 	// 仅测试执行，不检查数据
-	fn := NewStats()
+	fn := NewStats(atomic.NewInt32(0))
 	req := httptest.NewRequest("GET", "/", nil)
 	c := elton.NewContext(nil, req)
 	c.Next = func() error {

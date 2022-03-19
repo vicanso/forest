@@ -1,6 +1,6 @@
 module github.com/vicanso/forest
 
-go 1.17
+go 1.18
 
 require (
 	entgo.io/ent v0.10.1
@@ -9,7 +9,7 @@ require (
 	github.com/felixge/fgprof v0.9.2
 	github.com/fogleman/gg v1.3.0
 	github.com/go-playground/validator/v10 v10.10.1
-	github.com/go-redis/redis/v8 v8.11.4
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.4
@@ -28,11 +28,11 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.14.0
 	github.com/vicanso/count-warner v1.2.0
-	github.com/vicanso/elton v1.8.3
-	github.com/vicanso/elton-compress v1.3.0
+	github.com/vicanso/elton v1.8.5
+	github.com/vicanso/elton-compress v1.3.1
 	github.com/vicanso/elton-session v1.2.3
 	github.com/vicanso/go-axios v1.4.0
-	github.com/vicanso/go-cache v1.4.1
+	github.com/vicanso/go-cache v1.5.0
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v0.4.0
 	github.com/vicanso/go-parallel v0.5.0
@@ -68,7 +68,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
-	github.com/google/pprof v0.0.0-20220314021825-5bba342933ea // indirect
+	github.com/google/pprof v0.0.0-20220318212150-b2ab0324ddda // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -85,7 +85,8 @@ require (
 	github.com/jackc/pgtype v1.10.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
-	github.com/klauspost/cpuid/v2 v2.0.11 // indirect
+	github.com/klauspost/cpuid/v2 v2.0.12 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20220305071607-d0b38dbe16db // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
@@ -103,6 +104,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
 	github.com/pyroscope-io/dotnetdiag v1.2.1 // indirect
+	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/shirou/gopsutil/v3 v3.22.2 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
@@ -123,7 +125,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220317061510-51cd9980dadf // indirect
+	golang.org/x/sys v0.0.0-20220318055525-2edf467146b5 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

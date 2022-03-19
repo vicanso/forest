@@ -74,6 +74,7 @@ import (
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
+	"go.uber.org/atomic"
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
@@ -282,10 +283,21 @@ func main() {
 	if util.IsDevelopment() {
 		e.EnableTrace = true
 	}
+	// 记录正在处理的请求数
+	processingCount := atomic.NewInt32(0)
+	// 开始前+1
+	e.OnBefore(func(_ *elton.Context) {
+		processingCount.Inc()
+	})
+	// 完成时-1
+	e.OnDone(func(_ *elton.Context) {
+		processingCount.Dec()
+	})
 	e.SignedKeys = service.GetSignedKeys()
 	e.OnTrace(func(c *elton.Context, infos elton.TraceInfos) {
 		// 设置server timing
-		c.ServerTiming(infos, "forest-")
+		// 只过滤大于5毫秒的处理，避免响应头过大
+		c.ServerTiming(infos.FilterDurationGT(5*time.Millisecond), "forest-")
 	})
 	// 若需要唯一值，可使用ulid或uuid
 	e.GenerateID = func() string {
@@ -308,7 +320,7 @@ func main() {
 	e.UseWithName(middleware.NewEntry(service.IncreaseConcurrency, service.DecreaseConcurrency), "entry")
 
 	// 接口相关统计信息
-	e.UseWithName(middleware.NewStats(), "stats")
+	e.UseWithName(middleware.NewStats(processingCount), "stats")
 
 	// 出错转换为json（出错处理应该在stats之后，这样stats中才可获取到正确的http status code)
 	e.UseWithName(middleware.NewError(), "error")
