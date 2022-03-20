@@ -189,8 +189,7 @@ func (*commonCtrl) getCaptcha(c *elton.Context) error {
 
 // getPerformance 获取应用性能指标
 func (*commonCtrl) getPerformance(c *elton.Context) error {
-	p := service.GetPerformance(c.Context())
-	c.Body = p
+	c.Body = service.GetPerformance(c.Context())
 	return nil
 }
 

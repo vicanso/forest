@@ -290,7 +290,13 @@ func main() {
 		processingCount.Inc()
 	})
 	// 完成时-1
-	e.OnDone(func(_ *elton.Context) {
+	e.OnDone(func(c *elton.Context) {
+		// 如果请求头指定connection: close
+		// server conn stats中无法判断现在处理请求事件
+		// 处理完成时，需要手工将现在处理的连接数-1
+		if c.GetRequestHeader("Connection") == "close" {
+			service.DecHTTPConnProcessing()
+		}
 		processingCount.Dec()
 	})
 	e.SignedKeys = service.GetSignedKeys()

@@ -210,7 +210,7 @@ func MustGetBasicConfig() *BasicConfig {
 		Name:         defaultViperX.GetString(prefix + "name"),
 		RequestLimit: uint(limit),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
-		Prefixes:     defaultViperX.GetStringSlice(prefix + "prefixes"),
+		Prefixes:     defaultViperX.GetStringSliceFromENV(prefix + "prefixes"),
 		Timeout:      defaultViperX.GetDurationFromENV(prefix + "timeout"),
 	}
 	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
@@ -229,10 +229,10 @@ func MustGetSessionConfig() *SessionConfig {
 	sessConfig := &SessionConfig{
 		MaxAge:     defaultViperX.GetDurationFromENV(prefix + "maxAge"),
 		TTL:        defaultViperX.GetDurationFromENV(prefix + "ttl"),
-		Key:        defaultViperX.GetString(prefix + "key"),
-		CookiePath: defaultViperX.GetString(prefix + "path"),
-		Keys:       defaultViperX.GetStringSlice(prefix + "keys"),
-		TrackKey:   defaultViperX.GetString(prefix + "trackKey"),
+		Key:        defaultViperX.GetStringFromENV(prefix + "key"),
+		CookiePath: defaultViperX.GetStringFromENV(prefix + "path"),
+		Keys:       defaultViperX.GetStringSliceFromENV(prefix + "keys"),
+		TrackKey:   defaultViperX.GetStringFromENV(prefix + "trackKey"),
 	}
 	mustValidate(sessConfig)
 	return sessConfig
