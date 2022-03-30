@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog"
+	"github.com/samber/lo"
 	"github.com/vicanso/elton"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/forest/cs"
@@ -154,7 +155,7 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 
 // newTrackerMiddleware 初始化用户行为跟踪中间件
 func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Handler {
-	marshalString := func(data interface{}) string {
+	marshalString := func(data any) string {
 		buf, _ := json.Marshal(data)
 		return string(buf)
 	}
@@ -175,7 +176,7 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 			ip := c.RealIP()
 			sid := util.GetSessionID(c)
 
-			fields := map[string]interface{}{
+			fields := map[string]any{
 				cs.FieldAccount: account,
 				cs.FieldIP:      ip,
 				cs.FieldSID:     sid,
@@ -227,7 +228,7 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 				tags["step"] = currentStep
 			}
 			if extraParams != nil && extraParams.CustomTags != nil {
-				util.MergeMapString(tags, extraParams.CustomTags(c))
+				lo.Assign[string, string](tags, extraParams.CustomTags(c))
 			}
 			getInfluxSrv().Write(cs.MeasurementUserTracker, tags, fields)
 		},
@@ -268,10 +269,10 @@ func isIntranet(c *elton.Context) error {
 	return hes.NewWithStatusCode("Forbidden", 403)
 }
 
-func validateBody(c *elton.Context, params interface{}) error {
+func validateBody(c *elton.Context, params any) error {
 	return validate.Do(params, c.RequestBody)
 }
 
-func validateQuery(c *elton.Context, params interface{}) error {
+func validateQuery(c *elton.Context, params any) error {
 	return validate.Query(params, c.Query())
 }

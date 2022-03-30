@@ -156,7 +156,7 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 // }
 
 // doValidate 校验struct
-func doValidate(s interface{}, data interface{}) error {
+func doValidate(s any, data any) error {
 	// statusCode := http.StatusBadRequest
 	if data != nil {
 		switch data := data.(type) {
@@ -310,7 +310,7 @@ func queryFillValue(value reflect.Value, field reflect.StructField, data map[str
 }
 
 // Query 转换数据后执行校验，用于将query转换为struct时使用
-func Query(s interface{}, data map[string]string) error {
+func Query(s any, data map[string]string) error {
 	v := reflect.ValueOf(s)
 	if v.Kind() != reflect.Ptr {
 		return wrapError(errors.New("only support pointer"))
@@ -330,7 +330,7 @@ func Query(s interface{}, data map[string]string) error {
 }
 
 // Do 执行校验
-func Do(s interface{}, data interface{}) error {
+func Do(s any, data any) error {
 	err := doValidate(s, data)
 	if err != nil {
 		return wrapError(err)
@@ -339,7 +339,7 @@ func Do(s interface{}, data interface{}) error {
 }
 
 // 对struct校验
-func Struct(s interface{}) error {
+func Struct(s any) error {
 	defaults.SetDefaults(s)
 	err := defaultValidator.Struct(s)
 	if err != nil {

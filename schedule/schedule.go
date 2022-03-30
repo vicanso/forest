@@ -34,7 +34,7 @@ import (
 
 type (
 	taskFn      func() error
-	statsTaskFn func() map[string]interface{}
+	statsTaskFn func() map[string]any
 )
 
 const logCategory = "schedule"
@@ -98,7 +98,7 @@ func configRefresh() {
 }
 
 func redisStats() {
-	doStatsTask("redis stats", func() map[string]interface{} {
+	doStatsTask("redis stats", func() map[string]any {
 		// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 		stats := helper.RedisStats()
 		helper.GetInfluxDB().Write(cs.MeasurementRedisStats, nil, stats)
@@ -112,7 +112,7 @@ func entPing() {
 
 // entStats ent的性能统计
 func entStats() {
-	doStatsTask("ent stats", func() map[string]interface{} {
+	doStatsTask("ent stats", func() map[string]any {
 		stats := helper.EntGetStats()
 		helper.GetInfluxDB().Write(cs.MeasurementEntStats, nil, stats)
 		return stats
@@ -130,11 +130,11 @@ func cpuUsageStats() {
 
 // influxdbStats influxdb统计
 func influxdbStats() {
-	doStatsTask("influxdb stats", func() map[string]interface{} {
+	doStatsTask("influxdb stats", func() map[string]any {
 		db := helper.GetInfluxDB()
 		writeCount := db.GetAndResetWriteCount()
 		writingCount := db.GetWritingCount()
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldProcessing: writingCount,
 			cs.FieldCount:      writeCount,
 		}
@@ -168,11 +168,11 @@ const mb = 1024 * 1024
 
 // performanceStats 系统性能
 func performanceStats() {
-	doStatsTask("performance stats", func() map[string]interface{} {
+	doStatsTask("performance stats", func() map[string]any {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		data := service.GetPerformance(ctx)
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldGoMaxProcs:   data.GoMaxProcs,
 			cs.FieldThreadCount:  int(data.ThreadCount),
 			cs.FieldRoutineCount: data.RoutineCount,
@@ -299,13 +299,13 @@ func performanceStats() {
 
 // httpInstanceStats http instance stats
 func httpInstanceStats() {
-	doStatsTask("http instance stats", func() map[string]interface{} {
-		fields := make(map[string]interface{})
+	doStatsTask("http instance stats", func() map[string]any {
+		fields := make(map[string]any)
 		statsList := request.GetHTTPStats()
 		for _, stats := range statsList {
 			helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, map[string]string{
 				cs.TagService: stats.Name,
-			}, map[string]interface{}{
+			}, map[string]any{
 				cs.FieldMaxConcurrency: stats.MaxConcurrency,
 				cs.FieldProcessing:     stats.Concurrency,
 			})
@@ -323,9 +323,9 @@ func influxdbPing() {
 
 // routerConcurrencyStats router concurrency stats
 func routerConcurrencyStats() {
-	doStatsTask("router concurrency stats", func() map[string]interface{} {
+	doStatsTask("router concurrency stats", func() map[string]any {
 		result := routerconcurrency.GetLimiter().GetStats()
-		fields := make(map[string]interface{})
+		fields := make(map[string]any)
 
 		influxSrv := helper.GetInfluxDB()
 		for key, value := range result {
@@ -336,7 +336,7 @@ func routerConcurrencyStats() {
 			fields[key] = value
 			influxSrv.Write(cs.MeasurementRouterConcurrency, map[string]string{
 				cs.TagRoute: key,
-			}, map[string]interface{}{
+			}, map[string]any{
 				cs.FieldCount: int(value),
 			})
 		}

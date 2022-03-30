@@ -1,3 +1,13 @@
+// 获取客户IP
+function getClientIP() {
+  return req.ip;
+}
+
+// 获取客户cookie
+function getCookie(name) {
+  return req.cookies[name];
+}
+
 // 从请求的query中获取key对应的值
 function getReqQuery(key) {
   return req.query[key];

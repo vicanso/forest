@@ -39,18 +39,6 @@ func TestSha256(t *testing.T) {
 	assert.Equal("ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=", Sha256("abc"))
 }
 
-func TestContainsString(t *testing.T) {
-	assert := assert.New(t)
-	assert.True(ContainsString([]string{
-		"a",
-		"b",
-	}, "a"))
-	assert.False(ContainsString([]string{
-		"a",
-		"b",
-	}, "c"))
-}
-
 func TestContainsAny(t *testing.T) {
 	assert := assert.New(t)
 	assert.True(ContainsAny([]string{

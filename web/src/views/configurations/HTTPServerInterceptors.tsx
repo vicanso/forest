@@ -53,6 +53,12 @@ export default defineComponent({
         }),
       },
       {
+        name: "IP：",
+        span: 24,
+        key: "data.ip",
+        placeholder: "请填写需要拦截的IP，如果未指定则表示所有IP均处理",
+      },
+      {
         name: "前置脚本：",
         key: "data.before",
         type: FormItemTypes.TextArea,

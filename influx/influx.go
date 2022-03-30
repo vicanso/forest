@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/samber/lo"
 	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
@@ -41,29 +42,29 @@ type (
 		End         time.Time `validate:"required"`
 		Limit       int       `default:"20" validate:"required"`
 		Tags        map[string]string
-		Fields      map[string]interface{}
+		Fields      map[string]any
 	}
 )
 
 type mutexMapSlice struct {
 	mutex sync.Mutex
-	data  []map[string]interface{}
+	data  []map[string]any
 }
 
 func newMutexMapSlice() *mutexMapSlice {
 	return &mutexMapSlice{}
 }
 
-func (m *mutexMapSlice) Add(data ...map[string]interface{}) {
+func (m *mutexMapSlice) Add(data ...map[string]any) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	if m.data == nil {
-		m.data = make([]map[string]interface{}, 0)
+		m.data = make([]map[string]any, 0)
 	}
 	m.data = append(m.data, data...)
 }
 
-func (m *mutexMapSlice) List() []map[string]interface{} {
+func (m *mutexMapSlice) List() []map[string]any {
 	return m.data
 }
 
@@ -179,7 +180,7 @@ schema.measurementTagKeys(
 	return
 }
 
-func addTagQuery(query, key string, value interface{}) string {
+func addTagQuery(query, key string, value any) string {
 	str, ok := value.(string)
 	template := `|> filter(fn: (r) => r.%s == %v)
 `
@@ -192,7 +193,7 @@ func addTagQuery(query, key string, value interface{}) string {
 	return query
 }
 
-func addFieldsQuery(query string, fields map[string]interface{}) string {
+func addFieldsQuery(query string, fields map[string]any) string {
 	if len(fields) == 0 {
 		return query
 	}
@@ -221,7 +222,7 @@ func addFieldsQuery(query string, fields map[string]interface{}) string {
 	return query
 }
 
-func (srv *influxSrv) pivotQuery(ctx context.Context, measurement string, params map[string]interface{}) ([]map[string]interface{}, error) {
+func (srv *influxSrv) pivotQuery(ctx context.Context, measurement string, params map[string]any) ([]map[string]any, error) {
 	t, ok := params["_time"].(time.Time)
 	if !ok {
 		return nil, errors.New("time can not be nil")
@@ -254,7 +255,7 @@ func (srv *influxSrv) pivotQuery(ctx context.Context, measurement string, params
 	return items, nil
 }
 
-func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[string]interface{}, error) {
+func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[string]any, error) {
 	err := validate.Struct(&params)
 	if err != nil {
 		return nil, err
@@ -275,7 +276,7 @@ func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[stri
 		}
 		query = addTagQuery(query, k, v)
 	}
-	fields := make(map[string]interface{})
+	fields := make(map[string]any)
 	// 过滤空值
 	for k, v := range params.Fields {
 		if v == nil {
@@ -309,8 +310,7 @@ func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[stri
 	result := newMutexMapSlice()
 	err = parallel.Parallel(func(index int) error {
 		// 首次筛选的结果均符合tag，因此pivot的时候将fields也增加匹配
-		query := util.MergeMapStringInterface(items[index], fields)
-		fmt.Println(query)
+		query := lo.Assign[string, any](items[index], fields)
 		tmpItems, err := srv.pivotQuery(ctx, params.Measurement, query)
 		if err != nil {
 			return err
@@ -338,7 +338,7 @@ func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[stri
 	return items, nil
 }
 
-func (srv *influxSrv) QueryRaw(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+func (srv *influxSrv) QueryRaw(ctx context.Context, query string) (items []map[string]any, err error) {
 	if srv.db == nil {
 		return
 	}
@@ -393,7 +393,7 @@ schema.measurementFieldKeys(
 }
 
 // Write 写入数据
-func (srv *influxSrv) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
+func (srv *influxSrv) Write(measurement string, tags map[string]string, fields map[string]any, ts ...time.Time) {
 	if srv.db == nil {
 		return
 	}

@@ -187,7 +187,7 @@ func mustLoadConfig() *viperx.ViperX {
 }
 
 // mustValidate 对数据校验，如果出错则panic，仅用于初始化时的配置检查
-func mustValidate(v interface{}) {
+func mustValidate(v any) {
 	err := validate.Do(v, nil)
 	if err != nil {
 		panic(err)

@@ -28,6 +28,7 @@ import (
 
 	"github.com/mozillazg/go-pinyin"
 	"github.com/rs/xid"
+	"github.com/samber/lo"
 )
 
 // https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
@@ -82,29 +83,14 @@ func Sha256(str string) string {
 	return base64.StdEncoding.EncodeToString(hashBytes)
 }
 
-// ContainsString 判断字符串数组是否包含该字符串
-func ContainsString(arr []string, str string) (found bool) {
-	for _, v := range arr {
-		if found {
-			break
-		}
-		if v == str {
-			found = true
-		}
-	}
-	return
-}
-
 // ContainsAny 判断该字符串数据是否包含其中任意一个字符串
 func ContainsAny(targets []string, checkArr []string) bool {
-	valid := false
 	for _, item := range targets {
-		if ContainsString(checkArr, item) {
-			valid = true
-			break
+		if lo.Contains[string](checkArr, item) {
+			return true
 		}
 	}
-	return valid
+	return false
 }
 
 // Encrypt 数据加密

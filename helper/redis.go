@@ -86,7 +86,7 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 		PoolSize:         redisConfig.PoolSize,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			log.Info(ctx).Msg("redis new connection is established")
-			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
+			GetInfluxDB().Write(cs.MeasurementRedisConn, nil, map[string]any{
 				cs.FieldCount: 1,
 				cs.FieldAddr:  cn.String(),
 			})
@@ -136,7 +136,7 @@ func (rh *redisHook) addStats(ctx context.Context, cmd, err string) {
 	tags := map[string]string{
 		cs.TagOP: cmd,
 	}
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		cs.FieldLatency: int(d.Milliseconds()),
 	}
 	if len(err) != 0 {
@@ -229,7 +229,7 @@ func (*redisHook) ReportResult(result error) {
 			Str("category", "redisProcessFail").
 			Err(result).
 			Msg("")
-		GetInfluxDB().Write(cs.MeasurementRedisError, nil, map[string]interface{}{
+		GetInfluxDB().Write(cs.MeasurementRedisError, nil, map[string]any{
 			cs.FieldError: result.Error(),
 		})
 	}
@@ -246,10 +246,10 @@ func RedisIsNilError(err error) bool {
 }
 
 // RedisStats 获取redis的性能统计
-func RedisStats() map[string]interface{} {
+func RedisStats() map[string]any {
 	stats := RedisGetClient().PoolStats()
 	processing, pipeProcessing, total := defaultRedisHook.getProcessingAndTotal()
-	return map[string]interface{}{
+	return map[string]any{
 		cs.FieldHits:          int(stats.Hits),
 		cs.FieldMisses:        int(stats.Misses),
 		cs.FieldTimeouts:      int(stats.Timeouts),

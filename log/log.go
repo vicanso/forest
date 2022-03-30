@@ -53,7 +53,7 @@ func (hsl *httpServerLogger) Write(p []byte) (int, error) {
 
 type redisLogger struct{}
 
-func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
+func (rl *redisLogger) Printf(ctx context.Context, format string, v ...any) {
 	Info(context.Background()).
 		Str("category", "redisLogger").
 		Msg(fmt.Sprintf(format, v...))
@@ -61,7 +61,7 @@ func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface
 
 type entLogger struct{}
 
-func (el *entLogger) Log(args ...interface{}) {
+func (el *entLogger) Log(args ...any) {
 	Info(context.Background()).
 		Msg(fmt.Sprint(args...))
 }
@@ -160,7 +160,7 @@ func URLValues(query url.Values) *zerolog.Event {
 }
 
 // Struct create a struct log event
-func Struct(data interface{}) *zerolog.Event {
+func Struct(data any) *zerolog.Event {
 	if data == nil {
 		return zerolog.Dict()
 	}

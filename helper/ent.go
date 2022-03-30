@@ -276,7 +276,7 @@ func initSchemaHooks(c *ent.Client) {
 				result = cs.ResultFail
 				message = err.Error()
 			}
-			data := make(map[string]interface{})
+			data := make(map[string]any)
 			for _, name := range m.Fields() {
 				if isIgnored(name) {
 					continue
@@ -315,7 +315,7 @@ func initSchemaHooks(c *ent.Client) {
 				Dict("data", log.Struct(data)).
 				Str("message", message).
 				Msg("")
-			fields := map[string]interface{}{
+			fields := map[string]any{
 				cs.FieldProcessing:      int(processing),
 				cs.FieldTotalProcessing: int(totalProcessing),
 				cs.FieldLatency:         int(d.Milliseconds()),
@@ -336,9 +336,9 @@ func initSchemaHooks(c *ent.Client) {
 }
 
 // EntGetStats get ent stats
-func EntGetStats() map[string]interface{} {
+func EntGetStats() map[string]any {
 	info := defaultEntDriver.DB().Stats()
-	stats := map[string]interface{}{
+	stats := map[string]any{
 		cs.FieldMaxOpenConns:      info.MaxOpenConnections,
 		cs.FieldOpenConns:         info.OpenConnections,
 		cs.FieldInUseConns:        info.InUse,

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/dop251/goja v0.0.0-20220214123719-b09a6bfa842f
+	github.com/dop251/goja v0.0.0-20220324112439-a18ffb9c5866
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.2
 	github.com/fogleman/gg v1.3.0
@@ -13,21 +13,22 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/iancoleman/strcase v0.2.0
-	github.com/influxdata/influxdb-client-go/v2 v2.8.0
+	github.com/influxdata/influxdb-client-go/v2 v2.8.1
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/jinzhu/now v1.1.5
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/minio/minio-go/v7 v7.0.23
 	github.com/mozillazg/go-pinyin v0.19.0
-	github.com/pyroscope-io/pyroscope v0.12.0
+	github.com/pyroscope-io/pyroscope v0.13.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/rs/xid v1.3.0
+	github.com/rs/xid v1.4.0
 	github.com/rs/zerolog v1.26.1
+	github.com/samber/lo v1.11.0
 	github.com/spf13/cast v1.4.1
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.14.0
 	github.com/vicanso/count-warner v1.2.0
-	github.com/vicanso/elton v1.9.0
+	github.com/vicanso/elton v1.9.1
 	github.com/vicanso/elton-compress v1.3.1
 	github.com/vicanso/elton-session v1.2.3
 	github.com/vicanso/go-axios v1.4.0
@@ -44,7 +45,7 @@ require (
 	go.uber.org/atomic v1.9.0
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.2.0
-	golang.org/x/image v0.0.0-20220302094943-723b81ca9867
+	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
@@ -88,7 +89,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.12 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lufia/plan9stats v0.0.0-20220305071607-d0b38dbe16db // indirect
+	github.com/lufia/plan9stats v0.0.0-20220326011226-f1430873d8db // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -122,12 +123,13 @@ require (
 	github.com/vicanso/keygrip v1.2.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
-	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
+	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
+	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb // indirect
+	golang.org/x/mod v0.6.0-dev.0.20211013180041-c96bc1413d57 // indirect
+	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
+	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -22,13 +22,13 @@ import (
 	"github.com/dop251/goja"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/asset"
-	"github.com/vicanso/forest/util"
 	"go.uber.org/atomic"
 )
 
 type httpInterceptorScript struct {
 	Before string
 	After  string
+	IP     string
 }
 type httpInterceptors struct {
 	scripts    *atomic.Value
@@ -68,6 +68,7 @@ func UpdateHTTPInterceptors(arr []string) {
 		scripts[router] = &httpInterceptorScript{
 			Before: script["before"],
 			After:  script["after"],
+			IP:     script["ip"],
 		}
 	}
 	currentHTTPInterceptors.scripts.Store(scripts)
@@ -76,11 +77,18 @@ func UpdateHTTPInterceptors(arr []string) {
 // http服务器接收请求
 // 其中query为了简便直接使用了map[string]string替换map[string][]string
 type httpServerRequest struct {
-	URI   string            `json:"uri"`
+	// 请求地址
+	URI string `json:"uri"`
+	// HTTP Query
 	Query map[string]string `json:"query"`
+	// HTTP Cookies
+	Cookies map[string]string `json:"cookies"`
+	// IP地址
+	IP string `json:"ip"`
 	// 是否有修改query
-	ModifiedQuery bool                   `json:"modifiedQuery"`
-	Body          map[string]interface{} `json:"body"`
+	ModifiedQuery bool `json:"modifiedQuery"`
+	// 响应数据
+	Body map[string]any `json:"body"`
 	// 是否有修改body
 	ModifiedBody bool `json:"modifiedBody"`
 }
@@ -92,7 +100,7 @@ type httpServerResponse struct {
 	// 响应头
 	Header map[string]string `json:"header"`
 	// 响应数据
-	Body map[string]interface{} `json:"body"`
+	Body map[string]any `json:"body"`
 }
 
 type httpServerInterceptor struct {
@@ -122,10 +130,20 @@ func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
 	for key, values := range c.Request.URL.Query() {
 		query[key] = values[0]
 	}
+	cookies := make(map[string]string)
+	for _, cookie := range c.Request.Cookies() {
+		if cookie.Value == "" {
+			continue
+		}
+		cookies[cookie.Name] = cookie.Value
+	}
+
 	req := &httpServerRequest{
-		URI:   c.Request.URL.RequestURI(),
-		Query: query,
-		Body:  make(map[string]interface{}),
+		URI:     c.Request.URL.RequestURI(),
+		Query:   query,
+		Body:    make(map[string]any),
+		IP:      c.ClientIP(),
+		Cookies: cookies,
 	}
 	if len(c.RequestBody) != 0 {
 		_ = json.Unmarshal(c.RequestBody, &req.Body)
@@ -136,7 +154,7 @@ func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
 func newHTTPServerResponse() *httpServerResponse {
 	return &httpServerResponse{
 		Header: make(map[string]string),
-		Body:   make(map[string]interface{}),
+		Body:   make(map[string]any),
 	}
 }
 
@@ -153,6 +171,10 @@ func (resp *httpServerResponse) SetResponse(c *elton.Context) {
 func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 	script := currentHTTPInterceptors.Get(c.Request.Method + " " + c.Route)
 	if script == nil {
+		return nil, nil
+	}
+	// 如果指定了IP但客户非此IP
+	if script.IP != "" && c.ClientIP() != script.IP {
 		return nil, nil
 	}
 
@@ -191,8 +213,7 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 			}
 			// 如果有修改body
 			if req.ModifiedBody {
-				body := util.MergeMapStringInterface(req.Body, req.Body)
-				c.RequestBody, _ = json.Marshal(body)
+				c.RequestBody, _ = json.Marshal(req.Body)
 			}
 			return resp, nil
 		},

@@ -40,7 +40,7 @@ func finalizerHandler(f *finalizerRef) {
 	default:
 		influx.New().Write(cs.MeasurementEvent, map[string]string{
 			cs.TagCategory: "gc",
-		}, map[string]interface{}{
+		}, map[string]any{
 			cs.FieldCount: 1,
 		})
 		log.Info(context.Background()).

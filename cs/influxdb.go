@@ -306,7 +306,7 @@ const (
 	FieldException = "exception"
 )
 
-// map[string]interface{} 类型
+// map[string]any 类型
 const (
 	// FieldData 数据
 	FieldData = "data"

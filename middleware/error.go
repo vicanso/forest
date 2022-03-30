@@ -71,7 +71,7 @@ func NewError() elton.Handler {
 
 		he.AddExtra("route", c.Route)
 		// 记录用户相关信息
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldStatus:    he.StatusCode,
 			cs.FieldError:     he.Error(),
 			cs.FieldURI:       uri,

@@ -25,6 +25,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
+	"github.com/samber/lo"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
@@ -147,7 +148,7 @@ type (
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time" validate:"required"`
 			// Extra 其它额外信息
-			Extra map[string]interface{} `json:"extra"`
+			Extra map[string]any `json:"extra"`
 		} `json:"actions" validate:"required,dive"`
 	}
 )
@@ -581,7 +582,7 @@ func (*userCtrl) me(c *elton.Context) error {
 		})
 
 		ip := c.RealIP()
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldUserAgent: c.GetRequestHeader("User-Agent"),
 			cs.FieldTID:       uid,
 			cs.FieldIP:        ip,
@@ -701,7 +702,7 @@ func (*userCtrl) login(c *elton.Context) error {
 	go func() {
 		// 由于elton.context可利用
 		// 此函数中不可再使用elton.context的相关属性(c.Context()也不可以)
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldAccount:   account,
 			cs.FieldUserAgent: userAgent,
 			cs.FieldIP:        ip,
@@ -899,7 +900,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) error {
 		// 随机生成nano second填充
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldRouteName: item.Route,
 			cs.FieldPath:      item.Path,
 			cs.FieldTID:       tid,
@@ -907,7 +908,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) error {
 		if account != "" {
 			fields[cs.FieldAccount] = account
 		}
-		fields = util.MergeMapStringInterface(fields, item.Extra)
+		fields = lo.Assign[string, any](fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
 			cs.TagCategory: item.Category,
 			cs.TagResult:   strconv.Itoa(item.Result),

@@ -59,16 +59,15 @@ func NewStats(processingCount *atomic.Int32) elton.Handler {
 				cs.TagMethod: info.Method,
 				cs.TagRoute:  info.Route,
 			}
-			fields := map[string]interface{}{
-				cs.FieldIP:       info.IP,
-				cs.FieldSID:      sid,
-				cs.FieldURI:      info.URI,
-				cs.FieldStatus:   info.Status,
-				cs.FieldLatency:  int(info.Latency.Milliseconds()),
-				cs.FieldBodySize: requestBodySize,
-				cs.FieldSize:     info.Size,
-				// 以前的数据记录为uint32
-				cs.FieldProcessing: uint32(processing),
+			fields := map[string]any{
+				cs.FieldIP:         info.IP,
+				cs.FieldSID:        sid,
+				cs.FieldURI:        info.URI,
+				cs.FieldStatus:     info.Status,
+				cs.FieldLatency:    int(info.Latency.Milliseconds()),
+				cs.FieldBodySize:   requestBodySize,
+				cs.FieldSize:       info.Size,
+				cs.FieldProcessing: processing,
 			}
 			helper.GetInfluxDB().Write(cs.MeasurementHTTPStats, tags, fields)
 		},

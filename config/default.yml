@@ -39,7 +39,7 @@ database:
 # influxdb 配置
 influxdb:
   # 如果与influxdb非同一内网，建议设置为gzip=true
-  uri: http://127.0.0.1:8086/?bucket=forest&org=bigTree&token=Hv6UxCWbj1Vp-W7NHqa3HS5ph5iowx1AedA6Po3NtlbyYcjZxuLYhSkqkv178etsJijLUooRtSOJi0NLi_irZA==&batchSize=100&flushInterval=10s&gzip=false&disabled=false
+  uri: http://127.0.0.1:8086/?bucket=forest&org=bigTree&token=5o2Ev-LMHztuVARqKWqqkGiEphNCCsZ-meqABdC1OtFCtp8CMMROg4AwOYWvV76sTzM8LhK-PDoQTGyxD7DxBw==&batchSize=100&flushInterval=10s&gzip=false&disabled=false
 
 # mail相关配置
 mail:

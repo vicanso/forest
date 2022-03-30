@@ -117,7 +117,7 @@ func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI, db *InfluxDB) {
 		// 避免 write的时候卡住，导致err channel一直没处理而导致定入卡住
 		go db.Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "influxdbError",
-		}, map[string]interface{}{
+		}, map[string]any{
 			cs.FieldError: err.Error(),
 		})
 	}
@@ -145,7 +145,7 @@ func (db *InfluxDB) Health() error {
 	return nil
 }
 
-func (db *InfluxDB) Query(ctx context.Context, query string) ([]map[string]interface{}, error) {
+func (db *InfluxDB) Query(ctx context.Context, query string) ([]map[string]any, error) {
 	if db.client == nil {
 		return nil, nil
 	}
@@ -153,7 +153,7 @@ func (db *InfluxDB) Query(ctx context.Context, query string) ([]map[string]inter
 	if err != nil {
 		return nil, err
 	}
-	items := make([]map[string]interface{}, 0)
+	items := make([]map[string]any, 0)
 	for result.Next() {
 		items = append(items, result.Record().Values())
 	}
@@ -174,7 +174,7 @@ func (db *InfluxDB) GetWritingCount() int32 {
 }
 
 // Write 写入数据
-func (db *InfluxDB) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
+func (db *InfluxDB) Write(measurement string, tags map[string]string, fields map[string]any, ts ...time.Time) {
 	if db.writer == nil {
 		return
 	}
@@ -186,7 +186,7 @@ func (db *InfluxDB) Write(measurement string, tags map[string]string, fields map
 		now = time.Now()
 	}
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	if hostname != "" && fields["hostname"] == nil {
 		fields["hostname"] = hostname

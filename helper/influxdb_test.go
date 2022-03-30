@@ -22,13 +22,13 @@ import (
 func TestInfluxWrite(t *testing.T) {
 	GetInfluxDB().Write("test", map[string]string{
 		"type": "vip",
-	}, map[string]interface{}{
+	}, map[string]any{
 		"name":  "test",
 		"count": 1,
 	})
 	GetInfluxDB().Write("test", map[string]string{
 		"type": "vip",
-	}, map[string]interface{}{
+	}, map[string]any{
 		"name":  "test",
 		"count": 1,
 	}, time.Now())

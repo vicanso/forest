@@ -180,7 +180,7 @@ func (ctrl fluxCtrl) listHTTPError(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	fields := map[string]interface{}{
+	fields := map[string]any{
 		cs.FieldAccount: params.Account,
 	}
 	if params.Exception != "" {
@@ -203,7 +203,7 @@ func (ctrl fluxCtrl) listHTTPError(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	c.Body = map[string]interface{}{
+	c.Body = map[string]any{
 		"httpErrors": result,
 		"count":      len(result),
 	}
@@ -227,14 +227,14 @@ func (ctrl fluxCtrl) listTracker(c *elton.Context) error {
 			cs.TagAction: params.Action,
 			cs.TagResult: params.Result,
 		},
-		Fields: map[string]interface{}{
+		Fields: map[string]any{
 			cs.FieldAccount: params.Account,
 		},
 	})
 	if err != nil {
 		return err
 	}
-	c.Body = map[string]interface{}{
+	c.Body = map[string]any{
 		"trackers": result,
 		"count":    len(result),
 	}
@@ -248,7 +248,7 @@ func (ctrl fluxCtrl) listRequest(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	fields := map[string]interface{}{}
+	fields := map[string]any{}
 	if params.Exception != "" {
 		exception := false
 		if params.Exception == "true" {
@@ -271,7 +271,7 @@ func (ctrl fluxCtrl) listRequest(c *elton.Context) error {
 	if err != nil {
 		return err
 	}
-	c.Body = map[string]interface{}{
+	c.Body = map[string]any{
 		"requests": result,
 		"count":    len(result),
 	}

@@ -41,7 +41,7 @@ func newOnDone(serviceName string) axios.OnDone {
 			cs.TagMethod:  stats.Method,
 			cs.TagResult:  strconv.Itoa(stats.Result),
 		}
-		fields := map[string]interface{}{
+		fields := map[string]any{
 			cs.FieldURI:    stats.URI,
 			cs.FieldStatus: stats.Status,
 		}
@@ -80,7 +80,7 @@ func newOnDone(serviceName string) axios.OnDone {
 			}
 		}
 		// 输出响应数据，如果响应数据为隐私数据可不输出
-		var data interface{}
+		var data any
 		size := stats.Size
 		if resp != nil {
 			data = resp.UnmarshalData

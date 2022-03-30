@@ -99,7 +99,7 @@ func init() {
 		return reg.ReplaceAllString(file, "")
 	})
 
-	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
+	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...any) {
 		value := fmt.Sprintf(format, args...)
 		log.Info(context.Background()).
 			Msg(value)
@@ -212,7 +212,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		influx.New().Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "routeError",
 			cs.TagRoute:    c.Route,
-		}, map[string]interface{}{
+		}, map[string]any{
 			cs.FieldIP:  ip,
 			cs.FieldURI: uri,
 		})
@@ -405,7 +405,7 @@ func main() {
 	service.SetApplicationStatus(service.ApplicationStatusRunning)
 	influx.New().Write(cs.MeasurementEvent, map[string]string{
 		cs.TagCategory: "start",
-	}, map[string]interface{}{
+	}, map[string]any{
 		cs.FieldCount: 1,
 	})
 
