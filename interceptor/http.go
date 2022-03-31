@@ -18,17 +18,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/dop251/goja"
+	"github.com/samber/lo"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/asset"
 	"go.uber.org/atomic"
 )
 
 type httpInterceptorScript struct {
-	Before string
-	After  string
-	IP     string
+	Router string `json:"router"`
+	Before string `json:"before"`
+	After  string `json:"after"`
+	IP     string `json:"ip"`
+	Cookie string `json:"cookie"`
 }
 type httpInterceptors struct {
 	scripts    *atomic.Value
@@ -58,18 +63,14 @@ func (interceptors *httpInterceptors) Get(router string) *httpInterceptorScript 
 func UpdateHTTPInterceptors(arr []string) {
 	scripts := make(map[string]*httpInterceptorScript)
 	for _, item := range arr {
-		script := make(map[string]string)
+		script := httpInterceptorScript{}
 		_ = json.Unmarshal([]byte(item), &script)
-		router := script["router"]
+		router := script.Router
 		// 只根据是否有router来判断是否正确
 		if router == "" {
 			continue
 		}
-		scripts[router] = &httpInterceptorScript{
-			Before: script["before"],
-			After:  script["after"],
-			IP:     script["ip"],
-		}
+		scripts[router] = &script
 	}
 	currentHTTPInterceptors.scripts.Store(scripts)
 }
@@ -176,6 +177,18 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 	// 如果指定了IP但客户非此IP
 	if script.IP != "" && c.ClientIP() != script.IP {
 		return nil, nil
+	}
+	if script.Cookie != "" {
+		arr := strings.Split(script.Cookie, ";")
+		cookies := lo.Map[*http.Cookie, string](c.Request.Cookies(), func(cookie *http.Cookie, _ int) string {
+			return fmt.Sprintf("%s=%s", cookie.Name, cookie.Value)
+		})
+		for _, item := range arr {
+			// 如果不包括，则直接返回
+			if !lo.Contains[string](cookies, item) {
+				return nil, nil
+			}
+		}
 	}
 
 	vm := goja.New()

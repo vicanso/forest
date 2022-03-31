@@ -54,9 +54,15 @@ export default defineComponent({
       },
       {
         name: "IP：",
-        span: 24,
+        span: 12,
         key: "data.ip",
-        placeholder: "请填写需要拦截的IP，如果未指定则表示所有IP均处理",
+        placeholder: "请填写需要拦截的IP，如果未指定则不判断ip",
+      },
+      {
+        name: "Cookie：",
+        span: 12,
+        key: "data.cookie",
+        placeholder: "请填充需要拦截的Cookie(name1=value1;name2=value2)，如果未指定则不判断cookie"
       },
       {
         name: "前置脚本：",
