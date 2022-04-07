@@ -255,10 +255,7 @@ func MustGetRedisConfig() *RedisConfig {
 	slowValue := query.Get("slow")
 	slow := 100 * time.Millisecond
 	if slowValue != "" {
-		slow, err = time.ParseDuration(slowValue)
-		if err != nil {
-			panic(err)
-		}
+		slow, _ = time.ParseDuration(slowValue)
 	}
 
 	// 获取最大处理数的配置
@@ -292,7 +289,7 @@ func MustGetRedisConfig() *RedisConfig {
 	return redisConfig
 }
 
-// MustGetPostgresConfig 获取postgres配置
+// MustGetPostgresConfig 获取数据库配置
 func MustGetDatabaseConfig() *DatabaseConfig {
 	prefix := "database."
 	uri := defaultViperX.GetStringFromENV(prefix + "uri")

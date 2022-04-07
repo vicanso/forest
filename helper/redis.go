@@ -69,6 +69,10 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 	log.Info(context.Background()).
 		Strs("addr", redisConfig.Addrs).
 		Msg("connect to redis")
+	slow := redisConfig.Slow
+	if slow < time.Millisecond {
+		slow = 100 * time.Millisecond
+	}
 	hook := &redisHook{
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
@@ -223,7 +227,8 @@ func (rh *redisHook) Allow() error {
 // ReportResult 记录结果
 func (*redisHook) ReportResult(result error) {
 	// 仅是调用redis完成时触发
-	// 如allow返回出错的不会触发
+	// 需要注意，只有allow通过后才会触发
+	// 仅仅nil error则忽略
 	if result != nil && !RedisIsNilError(result) {
 		log.Error(context.Background()).
 			Str("category", "redisProcessFail").

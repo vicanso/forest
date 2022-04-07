@@ -157,30 +157,23 @@ func isInString(fl validator.FieldLevel, values []string) bool {
 
 // doValidate 校验struct
 func doValidate(s any, data any) error {
-	// statusCode := http.StatusBadRequest
 	if data != nil {
-		switch data := data.(type) {
-		case []byte:
-			if len(data) == 0 {
-				he := hes.New("data is empty")
-				he.Category = errJSONParseCategory
-				return he
-			}
-			err := json.Unmarshal(data, s)
-			if err != nil {
-				he := hes.Wrap(err)
-				he.Category = errJSONParseCategory
-				return he
-			}
-		default:
-			buf, err := json.Marshal(data)
+		buf, ok := data.([]byte)
+		if !ok {
+			tmp, err := json.Marshal(data)
 			if err != nil {
 				return err
 			}
-			err = json.Unmarshal(buf, s)
-			if err != nil {
-				return err
-			}
+			buf = tmp
+		}
+		if len(buf) == 0 {
+			return hes.New("data is empty", errJSONParseCategory)
+		}
+		err := json.Unmarshal(buf, s)
+		if err != nil {
+			he := hes.Wrap(err)
+			he.Category = errJSONParseCategory
+			return he
 		}
 	}
 	return Struct(s)
