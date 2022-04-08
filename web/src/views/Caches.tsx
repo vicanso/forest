@@ -12,6 +12,7 @@ import {
   NDataTable,
   NPopconfirm,
   NPopover,
+  NInputNumber,
 } from "naive-ui";
 import { TableColumn } from "naive-ui/lib/data-table/src/interface";
 import { showError, showWarning, toast, formatJSON } from "../helpers/util";
@@ -26,6 +27,8 @@ export default defineComponent({
   setup() {
     const message = useMessage();
     const keyword = ref("");
+    const limit = ref(0);
+    const offset = ref(0);
     const adminStore = useAdminStore();
     const { cacheKeys, fetchingCacheKeys } = storeToRefs(adminStore);
     const cacheData = ref("");
@@ -38,6 +41,8 @@ export default defineComponent({
       try {
         await adminStore.listCacheKeys({
           keyword: keyword.value,
+          limit: limit.value,
+          offset: offset.value,
         });
       } catch (err) {
         showError(message, err);
@@ -66,6 +71,8 @@ export default defineComponent({
       fetchingCacheKeys,
       cacheKeys,
       keyword,
+      limit,
+      offset,
       fetch,
       del,
       getCache,
@@ -129,7 +136,7 @@ export default defineComponent({
       <NSpin show={fetchingCacheKeys}>
         <NCard title="缓存查询与清除">
           <NGrid xGap={24}>
-            <NGridItem span={18}>
+            <NGridItem span={12}>
               <NInput
                 placeholder="请输入缓存的key"
                 size={size}
@@ -139,7 +146,28 @@ export default defineComponent({
                 }}
               />
             </NGridItem>
-            <NGridItem span={6}>
+            <NGridItem span={4}>
+              <NInputNumber
+                placeholder="请输入Scan的数量"
+                size={size}
+                clearable
+                defaultValue={1000}
+                onUpdateValue={(value) => {
+                  this.limit = Number(value);
+                }}
+              />
+            </NGridItem>
+            <NGridItem span={4}>
+              <NInputNumber
+                placeholder="请输入Cursor的数量"
+                size={size}
+                clearable
+                onUpdateValue={(value) => {
+                  this.offset = Number(value);
+                }}
+              />
+            </NGridItem>
+            <NGridItem span={4}>
               <NButton class="widthFull" size={size} onClick={() => fetch()}>
                 查询
               </NButton>

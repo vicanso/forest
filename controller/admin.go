@@ -17,18 +17,23 @@
 package controller
 
 import (
-	"fmt"
-
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/router"
-	"github.com/vicanso/hes"
+)
+
+type adminCtrl struct{}
+
+type (
+	listCacheParams struct {
+		Keyword string `json:"keyword" validate:"required,xKeyword"`
+		Offset  int    `json:"offset"`
+		Limit   int    `json:"limit" default:"1000"`
+	}
 )
 
 type (
-	adminCtrl struct{}
-
 	findCacheResp struct {
 		Data string `json:"data"`
 	}
@@ -59,15 +64,15 @@ func init() {
 }
 
 func (*adminCtrl) listCache(c *elton.Context) error {
-	keyword := c.QueryParam("keyword")
-	if keyword == "" {
-		return hes.New("keyword can't be nil")
-	}
-	keys, _, err := helper.RedisGetClient().Scan(c.Context(), 0, keyword, 100).Result()
+	params := listCacheParams{}
+	err := validateQuery(c, &params)
 	if err != nil {
 		return err
 	}
-	fmt.Println(keys)
+	keys, _, err := helper.RedisGetClient().Scan(c.Context(), uint64(params.Offset), params.Keyword, int64(params.Limit)).Result()
+	if err != nil {
+		return err
+	}
 	c.Body = &listCacheResp{
 		Keys: keys,
 	}

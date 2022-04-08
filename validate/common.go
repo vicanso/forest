@@ -30,7 +30,7 @@ func init() {
 	AddAlias("xOffset", "numeric,min=0,max=10000")
 	AddAlias("xOrder", "ascii,min=0,max=100")
 	AddAlias("xFields", "ascii,min=0,max=100")
-	AddAlias("xKeyword", "min=1,max=10")
+	AddAlias("xKeyword", "min=1,max=20")
 	// 状态：启用、禁用
 	AddAlias("xStatus", "numeric,min=1,max=2")
 	// path校验

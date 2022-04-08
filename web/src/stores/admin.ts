@@ -12,7 +12,11 @@ export const useAdminStore = defineStore("admin", {
   },
   actions: {
     // 根据关键字查询缓存列表
-    async listCacheKeys(params: { keyword: string }): Promise<void> {
+    async listCacheKeys(params: {
+      keyword: string;
+      limit: number;
+      offset: number;
+    }): Promise<void> {
       if (this.fetchingCacheKeys) {
         return;
       }

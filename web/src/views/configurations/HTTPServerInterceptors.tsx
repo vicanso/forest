@@ -62,7 +62,8 @@ export default defineComponent({
         name: "Cookie：",
         span: 12,
         key: "data.cookie",
-        placeholder: "请填充需要拦截的Cookie(name1=value1;name2=value2)，如果未指定则不判断cookie"
+        placeholder:
+          "请填充需要拦截的Cookie(name1=value1;name2=value2)，如果未指定则不判断cookie",
       },
       {
         name: "前置脚本：",
