@@ -28,31 +28,31 @@ import (
 	"go.uber.org/atomic"
 )
 
-type httpInterceptorScript struct {
+type httpServerInterceptorScript struct {
 	Router string `json:"router"`
 	Before string `json:"before"`
 	After  string `json:"after"`
 	IP     string `json:"ip"`
 	Cookie string `json:"cookie"`
 }
-type httpInterceptors struct {
+type httpServerInterceptors struct {
 	scripts    *atomic.Value
 	baseScript string
 }
 
-func (interceptors *httpInterceptors) getScripts() map[string]*httpInterceptorScript {
+func (interceptors *httpServerInterceptors) getScripts() map[string]*httpServerInterceptorScript {
 	value := interceptors.scripts.Load()
 	if value == nil {
 		return nil
 	}
-	scripts, ok := value.(map[string]*httpInterceptorScript)
+	scripts, ok := value.(map[string]*httpServerInterceptorScript)
 	if !ok {
 		return nil
 	}
 	return scripts
 }
 
-func (interceptors *httpInterceptors) Get(router string) *httpInterceptorScript {
+func (interceptors *httpServerInterceptors) Get(router string) *httpServerInterceptorScript {
 	scripts := interceptors.getScripts()
 	if scripts == nil {
 		return nil
@@ -61,9 +61,9 @@ func (interceptors *httpInterceptors) Get(router string) *httpInterceptorScript 
 }
 
 func UpdateHTTPInterceptors(arr []string) {
-	scripts := make(map[string]*httpInterceptorScript)
+	scripts := make(map[string]*httpServerInterceptorScript)
 	for _, item := range arr {
-		script := httpInterceptorScript{}
+		script := httpServerInterceptorScript{}
 		_ = json.Unmarshal([]byte(item), &script)
 		router := script.Router
 		// 只根据是否有router来判断是否正确
@@ -111,9 +111,9 @@ type httpServerInterceptor struct {
 
 var currentHTTPInterceptors = newHTTPInterceptors()
 
-func newHTTPInterceptors() *httpInterceptors {
+func newHTTPInterceptors() *httpServerInterceptors {
 	script, _ := asset.GetFS().ReadFile("http_server_interceptor.js")
-	return &httpInterceptors{
+	return &httpServerInterceptors{
 		scripts:    &atomic.Value{},
 		baseScript: string(script),
 	}

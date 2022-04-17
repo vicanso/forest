@@ -240,6 +240,7 @@ func newOnErrorHandler(e *elton.Elton) {
 func main() {
 	profiler.MustStartPyroscope()
 	e := elton.New()
+	e.Server.IdleTimeout = 5 * time.Minute
 	// 记录server中连接的状态变化
 	e.Server.ConnState = service.GetHTTPServerConnState()
 	e.Server.ErrorLog = log.NewHTTPServerLogger()
