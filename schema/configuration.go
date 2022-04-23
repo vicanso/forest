@@ -37,6 +37,8 @@ const (
 	ConfigurationCategoryEmail = "email"
 	// ConfigurationHTTPServerInterceptor http服务的拦截配置
 	ConfigurationHTTPServerInterceptor = "httpServerInterceptor"
+	// ConfigurationHTTPRequestInterceptor http请求拦截配置
+	ConfigurationHTTPRequestInterceptor = "httpRequestInterceptor"
 )
 
 // Configuration holds the schema definition for the Configuration entity.
@@ -69,6 +71,7 @@ func (Configuration) Fields() []ent.Field {
 				ConfigurationCategoryRequestConcurrency,
 				ConfigurationCategoryEmail,
 				ConfigurationHTTPServerInterceptor,
+				ConfigurationHTTPRequestInterceptor,
 			).
 			Comment("配置分类"),
 		field.String("owner").

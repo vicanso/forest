@@ -92,6 +92,10 @@ const navigationOptions = [
         key: names.httpServerInterceptors,
       },
       {
+        label: "HTTP请求拦截配置",
+        key: names.httpRequestInterceptors,
+      },
+      {
         label: "接收邮箱配置",
         key: names.emails,
       },

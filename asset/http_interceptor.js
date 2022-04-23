@@ -24,6 +24,17 @@ function getReqBody(key) {
   return req.body[key];
 }
 
+// 从请求路由的参数中获取key的值
+function getReqParam(key) {
+  return req.params[key];
+}
+
+// 设置请求路由的参数
+function setReqParam(key, value) {
+  req.modifiedParams = true;
+  req.params[key] = value;
+}
+
 // 设置请求数据中的body的值
 function setReqBody(key, value) {
   req.modifiedBody = true;

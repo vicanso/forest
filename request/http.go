@@ -22,6 +22,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/helper"
+	"github.com/vicanso/forest/interceptor"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/go-axios"
@@ -131,9 +132,34 @@ func newOnDone(serviceName string) axios.OnDone {
 	}
 }
 
+func newOnBeforeRequestInterceptor(service string) axios.OnBeforeNewRequest {
+	return func(config *axios.Config) (err error) {
+		inter, err := interceptor.NewHTTPRequest(service, config)
+		if err != nil {
+			return err
+		}
+		if inter == nil {
+			return nil
+		}
+		_, err = inter.Before()
+		return err
+	}
+}
+
 // newConvertResponseToError 将http响应码为>=400的转换为出错
-func newConvertResponseToError() axios.ResponseInterceptor {
+func newConvertResponseToError(service string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) error {
+		inter, err := interceptor.NewHTTPRequest(service, resp.Config)
+		if err != nil {
+			return err
+		}
+		if inter == nil {
+			return nil
+		}
+		_, err = inter.After()
+		if err != nil {
+			return err
+		}
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
 			exception := false

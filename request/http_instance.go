@@ -30,16 +30,18 @@ type InstanceStats struct {
 
 // NewHTTP 新建实例
 func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
-	ins := axios.NewInstance(&axios.InstanceConfig{
+	config := &axios.InstanceConfig{
 		EnableTrace: true,
 		Timeout:     timeout,
 		OnError:     newOnError(serviceName),
 		OnDone:      newOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newConvertResponseToError(),
+			newConvertResponseToError(serviceName),
 		},
-	})
+	}
+	config.PrependBeforeNewRequestListener(newOnBeforeRequestInterceptor(serviceName))
+	ins := axios.NewInstance(config)
 	insList[serviceName] = ins
 	return ins
 }

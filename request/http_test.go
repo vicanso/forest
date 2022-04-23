@@ -42,7 +42,7 @@ func TestHTTPStats(t *testing.T) {
 
 func TestConvertResponseToError(t *testing.T) {
 	assert := assert.New(t)
-	fn := newConvertResponseToError()
+	fn := newConvertResponseToError("abc")
 	data := []byte(`{
 		"message": "error message"
 	}`)

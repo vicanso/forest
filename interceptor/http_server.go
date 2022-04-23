@@ -24,8 +24,6 @@ import (
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
 	"github.com/vicanso/elton"
-	"github.com/vicanso/forest/asset"
-	"go.uber.org/atomic"
 )
 
 type httpServerInterceptorScript struct {
@@ -35,32 +33,8 @@ type httpServerInterceptorScript struct {
 	IP     string `json:"ip"`
 	Cookie string `json:"cookie"`
 }
-type httpServerInterceptors struct {
-	scripts    *atomic.Value
-	baseScript string
-}
 
-func (interceptors *httpServerInterceptors) getScripts() map[string]*httpServerInterceptorScript {
-	value := interceptors.scripts.Load()
-	if value == nil {
-		return nil
-	}
-	scripts, ok := value.(map[string]*httpServerInterceptorScript)
-	if !ok {
-		return nil
-	}
-	return scripts
-}
-
-func (interceptors *httpServerInterceptors) Get(router string) *httpServerInterceptorScript {
-	scripts := interceptors.getScripts()
-	if scripts == nil {
-		return nil
-	}
-	return scripts[router]
-}
-
-func UpdateHTTPInterceptors(arr []string) {
+func UpdateHTTPServer(arr []string) {
 	scripts := make(map[string]*httpServerInterceptorScript)
 	for _, item := range arr {
 		script := httpServerInterceptorScript{}
@@ -72,61 +46,12 @@ func UpdateHTTPInterceptors(arr []string) {
 		}
 		scripts[router] = &script
 	}
-	currentHTTPInterceptors.scripts.Store(scripts)
+	currentHTTPServerInterceptors.scripts.Store(scripts)
 }
 
-// http服务器接收请求
-// 其中query为了简便直接使用了map[string]string替换map[string][]string
-type httpServerRequest struct {
-	// 请求地址
-	URI string `json:"uri"`
-	// HTTP Query
-	Query map[string]string `json:"query"`
-	// HTTP Cookies
-	Cookies map[string]string `json:"cookies"`
-	// IP地址
-	IP string `json:"ip"`
-	// 是否有修改query
-	ModifiedQuery bool `json:"modifiedQuery"`
-	// 响应数据
-	Body map[string]any `json:"body"`
-	// 是否有修改body
-	ModifiedBody bool `json:"modifiedBody"`
-}
+var currentHTTPServerInterceptors = newHTTPInterceptors()
 
-// http服务响应数据
-type httpServerResponse struct {
-	// 响应状态码
-	Status int `json:"status"`
-	// 响应头
-	Header map[string]string `json:"header"`
-	// 响应数据
-	Body map[string]any `json:"body"`
-}
-
-type httpServerInterceptor struct {
-	Before func() (*httpServerResponse, error)
-	After  func() (*httpServerResponse, error)
-}
-
-var currentHTTPInterceptors = newHTTPInterceptors()
-
-func newHTTPInterceptors() *httpServerInterceptors {
-	script, _ := asset.GetFS().ReadFile("http_server_interceptor.js")
-	return &httpServerInterceptors{
-		scripts:    &atomic.Value{},
-		baseScript: string(script),
-	}
-}
-
-func newScript(script string) string {
-	return fmt.Sprintf(`%s;(function() {
-		%s
-	})();
-	`, currentHTTPInterceptors.baseScript, script)
-}
-
-func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
+func newHTTPServerRequest(c *elton.Context) *httpRequest {
 	query := make(map[string]string)
 	for key, values := range c.Request.URL.Query() {
 		query[key] = values[0]
@@ -139,8 +64,9 @@ func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
 		cookies[cookie.Name] = cookie.Value
 	}
 
-	req := &httpServerRequest{
+	req := &httpRequest{
 		URI:     c.Request.URL.RequestURI(),
+		Params:  c.Params.ToMap(),
 		Query:   query,
 		Body:    make(map[string]any),
 		IP:      c.ClientIP(),
@@ -152,15 +78,8 @@ func newHTTPServerRequest(c *elton.Context) *httpServerRequest {
 	return req
 }
 
-func newHTTPServerResponse() *httpServerResponse {
-	return &httpServerResponse{
-		Header: make(map[string]string),
-		Body:   make(map[string]any),
-	}
-}
-
 // 设置响应数据
-func (resp *httpServerResponse) SetResponse(c *elton.Context) {
+func (resp *httpResponse) SetResponse(c *elton.Context) {
 	c.StatusCode = resp.Status
 	for k, v := range resp.Header {
 		c.SetHeader(k, v)
@@ -169,8 +88,8 @@ func (resp *httpServerResponse) SetResponse(c *elton.Context) {
 	c.BodyBuffer = bytes.NewBuffer(buf)
 }
 
-func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
-	script := currentHTTPInterceptors.Get(c.Request.Method + " " + c.Route)
+func NewHTTPServer(c *elton.Context) (*httpInterceptor, error) {
+	script := getScript[*httpServerInterceptorScript](currentHTTPServerInterceptors, c.Request.Method+" "+c.Route)
 	if script == nil {
 		return nil, nil
 	}
@@ -196,22 +115,22 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 
 	req := newHTTPServerRequest(c)
-	err = vm.Set("req", req)
+	err := vm.Set("req", req)
 	if err != nil {
-		return
+		return nil, err
 	}
-	resp := newHTTPServerResponse()
+	resp := newHTTPResponse()
 	err = vm.Set("resp", resp)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	inter = &httpServerInterceptor{
-		Before: func() (*httpServerResponse, error) {
+	inter := &httpInterceptor{
+		Before: func() (*httpResponse, error) {
 			if script.Before == "" {
 				return nil, nil
 			}
-			_, err := vm.RunString(newScript(script.Before))
+			_, err := vm.RunString(currentHTTPServerInterceptors.script(script.Before))
 			if err != nil {
 				return nil, err
 			}
@@ -230,17 +149,17 @@ func NewHTTPServer(c *elton.Context) (inter *httpServerInterceptor, err error) {
 			}
 			return resp, nil
 		},
-		After: func() (*httpServerResponse, error) {
+		After: func() (*httpResponse, error) {
 			if script.After == "" {
 				return nil, nil
 			}
 			_ = json.Unmarshal(c.BodyBuffer.Bytes(), &resp.Body)
-			_, err := vm.RunString(newScript(script.After))
+			_, err := vm.RunString(currentHTTPServerInterceptors.script(script.After))
 			if err != nil {
 				return nil, err
 			}
 			return resp, nil
 		},
 	}
-	return
+	return inter, nil
 }

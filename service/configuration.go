@@ -126,7 +126,8 @@ func (srv *ConfigurationSrv) Refresh() error {
 
 	mailList := make(map[string]string)
 
-	httpInterceptors := make([]string, 0)
+	httpServerInterceptors := make([]string, 0)
+	httpRequestInterceptors := make([]string, 0)
 
 	requestLimitConfigs := make(map[string]int)
 	for _, item := range configs {
@@ -162,7 +163,9 @@ func (srv *ConfigurationSrv) Refresh() error {
 		case schema.ConfigurationCategoryEmail:
 			mailList[item.Name] = item.Data
 		case schema.ConfigurationHTTPServerInterceptor:
-			httpInterceptors = append(httpInterceptors, item.Data)
+			httpServerInterceptors = append(httpServerInterceptors, item.Data)
+		case schema.ConfigurationHTTPRequestInterceptor:
+			httpRequestInterceptors = append(httpRequestInterceptors, item.Data)
 		}
 	}
 
@@ -201,7 +204,8 @@ func (srv *ConfigurationSrv) Refresh() error {
 	email.Update(mailList)
 
 	// 更新拦截配置
-	interceptor.UpdateHTTPInterceptors(httpInterceptors)
+	interceptor.UpdateHTTPServer(httpServerInterceptors)
+	interceptor.UpdateHTTPRequest(httpRequestInterceptors)
 
 	return nil
 }

@@ -14,6 +14,7 @@ export enum ConfigCategory {
   Router = "router",
   Email = "email",
   HTTPServerInterceptor = "httpServerInterceptor",
+  HTTPRequestInterceptor = "httpRequestInterceptor",
 }
 
 export enum ConfigStatus {
