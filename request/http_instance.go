@@ -37,6 +37,7 @@ func NewHTTP(serviceName, baseURL string, timeout time.Duration) *axios.Instance
 		OnDone:      newOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
+			newResponseInterceptor(serviceName),
 			newConvertResponseToError(serviceName),
 		},
 	}

@@ -87,6 +87,9 @@ func (req *httpRequest) getQuery() url.Values {
 }
 
 func NewHTTPRequest(service string, conf *axios.Config) (*httpInterceptor, error) {
+	if conf == nil {
+		return nil, nil
+	}
 	method := conf.Method
 	if method == "" {
 		method = http.MethodGet

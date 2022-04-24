@@ -146,9 +146,8 @@ func newOnBeforeRequestInterceptor(service string) axios.OnBeforeNewRequest {
 	}
 }
 
-// newConvertResponseToError 将http响应码为>=400的转换为出错
-func newConvertResponseToError(service string) axios.ResponseInterceptor {
-	return func(resp *axios.Response) error {
+func newResponseInterceptor(service string) axios.ResponseInterceptor {
+	return func(resp *axios.Response) (err error) {
 		inter, err := interceptor.NewHTTPRequest(service, resp.Config)
 		if err != nil {
 			return err
@@ -157,9 +156,13 @@ func newConvertResponseToError(service string) axios.ResponseInterceptor {
 			return nil
 		}
 		_, err = inter.After()
-		if err != nil {
-			return err
-		}
+		return err
+	}
+}
+
+// newConvertResponseToError 将http响应码为>=400的转换为出错
+func newConvertResponseToError(service string) axios.ResponseInterceptor {
+	return func(resp *axios.Response) error {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
 			exception := false
