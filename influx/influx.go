@@ -80,7 +80,7 @@ var srv = mustNewSrv()
 var ignoreFields = "_start _stop _field _measurement"
 
 // 缓存flux的tags tag-values等
-var fluxCache = cache.NewMultilevelCache(10, 5*time.Minute, "flux:")
+var fluxCache = cache.MustNewMultilevelCache(5*time.Minute, 1, "flux:")
 
 // mustNewSrv 创建新的influx服务
 func mustNewSrv() *influxSrv {

@@ -164,7 +164,7 @@ func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	// allow返回error时也触发
 	message := ""
 	err := cmd.Err()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		message = err.Error()
 	}
 	rh.addStats(ctx, cmd.FullName(), message)
@@ -172,7 +172,9 @@ func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	if log.DebugEnabled() {
 		// 由于redis是较频繁的操作
 		// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
-		log.Debug(ctx).Msg(cmd.String())
+		log.Debug(ctx).
+			Str("category", "redisHook").
+			Msg(cmd.String())
 	}
 	return nil
 }
@@ -198,7 +200,7 @@ func (rh *redisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmde
 		}
 		cmdSb.WriteString(cmd.Name())
 		err := cmd.Err()
-		if err != nil {
+		if err != nil && err != redis.Nil {
 			message += err.Error()
 		}
 	}

@@ -32,7 +32,7 @@ require (
 	github.com/vicanso/elton-compress v1.3.1
 	github.com/vicanso/elton-session v1.2.3
 	github.com/vicanso/go-axios v1.4.1
-	github.com/vicanso/go-cache v1.5.1
+	github.com/vicanso/go-cache/v2 v2.0.0-beta1
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v0.5.0
 	github.com/vicanso/go-parallel v0.5.0
@@ -40,7 +40,6 @@ require (
 	github.com/vicanso/hes v0.5.0
 	github.com/vicanso/http-trace v1.0.7
 	github.com/vicanso/ips v1.2.1
-	github.com/vicanso/lru-ttl v1.5.1
 	github.com/vicanso/viperx v0.6.0
 	go.uber.org/atomic v1.9.0
 	go.uber.org/automaxprocs v1.5.1
@@ -53,6 +52,7 @@ require (
 	ariga.io/atlas v0.3.7 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/allegro/bigcache/v3 v3.0.2 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
@@ -85,7 +85,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.11.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.15.1 // indirect
+	github.com/klauspost/compress v1.15.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.12 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
