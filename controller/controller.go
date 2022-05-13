@@ -78,8 +78,10 @@ type (
 	trackerExtraParams struct {
 		// 步骤（tag)
 		Step string
-		// 自定义的tags`
+		// 自定义的tags
 		CustomTags func(c *elton.Context) map[string]string
+		// 自定义的fields
+		CustomFields func(c *elton.Context) map[string]any
 	}
 )
 
@@ -227,8 +229,13 @@ func newTrackerMiddleware(action string, params ...trackerExtraParams) elton.Han
 			if currentStep != "" {
 				tags["step"] = currentStep
 			}
-			if extraParams != nil && extraParams.CustomTags != nil {
-				lo.Assign[string, string](tags, extraParams.CustomTags(c))
+			if extraParams != nil {
+				if extraParams.CustomTags != nil {
+					tags = lo.Assign[string, string](tags, extraParams.CustomTags(c))
+				}
+				if extraParams.CustomFields != nil {
+					fields = lo.Assign[string, any](fields, extraParams.CustomFields(c))
+				}
 			}
 			getInfluxSrv().Write(cs.MeasurementUserTracker, tags, fields)
 		},
