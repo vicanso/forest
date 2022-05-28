@@ -41,17 +41,6 @@ type ConfigurationSrv struct{}
 
 // 配置数据
 type (
-
-	// CurrentValidConfiguration 当前有效配置
-	CurrentValidConfiguration struct {
-		UpdatedAt         time.Time                        `json:"updatedAt"`
-		MockTime          string                           `json:"mockTime"`
-		IPBlockList       []string                         `json:"ipBlockList"`
-		SignedKeys        []string                         `json:"signedKeys"`
-		RouterConcurrency map[string]uint32                `json:"routerConcurrency"`
-		RouterMock        map[string]routermock.RouterMock `json:"routerMock"`
-		Limits            map[string]int                   `json:"limits"`
-	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
 		Name string `json:"name"`
@@ -80,27 +69,15 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 	return sessionSignedKeys
 }
 
-// GetCurrentValidConfiguration 获取当前有效配置
-func GetCurrentValidConfiguration() *CurrentValidConfiguration {
-	result := &CurrentValidConfiguration{
-		UpdatedAt:         configurationRefreshedAt,
-		MockTime:          util.GetMockTime(),
-		IPBlockList:       GetIPBlockList(),
-		SignedKeys:        sessionSignedKeys.GetKeys(),
-		RouterConcurrency: routerconcurrency.List(),
-		RouterMock:        routermock.List(),
-	}
-	value := currentLimits.Load()
-	if value != nil {
-		limits, _ := value.(map[string]int)
-		result.Limits = limits
-	}
-	return result
+// GetAvailableConfigurations 获取当前有效配置
+func GetAvailableConfigurations(ctx context.Context) ([]*ent.Configuration, error) {
+	srv := ConfigurationSrv{}
+	return srv.available(ctx)
 }
 
 // available 获取可用的配置
-func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (*ConfigurationSrv) available(ctx context.Context) ([]*ent.Configuration, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	now := time.Now()
 	return helper.EntGetClient().Configuration.Query().
@@ -112,8 +89,8 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 }
 
 // Refresh 刷新配置
-func (srv *ConfigurationSrv) Refresh() error {
-	configs, err := srv.available()
+func (srv *ConfigurationSrv) Refresh(ctx context.Context) error {
+	configs, err := srv.available(ctx)
 	if err != nil {
 		return err
 	}

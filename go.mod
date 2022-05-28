@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/dop251/goja v0.0.0-20220501172647-e1eca0b61fa9
+	github.com/dop251/goja v0.0.0-20220516123900-4418d4575a41
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.2
 	github.com/fogleman/gg v1.3.0
@@ -13,13 +13,13 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/iancoleman/strcase v0.2.0
-	github.com/influxdata/influxdb-client-go/v2 v2.8.2
+	github.com/influxdata/influxdb-client-go/v2 v2.9.0
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/jinzhu/now v1.1.5
 	github.com/mcuadros/go-defaults v1.2.0
-	github.com/minio/minio-go/v7 v7.0.26
+	github.com/minio/minio-go/v7 v7.0.27
 	github.com/mozillazg/go-pinyin v0.19.0
-	github.com/pyroscope-io/pyroscope v0.16.0
+	github.com/pyroscope-io/pyroscope v0.17.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.4.0
 	github.com/rs/zerolog v1.26.1
@@ -28,16 +28,16 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.14.1
 	github.com/vicanso/count-warner v1.2.0
-	github.com/vicanso/elton v1.9.1
+	github.com/vicanso/elton v1.9.2
 	github.com/vicanso/elton-compress v1.3.2
 	github.com/vicanso/elton-session v1.2.4
-	github.com/vicanso/go-axios v1.4.2
+	github.com/vicanso/go-axios v1.4.3
 	github.com/vicanso/go-cache/v2 v2.0.0
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v1.0.0
 	github.com/vicanso/go-parallel v1.0.0
 	github.com/vicanso/go-performance v1.0.0
-	github.com/vicanso/hes v0.5.0
+	github.com/vicanso/hes v0.5.1
 	github.com/vicanso/http-trace v1.0.7
 	github.com/vicanso/ips v1.2.1
 	github.com/vicanso/viperx v1.0.0

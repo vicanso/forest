@@ -94,7 +94,9 @@ func redisPing() {
 
 func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
-	doTask("config refresh", configSrv.Refresh)
+	doTask("config refresh", func() error {
+		return configSrv.Refresh(context.Background())
+	})
 }
 
 func redisStats() {

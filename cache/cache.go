@@ -19,7 +19,6 @@ import (
 
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/helper"
-	"github.com/vicanso/go-cache/v2"
 	goCache "github.com/vicanso/go-cache/v2"
 )
 
@@ -40,14 +39,14 @@ func newRedisCache() *goCache.RedisCache {
 }
 
 func MustNewSnappyCompressCache(ttl time.Duration) *goCache.Cache {
-	return mustNewCompressCache(ttl, cache.NewSnappyCompressor(compressMinLength))
+	return mustNewCompressCache(ttl, goCache.NewSnappyCompressor(compressMinLength))
 }
 
 func MustNewZSTDCompressCache(ttl time.Duration) *goCache.Cache {
-	return mustNewCompressCache(ttl, cache.NewZSTDCompressor(compressMinLength, 2))
+	return mustNewCompressCache(ttl, goCache.NewZSTDCompressor(compressMinLength, 2))
 }
 
-func mustNewCompressCache(ttl time.Duration, compressor cache.Compressor) *goCache.Cache {
+func mustNewCompressCache(ttl time.Duration, compressor goCache.Compressor) *goCache.Cache {
 	c, err := goCache.New(
 		ttl,
 		goCache.CacheCompressorOption(compressor),

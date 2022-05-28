@@ -179,7 +179,7 @@ func dependServiceCheck() (err error) {
 		}
 	}
 	configSrv := new(service.ConfigurationSrv)
-	err = configSrv.Refresh()
+	err = configSrv.Refresh(context.Background())
 	if err != nil {
 		return
 	}

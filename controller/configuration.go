@@ -291,6 +291,10 @@ func (*configurationCtrl) findByID(c *elton.Context) error {
 
 // getCurrentValid 获取当前有效配置
 func (*configurationCtrl) getCurrentValid(c *elton.Context) error {
-	c.Body = service.GetCurrentValidConfiguration()
+	configs, err := service.GetAvailableConfigurations(c.Context())
+	if err != nil {
+		return err
+	}
+	c.Body = configs
 	return nil
 }
