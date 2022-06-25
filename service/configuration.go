@@ -56,7 +56,6 @@ var (
 )
 
 // 配置刷新时间
-var configurationRefreshedAt time.Time
 var sessionConfig = config.MustGetSessionConfig()
 
 func init() {
@@ -94,7 +93,6 @@ func (srv *ConfigurationSrv) Refresh(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	configurationRefreshedAt = time.Now()
 	var mockTimeConfig *ent.Configuration
 	routerConcurrencyConfigs := make([]string, 0)
 	routerConfigs := make([]string, 0)
