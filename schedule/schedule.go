@@ -145,28 +145,8 @@ func influxdbStats() {
 	})
 }
 
-// prevMemFrees 上一次 memory objects 释放的数量
-var prevMemFrees uint64
-
-// 上一次memory objects的申请数量
-var prevMemMallocs uint64
-
-// prevNumGC 上一次 gc 的次数
-var prevNumGC uint32
-
-// prevPauseTotal 上一次 pause 的总时长
-var prevPauseTotal time.Duration
-
-// 上一次的 io counter记录
-var prevIOCountersStat = &performance.IOCountersStat{}
-
-// 上一次context切换记录
-var prevNumCtxSwitchesStat = &performance.NumCtxSwitchesStat{}
-
-// 上一次的page faults记录
-var prevPageFaultsStat = &performance.PageFaultsStat{}
-
-const mb = 1024 * 1024
+// 上一次的性能指标
+var prevPerformance *performance.Performance
 
 // performanceStats 系统性能
 func performanceStats() {
@@ -174,125 +154,36 @@ func performanceStats() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		data := service.GetPerformance(ctx)
-		fields := map[string]any{
-			cs.FieldGoMaxProcs:   data.GoMaxProcs,
-			cs.FieldThreadCount:  int(data.ThreadCount),
-			cs.FieldRoutineCount: data.RoutineCount,
-			cs.FieldProcessing:   int(data.Concurrency),
+		fields := data.Performance.ToMap(prevPerformance)
 
-			// CPU使用率相关
-			cs.FieldCPUUsage:     int(data.CPUUsage),
-			cs.FieldCPUUser:      data.CPUUser,
-			cs.FieldCPUIdle:      data.CPUIdle,
-			cs.FieldCPUNice:      data.CPUNice,
-			cs.FieldCPUIowait:    data.CPUIowait,
-			cs.FieldCPUIrq:       data.CPUIrq,
-			cs.FieldCPUSoftirq:   data.CPUSoftirq,
-			cs.FieldCPUSteal:     data.CPUSteal,
-			cs.FieldCPUGuest:     data.CPUGuest,
-			cs.FieldCPUGuestNice: data.CPUGuestNice,
-
-			// 内存使用相关
-			cs.FieldMemAlloc:        data.MemAlloc,
-			cs.FieldMemTotalAlloc:   data.MemTotalAlloc,
-			cs.FieldMemSys:          data.MemSys,
-			cs.FieldMemLookups:      data.MemLookups,
-			cs.FieldMemMallocs:      int(data.MemMallocs - prevMemMallocs),
-			cs.FieldMemFrees:        int(data.MemFrees - prevMemFrees),
-			cs.FieldMemHeapAlloc:    data.MemHeapAlloc,
-			cs.FieldMemHeapSys:      data.MemHeapSys,
-			cs.FieldMemHeapIdle:     data.MemHeapIdle,
-			cs.FieldMemHeapInuse:    data.MemHeapInuse,
-			cs.FieldMemHeapReleased: data.MemHeapReleased,
-			cs.FieldMemHeapObjects:  data.MemHeapObjects,
-			cs.FieldMemStackInuse:   data.MemStackInuse,
-			cs.FieldMemStackSys:     data.MemStackSys,
-			cs.FieldMemMSpanInuse:   data.MemMSpanInuse,
-			cs.FieldMemMSpanSys:     data.MemMSpanSys,
-			cs.FieldMemMCacheInuse:  data.MemMCacheInuse,
-			cs.FieldMemMCacheSys:    data.MemMCacheSys,
-			cs.FieldMemBuckHashSys:  data.MemBuckHashSys,
-
-			cs.FieldMemGCSys:    data.MemGCSys,
-			cs.FieldMemOtherSys: data.MemOtherSys,
-
-			cs.FieldNumGC:   int(data.NumGC - prevNumGC),
-			cs.FieldPauseMS: int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
-
-			cs.FieldConnProcessing:   int(data.HTTPServerConnStats.ConnProcessing),
-			cs.FieldConnAlive:        int(data.HTTPServerConnStats.ConnAlive),
-			cs.FieldConnCreatedCount: int(data.HTTPServerConnStats.ConnCreatedCount),
-		}
-		// io 相关统计
-		if data.IOCountersStat != nil {
-			readCount := data.IOCountersStat.ReadCount - prevIOCountersStat.ReadCount
-			writeCount := data.IOCountersStat.WriteCount - prevIOCountersStat.WriteCount
-			readBytes := data.IOCountersStat.ReadBytes - prevIOCountersStat.ReadBytes
-			writeBytes := data.IOCountersStat.WriteBytes - prevIOCountersStat.WriteBytes
-			prevIOCountersStat = data.IOCountersStat
-			fields[cs.FieldIOReadCount] = readCount
-			fields[cs.FieldIOWriteCount] = writeCount
-			fields[cs.FieldIOReadMBytes] = readBytes / mb
-			fields[cs.FieldIOWriteMBytes] = writeBytes / mb
-		}
-
+		fields[cs.FieldProcessing] = int(data.Concurrency)
+		fields[cs.FieldConnProcessing] = int(data.HTTPServerConnStats.ConnProcessing)
+		fields[cs.FieldConnAlive] = int(data.HTTPServerConnStats.ConnAlive)
+		fields[cs.FieldConnCreatedCount] = int(data.HTTPServerConnStats.ConnCreatedCount)
 		// 网络相关
 		if data.ConnStat != nil {
 			count := make(map[string]string)
-
 			for k, v := range data.ConnStat.Status {
-				// 如果该状态下对应的连接大于0，则记录此连接数
-				if v > 0 {
-					fields[cs.FieldConnTotal+k] = v
-				}
 				count[k] = strconv.Itoa(v)
 			}
 			for k, v := range data.ConnStat.RemoteAddr {
 				count[k] = strconv.Itoa(v)
 			}
-
-			log.Info(context.Background()).
+			log.Info(ctx).
 				Str("category", "connStat").
 				Dict("count", log.Struct(count)).
 				Msg("")
-			fields[cs.FieldConnTotal] = data.ConnStat.Count
-		}
-		// context切换相关
-		if data.NumCtxSwitchesStat != nil {
-			fields[cs.FieldCtxSwitchesVoluntary] = data.NumCtxSwitchesStat.Voluntary - prevNumCtxSwitchesStat.Voluntary
-			fields[cs.FieldCtxSwitchesInvoluntary] = data.NumCtxSwitchesStat.Involuntary - prevNumCtxSwitchesStat.Involuntary
-			prevNumCtxSwitchesStat = data.NumCtxSwitchesStat
-		}
-
-		// page fault相关
-		if data.PageFaultsStat != nil {
-			fields[cs.FieldPageFaultMinor] = data.PageFaultsStat.MinorFaults - prevPageFaultsStat.MinorFaults
-			fields[cs.FieldPageFaultMajor] = data.PageFaultsStat.MajorFaults - prevPageFaultsStat.MajorFaults
-			fields[cs.FieldPageFaultChildMinor] = data.PageFaultsStat.ChildMinorFaults - prevPageFaultsStat.ChildMinorFaults
-			fields[cs.FieldPageFaultChildMajor] = data.PageFaultsStat.ChildMajorFaults - prevPageFaultsStat.ChildMajorFaults
-
-			prevPageFaultsStat = data.PageFaultsStat
-		}
-
-		// fd 相关
-		if data.NumFdsStat != nil {
-			fields[cs.FieldNumFds] = data.NumFdsStat.Fds
-
 		}
 
 		// open files的统计
 		if data.OpenFilesStats != nil &&
 			len(data.OpenFilesStats.OpenFiles) != 0 {
-			log.Info(context.Background()).
+			log.Info(ctx).
 				Str("category", "openFiles").
 				Dict("stat", log.Struct(data.OpenFilesStats)).
 				Msg("")
 		}
-
-		prevMemMallocs = data.MemMallocs
-		prevMemFrees = data.MemFrees
-		prevNumGC = data.NumGC
-		prevPauseTotal = data.PauseTotalNs
+		prevPerformance = data.Performance
 
 		helper.GetInfluxDB().Write(cs.MeasurementPerformance, nil, fields)
 		return fields

@@ -449,7 +449,6 @@ github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.10.2/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/lib/pq v1.10.5 h1:J+gdV2cUmX7ZqL2B0lFcW0m+egaHC2V3lpO8nWxyYiQ=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0/go.mod h1:zJYVVT2jmtg6P3p1VtQj7WsuWi/y4VnjVBn7F8KPB3I=
-github.com/lufia/plan9stats v0.0.0-20220326011226-f1430873d8db/go.mod h1:VgrrWVwBO2+6XKn8ypT3WUqvoxCa8R2M5to2tRzGovI=
 github.com/lufia/plan9stats v0.0.0-20220517141722-cf486979b281 h1:aczX6NMOtt6L4YT0fQvKkDK6LZEtdOso9sUH89V1+P0=
 github.com/lufia/plan9stats v0.0.0-20220517141722-cf486979b281/go.mod h1:lc+czkgO/8F7puNki5jk8QyujbfK1LOT7Wl0ON2hxyk=
 github.com/magiconair/properties v1.8.6 h1:5ibWZ6iY0NctNGWo87LalDlEZ6R41TqbbDamhfG/Qzo=
@@ -588,7 +587,6 @@ github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg
 github.com/sergi/go-diff v1.2.0 h1:XU+rvMAioB0UC3q1MFrIQy4Vo5/4VsRDQQXHsEya6xQ=
 github.com/shirou/gopsutil v3.21.11+incompatible h1:+1+c1VGhc88SSonWP6foOcLhvnKlUeu/erjjvaPEYiI=
 github.com/shirou/gopsutil v3.21.11+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
-github.com/shirou/gopsutil/v3 v3.22.4/go.mod h1:D01hZJ4pVHPpCTZ3m3T2+wDF2YAGfd+H4ifUguaQzHM=
 github.com/shirou/gopsutil/v3 v3.22.5 h1:atX36I/IXgFiB81687vSiBI5zrMsxcIBkP9cQMJQoJA=
 github.com/shirou/gopsutil/v3 v3.22.5/go.mod h1:so9G9VzeHt/hsd0YwqprnjHnfARAUktauykSbr+y2gA=
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
@@ -670,8 +668,8 @@ github.com/vicanso/go-mask v1.0.0 h1:ydxDGuc63JLJuBRDhF49s7gG/a4DRdmJjdwrBSiGCwM
 github.com/vicanso/go-mask v1.0.0/go.mod h1:LvZ98VripV5UP3XTBYyPnfnFYrvqE+yCOrfV8JmRtfI=
 github.com/vicanso/go-parallel v1.0.1 h1:I5xIRsg0ZC83TwSZwGFIyhkzsWD90bjgtPUTZasJnGU=
 github.com/vicanso/go-parallel v1.0.1/go.mod h1:DiPXWrqf+eDyptniju6CdnBDux1G1InqGt9cx+W4kn4=
-github.com/vicanso/go-performance v1.0.0 h1:ToiJS3mT7vsu5iZ6xhagIQoHlEkaXifYPSHngNVqQQc=
-github.com/vicanso/go-performance v1.0.0/go.mod h1:Gm5wBMXbGJD67Z+umWPUSJCOCNvFAtM2rgCHU91R/AI=
+github.com/vicanso/go-performance v1.1.0 h1:bKztQ60BNGuGOWpGeqkJrOeKyCKEERGfX4Z7MN7mEXQ=
+github.com/vicanso/go-performance v1.1.0/go.mod h1:5Zbt5buxnssMtkNnAXXK29N7iyg3b2edoAJc0zBmCus=
 github.com/vicanso/hes v0.5.0/go.mod h1:B0l1NIQM/nYw7owAd+hyHuNnAD8Nsx0T6duhVxmXUBY=
 github.com/vicanso/hes v0.6.0 h1:rmLhJw1PkZ+BTlJXt91i12mr7vpIC65S5KRCD4uF9HU=
 github.com/vicanso/hes v0.6.0/go.mod h1:bO1pAVgzuwBJAv76LXx8YN6jXLWcCYVyNx4qzPw9h6Y=

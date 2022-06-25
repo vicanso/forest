@@ -41,45 +41,22 @@ type (
 		Concurrency           int32 `json:"concurrency"`
 		RequestProcessedTotal int64 `json:"requestProcessedTotal"`
 		performance.CPUMemory
-		HTTPServerConnStats *performance.ConnStats          `json:"httpServerConnStats"`
-		IOCountersStat      *performance.IOCountersStat     `json:"ioCountersStat"`
-		ConnStat            *performance.ConnectionsCount   `json:"connStat"`
-		NumCtxSwitchesStat  *performance.NumCtxSwitchesStat `json:"numCtxSwitchesStat"`
-		PageFaultsStat      *performance.PageFaultsStat     `json:"pageFaultsStat"`
-		NumFdsStat          *performance.NumFdsStat         `json:"numFdsStat"`
-		OpenFilesStats      *performance.OpenFilesStat      `json:"openFilesStats"`
+		HTTPServerConnStats *performance.ConnStats `json:"httpServerConnStats"`
+		*performance.Performance
 	}
 )
 
 // GetPerformance 获取应用性能指标
 func GetPerformance(ctx context.Context) *Performance {
-	ioCountersStat, _ := performance.IOCounters(ctx)
-	connStat, _ := performance.ConnectionsStat(ctx)
-	numCtxSwitchesStat, _ := performance.NumCtxSwitches(ctx)
-
-	pageFaults, _ := performance.PageFaults(ctx)
-	openFilesStats, _ := performance.OpenFiles(ctx)
-	// fd 可以通过open files获取，减少一次查询
-	var numFdsStat *performance.NumFdsStat
-	if openFilesStats != nil {
-		numFdsStat = &performance.NumFdsStat{
-			Fds:  int32(len(openFilesStats.OpenFiles)),
-			Took: openFilesStats.Took,
-		}
-	}
 	httpServerConnStats := httpServerConnStats.Stats()
-	return &Performance{
+	pref := &Performance{
 		Concurrency:           GetConcurrency(),
 		RequestProcessedTotal: requestProcessConcurrency.Total(),
 		CPUMemory:             performance.CurrentCPUMemory(ctx),
 		HTTPServerConnStats:   &httpServerConnStats,
-		IOCountersStat:        ioCountersStat,
-		ConnStat:              connStat,
-		NumCtxSwitchesStat:    numCtxSwitchesStat,
-		NumFdsStat:            numFdsStat,
-		PageFaultsStat:        pageFaults,
-		OpenFilesStats:        openFilesStats,
 	}
+	pref.Performance = performance.GetPerformance(ctx)
+	return pref
 }
 
 // IncreaseConcurrency 当前并发请求+1

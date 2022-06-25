@@ -36,7 +36,7 @@ require (
 	github.com/vicanso/go-gauge v0.0.1
 	github.com/vicanso/go-mask v1.0.0
 	github.com/vicanso/go-parallel v1.0.1
-	github.com/vicanso/go-performance v1.0.0
+	github.com/vicanso/go-performance v1.1.0
 	github.com/vicanso/hes v0.6.0
 	github.com/vicanso/http-trace v1.0.7
 	github.com/vicanso/ips v1.2.1
