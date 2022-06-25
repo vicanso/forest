@@ -97,7 +97,7 @@ export default defineComponent({
           showError(message, err);
           return;
         }
-        return props.onSubmit(data);
+        return props.onSubmit?.(data);
       },
       params,
       formRef,

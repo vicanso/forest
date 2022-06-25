@@ -236,7 +236,7 @@ export default defineComponent({
         } else {
           await configsStore.add(configData);
         }
-        props.onSubmitDone();
+        props.onSubmitDone?.();
       } catch (err) {
         showError(message, err);
       } finally {

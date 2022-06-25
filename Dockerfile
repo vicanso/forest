@@ -1,4 +1,4 @@
-FROM node:16-alpine as webbuilder
+FROM node:18-alpine as webbuilder
 
 COPY . /forest
 RUN cd /forest/web \
@@ -6,7 +6,7 @@ RUN cd /forest/web \
   && npm run build \
   && rm -rf node_module
 
-FROM golang:1.17-alpine as builder
+FROM golang:1.18-alpine as builder
 
 COPY --from=webbuilder /forest /forest
 
