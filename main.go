@@ -45,7 +45,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"regexp"
@@ -268,7 +267,7 @@ func main() {
 		watchForClose(e)
 		go func() {
 			pidData := []byte(strconv.Itoa(os.Getpid()))
-			err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
+			err := os.WriteFile(basicConfig.PidFile, pidData, 0600)
 			if err != nil {
 				log.Error(context.Background()).
 					Err(err).

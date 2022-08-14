@@ -17,7 +17,7 @@ package storage
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -54,7 +54,7 @@ func (m *minioStorage) Get(ctx context.Context, bucket, filename string) (*File,
 	if err != nil {
 		return nil, err
 	}
-	data, err := ioutil.ReadAll(obj)
+	data, err := io.ReadAll(obj)
 	if err != nil {
 		return nil, err
 	}
