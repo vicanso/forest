@@ -24,11 +24,11 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"github.com/sourcegraph/conc/pool"
 	"github.com/vicanso/forest/cache"
 	"github.com/vicanso/forest/helper"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/forest/validate"
-	"github.com/vicanso/go-parallel"
 )
 
 type influxSrv struct {
@@ -308,19 +308,27 @@ func (srv *influxSrv) Query(ctx context.Context, params QueryParams) ([]map[stri
 		return nil, nil
 	}
 	result := newMutexMapSlice()
-	err = parallel.Parallel(func(index int) error {
+
+	p := pool.New().WithErrors().WithMaxGoroutines(5)
+	lo.ForEach(items, func(item map[string]any, _ int) {
+		// 因为for range中的item是共用内存
+		// 因此先提交计算好参数
 		// 首次筛选的结果均符合tag，因此pivot的时候将fields也增加匹配
-		query := lo.Assign[string, any](items[index], fields)
-		tmpItems, err := srv.pivotQuery(ctx, params.Measurement, query)
-		if err != nil {
-			return err
-		}
-		result.Add(tmpItems...)
-		return nil
-	}, len(items), 5)
+		query := lo.Assign(item, fields)
+		p.Go(func() error {
+			tmpItems, err := srv.pivotQuery(ctx, params.Measurement, query)
+			if err != nil {
+				return err
+			}
+			result.Add(tmpItems...)
+			return nil
+		})
+	})
+	err = p.Wait()
 	if err != nil {
 		return nil, err
 	}
+
 	items = result.List()
 	// 清除不需要字段
 	for _, item := range items {
