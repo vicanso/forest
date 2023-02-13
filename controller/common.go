@@ -30,7 +30,6 @@ import (
 	"github.com/vicanso/forest/profiler"
 	"github.com/vicanso/forest/request"
 	"github.com/vicanso/forest/router"
-	"github.com/vicanso/forest/schema"
 	"github.com/vicanso/forest/service"
 	"github.com/vicanso/forest/util"
 	"github.com/vicanso/hes"
@@ -61,10 +60,6 @@ type (
 	routersResp struct {
 		// 路由信息
 		Routers []elton.RouterInfo `json:"routers"`
-	}
-	// statusListResp 状态列表响应
-	statusListResp struct {
-		Statuses []*schema.StatusInfo `json:"statuses"`
 	}
 	// randomKeysResp 随机字符
 	randomKeysResp struct {
@@ -105,10 +100,6 @@ func init() {
 	g.GET(
 		"/performance",
 		ctrl.getPerformance,
-	)
-	g.GET(
-		"/schema-statuses",
-		ctrl.listStatus,
 	)
 	g.GET(
 		"/random-keys",
@@ -190,15 +181,6 @@ func (*commonCtrl) getCaptcha(c *elton.Context) error {
 // getPerformance 获取应用性能指标
 func (*commonCtrl) getPerformance(c *elton.Context) error {
 	c.Body = service.GetPerformance(c.Context())
-	return nil
-}
-
-// listStatus 获取状态列表
-func (*commonCtrl) listStatus(c *elton.Context) error {
-	c.CacheMaxAge(5 * time.Minute)
-	c.Body = &statusListResp{
-		Statuses: schema.GetStatusList(),
-	}
 	return nil
 }
 

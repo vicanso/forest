@@ -35,8 +35,10 @@ const (
 	MeasurementHTTPInstanceStats = "httpInstanceStats"
 	// MeasurementEntStats ent性能统计
 	MeasurementEntStats = "entStats"
-	// MeasurementEntOP ent的操作记录
-	MeasurementEntOP = "entOP"
+	// MeasurementEntUpdate ent的更新记录
+	MeasurementEntUpdate = "entUpdate"
+	// MeasurementEntQuery ent的查询记录
+	MeasurementEntQuery = "entQuery"
 	// MeasurementInfluxdbStats influxdb统计
 	MeasurementInfluxdbStats = "influxdbStats"
 	// MeasurementHTTPError http响应出错统计

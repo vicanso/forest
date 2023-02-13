@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -25,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
@@ -34,8 +36,9 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
-	"github.com/vicanso/forest/ent"
+	gen "github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/hook"
+	"github.com/vicanso/forest/ent/intercept"
 	"github.com/vicanso/forest/ent/migrate"
 	"github.com/vicanso/forest/log"
 	"github.com/vicanso/forest/util"
@@ -127,7 +130,7 @@ func newClientDB(uri string) (*sql.DB, string, error) {
 }
 
 // mustNewEntClient 初始化客户端与driver
-func mustNewEntClient() (*entsql.Driver, *ent.Client) {
+func mustNewEntClient() (*entsql.Driver, *gen.Client) {
 
 	maskURI := getMaskURI(databaseConfig.URI)
 	log.Info(context.Background()).
@@ -150,7 +153,7 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	// Create an ent.Driver from `db`.
 	driver := entsql.OpenDB(driverType, db)
 	entLogger := log.NewEntLogger()
-	c := ent.NewClient(ent.Driver(driver), ent.Log(entLogger.Log))
+	c := gen.NewClient(gen.Driver(driver), gen.Log(entLogger.Log))
 
 	initSchemaHooks(c)
 	return driver, c
@@ -172,17 +175,17 @@ func (params *EntListParams) GetOffset() int {
 }
 
 // GetOrders 获取排序的函数列表
-func (params *EntListParams) GetOrders() []ent.OrderFunc {
+func (params *EntListParams) GetOrders() []gen.OrderFunc {
 	if params.Order == "" {
 		return nil
 	}
 	arr := strings.Split(params.Order, ",")
-	funcs := make([]ent.OrderFunc, len(arr))
+	funcs := make([]gen.OrderFunc, len(arr))
 	for index, item := range arr {
 		if item[0] == '-' {
-			funcs[index] = ent.Desc(strcase.ToSnake(item[1:]))
+			funcs[index] = gen.Desc(strcase.ToSnake(item[1:]))
 		} else {
-			funcs[index] = ent.Asc(strcase.ToSnake(item))
+			funcs[index] = gen.Asc(strcase.ToSnake(item))
 		}
 	}
 	return funcs
@@ -237,7 +240,7 @@ func (stats *entProcessingStats) dec(schema string) (int32, int32) {
 }
 
 // initSchemaHooks 初始化相关的hooks
-func initSchemaHooks(c *ent.Client) {
+func initSchemaHooks(c *gen.Client) {
 	schemas := make([]string, len(migrate.Tables))
 	for index, table := range migrate.Tables {
 		name := strcase.ToCamel(table.Name)
@@ -257,11 +260,13 @@ func initSchemaHooks(c *ent.Client) {
 		}
 		return false
 	}
-	// 禁止删除数据
-	c.Use(hook.Reject(ent.OpDelete | ent.OpDeleteOne))
+	// 禁止删除数据以及一次更新多个数据
+	// 如果需要更新多个数据可通过DBA处理
+	c.Use(hook.Reject(gen.OpDelete | gen.OpDeleteOne | gen.OpUpdate))
 	// 数据库操作统计
-	c.Use(func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	c.Use(func(next gen.Mutator) gen.Mutator {
+		return gen.MutateFunc(func(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+			// TODO 增加用户权限判断
 			schemaType := m.Type()
 			totalProcessing, processing := currentEntProcessingStats.inc(schemaType)
 			defer currentEntProcessingStats.dec(schemaType)
@@ -305,7 +310,7 @@ func initSchemaHooks(c *ent.Client) {
 
 			d := time.Since(startedAt)
 			log.Info(ctx).
-				Str("category", "entStats").
+				Str("category", "entUpdate").
 				Str("schema", schemaType).
 				Str("op", op).
 				Int("result", result).
@@ -329,10 +334,67 @@ func initSchemaHooks(c *ent.Client) {
 				cs.TagOP:     op,
 				cs.TagResult: strconv.Itoa(result),
 			}
-			GetInfluxDB().Write(cs.MeasurementEntOP, tags, fields)
+			GetInfluxDB().Write(cs.MeasurementEntUpdate, tags, fields)
 			return mutateResult, err
 		})
 	})
+
+	queryStats := gen.InterceptFunc(func(next gen.Querier) gen.Querier {
+		return gen.QuerierFunc(func(ctx context.Context, query gen.Query) (gen.Value, error) {
+			q := ent.QueryFromContext(ctx)
+			op := q.Op
+			schemaType := q.Type
+
+			totalProcessing, processing := currentEntProcessingStats.inc(schemaType)
+			defer currentEntProcessingStats.dec(schemaType)
+			startedAt := time.Now()
+
+			result := cs.ResultSuccess
+			message := ""
+			queryValue, err := next.Query(ctx, query)
+			if err != nil {
+				result = cs.ResultFail
+				message = err.Error()
+			}
+			d := time.Since(startedAt)
+			log.Info(ctx).
+				Str("category", "entQuery").
+				Str("schema", schemaType).
+				Int("result", result).
+				Int32("processing", processing).
+				Int32("totalProcessing", totalProcessing).
+				Str("use", d.String()).
+				Str("message", message).
+				Msg("")
+			fields := map[string]any{
+				cs.FieldProcessing:      int(processing),
+				cs.FieldTotalProcessing: int(totalProcessing),
+				cs.FieldLatency:         int(d.Milliseconds()),
+			}
+			if message != "" {
+				fields[cs.FieldError] = message
+			}
+			tags := map[string]string{
+				cs.TagSchema: schemaType,
+				cs.TagOP:     op,
+				cs.TagResult: strconv.Itoa(result),
+			}
+			GetInfluxDB().Write(cs.MeasurementEntQuery, tags, fields)
+			return queryValue, err
+		})
+	})
+	setLimitIfNotExists := intercept.Func(func(ctx context.Context, q intercept.Query) error {
+		max := 200
+		limit := ent.QueryFromContext(ctx).Limit
+		if limit != nil && *limit > max {
+			return hes.New(fmt.Sprintf("Limit should be <= %d", *limit))
+		}
+		if limit == nil {
+			q.Limit(max)
+		}
+		return nil
+	})
+	c.Intercept(queryStats, setLimitIfNotExists)
 }
 
 // EntGetStats get ent stats
@@ -356,7 +418,7 @@ func EntGetStats() map[string]any {
 }
 
 // EntGetClient get ent client
-func EntGetClient() *ent.Client {
+func EntGetClient() *gen.Client {
 	return defaultEntClient
 }
 

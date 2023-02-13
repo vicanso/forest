@@ -25,12 +25,6 @@ import (
 
 type Status int8
 
-// StatusInfo 状态信息
-type StatusInfo struct {
-	Name  string `json:"name"`
-	Value Status `json:"value"`
-}
-
 const (
 	// 状态启用
 	StatusEnabled Status = iota + 1
@@ -53,22 +47,6 @@ func (status Status) String() string {
 	default:
 		return "未知"
 	}
-}
-
-// GetSchemaStatusList 获取schema的状态列表
-func GetStatusList() []*StatusInfo {
-	values := []Status{
-		StatusEnabled,
-		StatusDisabled,
-	}
-	list := make([]*StatusInfo, len(values))
-	for index, value := range values {
-		list[index] = &StatusInfo{
-			Name:  value.String(),
-			Value: value,
-		}
-	}
-	return list
 }
 
 // TimeMixin 公共的时间schema

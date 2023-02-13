@@ -16,11 +16,12 @@ package helper
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/log"
@@ -124,10 +125,85 @@ func mustNewRedisClient() (redis.UniversalClient, *redisHook) {
 	return c, hook
 }
 
+// DialHook redis连接时的hook
+func (rh *redisHook) DialHook(next redis.DialHook) redis.DialHook {
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		return next(ctx, network, addr)
+	}
+}
+
+// ProcessHook redis 命令执行时的hook
+func (rh *redisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
+	return func(ctx context.Context, cmd redis.Cmder) error {
+		t := time.Now()
+		v := rh.processing.Inc()
+		rh.gauge.SetMax(int64(v))
+		rh.total.Inc()
+		err := next(ctx, cmd)
+		d := time.Since(t)
+		message := ""
+		if err != nil {
+			message = err.Error()
+		}
+		rh.addStats(ctx, cmd.FullName(), message, d)
+		rh.processing.Dec()
+		if log.DebugEnabled() {
+			// 由于redis是较频繁的操作
+			// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
+			log.Debug(ctx).
+				Str("category", "redisProcess").
+				Str("message", message).
+				Msg(cmd.String())
+		}
+		return err
+	}
+}
+
+// ProcessPipelineHook redis pipeline 执行时的hook
+func (rh *redisHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.ProcessPipelineHook {
+	return func(ctx context.Context, cmds []redis.Cmder) error {
+		t := time.Now()
+		v := rh.pipeProcessing.Inc()
+		rh.pipeGauge.SetMax(int64(v))
+		rh.total.Inc()
+		fullNameList := new(strings.Builder)
+		for index, cmd := range cmds {
+			if index != 0 {
+				fullNameList.WriteString(",")
+			}
+			fullNameList.WriteString(cmd.FullName())
+		}
+
+		err := next(ctx, cmds)
+		d := time.Since(t)
+		message := ""
+
+		if err != nil {
+			message = err.Error()
+		}
+		rh.addStats(ctx, fullNameList.String(), message, d)
+		rh.pipeProcessing.Dec()
+		if log.DebugEnabled() {
+			// 由于redis是较频繁的操作
+			// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
+			cmdList := new(strings.Builder)
+			for index, cmd := range cmds {
+				if index != 0 {
+					cmdList.WriteString(",")
+				}
+				cmdList.WriteString(cmd.String())
+			}
+			log.Debug(ctx).
+				Str("category", "redisProcess").
+				Str("message", message).
+				Msg(cmdList.String())
+		}
+		return err
+	}
+}
+
 // 添加统计至influxdb
-func (rh *redisHook) addStats(ctx context.Context, cmd, err string) {
-	t := ctx.Value(startedAtKey).(*time.Time)
-	d := time.Since(*t)
+func (rh *redisHook) addStats(ctx context.Context, cmd, err string, d time.Duration) {
 	if d > rh.slow || err != "" {
 		log.Info(ctx).
 			Str("category", "redisSlowOrErr").
@@ -147,66 +223,6 @@ func (rh *redisHook) addStats(ctx context.Context, cmd, err string) {
 		fields[cs.FieldError] = err
 	}
 	GetInfluxDB().Write(cs.MeasurementRedisOP, tags, fields)
-}
-
-// BeforeProcess redis处理命令前的hook函数
-func (rh *redisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
-	t := time.Now()
-	ctx = context.WithValue(ctx, startedAtKey, &t)
-	v := rh.processing.Inc()
-	rh.gauge.SetMax(int64(v))
-	rh.total.Inc()
-	return ctx, nil
-}
-
-// AfterProcess redis处理命令后的hook函数
-func (rh *redisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
-	// allow返回error时也触发
-	message := ""
-	err := cmd.Err()
-	if err != nil && err != redis.Nil {
-		message = err.Error()
-	}
-	rh.addStats(ctx, cmd.FullName(), message)
-	rh.processing.Dec()
-	if log.DebugEnabled() {
-		// 由于redis是较频繁的操作
-		// 由于cmd string的执行也有耗时，因此判断是否启用debug再输出
-		log.Debug(ctx).
-			Str("category", "redisHook").
-			Msg(cmd.String())
-	}
-	return nil
-}
-
-// BeforeProcessPipeline redis pipeline命令前的hook函数
-func (rh *redisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
-	// allow返回error时也触发
-	t := time.Now()
-	ctx = context.WithValue(ctx, startedAtKey, &t)
-	v := rh.pipeProcessing.Inc()
-	rh.pipeGauge.SetMax(int64(v))
-	rh.total.Inc()
-	return ctx, nil
-}
-
-// AfterProcessPipeline redis pipeline命令后的hook函数
-func (rh *redisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
-	cmdSb := new(strings.Builder)
-	message := ""
-	for index, cmd := range cmds {
-		if index != 0 {
-			cmdSb.WriteString(",")
-		}
-		cmdSb.WriteString(cmd.Name())
-		err := cmd.Err()
-		if err != nil && err != redis.Nil {
-			message += err.Error()
-		}
-	}
-	rh.addStats(ctx, cmdSb.String(), message)
-	rh.pipeProcessing.Dec()
-	return nil
 }
 
 // getProcessingAndTotal 获取正在处理中的请求与总请求量

@@ -8,8 +8,29 @@
 import "encoding/json"
 
 {{ range $n := $.Nodes }}
+    {{- /* 判断是否存在status字段 */}}
+    {{ $existStatus := false }}
+    {{ range $f := $n.Fields }}
+        {{ if eq $f.Name "status" }}
+            {{ $existStatus = true }}
+        {{ end }}
+    {{ end }}
 
+    {{- /* 存在则实现自定义marshal json */}}
+    {{ if $existStatus }}
+    {{ $receiver := $n.Receiver }}
+        // MarshalJSON implements the json.Marshaler interface.
+        func ({{ $receiver }} *{{ $n.Name }}) MarshalJSON() ([]byte, error) {
+            type Alias {{ $n.Name }}
+            return json.Marshal(&struct {
+                *Alias
+                StatusDict string `json:"statusDict"`
+            }{
+                Alias: (*Alias)({{ $receiver }}),
+                StatusDict: {{ $receiver }}.Status.String(),
+            })
+        }
+    {{ end }}
 
 {{ end }}
-
 {{ end }}

@@ -71,16 +71,6 @@ func TestCommonCtrl(t *testing.T) {
 		assert.True(ok)
 	})
 
-	t.Run("listStatus", func(t *testing.T) {
-		c := elton.NewContext(httptest.NewRecorder(), nil)
-		err := ctrl.listStatus(c)
-		assert.Nil(err)
-		data, ok := c.Body.(*statusListResp)
-		assert.True(ok)
-		assert.NotEmpty(data.Statuses)
-		assert.Equal("public, max-age=300", c.GetHeader(elton.HeaderCacheControl))
-	})
-
 	t.Run("getRandomKeys", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil)
 		c := elton.NewContext(nil, req)
