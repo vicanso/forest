@@ -12,11 +12,11 @@ test:
 	go test -race -cover ./...
 
 install:
-	go get -d entgo.io/ent/cmd/entc@v0.11.8
+	go get -d entgo.io/ent/cmd/entc@v0.11.9
 
 generate: 
 	rm -rf ./ent
-	go run entgo.io/ent/cmd/ent generate --feature privacy --feature intercept ./schema --template ./template --target ./ent
+	go run entgo.io/ent/cmd/ent generate --feature sql/modifier --feature privacy --feature intercept ./schema --template ./template --target ./ent
 
 describe:
 	entc describe ./schema
