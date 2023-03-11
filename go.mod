@@ -30,7 +30,7 @@ require (
 	github.com/tidwall/gjson v1.14.4
 	github.com/vicanso/count-warner v1.2.0
 	github.com/vicanso/elton v1.10.0
-	github.com/vicanso/elton-compress v1.3.5
+	github.com/vicanso/elton-compress v1.3.6
 	github.com/vicanso/elton-session v1.3.0
 	github.com/vicanso/go-axios v1.5.0
 	github.com/vicanso/go-cache/v2 v2.2.0
@@ -100,7 +100,7 @@ require (
 	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.15.15 // indirect
+	github.com/klauspost/compress v1.16.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect

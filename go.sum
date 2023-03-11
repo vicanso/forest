@@ -364,8 +364,8 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/klauspost/compress v1.15.15 h1:EF27CXIuDsYJ6mmvtBRlEuB2UVOqHG1tAXgZ7yIO+lw=
-github.com/klauspost/compress v1.15.15/go.mod h1:ZcK2JAFqKOpnBlxcLsJzYfrS9X1akm9fHZNnD9+Vo/4=
+github.com/klauspost/compress v1.16.0 h1:iULayQNOReoYUe+1qtKOqw9CwJv3aNQu8ivo7lw1HU4=
+github.com/klauspost/compress v1.16.0/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
 github.com/klauspost/cpuid/v2 v2.0.1/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/klauspost/cpuid/v2 v2.0.4/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=
 github.com/klauspost/cpuid/v2 v2.2.3 h1:sxCkb+qR91z4vsqw4vGGZlDgPz3G7gjaLyK3V8y70BU=
@@ -567,8 +567,8 @@ github.com/vicanso/count-warner v1.2.0 h1:NpbaOqbGkwtUnqqLaQYSrs3fDV/6TOgHkyJrcc
 github.com/vicanso/count-warner v1.2.0/go.mod h1:bfSB9wD+Ew9QNxT18IT8M2RY4fEGCx2EEzgcSkd3h8k=
 github.com/vicanso/elton v1.10.0 h1:Qd6Dr5sarzkij+Vdgvtsd08jaNAKuZpBDpyPtKzESaY=
 github.com/vicanso/elton v1.10.0/go.mod h1:GnFxH3+Vtz0HQbhGhCmssbdi67+yLjFOUbZDdB8mRcQ=
-github.com/vicanso/elton-compress v1.3.5 h1:e2n7cbJEJEdZ+M3cOIXpcT28/sDI1Yg9JeGdr011Nug=
-github.com/vicanso/elton-compress v1.3.5/go.mod h1:rlGl9IDxX7TwgRjoGPZ6vGGG4uWfjGJtMtVWR7zClPg=
+github.com/vicanso/elton-compress v1.3.6 h1:TOt6m+QLWZGBAN8mHzpmarReo0/+jZlqOSboj/RIi9w=
+github.com/vicanso/elton-compress v1.3.6/go.mod h1:o6ojW+PzL9mTAdnujmh90qXXbcCv+eEfJMQyntoq+nw=
 github.com/vicanso/elton-session v1.3.0 h1:w439FafDiDjPIsl3nkmQqDgFPloNwz+jOoHm7PTPc5I=
 github.com/vicanso/elton-session v1.3.0/go.mod h1:Dw8Aq2s3IOE09gI9ExkDbfhleSo557dIXxAcSWlRz74=
 github.com/vicanso/go-axios v1.5.0 h1:pjrdhGYLmMGqSNaCKAPRPm/plm+2MDjcmzgNLjlyIpE=
