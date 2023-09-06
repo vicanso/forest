@@ -174,23 +174,6 @@ func (params *EntListParams) GetOffset() int {
 	return params.Offset
 }
 
-// GetOrders 获取排序的函数列表
-func (params *EntListParams) GetOrders() []gen.OrderFunc {
-	if params.Order == "" {
-		return nil
-	}
-	arr := strings.Split(params.Order, ",")
-	funcs := make([]gen.OrderFunc, len(arr))
-	for index, item := range arr {
-		if item[0] == '-' {
-			funcs[index] = gen.Desc(strcase.ToSnake(item[1:]))
-		} else {
-			funcs[index] = gen.Asc(strcase.ToSnake(item))
-		}
-	}
-	return funcs
-}
-
 // GetFields 获取选择的字段
 func (params *EntListParams) GetFields() []string {
 	if params.Fields == "" {

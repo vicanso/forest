@@ -40,7 +40,6 @@ func TestListParams(t *testing.T) {
 		"id",
 		"updated_at",
 	}, params.GetFields())
-	assert.Equal(2, len(params.GetOrders()))
 }
 
 func newContextAndUserSession() (*elton.Context, *session.UserSession) {

@@ -21,16 +21,19 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
+	"github.com/iancoleman/strcase"
 	"github.com/samber/lo"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/config"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	gen "github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/predicate"
 	"github.com/vicanso/forest/ent/user"
 	"github.com/vicanso/forest/ent/userlogin"
@@ -404,6 +407,23 @@ func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 	return query
 }
 
+// GetOrders 获取排序的函数列表
+func (params *userListParams) GetOrders() []user.OrderOption {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]user.OrderOption, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = gen.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = gen.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
+}
+
 // queryAll 查询用户列表
 func (params *userListParams) queryAll(ctx context.Context) ([]*ent.User, error) {
 	query := getUserClient().Query()
@@ -437,6 +457,23 @@ func (params *userLoginListParams) where(query *ent.UserLoginQuery) *ent.UserLog
 		query.Where(userlogin.CreatedAtLTE(params.End))
 	}
 	return query
+}
+
+// GetOrders 获取排序的函数列表
+func (params *userLoginListParams) GetOrders() []userlogin.OrderOption {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]userlogin.OrderOption, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = gen.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = gen.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
 }
 
 // queryAll 查询所有的登录记录
@@ -541,7 +578,8 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) error {
 // 在登录之前需要先调用获取token，此token用于登录时与客户密码sha256生成hash，
 // 保证客户每次登录时的密码均不相同，避免接口重放登录。
 // Responses:
-// 	200: apiUserLoginTokenResponse
+//
+//	200: apiUserLoginTokenResponse
 func (*userCtrl) getLoginToken(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
@@ -568,7 +606,8 @@ func (*userCtrl) getLoginToken(c *elton.Context) error {
 // 若用户登录状态，则返回客户的相关信息。
 // 若用户未登录，仅返回服务器当前时间。
 // Responses:
-// 	200: apiUserInfoResponse
+//
+//	200: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) error {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
 	if cookie == nil {
@@ -627,7 +666,8 @@ func (*userCtrl) detail(c *elton.Context) error {
 // 在成功注册后返回用户信息。
 // 需注意此时并非登录状态，需要客户自主登录。
 // Responses:
-// 	201: apiUserRegisterResponse
+//
+//	201: apiUserRegisterResponse
 func (*userCtrl) register(c *elton.Context) error {
 	params := userRegisterLoginParams{}
 	err := validateBody(c, &params)
@@ -659,7 +699,8 @@ func (*userCtrl) register(c *elton.Context) error {
 // 用户登录时需要先获取token，之后使用token与密码sha256后提交，
 // 登录成功后返回用户信息。
 // Responses:
-// 	200: apiUserInfoResponse
+//
+//	200: apiUserInfoResponse
 func (*userCtrl) login(c *elton.Context) error {
 	params := userRegisterLoginParams{}
 	err := validateBody(c, &params)
@@ -764,7 +805,8 @@ func (*userCtrl) login(c *elton.Context) error {
 //
 // 退出用户当前登录状态，成功时并无内容返回。
 // Responses:
-// 	204: apiNoContentResponse
+//
+//	204: apiNoContentResponse
 func (*userCtrl) logout(c *elton.Context) error {
 	us := getUserSession(c)
 	// 清除session

@@ -18,11 +18,14 @@ package controller
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	"github.com/iancoleman/strcase"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/forest/cs"
 	"github.com/vicanso/forest/ent"
+	gen "github.com/vicanso/forest/ent"
 	"github.com/vicanso/forest/ent/configuration"
 	confSchema "github.com/vicanso/forest/ent/configuration"
 	"github.com/vicanso/forest/router"
@@ -162,6 +165,23 @@ func (params *configurationListParmas) where(query *ent.ConfigurationQuery) *ent
 		query.Where(configuration.CategoryEQ(params.Category))
 	}
 	return query
+}
+
+// GetOrders 获取排序的函数列表
+func (params *configurationListParmas) GetOrders() []configuration.OrderOption {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]configuration.OrderOption, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = gen.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = gen.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
 }
 
 // queryAll 查询配置列表
